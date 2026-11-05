@@ -25,11 +25,6 @@ struct LockerView: View {
     var body: some View { Text("락커").navigationTitle("락커") }
 }
 
-struct SessionEditorView: View {
-    var newType: ActivityType
-    var body: some View { Text(newType.title) }
-}
-
 struct JournalEditorView: View {
     var newDate: Date
     var body: some View { Text("하루 일기") }

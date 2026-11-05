@@ -110,12 +110,12 @@ final class EquipmentTests: XCTestCase {
 
         // A가 부츠1에 달린 채로 부츠2에 같은 시점 장착 → 거부
         let clash = InstallSpan(runnerID: runnerA, skateID: skate2, from: day(1), to: nil)
-        if case .failure(let e) = RunnerInstallation.validate(clash, existing: spans) {
+        if case .failure(let e) = InstallPlanner.validate(clash, existing: spans) {
             XCTAssertEqual(e, .runnerAlreadyInstalled(onSkate: skate1))
         } else { XCTFail("충돌이 잡혀야 함") }
 
         // 부츠1에 B로 교체 → A 구간이 닫히고 B가 열린다
-        let result = try RunnerInstallation.swap(onto: skate1, runnerID: runnerB, at: day(5), existing: spans).get()
+        let result = try InstallPlanner.swap(onto: skate1, runnerID: runnerB, at: day(5), existing: spans).get()
         XCTAssertEqual(result.closing, [0])
         for i in result.closing { spans[i].to = day(5) }
         spans.append(result.new)
@@ -123,19 +123,19 @@ final class EquipmentTests: XCTestCase {
         XCTAssertNil(spans[1].to)
 
         // 이제 A는 비어 있으니 부츠2에 달 수 있다
-        let moveA = try RunnerInstallation.swap(onto: skate2, runnerID: runnerA, at: day(6), existing: spans).get()
+        let moveA = try InstallPlanner.swap(onto: skate2, runnerID: runnerA, at: day(6), existing: spans).get()
         XCTAssertEqual(moveA.closing, [], "부츠2에는 열린 구간이 없고 A도 이미 닫힘")
     }
 
     func testMovingInstalledRunnerClosesOldSpan() throws {
         let spans = [InstallSpan(runnerID: runnerA, skateID: skate1, from: day(0), to: nil)]
-        let result = try RunnerInstallation.swap(onto: skate2, runnerID: runnerA, at: day(2), existing: spans).get()
+        let result = try InstallPlanner.swap(onto: skate2, runnerID: runnerA, at: day(2), existing: spans).get()
         XCTAssertEqual(result.closing, [0], "다른 부츠에 달려 있던 같은 러너는 먼저 떼어낸다")
     }
 
     func testInvalidRange() {
         let bad = InstallSpan(runnerID: runnerA, skateID: skate1, from: day(2), to: day(1))
-        if case .failure(let e) = RunnerInstallation.validate(bad, existing: []) {
+        if case .failure(let e) = InstallPlanner.validate(bad, existing: []) {
             XCTAssertEqual(e, .invalidRange)
         } else { XCTFail() }
     }

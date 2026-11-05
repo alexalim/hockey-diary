@@ -59,7 +59,7 @@ enum DiaryStore {
         let all = (try? context.fetch(FetchDescriptor<RunnerInstallation>())) ?? []
         let pairs = all.compactMap { inst in inst.span.map { (inst, $0) } }
         let spans = pairs.map(\.1)
-        switch RunnerInstallation.swap(onto: skate.id, runnerID: runner.id, at: date, existing: spans) {
+        switch InstallPlanner.swap(onto: skate.id, runnerID: runner.id, at: date, existing: spans) {
         case .failure(let e):
             return e
         case .success(let plan):
