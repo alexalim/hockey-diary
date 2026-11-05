@@ -182,12 +182,20 @@ struct DayTimeline: View {
                     }
                     .buttonStyle(.bordered)
                 }
-                Button { newEntry = .session(.lesson) } label: {
+                Button { newEntry = .session(.lesson, Self.sameTime(on: day)) } label: {
                     Label("하키 기록", systemImage: "plus").frame(maxWidth: .infinity, minHeight: Theme.touch)
                 }
                 .buttonStyle(.bordered)
             }
         }
+    }
+
+    /// 고른 날짜에 지금 시각을 붙인다. 지난 날 기록이 오늘로 들어가지 않게.
+    static func sameTime(on day: Date) -> Date {
+        let cal = Calendar.current
+        if cal.isDateInToday(day) { return Date() }
+        let now = cal.dateComponents([.hour, .minute], from: Date())
+        return cal.date(bySettingHour: now.hour ?? 19, minute: now.minute ?? 0, second: 0, of: day) ?? day
     }
 }
 

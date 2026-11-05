@@ -3,12 +3,12 @@ import HockeyCore
 
 /// 무엇을 새로 기록할지.
 enum NewEntry: Identifiable, Hashable {
-    case session(ActivityType)
+    case session(ActivityType, Date = Date())
     case journal(Date)
 
     var id: String {
         switch self {
-        case .session(let t): return "session-\(t.rawValue)"
+        case .session(let t, let d): return "session-\(t.rawValue)-\(d.timeIntervalSince1970)"
         case .journal(let d): return "journal-\(d.timeIntervalSince1970)"
         }
     }
@@ -49,8 +49,8 @@ struct RootView: View {
         }
         .sheet(item: $newEntry) { entry in
             switch entry {
-            case .session(let type):
-                NavigationStack { SessionEditorView(newType: type) }
+            case .session(let type, let date):
+                NavigationStack { SessionEditorView(newType: type, startsAt: date) }
             case .journal(let date):
                 NavigationStack { JournalEditorView(newDate: date) }
             }
