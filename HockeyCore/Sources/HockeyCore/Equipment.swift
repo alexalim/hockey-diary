@@ -72,7 +72,7 @@ public enum InstallError: Error, Equatable {
     case invalidRange
 }
 
-public enum RunnerInstallation {
+public enum InstallPlanner {
     /// 새 장착 구간이 기존 이력과 충돌하는지 검사한다.
     public static func validate(_ new: InstallSpan, existing: [InstallSpan]) -> Result<Void, InstallError> {
         if let to = new.to, to <= new.from { return .failure(.invalidRange) }
