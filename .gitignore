@@ -1,0 +1,16 @@
+.DS_Store
+*.xcodeproj/
+*.xcworkspace/
+DerivedData/
+.build/
+.swiftpm/
+build.log
+test.log
+# 서명 비밀값은 저장소 밖(~/.shotsort-signing)에 둔다
+*.p12
+*.p8
+*.mobileprovision
+*.key
+*.pem
+.env
+*credentials*

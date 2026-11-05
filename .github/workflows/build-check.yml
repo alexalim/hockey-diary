@@ -1,0 +1,76 @@
+# 1단계: 서명 없이 빌드·테스트만 확인한다. Apple 계정이나 비밀값이 필요 없다.
+name: Build check
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: build-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 45
+    env:
+      TEAM_ID: ""
+      PROFILE_NAME: ""
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Xcode 버전 확인 (26 이상 필요)
+        run: |
+          xcodebuild -version
+          major=$(xcodebuild -version | head -1 | awk '{print $2}' | cut -d. -f1)
+          if [ "$major" -lt 26 ]; then
+            echo "::error::Xcode 26 이상이 필요합니다 (현재 $major)"; exit 1
+          fi
+
+      - name: 판단 로직 단위 테스트 (Unit)
+        working-directory: HockeyCore
+        run: swift test
+
+      - name: Xcode 프로젝트 생성
+        run: |
+          brew install xcodegen
+          xcodegen
+
+      - name: 앱 빌드 (시뮬레이터, 서명 없음)
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project HockeyDiary.xcodeproj \
+            -scheme HockeyDiary \
+            -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            | tee build.log | grep -E "error:|warning: .*deprecated|BUILD (SUCCEEDED|FAILED)" || true
+          grep -q "BUILD SUCCEEDED" build.log
+
+      - name: 앱 저장소 통합 테스트 (Integration, 시뮬레이터)
+        run: |
+          udid=$(xcrun simctl list devices available -j | python3 -c "
+          import json,sys
+          d=json.load(sys.stdin)['devices']
+          ios=sorted((k,v) for k,v in d.items() if 'iOS' in k)
+          print([x for x in ios[-1][1] if x['name'].startswith('iPhone')][-1]['udid'])")
+          set -o pipefail
+          xcodebuild test \
+            -project HockeyDiary.xcodeproj \
+            -scheme HockeyDiary \
+            -destination "id=$udid" \
+            -only-testing:HockeyDiaryTests \
+            CODE_SIGNING_ALLOWED=NO \
+            | tee test.log | grep -E "error:|Test Case .*(passed|failed)|TEST (SUCCEEDED|FAILED)" || true
+          grep -q "TEST SUCCEEDED" test.log
+
+      - name: 실패 시 빌드 로그 보관
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: build-log
+          path: |
+            build.log
+            test.log
