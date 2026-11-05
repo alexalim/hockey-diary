@@ -19,6 +19,7 @@ struct JournalEditorView: View {
     @State private var customTag = ""
     @State private var removedPhotoIDs: Set<UUID> = []
     @State private var addedPhotos: [Data] = []
+    @State private var confirmingDelete = false
 
     init(newDate: Date) {
         journal = nil
@@ -102,6 +103,16 @@ struct JournalEditorView: View {
             if !canSave {
                 Section { Text("기분을 고르거나 한 줄만 써도 저장돼.").font(.footnote).foregroundStyle(.secondary) }
             }
+            if journal != nil {
+                Section {
+                    Button("이 일기 지우기", role: .destructive) { confirmingDelete = true }
+                }
+            }
+        }
+        .confirmationDialog("이 일기를 지울까?", isPresented: $confirmingDelete, titleVisibility: .visible) {
+            Button("지우기", role: .destructive, action: delete)
+        } message: {
+            Text("앱 안에 담은 사진 사본도 함께 지워져. 사진 앱의 원본은 그대로야.")
         }
         .navigationTitle(journal == nil ? "하루 일기" : "일기 고치기")
         .navigationBarTitleDisplayMode(.inline)
@@ -111,6 +122,14 @@ struct JournalEditorView: View {
                 Button("저장") { save() }.disabled(!canSave).fontWeight(.semibold)
             }
         }
+    }
+
+    private func delete() {
+        guard let journal else { return }
+        for p in journal.photos { context.delete(p) }
+        context.delete(journal)
+        context.saveOrReport()
+        dismiss()
     }
 
     private func save() {
