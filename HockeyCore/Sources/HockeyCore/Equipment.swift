@@ -132,3 +132,18 @@ public enum ElapsedText {
         }
     }
 }
+
+/// 날(러너) 교체 시기. 연마할수록 날이 깎이므로 연마 횟수나 사용 기간으로 본다.
+/// 정답 주기는 없어서 사용자가 정한 기준에 닿을 때만 알린다.
+public enum RunnerLife {
+    public static func monthsUsed(since start: Date, now: Date = Date(), calendar: Calendar = .current) -> Int {
+        max(0, calendar.dateComponents([.month], from: start, to: now).month ?? 0)
+    }
+
+    public static func needsReplacement(sharpenings: Int, monthsUsed: Int,
+                                        afterSharpenings: Int?, afterMonths: Int?) -> Bool {
+        if let n = afterSharpenings, n > 0, sharpenings >= n { return true }
+        if let m = afterMonths, m > 0, monthsUsed >= m { return true }
+        return false
+    }
+}

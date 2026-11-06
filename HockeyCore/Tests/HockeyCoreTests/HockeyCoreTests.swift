@@ -132,6 +132,19 @@ final class EquipmentTests: XCTestCase {
         XCTAssertFalse(EquipmentMath.needsCheck(minutesSince: 999, sessionsSince: 99, thresholdMinutes: nil, thresholdSessions: nil))
     }
 
+    // 날 교체: 연마 횟수 또는 사용 기간 중 정한 기준에 닿으면 알림.
+    func testRunnerReplacement() {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = TimeZone(identifier: "Asia/Seoul")!
+        let now = cal.date(from: DateComponents(year: 2026, month: 11, day: 6))!
+        let start = cal.date(from: DateComponents(year: 2025, month: 12, day: 1))!
+        XCTAssertEqual(RunnerLife.monthsUsed(since: start, now: now, calendar: cal), 11)
+        XCTAssertTrue(RunnerLife.needsReplacement(sharpenings: 20, monthsUsed: 3, afterSharpenings: 20, afterMonths: nil))
+        XCTAssertFalse(RunnerLife.needsReplacement(sharpenings: 19, monthsUsed: 3, afterSharpenings: 20, afterMonths: nil))
+        XCTAssertTrue(RunnerLife.needsReplacement(sharpenings: 2, monthsUsed: 12, afterSharpenings: nil, afterMonths: 12))
+        XCTAssertFalse(RunnerLife.needsReplacement(sharpenings: 99, monthsUsed: 99, afterSharpenings: nil, afterMonths: nil))
+    }
+
     func testCheckOnlyWithUserThreshold() {
         XCTAssertFalse(EquipmentMath.needsCheck(minutesSince: 10_000, thresholdMinutes: nil), "기준 없으면 처방하지 않음")
         XCTAssertTrue(EquipmentMath.needsCheck(minutesSince: 600, thresholdMinutes: 600))
@@ -448,6 +461,17 @@ final class WatchPayloadTests: XCTestCase {
         var odd = p.dictionary; odd["moodAfter"] = 9
         XCTAssertNil(WatchWorkoutPayload(dictionary: odd)?.moodAfter, "범위 밖 기분은 버림")
         XCTAssertNil(WatchWorkoutPayload(dictionary: ["kind": "other"]))
+    }
+}
+
+final class TacticGuideTests: XCTestCase {
+    func testTacticsComplete() {
+        let ids = TacticGuide.topics.map(\.id)
+        XCTAssertEqual(Set(ids).count, ids.count)
+        for t in TacticGuide.topics {
+            XCTAssertGreaterThanOrEqual(t.points.count, 3, t.id)
+            XCTAssertFalse(t.when.isEmpty || t.practice.isEmpty || t.summary.isEmpty, t.id)
+        }
     }
 }
 

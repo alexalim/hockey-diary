@@ -14,9 +14,19 @@ struct RunnerListView: View {
                 Text("아직 러너 세트가 없어. 스케이트 화면에서 추가하면 바로 달려.")
                     .foregroundStyle(.secondary)
             }
-            ForEach(runners) { r in
+            ForEach(runners.filter { $0.retiredAt == nil }) { r in
                 NavigationLink { RunnerDetailView(runner: r) } label: {
-                    RunnerRow(runner: r, badge: r.installedSkate.map { "\($0.name)에 장착" })
+                    RunnerRow(runner: r, badge: r.needsReplacement ? "교체 시기" : r.installedSkate.map { "\($0.name)에 장착" })
+                }
+            }
+            let retired = runners.filter { $0.retiredAt != nil }
+            if !retired.isEmpty {
+                Section("교체한 날") {
+                    ForEach(retired) { r in
+                        NavigationLink { RunnerDetailView(runner: r) } label: {
+                            RunnerRow(runner: r, badge: r.retiredAt.map { "\($0.formatted(.dateTime.year().month())) 교체" })
+                        }
+                    }
                 }
             }
         }
@@ -76,6 +86,13 @@ struct RunnerEditorView: View {
     @State private var checkBy: CheckBy = .sessions
     @State private var thresholdHours = 10
     @State private var thresholdSessions = 8
+    enum ReplaceBy: String, CaseIterable { case sharpenings, months
+        var title: String { self == .sharpenings ? "연마 횟수" : "쓴 기간" }
+    }
+    @State private var useReplace = false
+    @State private var replaceBy: ReplaceBy = .sharpenings
+    @State private var replaceSharpenings = 20
+    @State private var replaceMonths = 12
     @State private var loaded = false
 
     var body: some View {
@@ -102,6 +119,24 @@ struct RunnerEditorView: View {
             } footer: {
                 Text("정해진 연마 주기는 없어. 내 느낌대로 정하면 돼.")
             }
+            Section {
+                Toggle("날 교체 알림 받기", isOn: $useReplace)
+                if useReplace {
+                    Picker("기준", selection: $replaceBy) {
+                        ForEach(ReplaceBy.allCases, id: \.self) { Text($0.title).tag($0) }
+                    }
+                    .pickerStyle(.segmented)
+                    if replaceBy == .sharpenings {
+                        Stepper("연마 \(replaceSharpenings)번 하면 알려줘", value: $replaceSharpenings, in: 5...100)
+                    } else {
+                        Stepper("\(replaceMonths)개월 쓰면 알려줘", value: $replaceMonths, in: 1...48)
+                    }
+                }
+            } header: {
+                Text("날 교체 알림")
+            } footer: {
+                Text("날은 갈수록 깎여. 얼마나 쓰면 바꿀지는 사람마다 달라. 내 기준으로 정해줘.")
+            }
             Section("메모") { TextField("메모", text: $memo, axis: .vertical) }
         }
         .navigationTitle(runner == nil ? "러너 추가" : "러너 고치기")
@@ -118,6 +153,8 @@ struct RunnerEditorView: View {
             name = runner.name; model = runner.model; memo = runner.memo
             if let t = runner.checkThresholdMinutes { useThreshold = true; checkBy = .hours; thresholdHours = max(1, t / 60) }
             if let n = runner.checkThresholdSessions { useThreshold = true; checkBy = .sessions; thresholdSessions = n }
+            if let n = runner.replaceAfterSharpenings { useReplace = true; replaceBy = .sharpenings; replaceSharpenings = n }
+            if let m = runner.replaceAfterMonths { useReplace = true; replaceBy = .months; replaceMonths = m }
         }
     }
 
@@ -134,6 +171,8 @@ struct RunnerEditorView: View {
         target.memo = memo
         target.checkThresholdMinutes = useThreshold && checkBy == .hours ? thresholdHours * 60 : nil
         target.checkThresholdSessions = useThreshold && checkBy == .sessions ? thresholdSessions : nil
+        target.replaceAfterSharpenings = useReplace && replaceBy == .sharpenings ? replaceSharpenings : nil
+        target.replaceAfterMonths = useReplace && replaceBy == .months ? replaceMonths : nil
         context.saveOrReport()
         if runner == nil, let installOn {
             DiaryStore.install(target, on: installOn, context: context)
@@ -149,6 +188,7 @@ struct RunnerDetailView: View {
 
     @State private var addingSharpening = false
     @State private var editing = false
+    @State private var confirmingRetire = false
 
     var body: some View {
         let since = DiaryStore.minutesSinceSharpening(runner, context: context)
@@ -201,6 +241,35 @@ struct RunnerDetailView: View {
             }
 
             Section {
+                HStack {
+                    Text("날 상태")
+                    Spacer()
+                    Text(runner.lifeSummary).bold()
+                }
+                if let n = runner.replaceAfterSharpenings {
+                    ProgressView(value: Double(min(runner.sharpenings.count, n)), total: Double(n)) {
+                        Text("연마 \(n)번 하면 교체 알림").font(.caption)
+                    }
+                    .tint(runner.needsReplacement ? Theme.neonPink : Theme.accent)
+                } else if let m = runner.replaceAfterMonths {
+                    let used = RunnerLife.monthsUsed(since: runner.firstUsedAt)
+                    ProgressView(value: Double(min(used, m)), total: Double(m)) {
+                        Text("\(m)개월 쓰면 교체 알림").font(.caption)
+                    }
+                    .tint(runner.needsReplacement ? Theme.neonPink : Theme.accent)
+                }
+                if let retired = runner.retiredAt {
+                    Text("\(retired.formatted(date: .abbreviated, time: .omitted))에 교체했어.").foregroundStyle(.secondary)
+                } else {
+                    Button("이 날 교체했어") { confirmingRetire = true }
+                }
+            } header: {
+                Text("날 교체")
+            } footer: {
+                Text("교체했다고 하면 이 러너는 '교체한 날'로 옮겨져. 지난 기록은 그대로 남아.")
+            }
+
+            Section {
                 Button { addingSharpening = true } label: { Label("연마 기록 추가", systemImage: "plus") }
                 ForEach(runner.sharpenings.sorted { $0.at > $1.at }) { log in
                     VStack(alignment: .leading, spacing: 4) {
@@ -224,6 +293,15 @@ struct RunnerDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("고치기") { editing = true } } }
         .sheet(isPresented: $addingSharpening) { NavigationStack { SharpeningEditorView(runner: runner) } }
+        .confirmationDialog("이 날을 교체했어?", isPresented: $confirmingRetire, titleVisibility: .visible) {
+            Button("교체했어") {
+                DiaryStore.uninstall(runner, context: context)
+                runner.retiredAt = Date()
+                context.saveOrReport()
+            }
+        } message: {
+            Text("부츠에서 떼고 '교체한 날'로 옮길게. 새 날은 스케이트 화면에서 추가해줘.")
+        }
         .sheet(isPresented: $editing) { NavigationStack { RunnerEditorView(runner: runner, installOn: nil) } }
     }
 }
