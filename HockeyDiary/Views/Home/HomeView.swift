@@ -69,7 +69,7 @@ struct HomeView: View {
                 Text("수업 끝나고 10분 안에 남겨봐. 잊어버리기 전에.")
                     .font(.subheadline).foregroundStyle(.white.opacity(0.85))
             } else {
-                Text("오늘 \(todaySessions.count)개 활동\(todayJournal == nil ? "" : " · 일기 1개")")
+                Text(todaySessions.isEmpty ? "오늘은 하키 기록이 없어 · 일기 1개" : "오늘 하키 \(todaySessions.count)번\(todayJournal == nil ? "" : " · 일기 1개")")
                     .font(.title3.bold()).foregroundStyle(.white)
                 ForEach(todaySessions) { s in
                     NavigationLink { SessionDetailView(session: s) } label: {

@@ -126,10 +126,13 @@ struct JournalEditorView: View {
 
     private func delete() {
         guard let journal else { return }
-        for p in journal.photos { context.delete(p) }
-        context.delete(journal)
-        context.saveOrReport()
+        let ctx = context
         dismiss()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            for p in journal.photos { ctx.delete(p) }
+            ctx.delete(journal)
+            ctx.saveOrReport()
+        }
     }
 
     private func save() {

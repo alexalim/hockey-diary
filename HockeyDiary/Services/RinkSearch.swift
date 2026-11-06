@@ -73,7 +73,10 @@ final class RinkSearch: NSObject, ObservableObject, MKLocalSearchCompleterDelega
     }
 
     nonisolated func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
-        let r = Array(completer.results.prefix(8))
+        // 부제(주소)에 한글이 있거나 비어 있는 것만: 일본·중국 주소가 섞여 오는 것을 거른다.
+        let r = Array(completer.results.filter { c in
+            c.subtitle.isEmpty || c.subtitle.unicodeScalars.contains { (0xAC00...0xD7A3).contains($0.value) }
+        }.prefix(8))
         Task { @MainActor in
             self.results = r
             self.failed = false
@@ -96,8 +99,13 @@ final class RinkSearch: NSObject, ObservableObject, MKLocalSearchCompleterDelega
         }
         failed = false
         var seen = Set<String>()
+        // 검색 사각형에 일본 규슈 일부가 걸리고 관계없는 장소도 섞여 온다.
+        // 한국에 있고, 이름에 빙상 관련 말이 들어간 곳만 남긴다.
+        let keywords = ["아이스", "링크", "빙상", "스케이트", "얼음", "하키", "ice", "rink", "skat", "hockey"]
         return items.compactMap { item in
-            guard let name = item.name, seen.insert(name).inserted else { return nil }
+            guard let name = item.name, item.placemark.isoCountryCode == "KR",
+                  keywords.contains(where: { name.localizedCaseInsensitiveContains($0) }),
+                  seen.insert(name).inserted else { return nil }
             let pm = item.placemark
             let address = [pm.administrativeArea, pm.locality, pm.subLocality, pm.thoroughfare]
                 .compactMap { $0 }.joined(separator: " ")

@@ -106,38 +106,38 @@ struct RunnerEditorView: View {
                 Text("러너는 부츠에 끼우는 날이야. 연마는 이 날을 가는 거야. 그래서 연마 기록과 알림도 날마다 따로 세.")
             }
             Section {
-                Toggle("연마 점검 알림 받기", isOn: $useThreshold)
+                Toggle("연마 점검 표시하기", isOn: $useThreshold)
                 if useThreshold {
                     ChoiceCards(options: [
                         ChoiceOption(value: CheckBy.sessions, title: "탄 횟수", art: .symbol("number")),
                         ChoiceOption(value: CheckBy.hours, title: "탄 시간", art: .symbol("clock")),
                     ], selection: $checkBy, columns: 2, minHeight: 60)
                     if checkBy == .hours {
-                        Stepper("연마하고 \(thresholdHours)시간 타면 알려줘", value: $thresholdHours, in: 1...100)
+                        Stepper("연마하고 \(thresholdHours)시간 타면 표시", value: $thresholdHours, in: 1...100)
                     } else {
-                        Stepper("연마하고 \(thresholdSessions)번 타면 알려줘", value: $thresholdSessions, in: 1...60)
+                        Stepper("연마하고 \(thresholdSessions)번 타면 표시", value: $thresholdSessions, in: 1...60)
                     }
                 }
             } header: {
-                Text("연마 점검 알림")
+                Text("연마 점검")
             } footer: {
-                Text("이 날로 정해둔 만큼 타면 다시 갈 때가 됐다고 알려줘. 정해진 주기는 없으니 내 느낌대로 정하면 돼.")
+                Text("이 날로 정해둔 만큼 타면 홈 화면에 갈 때가 됐다고 띄워줘. 휴대폰 알림은 아직 안 보내. 정해진 주기는 없으니 내 느낌대로 정하면 돼.")
             }
             Section {
-                Toggle("날 교체 알림 받기", isOn: $useReplace)
+                Toggle("날 교체 시기 표시하기", isOn: $useReplace)
                 if useReplace {
                     ChoiceCards(options: [
                         ChoiceOption(value: ReplaceBy.sharpenings, title: "연마 횟수", art: .symbol("wrench.and.screwdriver")),
                         ChoiceOption(value: ReplaceBy.months, title: "쓴 기간", art: .symbol("calendar")),
                     ], selection: $replaceBy, columns: 2, minHeight: 60)
                     if replaceBy == .sharpenings {
-                        Stepper("연마 \(replaceSharpenings)번 하면 알려줘", value: $replaceSharpenings, in: 5...100)
+                        Stepper("연마 \(replaceSharpenings)번 하면 표시", value: $replaceSharpenings, in: 5...100)
                     } else {
-                        Stepper("\(replaceMonths)개월 쓰면 알려줘", value: $replaceMonths, in: 1...48)
+                        Stepper("\(replaceMonths)개월 쓰면 표시", value: $replaceMonths, in: 1...48)
                     }
                 }
             } header: {
-                Text("날 교체 알림")
+                Text("날 교체 시기")
             } footer: {
                 Text("날은 갈수록 깎여. 얼마나 쓰면 바꿀지는 사람마다 달라. 내 기준으로 정해줘.")
             }
@@ -231,12 +231,12 @@ struct RunnerDetailView: View {
                 }
                 if let n = runner.checkThresholdSessions {
                     ProgressView(value: Double(min(rides, n)), total: Double(n)) {
-                        Text("\(n)번 타면 알림").font(.caption)
+                        Text("\(n)번 타면 홈에 표시").font(.caption)
                     }
                     .tint(rides >= n ? Theme.neonPink : Theme.accent)
                 } else if let t = runner.checkThresholdMinutes {
                     ProgressView(value: min(Double(since), Double(t)), total: Double(t)) {
-                        Text("\(minutesText(t)) 타면 알림").font(.caption)
+                        Text("\(minutesText(t)) 타면 홈에 표시").font(.caption)
                     }
                     .tint(since >= t ? Theme.neonPink : Theme.accent)
                 }
@@ -252,13 +252,13 @@ struct RunnerDetailView: View {
                 }
                 if let n = runner.replaceAfterSharpenings {
                     ProgressView(value: Double(min(runner.sharpenings.count, n)), total: Double(n)) {
-                        Text("연마 \(n)번 하면 교체 알림").font(.caption)
+                        Text("연마 \(n)번 하면 교체 표시").font(.caption)
                     }
                     .tint(runner.needsReplacement ? Theme.neonPink : Theme.accent)
                 } else if let m = runner.replaceAfterMonths {
                     let used = RunnerLife.monthsUsed(since: runner.firstUsedAt)
                     ProgressView(value: Double(min(used, m)), total: Double(m)) {
-                        Text("\(m)개월 쓰면 교체 알림").font(.caption)
+                        Text("\(m)개월 쓰면 교체 표시").font(.caption)
                     }
                     .tint(runner.needsReplacement ? Theme.neonPink : Theme.accent)
                 }
@@ -337,7 +337,7 @@ struct SharpeningEditorView: View {
 
     var body: some View {
         Form {
-            Section { DatePicker("연마일", selection: $at, displayedComponents: .date) }
+            Section { DatePicker("연마한 때", selection: $at, displayedComponents: [.date, .hourAndMinute]) }
             Section { SharpeningGuideCard() }
             Section {
                 HStack {

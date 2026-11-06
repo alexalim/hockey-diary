@@ -43,10 +43,12 @@ final class ScreenTourTests: XCTestCase {
         // 탐색: 목록, 반칙 그림, 링크 구조, 전술, 링크장 찾기
         tab("탐색"); snap("05-explore")
         if tapText("자주 나오는 반칙") { snap("05b-fouls"); app.swipeUp(); snap("05c-fouls-bottom"); back() }
-        if tapText("링크 구조") { snap("05d-rink-rule"); back() }
-        if tapText("경기 시간·연장") { snap("05e-gametime"); back() }
-        if tapText("골 무효") { snap("05f-nogoal"); back() }
-        app.swipeUp()
+        for (name, shot) in [("링크 구조", "05d-rink-rule"), ("선수 장비", "05d2-equipment"), ("주요 페널티", "05d3-penalties"),
+                             ("경기 시간·연장", "05e-gametime"), ("골 무효", "05f-nogoal"), ("골키퍼가 반칙하면", "05f2-goalie"),
+                             ("자주 듣는 말", "05f3-terms")] {
+            tab("탐색")
+            if tapText(name) { snap(shot); back() }
+        }
         if tapText("1-2-1 포어체크") { sleep(3); snap("05g-tactic"); back() }
         if tapText("링크장 찾기") { sleep(4); snap("05h-rink-finder"); app.swipeUp(); snap("05i-rink-finder-list"); back() }
 
@@ -55,6 +57,7 @@ final class ScreenTourTests: XCTestCase {
         if tapButton("문 열기") { sleep(1); snap("06b-locker-open"); tapButton("문 닫기") }
         if tapText("꾸미기") { sleep(1); snap("06c-customize"); tapButton("완료") }
         app.swipeUp()
+        tab("락커")
         if tapText("러너(날)") {
             snap("07-runners")
             if tapText("A세트") {
@@ -66,6 +69,13 @@ final class ScreenTourTests: XCTestCase {
     }
 
     // MARK: - 도우미
+
+    /// 화면을 조금만 위로 민다.
+    private func nudgeUp() {
+        let start = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.7))
+        let end = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.45))
+        start.press(forDuration: 0.05, thenDragTo: end)
+    }
 
     private func snap(_ name: String) {
         let a = XCTAttachment(screenshot: app.screenshot())
@@ -92,16 +102,17 @@ final class ScreenTourTests: XCTestCase {
         return true
     }
 
-    /// 글자가 들어간 버튼·셀·글을 찾아 누른다. 안 보이면 몇 번 내려서 찾는다.
+    /// 글자가 들어간 버튼·셀·글을 찾아 누른다. 안 보이면 조금씩 내려서 찾는다(한 번에 많이 내리면 지나친다).
     @discardableResult
     private func tapText(_ text: String) -> Bool {
         let pred = NSPredicate(format: "label CONTAINS %@", text)
-        for _ in 0..<5 {
+        for _ in 0..<10 {
             for q in [app.buttons, app.cells, app.staticTexts] {
                 let el = q.matching(pred).firstMatch
-                if el.exists && el.isHittable { el.tap(); return true }
+                // 탭바에 가려진 아래쪽(화면 85% 아래)은 누르지 않고 더 내린다.
+                if el.exists && el.isHittable && el.frame.midY < app.frame.height * 0.85 { el.tap(); return true }
             }
-            app.swipeUp()
+            nudgeUp()
         }
         XCTContext.runActivity(named: "못 찾음: \(text)") { _ in }
         return false

@@ -102,7 +102,7 @@ struct SessionEditorView: View {
         self.session = session
         _type = State(initialValue: session.type)
         _startsAt = State(initialValue: session.startsAt)
-        _minutes = State(initialValue: max(session.minutes, 10))
+        _minutes = State(initialValue: max(session.minutes, 1))
         _surface = State(initialValue: session.surface)
         _rinkName = State(initialValue: session.rinkName)
         _iceFeel = State(initialValue: session.iceFeel)
@@ -202,7 +202,7 @@ struct SessionEditorView: View {
                           options: ActivityType.allCases.map { ChoiceOption(value: $0, title: $0.title, art: .symbol($0.systemImage)) },
                           selection: $type, columns: 4, minHeight: 68)
             DatePicker("시작", selection: $startsAt)
-            Stepper("활동 시간 \(minutesText(minutes))", value: $minutes, in: 10...360, step: 10)
+            Stepper("활동 시간 \(minutesText(minutes))", value: $minutes, in: 1...360, step: 5)
         }
     }
 
@@ -470,10 +470,15 @@ struct SessionEditorView: View {
         target.review = review
 
         // 기술 연결은 초안대로 다시 만든다. 통계는 연결에서 계산되므로 원본 손실이 없다.
-        for l in target.learnings { context.delete(l) }
-        target.learnings = []
-        for a in target.attempts { context.delete(a) }
-        target.attempts = []
+        // 지금 종류에 해당하는 연결만 다시 만든다. 종류를 바꿔도 다른 쪽 기록은 지우지 않는다.
+        if type == .lesson {
+            for l in target.learnings { context.delete(l) }
+            target.learnings = []
+        }
+        if type.isGame {
+            for a in target.attempts { context.delete(a) }
+            target.attempts = []
+        }
         if type == .lesson {
             for d in learnings {
                 guard let skill = allSkills.first(where: { $0.id == d.skillID }) else { continue }
