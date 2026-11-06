@@ -103,14 +103,19 @@ final class GearItem {
 }
 
 enum GearKind: String, CaseIterable {
-    case helmet, gloves, jersey, pads, stick, tape
+    case helmet, neck, gloves, shoulder, elbow, pants, shin, jersey, pads, stick, tape
 
     var title: String {
         switch self {
         case .helmet: return "헬멧"
+        case .neck: return "목 보호대"
+        case .shoulder: return "어깨·가슴 보호대"
+        case .elbow: return "팔꿈치 보호대"
+        case .pants: return "하키 바지"
+        case .shin: return "정강이 보호대"
         case .gloves: return "장갑"
         case .jersey: return "유니폼"
-        case .pads: return "보호대"
+        case .pads: return "기타 보호대"
         case .stick: return "스틱"
         case .tape: return "테이프"
         }
@@ -119,6 +124,11 @@ enum GearKind: String, CaseIterable {
     var symbol: String {
         switch self {
         case .helmet: return "shield.lefthalf.filled"
+        case .neck: return "person.crop.circle"
+        case .shoulder: return "figure.arms.open"
+        case .elbow: return "figure.strengthtraining.traditional"
+        case .pants: return "figure.walk"
+        case .shin: return "figure.run"
         case .gloves: return "hand.raised.fill"
         case .jersey: return "tshirt.fill"
         case .pads: return "figure.cooldown"
@@ -132,15 +142,15 @@ enum GearKind: String, CaseIterable {
         case top, middle, side
         var title: String {
             switch self {
-            case .top: return "헬멧 · 장갑"
+            case .top: return "헬멧 · 목 · 장갑"
             case .middle: return "유니폼 · 보호대"
             case .side: return "스틱 · 테이프"
             }
         }
         var kinds: [GearKind] {
             switch self {
-            case .top: return [.helmet, .gloves]
-            case .middle: return [.jersey, .pads]
+            case .top: return [.helmet, .neck, .gloves]
+            case .middle: return [.shoulder, .elbow, .pants, .shin, .jersey, .pads]
             case .side: return [.stick, .tape]
             }
         }
