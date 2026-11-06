@@ -108,10 +108,10 @@ struct RunnerEditorView: View {
             Section {
                 Toggle("연마 점검 알림 받기", isOn: $useThreshold)
                 if useThreshold {
-                    Picker("기준", selection: $checkBy) {
-                        ForEach(CheckBy.allCases, id: \.self) { Text($0.title).tag($0) }
-                    }
-                    .pickerStyle(.segmented)
+                    ChoiceCards(options: [
+                        ChoiceOption(value: CheckBy.sessions, title: "탄 횟수", art: .symbol("number")),
+                        ChoiceOption(value: CheckBy.hours, title: "탄 시간", art: .symbol("clock")),
+                    ], selection: $checkBy, columns: 2, minHeight: 60)
                     if checkBy == .hours {
                         Stepper("연마하고 \(thresholdHours)시간 타면 알려줘", value: $thresholdHours, in: 1...100)
                     } else {
@@ -126,10 +126,10 @@ struct RunnerEditorView: View {
             Section {
                 Toggle("날 교체 알림 받기", isOn: $useReplace)
                 if useReplace {
-                    Picker("기준", selection: $replaceBy) {
-                        ForEach(ReplaceBy.allCases, id: \.self) { Text($0.title).tag($0) }
-                    }
-                    .pickerStyle(.segmented)
+                    ChoiceCards(options: [
+                        ChoiceOption(value: ReplaceBy.sharpenings, title: "연마 횟수", art: .symbol("wrench.and.screwdriver")),
+                        ChoiceOption(value: ReplaceBy.months, title: "쓴 기간", art: .symbol("calendar")),
+                    ], selection: $replaceBy, columns: 2, minHeight: 60)
                     if replaceBy == .sharpenings {
                         Stepper("연마 \(replaceSharpenings)번 하면 알려줘", value: $replaceSharpenings, in: 5...100)
                     } else {

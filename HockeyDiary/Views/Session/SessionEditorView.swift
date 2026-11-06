@@ -198,11 +198,9 @@ struct SessionEditorView: View {
 
     private var basicsSection: some View {
         Section {
-            Picker("종류", selection: $type) {
-                ForEach(ActivityType.allCases, id: \.self) { t in
-                    Label(t.title, systemImage: t.systemImage).tag(t)
-                }
-            }
+            LabeledChoice(title: "종류",
+                          options: ActivityType.allCases.map { ChoiceOption(value: $0, title: $0.title, art: .symbol($0.systemImage)) },
+                          selection: $type, columns: 4, minHeight: 68)
             DatePicker("시작", selection: $startsAt)
             Stepper("활동 시간 \(minutesText(minutes))", value: $minutes, in: 10...360, step: 10)
         }
@@ -254,22 +252,20 @@ struct SessionEditorView: View {
                             .accessibilityLabel("\(draft.name) 빼기")
                     }
                     Text("시합에서 실제 써봤어?").font(.subheadline).foregroundStyle(.secondary)
-                    Picker("시도 여부", selection: Binding(
+                    ChoiceCards(options: [
+                        ChoiceOption(value: Optional(false), title: "못 써봄", subtitle: "기회가 없었어", art: .symbol("moon.zzz")),
+                        ChoiceOption(value: Optional(true), title: "써봤어", subtitle: "시도했어", art: .symbol("figure.hockey")),
+                    ], selection: Binding(
                         get: { draft.tried },
                         set: { draft.tried = $0; if $0 != true { draft.outcome = nil; draft.count = nil } }
-                    )) {
-                        Text("못 써봄").tag(Optional(false))
-                        Text("써봤어").tag(Optional(true))
-                    }
-                    .pickerStyle(.segmented)
+                    ), columns: 2, minHeight: 64)
                     if draft.tried == true {
-                        Picker("결과", selection: $draft.outcome) {
-                            Text("미정").tag(AttemptOutcome?.none)
-                            ForEach(AttemptOutcome.allCases, id: \.self) { o in
-                                Text(o.title).tag(Optional(o))
-                            }
-                        }
-                        .pickerStyle(.segmented)
+                        ChoiceCards(options: [ChoiceOption(value: AttemptOutcome?.none, title: "미정", art: .symbol("questionmark"))]
+                                    + AttemptOutcome.allCases.map { o in
+                                        ChoiceOption(value: Optional(o), title: o.title,
+                                                     art: .symbol(o == .success ? "checkmark.seal.fill" : (o == .partial ? "circle.lefthalf.filled" : "tortoise.fill")))
+                                    },
+                                    selection: $draft.outcome, columns: 4, minHeight: 60)
                         OptionalNumberField(title: "시도 횟수", value: $draft.count)
                         TextField("어떤 상황이었어?", text: $draft.notes, axis: .vertical)
                     } else if draft.tried == false {
@@ -337,10 +333,13 @@ struct SessionEditorView: View {
                 TextField(surface == .pond ? "장소 메모 (예: 동네 저수지)" : "장소 이름", text: $rinkName)
             }
             if surface != .unknown {
-                Picker("체감 빙질", selection: $iceFeel) {
-                    Text("선택 안 함").tag(IceFeel?.none)
-                    ForEach(IceFeel.allCases, id: \.self) { f in Text(f.title).tag(Optional(f)) }
-                }
+                LabeledChoice(title: "체감 빙질",
+                              options: [ChoiceOption(value: IceFeel?.none, title: "안 고름", art: .symbol("minus"))]
+                                + IceFeel.allCases.map { f in
+                                    ChoiceOption(value: Optional(f), title: f.title,
+                                                 art: .symbol(f == .hard ? "cube.fill" : (f == .normal ? "square.grid.2x2" : "drop.fill")))
+                                },
+                              selection: $iceFeel, columns: 4, minHeight: 60)
                 if surface == .outdoorRink || surface == .pond {
                     TextField("날씨·기온·바람 메모", text: $weatherMemo, axis: .vertical)
                 }
@@ -364,25 +363,28 @@ struct SessionEditorView: View {
                 Text("락커 탭에 스케이트를 넣으면 연마하고 탄 시간이 저절로 쌓여.")
                     .font(.footnote).foregroundStyle(.secondary)
             } else {
-                Picker("스케이트", selection: $skateID) {
-                    Text("선택 안 함").tag(UUID?.none)
-                    ForEach(activeSkates) { s in
-                        Text(s.isPrimary ? "★ \(s.name)" : s.name).tag(Optional(s.id))
-                    }
-                }
+                LabeledChoice(title: "스케이트",
+                              options: [ChoiceOption(value: UUID?.none, title: "안 고름", art: .symbol("minus"))]
+                                + activeSkates.map { s in
+                                    ChoiceOption(value: Optional(s.id), title: s.name,
+                                                 subtitle: s.isPrimary ? "★ 대표" : (s.size.isEmpty ? s.status.title : "사이즈 \(s.size)"),
+                                                 art: s.coverPhoto.map { ChoiceOption<UUID?>.Art.photo($0) } ?? ChoiceOption<UUID?>.Art.symbol("shoeprints.fill"))
+                                },
+                              selection: $skateID, columns: 2, minHeight: 84)
                 .onChange(of: skateID) { _, new in
                     runnerID = skates.first { $0.id == new }?.currentRunner?.id
                 }
                 if let skate = skates.first(where: { $0.id == skateID }) {
                     let runners = skate.installations.compactMap(\.runner)
-                    Picker("러너", selection: $runnerID) {
-                        Text("선택 안 함").tag(UUID?.none)
-                        ForEach(Array(Set(runners.map(\.id))), id: \.self) { rid in
-                            if let r = runners.first(where: { $0.id == rid }) {
-                                Text(r.name).tag(Optional(r.id))
-                            }
-                        }
-                    }
+                        .reduce(into: [RunnerSet]()) { acc, r in if !acc.contains(where: { $0.id == r.id }) { acc.append(r) } }
+                    LabeledChoice(title: "러너(날)",
+                                  options: [ChoiceOption(value: UUID?.none, title: "안 고름", art: .symbol("minus"))]
+                                    + runners.map { r in
+                                        ChoiceOption(value: Optional(r.id), title: r.name,
+                                                     subtitle: r.currentHollow.map { "RoH \($0)\"" } ?? (r.id == skate.currentRunner?.id ? "장착 중" : nil),
+                                                     art: r.currentHollow.flatMap(Hollow.init(label:)).map { ChoiceOption<UUID?>.Art.hollow($0) } ?? ChoiceOption<UUID?>.Art.symbol("minus"))
+                                    },
+                                  selection: $runnerID, columns: 3, minHeight: 84)
                 }
                 if skateID != nil {
                     Stepper("실제로 탄 시간 \(minutesText(iceMinutes))", value: Binding(

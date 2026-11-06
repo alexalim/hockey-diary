@@ -82,12 +82,11 @@ struct JournalEditorView: View {
             }
             if !sameDaySessions.isEmpty {
                 Section("하키 활동 연결") {
-                    Picker("이날 활동", selection: $linkedSessionID) {
-                        Text("연결 안 함").tag(UUID?.none)
-                        ForEach(sameDaySessions) { s in
-                            Text("\(s.startsAt.timeTitle) \(s.title)").tag(Optional(s.id))
-                        }
-                    }
+                    ChoiceCards(options: [ChoiceOption(value: UUID?.none, title: "연결 안 함", art: .symbol("minus"))]
+                                  + sameDaySessions.map { s in
+                                      ChoiceOption(value: Optional(s.id), title: s.title, subtitle: s.startsAt.timeTitle, art: .symbol(s.type.systemImage))
+                                  },
+                                selection: $linkedSessionID, columns: 2, minHeight: 72)
                 }
             }
             Section("사진") {
