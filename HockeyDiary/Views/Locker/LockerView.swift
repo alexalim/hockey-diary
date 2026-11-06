@@ -9,7 +9,12 @@ struct LockerView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @AppStorage("lockerOpen") private var isOpen = false
-    @State private var animating = false
+    /// 문 각도(0=닫힘, DoorSwing.openAngle=활짝). 손가락을 따라 움직인다.
+    @State private var angle: Double = 0
+    @State private var dragBase: Double?
+    @State private var horizontalDrag: Bool?
+    @State private var latchTick = 0
+    @State private var hinted = false
     @State private var customizing = false
     @State private var newStickers: [String] = []
 
@@ -22,22 +27,32 @@ struct LockerView: View {
         ScrollView {
             VStack(spacing: 16) {
                 if !newStickers.isEmpty { earnedBanner }
-                ZStack {
-                    LockerInside(skateCount: skates.count, gear: gear)
-                        .opacity(isOpen ? 1 : 0)
-                        .allowsHitTesting(isOpen)
-                    LockerDoor(profile: profiles.first, placements: placements)
-                        .rotation3DEffect(.degrees(isOpen ? -100 : 0), axis: (x: 0, y: 1, z: 0),
-                                          anchor: .leading, perspective: 0.5)
-                        .opacity(isOpen ? 0 : 1)
-                        .allowsHitTesting(!isOpen)
-                        .onTapGesture(perform: toggle)
-                        .accessibilityElement(children: .ignore)
-                        .accessibilityLabel(doorLabel)
-                        .accessibilityHint("두 번 탭하면 문이 열려")
-                        .accessibilityAddTraits(.isButton)
+                GeometryReader { geo in
+                    let progress = DoorSwing.progress(angle)
+                    ZStack {
+                        LockerInside(skateCount: skates.count, gear: gear)
+                            .scaleEffect(0.94 + 0.06 * progress)
+                            .brightness(-0.25 * (1 - progress))
+                            .allowsHitTesting(angle >= DoorSwing.openAngle - 1)
+                        LockerDoor(profile: profiles.first, placements: placements)
+                            // 문이 돌수록 빛을 덜 받아 어두워진다.
+                            .overlay(Color.black.opacity(0.4 * progress).clipShape(RoundedRectangle(cornerRadius: 14)))
+                            .rotation3DEffect(.degrees(-angle), axis: (x: 0, y: 1, z: 0), anchor: .leading, perspective: 0.45)
+                            .shadow(color: .black.opacity(0.35 * progress), radius: 18 * progress, x: -10 * progress)
+                            .opacity(angle > 88 ? 0 : 1)
+                            .allowsHitTesting(angle < 1)
+                            .onTapGesture(perform: toggle)
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel(doorLabel)
+                            .accessibilityHint("두 번 탭하면 문이 열려")
+                            .accessibilityAddTraits(.isButton)
+                    }
+                    .contentShape(Rectangle())
+                    .simultaneousGesture(swipe(width: geo.size.width))
                 }
                 .frame(height: 440)
+                .sensoryFeedback(.selection, trigger: latchTick)
+                .sensoryFeedback(.impact(weight: .medium), trigger: isOpen)
 
                 HStack(spacing: 8) {
                     Button(isOpen ? "문 닫기" : "문 열기", action: toggle)
@@ -70,6 +85,61 @@ struct LockerView: View {
         .onAppear {
             let fresh = LockerStore.awardMilestones(context)
             if !fresh.isEmpty { newStickers = fresh }
+            angle = isOpen ? DoorSwing.openAngle : 0
+            hint()
+        }
+    }
+
+    /// 손잡이를 잡고 가로로 쓸어 문을 연다. 세로 움직임은 스크롤에 양보한다.
+    private func swipe(width: CGFloat) -> some Gesture {
+        DragGesture(minimumDistance: 8)
+            .onChanged { value in
+                if horizontalDrag == nil {
+                    horizontalDrag = abs(value.translation.width) > abs(value.translation.height)
+                }
+                guard horizontalDrag == true else { return }
+                if reduceMotion { return }
+                let base = dragBase ?? angle
+                if dragBase == nil { dragBase = base }
+                let next = DoorSwing.angle(from: base, translation: value.translation.width, width: width)
+                // 문고리가 풀리는 순간 가볍게 한 번 '딸깍'.
+                if (angle < DoorSwing.latchAngle) != (next < DoorSwing.latchAngle) { latchTick += 1 }
+                angle = next
+            }
+            .onEnded { value in
+                defer { dragBase = nil; horizontalDrag = nil }
+                guard horizontalDrag == true else { return }
+                let base = dragBase ?? angle
+                let predicted = DoorSwing.angle(from: base, translation: value.predictedEndTranslation.width, width: width)
+                if reduceMotion {
+                    // 동작 줄이기: 쓸어넘긴 방향으로 바로 여닫는다.
+                    setOpen(value.translation.width < 0)
+                    return
+                }
+                setOpen(DoorSwing.shouldOpen(current: angle, predicted: predicted, wasOpen: isOpen))
+            }
+    }
+
+    private func setOpen(_ open: Bool) {
+        if reduceMotion {
+            angle = open ? DoorSwing.openAngle : 0
+        } else {
+            withAnimation(.spring(response: 0.45, dampingFraction: open ? 0.72 : 0.8)) {
+                angle = open ? DoorSwing.openAngle : 0
+            }
+        }
+        isOpen = open
+    }
+
+    /// 닫힌 문을 처음 보면 살짝 들썩여 '밀 수 있다'는 걸 알려준다.
+    private func hint() {
+        guard !hinted, !isOpen, !reduceMotion else { return }
+        hinted = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { angle = 9 }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                if dragBase == nil && !isOpen { withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) { angle = 0 } }
+            }
         }
     }
 
@@ -102,15 +172,9 @@ struct LockerView: View {
     }
 
     private func toggle() {
-        // 애니메이션 중 중복 탭은 무시한다.
-        guard !animating else { return }
-        if reduceMotion {
-            isOpen.toggle()
-            return
-        }
-        animating = true
-        withAnimation(.easeInOut(duration: 0.75)) { isOpen.toggle() }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { animating = false }
+        // 드래그 중의 탭은 무시한다.
+        guard dragBase == nil else { return }
+        setOpen(!isOpen)
     }
 }
 
@@ -183,7 +247,7 @@ struct LockerDoor: View {
             }
         }
         .overlay(alignment: .bottom) {
-            Text("눌러서 열기").font(.caption).foregroundStyle(.white.opacity(0.75)).padding(.bottom, 16)
+            Label("손잡이를 밀어서 열기", systemImage: "chevron.left.2").font(.caption).foregroundStyle(.white.opacity(0.8)).padding(.bottom, 16)
         }
     }
 }

@@ -303,6 +303,20 @@ final class LockerTests: XCTestCase {
         XCTAssertTrue(Milestones.earned(f).allSatisfy { StickerCatalog.def($0)?.kind == .achievement })
     }
 
+    // 락커 스와이프: 왼쪽으로 쓸면 열리고, 범위 밖으로 넘지 않고, 관성으로 휙 넘기면 열린다.
+    func testDoorSwing() {
+        XCTAssertEqual(DoorSwing.angle(from: 0, translation: -150, width: 300), 70)
+        XCTAssertEqual(DoorSwing.angle(from: 0, translation: 200, width: 300), 0, "반대로 밀면 닫힌 채")
+        XCTAssertEqual(DoorSwing.angle(from: 0, translation: -900, width: 300), DoorSwing.openAngle)
+        XCTAssertEqual(DoorSwing.angle(from: DoorSwing.openAngle, translation: 150, width: 300), 35, "열린 문을 오른쪽으로 쓸면 닫힘")
+        XCTAssertFalse(DoorSwing.shouldOpen(current: 20, predicted: 30, wasOpen: false), "살짝 열다 놓으면 다시 닫힘")
+        XCTAssertTrue(DoorSwing.shouldOpen(current: 20, predicted: 90, wasOpen: false), "휙 넘기면 열림")
+        XCTAssertTrue(DoorSwing.shouldOpen(current: 60, predicted: 60, wasOpen: false))
+        XCTAssertTrue(DoorSwing.shouldOpen(current: 90, predicted: 80, wasOpen: true), "열린 문을 조금 밀면 열린 채")
+        XCTAssertFalse(DoorSwing.shouldOpen(current: 50, predicted: 40, wasOpen: true))
+        XCTAssertEqual(DoorSwing.progress(DoorSwing.openAngle / 2), 0.5, accuracy: 1e-9)
+    }
+
     func testCatalogKeysUnique() {
         let keys = StickerCatalog.all.map(\.key)
         XCTAssertEqual(Set(keys).count, keys.count)
