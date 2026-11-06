@@ -10,6 +10,11 @@ struct GrowthView: View {
 
     @State private var period: Period = .month
 
+    private var periodSessions: [Session] {
+        let from = period.start(from: Date())
+        return sessions.filter { from == nil || $0.startsAt >= from! }
+    }
+
     private var samples: [ActivitySample] {
         Insights.inPeriod(sessions.map(\.sample), from: period.start(from: Date()), to: Date())
     }
@@ -26,6 +31,21 @@ struct GrowthView: View {
                 surfaceCard
                 skillsCard
                 SleepGrowthCard(samples: samples, periodTitle: period.longTitle)
+                CycleGrowthCard(sessions: periodSessions.map { (at: $0.startsAt, fatigue: $0.fatigue) }, periodTitle: period.longTitle)
+                NavigationLink { AISummaryView() } label: {
+                    Card {
+                        Label("AI로 돌아보기", systemImage: "sparkles").font(.headline).foregroundStyle(Theme.title)
+                        Text("켠 사람만, 기기 안에서 하키 기록만 요약해.").font(.subheadline).foregroundStyle(.secondary)
+                    }
+                }
+                .buttonStyle(.plain)
+                NavigationLink { SeasonReportView() } label: {
+                    Card(tint: Theme.cobalt) {
+                        Label("시즌 리포트 만들기", systemImage: "photo.on.rectangle.angled").font(.headline).foregroundStyle(.white)
+                        Text("활동 숫자와 기술만 담은 이미지로 저장·공유해.").font(.subheadline).foregroundStyle(.white.opacity(0.85))
+                    }
+                }
+                .buttonStyle(.plain)
             }
             .padding(16)
         }

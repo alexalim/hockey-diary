@@ -96,6 +96,36 @@ final class HealthService {
                              averageHeartRate: hr?.average, maxHeartRate: hr?.max, workouts: ws)
     }
 
+    // MARK: - 생리 주기 (별도 동의, F-C04)
+
+    static let menstrualType = HKCategoryType(.menstrualFlow)
+
+    /// 생리 주기 토글을 켤 때만 따로 요청한다.
+    func requestCycleAccess() async throws {
+        try await store.requestAuthorization(toShare: [], read: [Self.menstrualType])
+    }
+
+    /// 출혈이 기록된 날(하루 시작 시각) 모음.
+    func menstrualDays(from: Date, to: Date) async throws -> Set<Date> {
+        let predicate = HKQuery.predicateForSamples(withStart: from, end: to)
+        let descriptor = HKSampleQueryDescriptor(
+            predicates: [.categorySample(type: Self.menstrualType, predicate: predicate)],
+            sortDescriptors: [])
+        let samples = try await descriptor.result(for: store)
+        let cal = Calendar.current
+        var days = Set<Date>()
+        for s in samples where s.value != HKCategoryValueMenstrualFlow.none.rawValue {
+            // 기록이 걸친 날을 모두 넣는다(하루짜리 기록은 그날 하루).
+            var d = cal.startOfDay(for: s.startDate)
+            repeat {
+                days.insert(d)
+                guard let next = cal.date(byAdding: .day, value: 1, to: d) else { break }
+                d = next
+            } while d < s.endDate
+        }
+        return days
+    }
+
     static func name(of type: HKWorkoutActivityType) -> String {
         switch type {
         case .hockey: return "하키"
@@ -111,4 +141,5 @@ final class HealthService {
 /// 건강 연결 상태(사용자가 켠 것만 기억). 권한 자체는 iOS가 관리한다.
 enum HealthPrefs {
     static let enabledKey = "healthEnabled"
+    static let cycleKey = "cycleEnabled"
 }
