@@ -693,9 +693,7 @@ struct GearEditorView: View {
                 TextField("브랜드", text: $brand)
                 TextField("모델명", text: $model)
                 TextField("사이즈", text: $size)
-                Picker("상태", selection: $status) {
-                    ForEach(SkateStatus.allCases, id: \.self) { s in Text(s.title).tag(s) }
-                }
+                LabeledChoice(title: "상태", options: SkateStatus.choices, selection: $status, columns: 4, minHeight: 64)
             }
             Section("사진") {
                 if let data = item?.photo, photos.isEmpty { PhotoThumb(data: data, size: 90) }

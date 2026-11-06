@@ -176,10 +176,11 @@ struct RinkDetailView: View {
     }
 
     private func facility(_ title: String, _ value: Binding<Bool?>) -> some View {
-        Picker(title, selection: Binding(get: { value.wrappedValue }, set: { value.wrappedValue = $0; rink.verifiedAt = Date() })) {
-            Text("모름").tag(Bool?.none)
-            Text("있음").tag(Optional(true))
-            Text("없음").tag(Optional(false))
-        }
+        LabeledChoice(title: title, options: [
+            ChoiceOption(value: Bool?.none, title: "모름", art: .symbol("questionmark")),
+            ChoiceOption(value: Optional(true), title: "있어", art: .symbol("checkmark")),
+            ChoiceOption(value: Optional(false), title: "없어", art: .symbol("xmark")),
+        ], selection: Binding(get: { value.wrappedValue }, set: { value.wrappedValue = $0; rink.verifiedAt = Date() }),
+        columns: 3, minHeight: 56)
     }
 }

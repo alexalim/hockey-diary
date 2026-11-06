@@ -102,9 +102,7 @@ struct SkateEditorView: View {
                 TextField("모델명", text: $model)
                 TextField("사이즈", text: $size)
                 TextField("FIT·발볼", text: $fit)
-                Picker("상태", selection: $status) {
-                    ForEach(SkateStatus.allCases, id: \.self) { s in Text(s.title).tag(s) }
-                }
+                LabeledChoice(title: "상태", options: SkateStatus.choices, selection: $status, columns: 4, minHeight: 64)
                 Toggle("구매일 기록", isOn: $hasPurchase)
                 if hasPurchase { DatePicker("구매일", selection: $purchasedAt, displayedComponents: .date) }
             }
@@ -189,12 +187,10 @@ struct SkateDetailView: View {
                 if !skate.isPrimary {
                     Button("대표 스케이트로 정하기") { DiaryStore.makePrimary(skate, context: context) }
                 }
-                Picker("상태", selection: Binding(
+                LabeledChoice(title: "상태", options: SkateStatus.choices, selection: Binding(
                     get: { skate.status },
                     set: { skate.status = $0; if !$0.isActive { skate.isPrimary = false }; context.saveOrReport() }
-                )) {
-                    ForEach(SkateStatus.allCases, id: \.self) { s in Text(s.title).tag(s) }
-                }
+                ), columns: 4, minHeight: 64)
             } footer: {
                 Text("지우지 말고 '사용 종료'로 바꿔두면 지난 기록이 남아.")
             }

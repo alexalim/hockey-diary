@@ -246,3 +246,95 @@ func minutesText(_ minutes: Int) -> String {
     if h == 0 { return "\(m)분" }
     return m == 0 ? "\(h)시간" : "\(h)시간 \(m)분"
 }
+
+/// 큰 카드 버튼 선택지 하나. 그림은 아이콘·사진·홀로우 단면 중 하나.
+struct ChoiceOption<T: Hashable>: Identifiable {
+    enum Art { case none, symbol(String), photo(Data), hollow(Hollow) }
+    let value: T
+    let title: String
+    var subtitle: String? = nil
+    var art: Art = .none
+    var id: T { value }
+}
+
+/// 연마 화면 홀로우 카드처럼 큰 카드로 고르는 선택기. 고르면 핑크 테두리와 체크가 붙는다.
+struct ChoiceCards<T: Hashable>: View {
+    var options: [ChoiceOption<T>]
+    @Binding var selection: T
+    var columns: Int = 3
+    var minHeight: CGFloat = 72
+
+    var body: some View {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: columns), spacing: 8) {
+            ForEach(options) { o in
+                let selected = o.value == selection
+                Button {
+                    selection = o.value
+                } label: {
+                    VStack(spacing: 5) {
+                        art(o.art)
+                        Text(o.title).font(.footnote.weight(.semibold))
+                            .multilineTextAlignment(.center).lineLimit(2).minimumScaleFactor(0.8)
+                        if let s = o.subtitle {
+                            Text(s).font(.caption2).foregroundStyle(.secondary).lineLimit(1)
+                        }
+                    }
+                    .padding(.horizontal, 4).padding(.vertical, 8)
+                    .frame(maxWidth: .infinity, minHeight: minHeight)
+                    .foregroundStyle(Theme.title)
+                    .background(selected ? Theme.cobaltSoft : Theme.card, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(selected ? Theme.neonPink : Color.secondary.opacity(0.25), lineWidth: selected ? 2.5 : 1))
+                    .overlay(alignment: .topTrailing) {
+                        if selected { Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.neonPink).padding(4) }
+                    }
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(o.subtitle.map { "\(o.title), \($0)" } ?? o.title)
+                .accessibilityAddTraits(selected ? .isSelected : [])
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    @ViewBuilder
+    private func art(_ a: ChoiceOption<T>.Art) -> some View {
+        switch a {
+        case .none: EmptyView()
+        case .symbol(let name): Image(systemName: name).font(.title3).foregroundStyle(Theme.accent)
+        case .photo(let data): PhotoThumb(data: data, size: 40)
+        case .hollow(let h): HollowGlyph(hollow: h).frame(height: 36)
+        }
+    }
+}
+
+/// 제목 + 큰 카드 선택(폼 안에서 쓰기 좋게).
+struct LabeledChoice<T: Hashable>: View {
+    var title: String
+    var options: [ChoiceOption<T>]
+    @Binding var selection: T
+    var columns: Int = 3
+    var minHeight: CGFloat = 72
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title).font(.subheadline).foregroundStyle(.secondary)
+            ChoiceCards(options: options, selection: $selection, columns: columns, minHeight: minHeight)
+        }
+    }
+}
+
+extension SkateStatus {
+    var symbol: String {
+        switch self {
+        case .main: return "star.fill"
+        case .sub: return "2.circle.fill"
+        case .stored: return "archivebox.fill"
+        case .retired: return "moon.zzz.fill"
+        }
+    }
+
+    static var choices: [ChoiceOption<SkateStatus>] {
+        allCases.map { ChoiceOption(value: $0, title: $0.title, art: .symbol($0.symbol)) }
+    }
+}
