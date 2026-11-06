@@ -205,7 +205,7 @@ struct RunnerDetailView: View {
                     }
                     VStack(alignment: .leading, spacing: 4) {
                         Text(runner.name).font(.title3.bold())
-                        Text("현재 RoH \(runner.currentHollow.map { "\($0)\"" } ?? "미확인")").font(.subheadline)
+                        Text("현재 RoH \(runner.currentHollow.map { "\($0)\"" } ?? "미확인")\(runner.currentHollow.flatMap(Hollow.init(label:))?.nickname.map { " · \($0)" } ?? "")").font(.subheadline)
                         Text(runner.installedSkate.map { "\($0.name)에 장착 중" } ?? "보관 중")
                             .font(.caption).foregroundStyle(.secondary)
                     }
@@ -410,11 +410,14 @@ struct HollowCard: View {
             VStack(spacing: 6) {
                 HollowGlyph(hollow: hollow).frame(height: 54)
                 Text(hollow.display).font(.headline)
+                if let nick = hollow.nickname {
+                    Text(nick).font(.caption.bold()).foregroundStyle(Theme.title).lineLimit(1).minimumScaleFactor(0.8)
+                }
                 Text(hollow.feel).font(.caption2.bold())
                     .foregroundStyle(hollow.feel == "깊은 홈" ? Theme.neonPink : (hollow.feel == "얕은 홈" ? Theme.accent : .secondary))
             }
             .padding(.vertical, 6)
-            .frame(maxWidth: .infinity, minHeight: 112)
+            .frame(maxWidth: .infinity, minHeight: 128)
             .foregroundStyle(Theme.title)
             .background(selected ? Theme.cobaltSoft : Theme.card, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
@@ -424,7 +427,7 @@ struct HollowCard: View {
             }
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("홀로우 \(hollow.label)인치")
+        .accessibilityLabel("홀로우 \(hollow.label)인치\(hollow.nickname.map { ", \($0)" } ?? ""), \(hollow.feel)")
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 }

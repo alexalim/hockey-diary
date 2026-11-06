@@ -16,11 +16,19 @@ struct ExploreView: View {
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
                         ForEach(RuleGuide.topics) { topic in
                             NavigationLink { RuleDetailView(topic: topic) } label: {
-                                Label(topic.title, systemImage: topic.symbol)
-                                    .font(.subheadline.weight(.semibold))
-                                    .frame(maxWidth: .infinity, minHeight: 56)
-                                    .foregroundStyle(Theme.title)
-                                    .background(Theme.iceBlue, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                VStack(spacing: 6) {
+                                    RuleArt(id: topic.id, compact: true)
+                                        .frame(height: 64)
+                                        .allowsHitTesting(false)
+                                        .accessibilityHidden(true)
+                                    Label(topic.title, systemImage: topic.symbol)
+                                        .font(.subheadline.weight(.semibold))
+                                        .lineLimit(1).minimumScaleFactor(0.8)
+                                        .foregroundStyle(Theme.title)
+                                }
+                                .padding(8)
+                                .frame(maxWidth: .infinity)
+                                .background(Theme.iceBlue, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                             }
                             .buttonStyle(.plain)
                         }
