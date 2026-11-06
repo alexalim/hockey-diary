@@ -56,6 +56,14 @@ public struct Hollow: Equatable, Hashable, Sendable {
 
     public var display: String { "\(label)\"" }
 
+    /// 단계별 별명(마하다가 붙인 이름). 목록에 없는 값은 nil.
+    public var nickname: String? {
+        [
+            "3/8": "강력 집게", "7/16": "단단 그립", "1/2": "날카로운 턴", "9/16": "딱 중간", "5/8": "부드러운 활주",
+            "11/16": "쭉쭉 활주", "3/4": "스피드 활주", "7/8": "미끄럼 대장", "1": "활주 끝판왕",
+        ][label]
+    }
+
     /// 홈 깊이 구분. 반경이 작을수록 홈이 깊다(기하 사실).
     public var feel: String {
         if inches < 0.53 { return "깊은 홈" }

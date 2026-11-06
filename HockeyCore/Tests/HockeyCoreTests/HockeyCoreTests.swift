@@ -193,6 +193,9 @@ final class HollowTests: XCTestCase {
     func testPresetLabelsAndDepthOrder() throws {
         let labels = Hollow.presets.map(\.label)
         XCTAssertEqual(labels, ["3/8", "7/16", "1/2", "9/16", "5/8", "11/16", "3/4", "7/8", "1"])
+        XCTAssertTrue(Hollow.presets.allSatisfy { $0.nickname != nil }, "프리셋마다 별명")
+        XCTAssertEqual(Hollow(label: "9/16")?.nickname, "딱 중간")
+        XCTAssertNil(Hollow(label: "0.55")?.nickname, "직접 입력값은 별명 없음")
         XCTAssertEqual(Hollow(label: "1/2")?.feel, "깊은 홈")
         XCTAssertEqual(Hollow(label: "9/16")?.feel, "중간")
         XCTAssertEqual(Hollow(label: "5/8")?.feel, "얕은 홈")

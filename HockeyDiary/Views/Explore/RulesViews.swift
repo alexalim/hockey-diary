@@ -17,6 +17,14 @@ struct RuleDetailView: View {
                     RuleSceneCard(scenes: scenes)
                 }
                 if topic.id == "positions" { PositionsDiagram() }
+                if RuleArt.needsDetailArt(topic.id) {
+                    Card {
+                        RuleArt(id: topic.id)
+                            .frame(height: RuleArt.detailHeight(topic.id))
+                            .accessibilityHidden(true)
+                        Text("그림은 이해를 돕는 도식이야.").font(.caption2).foregroundStyle(.secondary)
+                    }
+                }
                 if topic.id == "fouls" {
                     FoulCards(points: topic.points)
                 } else {
