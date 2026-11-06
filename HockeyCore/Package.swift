@@ -4,7 +4,7 @@ import PackageDescription
 // Foundation만 쓰는 순수 판단 로직. Linux(Docker swift 이미지)에서도 `swift test`로 검증한다.
 let package = Package(
     name: "HockeyCore",
-    platforms: [.iOS(.v17), .macOS(.v14)],
+    platforms: [.iOS(.v17), .macOS(.v14), .watchOS(.v10)],
     products: [
         .library(name: "HockeyCore", targets: ["HockeyCore"]),
     ],

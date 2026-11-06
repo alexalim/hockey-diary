@@ -15,6 +15,7 @@ struct HockeyDiaryApp: App {
             container = try! AppSchema.container(inMemory: true)
         }
         DiaryStore.seedIfNeeded(container.mainContext)
+        WatchBridge.shared.activate(container: container)
     }
 
     var body: some Scene {

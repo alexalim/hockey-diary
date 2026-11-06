@@ -17,6 +17,7 @@ jobs:
     env:
       TEAM_ID: ""
       PROFILE_NAME: ""
+      WATCH_PROFILE_NAME: ""
     steps:
       - uses: actions/checkout@v7
 
@@ -48,6 +49,13 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             | tee build.log | grep -E "error:|warning: .*deprecated|BUILD (SUCCEEDED|FAILED)" || true
           grep -q "BUILD SUCCEEDED" build.log
+
+      - name: 워치 앱이 앱 안에 들어갔는지 확인
+        run: |
+          app=$(find ~/Library/Developer/Xcode/DerivedData -type d -name "HockeyDiary.app" -path "*iphonesimulator*" | head -1)
+          echo "앱: $app"
+          ls "$app/Watch" 2>/dev/null || echo "(Watch 없음)"
+          test -d "$app/Watch/HockeyDiaryWatch.app" || { echo "::error::워치 앱이 앱 안에 없습니다"; exit 1; }
 
       - name: 앱 저장소 통합 테스트 (Integration, 시뮬레이터)
         run: |
