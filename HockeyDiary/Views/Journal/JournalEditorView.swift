@@ -93,11 +93,12 @@ struct JournalEditorView: View {
                 PhotoPickerRow(existing: journal?.photos ?? [], removedIDs: $removedPhotoIDs, added: $addedPhotos)
             }
             Section {
-                Toggle("비공개", isOn: $isPrivate)
+                // 저장 값은 그대로 isPrivate. 화면에서는 '리포트 공유'로 뒤집어 보여준다.
+                Toggle("리포트 공유", isOn: Binding(get: { !isPrivate }, set: { isPrivate = !$0 }))
             } footer: {
                 Text(isPrivate
-                     ? "비공개 일기는 리포트나 공유에 안 들어가. 내용을 따로 분석하지도 않아."
-                     : "지금은 일기를 공유하는 기능이 없어. 리포트나 AI 요약에도 일기는 안 들어가.")
+                     ? "꺼져 있으면 이 일기는 어디에도 안 들어가. 내용을 따로 분석하지도 않아."
+                     : "켜면 시즌 리포트 이미지에 이 일기 한 줄이 들어갈 수 있어. AI 요약에는 안 넣어.")
             }
             if !canSave {
                 Section { Text("기분을 고르거나 한 줄만 써도 저장돼.").font(.footnote).foregroundStyle(.secondary) }

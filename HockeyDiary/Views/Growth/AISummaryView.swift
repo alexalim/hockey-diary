@@ -81,7 +81,7 @@ struct AISummaryView: View {
                 case .available:
                     do {
                         let session = LanguageModelSession(instructions: SummaryFacts.instructions)
-                        summary = try await session.respond(to: "사실:\n\(input)").content
+                        summary = SummaryFacts.clean(try await session.respond(to: "사실:\n\(input)").content)
                     } catch {
                         errorText = "요약을 만들지 못했어. 잠시 뒤 다시 해줘."
                     }

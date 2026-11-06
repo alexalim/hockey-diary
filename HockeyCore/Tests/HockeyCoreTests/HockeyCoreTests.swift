@@ -192,7 +192,10 @@ final class HollowTests: XCTestCase {
     // T15: 1/2 · 5/8 · 3/4 선택값이 정확히 저장되고 그림 깊이 순서가 일치한다.
     func testPresetLabelsAndDepthOrder() throws {
         let labels = Hollow.presets.map(\.label)
-        XCTAssertEqual(labels, ["3/8", "1/2", "5/8", "3/4", "7/8", "1"])
+        XCTAssertEqual(labels, ["3/8", "7/16", "1/2", "9/16", "5/8", "11/16", "3/4", "7/8", "1"])
+        XCTAssertEqual(Hollow(label: "1/2")?.feel, "그립 쪽")
+        XCTAssertEqual(Hollow(label: "9/16")?.feel, "중간")
+        XCTAssertEqual(Hollow(label: "5/8")?.feel, "활주 쪽")
         let depths = Hollow.presets.map(\.grooveDepthInches)
         XCTAssertEqual(depths, depths.sorted(by: >), "반경이 작을수록 홈이 깊다")
         let half = try XCTUnwrap(Hollow(label: "1/2"))
@@ -412,6 +415,20 @@ final class SeasonReportTests: XCTestCase {
         XCTAssertEqual(r.bestDays, 1)
     }
 
+    // 리포트 공유를 켠 일기만, 기간 안, 최근 2개, 40자까지.
+    func testSharedJournalLines() {
+        let long = String(repeating: "가", count: 50)
+        let lines = [
+            SeasonReport.SharedLine(at: t0, text: "첫 골 넣은 날"),
+            SeasonReport.SharedLine(at: t0.addingTimeInterval(-86_400), text: long),
+            SeasonReport.SharedLine(at: t0.addingTimeInterval(-86_400 * 2), text: "오래된 한 줄"),
+            SeasonReport.SharedLine(at: t0.addingTimeInterval(-86_400 * 500), text: "기간 밖"),
+        ]
+        let r = SeasonReport.make(title: "t", from: t0.addingTimeInterval(-86_400 * 30), to: t0, samples: [], skillEvents: [], sharedLines: lines)
+        XCTAssertEqual(r.sharedLines, ["첫 골 넣은 날", String(repeating: "가", count: 40) + "…"])
+        XCTAssertEqual(SeasonReport.make(title: "t", from: nil, to: t0, samples: [], skillEvents: []).sharedLines, [], "아무것도 안 넘기면 일기 없음")
+    }
+
     // 11.2 deny-by-default: 리포트 타입에 민감 정보 칸이 없다.
     func testReportHasNoSensitiveFields() {
         let r = SeasonReport.make(title: "t", from: nil, to: t0, samples: [], skillEvents: [])
@@ -434,6 +451,9 @@ final class SummaryFactsTests: XCTestCase {
         XCTAssertTrue(with.contains("메모: 턴이 늦었다"))
         XCTAssertFalse(SummaryFacts.text(periodTitle: "x", sessions: s, includeNotes: false).contains("턴이 늦었다"))
         XCTAssertTrue(SummaryFacts.instructions.contains("의료"))
+        // 피드백: AI 요약에 ** 기호가 그대로 보임 → 화면에 보이기 전에 지운다.
+        XCTAssertEqual(SummaryFacts.clean("최근 **페이스오프**를 연습했어.\n- **퍽 드리블**도 해봐.\n## 끝"),
+                       "최근 페이스오프를 연습했어.\n퍽 드리블도 해봐.\n끝")
     }
 }
 

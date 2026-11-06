@@ -194,7 +194,7 @@ struct SettingsView: View {
                 Label("Apple 건강은 연결했을 때만 읽어. 읽은 값은 따로 저장하지 않아.", systemImage: "heart.text.square")
                 Label("AI 요약은 켰을 때만 써. 아이폰 안에서 하키 기록만 봐.", systemImage: "sparkles")
                 Label("Apple Watch로 잰 운동은 건강 앱에도 저장돼.", systemImage: "applewatch")
-                Label("일기는 처음부터 비공개야. 내용을 따로 분석하지 않아.", systemImage: "lock.fill")
+                Label("일기는 '리포트 공유'를 켠 것만 시즌 리포트에 한 줄 들어가. 내용을 따로 분석하지 않아.", systemImage: "lock.fill")
                 Label("사진은 고른 것만 복사해 둬. 위치 정보는 지워.", systemImage: "photo")
             }
             Section("연결") {

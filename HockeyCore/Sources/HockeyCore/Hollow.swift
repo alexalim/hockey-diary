@@ -7,7 +7,7 @@ public struct Hollow: Equatable, Hashable, Sendable {
     /// 반경(인치).
     public let inches: Double
 
-    public static let presets: [Hollow] = ["3/8", "1/2", "5/8", "3/4", "7/8", "1"].compactMap(Hollow.init(label:))
+    public static let presets: [Hollow] = ["3/8", "7/16", "1/2", "9/16", "5/8", "11/16", "3/4", "7/8", "1"].compactMap(Hollow.init(label:))
 
     /// 하키 날 폭(인치, 약 2.9mm). 단면 그림의 상대 깊이 계산에만 쓴다.
     public static let bladeWidthInches = 0.115
@@ -55,4 +55,41 @@ public struct Hollow: Equatable, Hashable, Sendable {
     }
 
     public var display: String { "\(label)\"" }
+
+    /// 느낌 쪽: 숫자가 작을수록 홈이 깊어 잘 물리고(그립), 클수록 얕아 잘 미끄러진다(활주).
+    public var feel: String {
+        if inches < 0.53 { return "그립 쪽" }
+        if inches < 0.6 { return "중간" }
+        return "활주 쪽"
+    }
+}
+
+/// 연마 안내. 언제 갈지, 연마점에 어떻게 맡길지, 타고 나서 날 관리.
+/// 권장 시간은 자료마다 달라서 숫자로 정해주지 않는다.
+public enum SharpeningGuide {
+    public struct Section: Sendable {
+        public let title: String
+        public let points: [String]
+    }
+
+    public static let sections: [Section] = [
+        Section(title: "언제 갈까?", points: [
+            "며칠 지났는지보다 얼마나 탔는지가 중요해. 탄 횟수나 시간을 같이 봐.",
+            "밀어낼 때 헛밀리거나 멈출 때 미끄러지면 점검할 때야.",
+            "날에 찍히거나 파인 곳이 보여도 갈아야 해.",
+            "날 모서리를 손톱으로 살짝 긁어봐. 안 걸리고 미끄러지면 무뎌진 거야.",
+            "권장 시간은 자료마다 달라. 느낌이 이상하면 시간과 상관없이 점검해.",
+        ]),
+        Section(title: "어떻게 맡길까?", points: [
+            "연마점에 지난번 세팅(RoH)과 양쪽 날 상태를 말해줘. 러너 화면에 지난번 세팅이 있어.",
+            "숫자가 작을수록 홈이 깊어서 잘 물려. 클수록 얕아서 잘 미끄러져.",
+            "바꿔보고 싶으면 한 칸씩만 바꿔. 9/16에서 1/2처럼.",
+            "갈고 나서 그립·활주·스톱·턴 느낌을 남겨두면 다음에 비교하기 쉬워.",
+        ]),
+        Section(title: "타고 나면?", points: [
+            "얼음에서 나오면 날의 물기를 바로 닦아. 그대로 두면 녹슬어.",
+            "보관할 땐 천으로 된 소프트 가드를 씌워. 딱딱한 가드는 걸어 다닐 때만 껴.",
+            "다음에 타기 전에 날에 찍힌 곳이 없는지 한 번 봐.",
+        ]),
+    ]
 }
