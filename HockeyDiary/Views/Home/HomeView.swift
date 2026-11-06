@@ -42,7 +42,7 @@ struct HomeView: View {
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button { showingSettings = true } label: {
-                    Image(systemName: "person.crop.circle.fill").font(.title2).foregroundStyle(Theme.cobalt)
+                    Image(systemName: "person.crop.circle.fill").font(.title2).foregroundStyle(Theme.accent)
                 }
                 .accessibilityLabel("설정")
             }

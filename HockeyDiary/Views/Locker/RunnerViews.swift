@@ -40,7 +40,7 @@ struct RunnerRow: View {
             if let h = runner.currentHollow.flatMap(Hollow.init(label:)) {
                 HollowGlyph(hollow: h).frame(width: 34, height: 34)
             } else {
-                Image(systemName: "minus").frame(width: 34, height: 34).foregroundStyle(Theme.cobalt)
+                Image(systemName: "minus").frame(width: 34, height: 34).foregroundStyle(Theme.accent)
             }
             VStack(alignment: .leading, spacing: 2) {
                 Text(runner.name).font(.subheadline.bold())
@@ -159,7 +159,7 @@ struct RunnerDetailView: View {
                     ProgressView(value: min(Double(since), Double(t)), total: Double(t)) {
                         Text("내 점검 기준 \(minutesText(t))").font(.caption)
                     }
-                    .tint(since >= t ? Theme.neonPink : Theme.cobalt)
+                    .tint(since >= t ? Theme.neonPink : Theme.accent)
                 }
             } footer: {
                 Text("기록한 활동에서 고른 러너의 '실제 얼음 위 시간'만 더해.")
