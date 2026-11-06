@@ -373,7 +373,7 @@ final class LockerTests: XCTestCase {
 final class RuleGuideTests: XCTestCase {
     // 8.2: 초기 주제 6개, 각 카드에 퀴즈 1문항, 정답 번호가 보기 범위 안.
     func testTopicsAreComplete() {
-        XCTAssertEqual(RuleGuide.topics.map(\.id), ["offside", "icing", "faceoff", "linechange", "penalties", "positions"])
+        XCTAssertEqual(RuleGuide.topics.map(\.id), ["offside", "icing", "faceoff", "linechange", "penalties", "gametime", "nogoal", "fouls", "goalie", "terms", "positions"])
         for t in RuleGuide.topics {
             XCTAssertFalse(t.summary.isEmpty)
             XCTAssertGreaterThanOrEqual(t.points.count, 3, t.id)

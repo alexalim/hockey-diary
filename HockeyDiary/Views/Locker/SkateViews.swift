@@ -218,7 +218,7 @@ struct SkateDetailView: View {
                               systemImage: "arrow.triangle.2.circlepath")
                     }
                 }
-                Button { addingRunner = true } label: { Label("새 러너 세트 추가", systemImage: "plus") }
+                Button { addingRunner = true } label: { Label("새 러너(날) 추가", systemImage: "plus") }
             } header: {
                 Text("러너")
             } footer: {
