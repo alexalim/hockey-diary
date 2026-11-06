@@ -1,0 +1,109 @@
+import XCTest
+
+// 테스트 계층: E2E — 실제 앱을 시뮬레이터에서 예시 데이터(메모리 저장소)로 띄워 주요 화면을 차례로 열고
+// 스크린샷을 남긴다. 화면이 열리는지 확인하는 것이 목적이고, 지도 검색 결과처럼 네트워크에 기대는 내용은 검증하지 않는다.
+final class ScreenTourTests: XCTestCase {
+    private var app: XCUIApplication!
+
+    override func setUp() {
+        continueAfterFailure = true
+        app = XCUIApplication()
+        app.launchArguments = ["-ui-demo", "-AppleLanguages", "(ko)", "-AppleLocale", "ko_KR"]
+        addUIInterruptionMonitor(withDescription: "권한") { alert in
+            for label in ["Don’t Allow", "Don't Allow", "허용 안 함", "OK", "확인"] where alert.buttons[label].exists {
+                alert.buttons[label].tap()
+                return true
+            }
+            return false
+        }
+        app.launch()
+    }
+
+    func test_tour() {
+        XCTAssertTrue(app.tabBars.buttons["홈"].waitForExistence(timeout: 15), "홈 탭이 보여야 한다")
+        snap("01-home")
+        app.swipeUp(); snap("01b-home-bottom")
+
+        // 수업 기록 편집기
+        app.swipeDown()
+        if tapText("수업 기록") {
+            snap("02-lesson-editor")
+            app.swipeUp(); snap("02b-lesson-editor-mid")
+            app.swipeUp(); snap("02c-lesson-editor-bottom")
+            tapButton("닫기")
+        }
+
+        // 다이어리
+        tab("다이어리"); snap("03-diary")
+        // 성장
+        tab("성장"); snap("04-growth")
+        app.swipeUp(); snap("04b-growth-mid")
+        app.swipeUp(); snap("04c-growth-bottom")
+
+        // 탐색: 목록, 반칙 그림, 링크 구조, 전술, 링크장 찾기
+        tab("탐색"); snap("05-explore")
+        if tapText("자주 나오는 반칙") { snap("05b-fouls"); app.swipeUp(); snap("05c-fouls-bottom"); back() }
+        if tapText("링크 구조") { snap("05d-rink-rule"); back() }
+        if tapText("경기 시간·연장") { snap("05e-gametime"); back() }
+        if tapText("골 무효") { snap("05f-nogoal"); back() }
+        app.swipeUp()
+        if tapText("1-2-1 포어체크") { sleep(3); snap("05g-tactic"); back() }
+        if tapText("링크장 찾기") { sleep(4); snap("05h-rink-finder"); app.swipeUp(); snap("05i-rink-finder-list"); back() }
+
+        // 락커: 닫힌 문 → 문 열기 → 꾸미기 → 러너 → 연마 기록
+        tab("락커"); sleep(2); snap("06-locker-closed")
+        if tapButton("문 열기") { sleep(1); snap("06b-locker-open"); tapButton("문 닫기") }
+        if tapText("꾸미기") { sleep(1); snap("06c-customize"); tapButton("완료") }
+        app.swipeUp()
+        if tapText("러너(날)") {
+            snap("07-runners")
+            if tapText("A세트") {
+                snap("07b-runner-detail")
+                app.swipeUp(); snap("07c-runner-detail-bottom")
+                if tapText("연마 기록 추가") { sleep(1); snap("07d-sharpening-editor"); app.swipeUp(); snap("07e-sharpening-editor-mid"); tapButton("닫기") }
+            }
+        }
+    }
+
+    // MARK: - 도우미
+
+    private func snap(_ name: String) {
+        let a = XCTAttachment(screenshot: app.screenshot())
+        a.name = name
+        a.lifetime = .keepAlways
+        add(a)
+    }
+
+    private func tab(_ name: String) {
+        let b = app.tabBars.buttons[name]
+        if b.waitForExistence(timeout: 5) { b.tap() } else { XCTFail("탭 \(name)이 없다") }
+    }
+
+    private func back() {
+        let b = app.navigationBars.buttons.element(boundBy: 0)
+        if b.exists { b.tap() }
+    }
+
+    @discardableResult
+    private func tapButton(_ label: String) -> Bool {
+        let b = app.buttons[label]
+        guard b.waitForExistence(timeout: 3) else { return false }
+        b.tap()
+        return true
+    }
+
+    /// 글자가 들어간 버튼·셀·글을 찾아 누른다. 안 보이면 몇 번 내려서 찾는다.
+    @discardableResult
+    private func tapText(_ text: String) -> Bool {
+        let pred = NSPredicate(format: "label CONTAINS %@", text)
+        for _ in 0..<5 {
+            for q in [app.buttons, app.cells, app.staticTexts] {
+                let el = q.matching(pred).firstMatch
+                if el.exists && el.isHittable { el.tap(); return true }
+            }
+            app.swipeUp()
+        }
+        XCTContext.runActivity(named: "못 찾음: \(text)") { _ in }
+        return false
+    }
+}
