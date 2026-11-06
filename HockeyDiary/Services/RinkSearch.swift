@@ -87,30 +87,33 @@ final class RinkSearch: NSObject, ObservableObject, MKLocalSearchCompleterDelega
         Task { @MainActor in self.failed = true }
     }
 
-    /// 한국 범위에서 장소를 바로 찾는다(링크장 둘러보기용). 실패하면 빈 목록.
+    /// 한국 범위에서 장소를 바로 찾는다(링크장 둘러보기용).
+    /// 지도 데이터가 검색어마다 다르게 걸려서 비슷한 말 몇 개로 같이 찾고 합친다.
+    /// 한국 밖은 뺀다. 이름에 빙상 관련 말이 있는 곳을 먼저, 하나도 없으면 한국 결과를 그대로 보여준다.
     func places(_ text: String) async -> [RinkPlace] {
-        let request = MKLocalSearch.Request()
-        request.naturalLanguageQuery = text
-        request.region = Self.korea
-        request.resultTypes = .pointOfInterest
-        guard let items = try? await MKLocalSearch(request: request).start().mapItems else {
-            failed = true
-            return []
+        let queries = [text, "아이스링크", "빙상장", "스케이트장", "ice rink"].reduce(into: [String]()) { acc, q in
+            if !acc.contains(q) { acc.append(q) }
         }
-        failed = false
-        var seen = Set<String>()
-        // 검색 사각형에 일본 규슈 일부가 걸리고 관계없는 장소도 섞여 온다.
-        // 한국에 있고, 이름에 빙상 관련 말이 들어간 곳만 남긴다.
+        var all: [RinkPlace] = []
+        var anySucceeded = false
+        for q in queries {
+            let request = MKLocalSearch.Request()
+            request.naturalLanguageQuery = q
+            request.region = Self.korea
+            request.resultTypes = .pointOfInterest
+            guard let items = try? await MKLocalSearch(request: request).start().mapItems else { continue }
+            anySucceeded = true
+            for item in items where item.placemark.isoCountryCode == "KR" {
+                guard let name = item.name, !all.contains(where: { $0.name == name }) else { continue }
+                let pm = item.placemark
+                let address = [pm.administrativeArea, pm.locality, pm.subLocality, pm.thoroughfare].compactMap { $0 }.joined(separator: " ")
+                all.append(RinkPlace(name: name, address: address, coordinate: pm.coordinate))
+            }
+        }
+        failed = !anySucceeded
         let keywords = ["아이스", "링크", "빙상", "스케이트", "얼음", "하키", "ice", "rink", "skat", "hockey"]
-        return items.compactMap { item in
-            guard let name = item.name, item.placemark.isoCountryCode == "KR",
-                  keywords.contains(where: { name.localizedCaseInsensitiveContains($0) }),
-                  seen.insert(name).inserted else { return nil }
-            let pm = item.placemark
-            let address = [pm.administrativeArea, pm.locality, pm.subLocality, pm.thoroughfare]
-                .compactMap { $0 }.joined(separator: " ")
-            return RinkPlace(name: name, address: address, coordinate: pm.coordinate)
-        }
+        let matched = all.filter { p in keywords.contains { p.name.localizedCaseInsensitiveContains($0) } }
+        return matched.isEmpty ? Array(all.prefix(15)) : matched
     }
 
     /// 자동완성 항목을 실제 장소(이름·주소·좌표)로 바꾼다. 실패하면 제목·부제만 쓴다.
