@@ -74,8 +74,8 @@ public struct SleepMoodComparison: Equatable, Sendable {
         let hours = thresholdMinutes / 60
         let total = longCount + shortCount
         let compare: String
-        if l - s >= 0.3 { compare = "더 높게" } else if s - l >= 0.3 { compare = "더 낮게" } else { compare = "비슷하게" }
-        return "최근 \(total)번 중 \(hours)시간 이상 잔 날(\(longCount)번)의 운동 후 기분이 덜 잔 날(\(shortCount)번)보다 \(compare) 기록됐어."
+        if l - s >= 0.3 { compare = "더 좋았어" } else if s - l >= 0.3 { compare = "덜 좋았어" } else { compare = "비슷했어" }
+        return "최근 \(total)번 기록이야. \(hours)시간 넘게 잔 날(\(longCount)번)이 덜 잔 날(\(shortCount)번)보다 운동 후 기분이 \(compare)."
     }
 }
 
@@ -98,7 +98,7 @@ public struct CycleFatigueComparison: Equatable, Sendable {
 
     public var sentence: String? {
         guard sufficiency.isSufficient, let p = periodAverage, let o = otherAverage else { return nil }
-        let compare = p - o >= 0.3 ? "더 높게" : (o - p >= 0.3 ? "더 낮게" : "비슷하게")
-        return "생리 기간에 한 활동(\(periodCount)번)의 피로도가 다른 날(\(otherCount)번)보다 \(compare) 기록됐어."
+        let compare = p - o >= 0.3 ? "더 높았어" : (o - p >= 0.3 ? "더 낮았어" : "비슷했어")
+        return "생리 기간에 탄 날(\(periodCount)번)이 다른 날(\(otherCount)번)보다 피로도가 \(compare)."
     }
 }

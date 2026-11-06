@@ -349,9 +349,9 @@ struct SessionEditorView: View {
             Text("어디서 탔어?")
         } footer: {
             if surface == .pond {
-                Text("자연 얼음의 두께나 안전은 앱이 판단하지 않아. 현장 안내를 꼭 확인해줘. 정확한 위치는 저장하지 않아.")
+                Text("얼음이 안전한지는 앱이 알 수 없어. 현장 안내를 꼭 확인해줘. 정확한 위치는 저장하지 않아.")
             } else {
-                Text("빙질은 내 체감 기록이야. 얼음 품질을 재는 지표가 아니야.")
+                Text("빙질은 내가 느낀 대로 남기면 돼.")
             }
         }
     }
@@ -361,7 +361,7 @@ struct SessionEditorView: View {
     private var equipmentSection: some View {
         Section {
             if skates.isEmpty {
-                Text("락커 탭에서 스케이트를 등록하면 연마 후 시간이 자동으로 쌓여.")
+                Text("락커 탭에 스케이트를 넣으면 연마하고 탄 시간이 저절로 쌓여.")
                     .font(.footnote).foregroundStyle(.secondary)
             } else {
                 Picker("스케이트", selection: $skateID) {
@@ -385,7 +385,7 @@ struct SessionEditorView: View {
                     }
                 }
                 if skateID != nil {
-                    Stepper("실제 얼음 위 시간 \(minutesText(iceMinutes))", value: Binding(
+                    Stepper("실제로 탄 시간 \(minutesText(iceMinutes))", value: Binding(
                         get: { iceMinutes },
                         set: { iceMinutes = $0; iceMinutesEdited = true }
                     ), in: 0...360, step: 5)

@@ -87,7 +87,7 @@ struct RinkFinderView: View {
             if !query.isEmpty {
                 Section("Apple 지도 검색") {
                     if search.results.isEmpty {
-                        Text(search.failed ? "지금은 지도 검색이 안 돼." : "결과가 없어. 지역명과 함께 찾아봐 (예: 목동 아이스링크).")
+                        Text(search.failed ? "지금은 지도 검색이 안 돼." : "결과가 없어. 동네 이름을 붙여서 찾아봐. 예: 목동 아이스링크")
                             .font(.subheadline).foregroundStyle(.secondary)
                     }
                     ForEach(search.results, id: \.self) { c in
@@ -114,12 +114,12 @@ struct RinkFinderView: View {
             let others = rinks.filter { !$0.isFavorite }
             Section("내 링크장") {
                 if others.isEmpty && favorites.isEmpty {
-                    Text("위에서 찾아 추가하거나, 기록할 때 링크장을 고르면 여기 모여.").font(.subheadline).foregroundStyle(.secondary)
+                    Text("위에서 찾아서 넣어봐. 기록할 때 고른 링크장도 여기 모여.").font(.subheadline).foregroundStyle(.secondary)
                 }
                 ForEach(others) { r in NavigationLink { RinkDetailView(rink: r) } label: { RinkRow(rink: r) } }
             }
             Section {
-                Text("검색어는 Apple 지도로 보내져. 위치 권한은 쓰지 않아. 운영 시간·대관은 바뀌니까 공식 안내를 꼭 확인해줘.")
+                Text("검색어는 Apple 지도로 가. 내 위치는 쓰지 않아. 운영 시간과 대관은 자주 바뀌니 공식 안내를 확인해줘.")
                     .font(.caption).foregroundStyle(.secondary)
             }
         }
@@ -159,15 +159,15 @@ struct RinkDetailView: View {
             Section {
                 facility("주차", $rink.hasParking)
                 facility("샤워실", $rink.hasShower)
-                facility("연마 가능", $rink.hasSharpening)
+                facility("연마하는 곳", $rink.hasSharpening)
                 TextField("공식 안내 주소 (https://…)", text: $rink.officialURL)
                     .keyboardType(.URL).textInputAutocapitalization(.never).autocorrectionDisabled()
                 TextField("메모 (대중교통·대관 팁 등)", text: $rink.memo, axis: .vertical)
             } header: {
                 Text("내가 확인한 정보")
             } footer: {
-                Text(rink.verifiedAt.map { "마지막 확인일 \($0.formatted(date: .abbreviated, time: .omitted)). 정보는 바뀔 수 있어." }
-                     ?? "아직 확인한 정보가 없어. 직접 확인한 것만 표시해줘.")
+                Text(rink.verifiedAt.map { "\($0.formatted(date: .abbreviated, time: .omitted))에 확인했어. 그 뒤로 바뀌었을 수 있어." }
+                     ?? "아직 확인한 게 없어. 직접 본 것만 골라줘.")
             }
         }
         .navigationTitle("링크장")

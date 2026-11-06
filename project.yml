@@ -45,10 +45,10 @@ targets:
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         ITSAppUsesNonExemptEncryption: false
         # 시즌 리포트 이미지를 공유 시트에서 '이미지 저장'할 때 필요(없으면 저장 순간 앱이 꺼진다).
-        NSPhotoLibraryAddUsageDescription: "시즌 리포트 이미지를 사진첩에 저장하려고 써. 사진첩의 다른 사진은 읽지 않아."
-        NSHealthShareUsageDescription: "하키 전날 밤 수면, 수업·경기 시간대 심박, 워치·가민이 잰 운동을 내 기록 옆에 보여주려고 읽어. 읽기만 하고 앱 밖으로 보내지 않아."
+        NSPhotoLibraryAddUsageDescription: "시즌 리포트 이미지를 사진첩에 저장할 때 써. 다른 사진은 보지 않아."
+        NSHealthShareUsageDescription: "하키 전날 잠, 수업·경기 중 심박, 워치·가민이 잰 운동을 내 기록 옆에 보여줄게. 읽기만 하고 어디에도 안 보내."
         # 쓰지 않지만 HealthKit 권한이 있으면 Apple이 쓰기 설명도 요구한다(없으면 업로드 거절).
-        NSHealthUpdateUsageDescription: "Apple Watch에서 마하다로 잰 하키 운동을 건강 앱에 운동 기록으로 저장해. 아이폰 앱은 다른 건강 데이터를 쓰지 않아."
+        NSHealthUpdateUsageDescription: "워치로 잰 하키 운동을 건강 앱에 저장해. 그 밖의 건강 데이터는 건드리지 않아."
         # 사진은 PhotosPicker(시스템 선택기)로만 받아 앨범 전체 권한을 요청하지 않는다 (FR-08, T10).
     settings:
       base:
@@ -91,8 +91,8 @@ targets:
         WKApplication: true
         WKCompanionAppBundleIdentifier: com.aspynlim.hockeydiary
         WKBackgroundModes: [workout-processing]
-        NSHealthShareUsageDescription: "하키 하는 동안 심박을 보여주려고 읽어. 앱 밖으로 보내지 않아."
-        NSHealthUpdateUsageDescription: "워치로 잰 하키 운동을 건강 앱에 운동 기록으로 저장해."
+        NSHealthShareUsageDescription: "하키 하는 동안 심박을 보여줄게. 어디에도 안 보내."
+        NSHealthUpdateUsageDescription: "워치로 잰 하키 운동을 건강 앱에 저장해."
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.aspynlim.hockeydiary.watchkitapp

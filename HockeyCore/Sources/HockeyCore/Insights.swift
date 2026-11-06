@@ -72,7 +72,7 @@ public enum Insights {
         /// 관찰된 사실만 말한다. 원인을 단정하지 않는다 (7.2).
         public var sentence: String? {
             guard sufficiency.isSufficient else { return nil }
-            return "운동 전후 기분을 둘 다 남긴 \(paired)번 중 \(improved)번은 운동 후 기분이 더 좋게 기록됐어."
+            return "운동 전후 기분을 다 남긴 \(paired)번 중 \(improved)번은 운동하고 기분이 나아졌어."
         }
     }
 
@@ -90,7 +90,7 @@ public enum Insights {
 
     /// 기간 설명 + 표본 수 + 출처를 붙인다. 분석 요약에는 이 셋이 반드시 따라간다 (7.2).
     public static func footnote(periodTitle: String, count: Int, source: String = "직접 입력") -> String {
-        "\(periodTitle) · 기록 \(count)건 · 출처: \(source)"
+        "\(periodTitle) · 기록 \(count)건 · \(source)"
     }
 }
 

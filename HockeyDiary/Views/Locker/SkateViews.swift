@@ -183,7 +183,7 @@ struct SkateDetailView: View {
                     Text([skate.size.isEmpty ? nil : "사이즈 \(skate.size)", skate.fit.isEmpty ? nil : skate.fit, skate.status.title]
                         .compactMap { $0 }.joined(separator: " · "))
                         .font(.subheadline).foregroundStyle(.secondary)
-                    Text("누적 얼음 위 시간 \(minutesText(EquipmentMath.iceMinutes(skateID: skate.id, usages: DiaryStore.usageRecords(context))))")
+                    Text("지금까지 탄 시간 \(minutesText(EquipmentMath.iceMinutes(skateID: skate.id, usages: DiaryStore.usageRecords(context))))")
                         .font(.subheadline)
                 }
                 if !skate.isPrimary {
@@ -196,7 +196,7 @@ struct SkateDetailView: View {
                     ForEach(SkateStatus.allCases, id: \.self) { s in Text(s.title).tag(s) }
                 }
             } footer: {
-                Text("지우는 대신 '사용 종료'로 두면 지난 기록이 그대로 남아.")
+                Text("지우지 말고 '사용 종료'로 바꿔두면 지난 기록이 남아.")
             }
 
             Section {
@@ -222,7 +222,7 @@ struct SkateDetailView: View {
             } header: {
                 Text("러너")
             } footer: {
-                Text("한 러너는 한 번에 한 부츠에만 달 수 있어. 교체하면 장착 기간이 이력으로 남아.")
+                Text("러너 하나는 부츠 하나에만 달 수 있어. 바꿔 달면 언제부터 언제까지 썼는지 남아.")
             }
 
             if !history.isEmpty {
@@ -265,7 +265,7 @@ struct SkateDetailView: View {
 
     private func message(_ e: InstallError) -> String {
         switch e {
-        case .runnerAlreadyInstalled: return "이 러너가 같은 시점에 다른 부츠에 달려 있어."
+        case .runnerAlreadyInstalled: return "이 러너는 그때 다른 부츠에 달려 있었어."
         case .invalidRange: return "장착 기간이 맞지 않아."
         }
     }

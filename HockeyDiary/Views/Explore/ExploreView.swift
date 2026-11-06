@@ -8,7 +8,7 @@ struct ExploreView: View {
             VStack(spacing: 12) {
                 Card(tint: Theme.cobalt) {
                     Text("하키 라이브러리").font(.title3.bold()).foregroundStyle(.white)
-                    Text("규칙 카드·상황 도식·퀴즈로 헷갈리는 규칙을 익히고, 링크장을 찾아봐.")
+                    Text("헷갈리는 규칙을 그림과 퀴즈로 익혀봐. 링크장도 찾을 수 있어.")
                         .font(.subheadline).foregroundStyle(.white.opacity(0.85))
                 }
                 Card {
@@ -25,13 +25,13 @@ struct ExploreView: View {
                             .buttonStyle(.plain)
                         }
                     }
-                    Text("\(RuleGuide.source) 기준으로 직접 정리했어. 대회·동호회마다 규칙 적용이 다를 수 있으니 대회 운영 규정을 꼭 확인해줘.")
+                    Text("\(RuleGuide.source)을 보고 쉽게 풀어 썼어. 대회나 동호회마다 다를 수 있으니 꼭 확인해줘.")
                         .font(.caption).foregroundStyle(.secondary)
                 }
                 NavigationLink { RinkFinderView() } label: {
                     Card {
                         CardHeader(title: "링크장 찾기", systemImage: "map.fill")
-                        Text("이름이나 지역으로 찾고, 즐겨찾기와 내가 확인한 시설 정보를 모아둬.")
+                        Text("이름이나 동네로 찾아봐. 자주 가는 곳과 시설 정보를 모아둘 수 있어.")
                             .font(.subheadline).foregroundStyle(.secondary)
                     }
                 }

@@ -35,14 +35,14 @@ struct GrowthView: View {
                 NavigationLink { AISummaryView() } label: {
                     Card {
                         Label("AI로 돌아보기", systemImage: "sparkles").font(.headline).foregroundStyle(Theme.title)
-                        Text("켠 사람만, 기기 안에서 하키 기록만 요약해.").font(.subheadline).foregroundStyle(.secondary)
+                        Text("켜야만 동작해. 아이폰 안에서 하키 기록만 요약해.").font(.subheadline).foregroundStyle(.secondary)
                     }
                 }
                 .buttonStyle(.plain)
                 NavigationLink { SeasonReportView() } label: {
                     Card(tint: Theme.cobalt) {
                         Label("시즌 리포트 만들기", systemImage: "photo.on.rectangle.angled").font(.headline).foregroundStyle(.white)
-                        Text("활동 숫자와 기술만 담은 이미지로 저장·공유해.").font(.subheadline).foregroundStyle(.white.opacity(0.85))
+                        Text("횟수와 기술만 담은 이미지를 만들어 저장하고 공유해.").font(.subheadline).foregroundStyle(.white.opacity(0.85))
                     }
                 }
                 .buttonStyle(.plain)
@@ -97,7 +97,7 @@ struct GrowthView: View {
                     moodStat("그대로", change.same, Theme.cobalt)
                     moodStat("낮아짐", change.worse, Color.secondary)
                 }
-                Text("기분은 내가 고른 자기평가야. 운동 때문이라고 단정하지 않아.")
+                Text("기분은 내가 고른 값이야. 운동 덕분이라고 말하는 건 아니야.")
                     .font(.caption).foregroundStyle(.secondary)
             } else {
                 EmptyHint(text: change.sufficiency == .empty
@@ -140,7 +140,7 @@ struct GrowthView: View {
                         .frame(minHeight: 32)
                     }
                 }
-                Text("장소에 따라 더 잘했다·못했다를 판단하지 않아. 맥락만 보여줘.")
+                Text("어디서 탔는지만 보여줘. 장소로 잘하고 못한 걸 따지지 않아.")
                     .font(.caption).foregroundStyle(.secondary)
             }
             footnote(samples.count)
@@ -154,14 +154,14 @@ struct GrowthView: View {
         return Card {
             CardHeader(title: "기술 성장", systemImage: "chart.line.uptrend.xyaxis")
             if used.isEmpty {
-                EmptyHint(text: "수업에서 배운 기술을 기록하면 여기서 경기 적용까지 이어서 볼 수 있어.")
+                EmptyHint(text: "수업에서 배운 기술을 남기면 경기에서 써본 것까지 이어서 볼 수 있어.")
             }
             ForEach(used) { skill in
                 NavigationLink { SkillDetailView(skill: skill) } label: { SkillRow(skill: skill) }
                     .buttonStyle(.plain)
             }
             if !used.isEmpty {
-                Text("전체 기간 · 직접 입력 기준").font(.caption2).foregroundStyle(.secondary)
+                Text("전체 기간 · 직접 남긴 기록").font(.caption2).foregroundStyle(.secondary)
             }
         }
     }
@@ -232,7 +232,7 @@ struct SkillDetailView: View {
                         Text(skill.name).font(.title2.bold()).foregroundStyle(.white)
                         SkillInfoButton(name: skill.name, tint: .white)
                     }
-                    Text("처음보다 나아졌을까? 숫자는 서로 다른 걸 세.")
+                    Text("처음보다 나아졌을까? 아래 숫자는 각각 다른 걸 세.")
                         .font(.subheadline).foregroundStyle(.white.opacity(0.85))
                 }
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
@@ -245,7 +245,7 @@ struct SkillDetailView: View {
                     Card {
                         Text("일부 성공 \(st.partials) · 어려움 \(st.difficulties) · 시도 횟수 합 \(st.attemptTotal)")
                             .font(.subheadline)
-                        Text("내가 남긴 평가 기준이야. 실제 샷 성공률과는 달라.")
+                        Text("내가 매긴 결과야. 실제 슛 성공률과는 달라.")
                             .font(.caption).foregroundStyle(.secondary)
                     }
                 }
