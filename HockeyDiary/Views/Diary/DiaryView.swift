@@ -86,7 +86,7 @@ struct DiaryView: View {
                     .foregroundStyle(isToday ? Theme.neonPink : Theme.title)
                 Text(mood.map(Mood.face) ?? " ").font(.callout)
                 Circle()
-                    .fill(daySessions.isEmpty ? Color.clear : Theme.cobalt)
+                    .fill(daySessions.isEmpty ? Color.clear : Theme.accent)
                     .frame(width: 5, height: 5)
             }
             .frame(maxWidth: .infinity, minHeight: 48)
@@ -224,7 +224,7 @@ struct JournalRow: View {
                             .multilineTextAlignment(.leading)
                     }
                     if !journal.tags.isEmpty {
-                        Text(journal.tags.map { "#\($0)" }.joined(separator: " ")).font(.caption).foregroundStyle(Theme.cobalt)
+                        Text(journal.tags.map { "#\($0)" }.joined(separator: " ")).font(.caption).foregroundStyle(Theme.accent)
                     }
                 }
                 Spacer()

@@ -31,7 +31,7 @@ struct PhotoPickerRow: View {
                             Text("사진").font(.caption)
                         }
                         .frame(width: 72, height: 72)
-                        .foregroundStyle(Theme.cobalt)
+                        .foregroundStyle(Theme.accent)
                         .background(Theme.cobaltSoft, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                     }
                     .accessibilityLabel("사진 추가")

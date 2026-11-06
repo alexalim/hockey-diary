@@ -54,7 +54,7 @@ struct GrowthView: View {
                 }
                 Chart(rows, id: \.0) { row in
                     BarMark(x: .value("횟수", row.1.count), y: .value("종류", row.0.title))
-                        .foregroundStyle(row.0 == .lesson ? Theme.neonPink : Theme.cobalt)
+                        .foregroundStyle(row.0 == .lesson ? Theme.neonPink : Theme.accent)
                         .annotation(position: .trailing) {
                             Text("\(row.1.count)").font(.caption2).foregroundStyle(.secondary)
                         }
@@ -169,7 +169,7 @@ struct SkillRow: View {
             }
             Spacer()
             if st.evaluated > 0 {
-                Text("성공 \(st.successes)/\(st.evaluated)").font(.caption.bold()).foregroundStyle(Theme.cobalt)
+                Text("성공 \(st.successes)/\(st.evaluated)").font(.caption.bold()).foregroundStyle(Theme.accent)
             }
             Image(systemName: "chevron.right").font(.caption).foregroundStyle(.secondary)
         }
@@ -212,7 +212,10 @@ struct SkillDetailView: View {
             VStack(spacing: 12) {
                 Card(tint: Theme.cobalt) {
                     Text(skill.category).font(.caption).foregroundStyle(.white.opacity(0.8))
-                    Text(skill.name).font(.title2.bold()).foregroundStyle(.white)
+                    HStack(spacing: 4) {
+                        Text(skill.name).font(.title2.bold()).foregroundStyle(.white)
+                        SkillInfoButton(name: skill.name, tint: .white)
+                    }
                     Text("처음보다 나아졌을까? 숫자는 서로 다른 걸 세.")
                         .font(.subheadline).foregroundStyle(.white.opacity(0.85))
                 }
@@ -268,7 +271,7 @@ struct SkillDetailView: View {
                     if let d = l.difficulty { Text("체감 난도 \(d)").font(.caption2).foregroundStyle(.secondary) }
                 }
             case .attempted(let a, let s):
-                Image(systemName: "figure.hockey").foregroundStyle(Theme.cobalt).frame(width: 24)
+                Image(systemName: "figure.hockey").foregroundStyle(Theme.accent).frame(width: 24)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("\(s.startsAt.dayTitle) \(s.type.title) · \(a.tried ? (a.outcome?.title ?? "써봤어") : "못 써봄")")
                         .font(.subheadline.bold())

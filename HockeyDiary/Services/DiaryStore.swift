@@ -4,20 +4,12 @@ import HockeyCore
 
 /// 저장·조회 도우미. 화면은 여기를 거쳐 저장한다.
 enum DiaryStore {
-    /// 기본 기술 사전. 처음 실행할 때 한 번만 넣는다.
-    static let defaultSkills: [(String, String)] = [
-        ("크로스오버", "스케이팅"), ("엣지 턴", "스케이팅"), ("하키 스톱", "스케이팅"),
-        ("백워드 스케이팅", "스케이팅"), ("피벗", "스케이팅"),
-        ("포핸드 패스", "퍽 컨트롤"), ("백핸드 패스", "퍽 컨트롤"), ("퍽 드리블", "퍽 컨트롤"),
-        ("리스트 샷", "슈팅"), ("스냅 샷", "슈팅"), ("슬랩 샷", "슈팅"),
-        ("포지셔닝", "게임 운영"), ("페이스오프", "게임 운영"),
-    ]
-
+    /// 기본 기술 사전(이름·분류·설명은 SkillGuide 한곳). 처음 실행할 때 한 번만 넣는다.
     static func seedIfNeeded(_ context: ModelContext) {
         let count = (try? context.fetchCount(FetchDescriptor<Skill>())) ?? 0
         guard count == 0 else { return }
-        for (name, category) in defaultSkills {
-            context.insert(Skill(name: name, category: category))
+        for entry in SkillGuide.entries {
+            context.insert(Skill(name: entry.name, category: entry.category))
         }
         context.saveOrReport()
     }

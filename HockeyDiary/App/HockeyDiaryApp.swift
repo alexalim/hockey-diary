@@ -20,7 +20,7 @@ struct HockeyDiaryApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
-                .tint(Theme.cobalt)
+                .tint(Theme.accent)
         }
         .modelContainer(container)
     }

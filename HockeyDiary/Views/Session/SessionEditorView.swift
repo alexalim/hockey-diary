@@ -214,6 +214,7 @@ struct SessionEditorView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
                         Text(draft.name).font(.headline).foregroundStyle(Theme.title)
+                        SkillInfoButton(name: draft.name)
                         Spacer()
                         Button(role: .destructive) {
                             learnings.removeAll { $0.skillID == draft.skillID }
@@ -244,6 +245,7 @@ struct SessionEditorView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
                         Text(draft.name).font(.headline).foregroundStyle(Theme.title)
+                        SkillInfoButton(name: draft.name)
                         Spacer()
                         Button(role: .destructive) {
                             attempts.removeAll { $0.skillID == draft.skillID }
@@ -544,19 +546,25 @@ struct SkillPickerView: View {
             ForEach(grouped, id: \.0) { category, items in
                 Section(category) {
                     ForEach(items) { skill in
-                        Button {
-                            if selected.contains(skill.id) { selected.remove(skill.id) } else { selected.insert(skill.id) }
-                        } label: {
-                            HStack {
-                                Text(skill.name).foregroundStyle(.primary)
-                                Spacer()
-                                if selected.contains(skill.id) {
-                                    Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.neonPink)
+                        // 행 선택 버튼과 ? 버튼을 나란히 둔다(버튼 안에 버튼을 넣으면 탭이 겹친다).
+                        HStack(spacing: 4) {
+                            Button {
+                                if selected.contains(skill.id) { selected.remove(skill.id) } else { selected.insert(skill.id) }
+                            } label: {
+                                HStack {
+                                    Text(skill.name).foregroundStyle(.primary)
+                                    Spacer()
+                                    if selected.contains(skill.id) {
+                                        Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.neonPink)
+                                    }
                                 }
+                                .frame(minHeight: Theme.touch)
+                                .contentShape(Rectangle())
                             }
-                            .frame(minHeight: Theme.touch)
+                            .buttonStyle(.borderless)
+                            .accessibilityAddTraits(selected.contains(skill.id) ? .isSelected : [])
+                            SkillInfoButton(name: skill.name)
                         }
-                        .accessibilityAddTraits(selected.contains(skill.id) ? .isSelected : [])
                     }
                 }
             }

@@ -244,6 +244,16 @@ final class DomainTests: XCTestCase {
         XCTAssertEqual(JournalTag.join(["하키", "하키", " 업무"]), "하키,업무")
     }
 
+    // 기본 기술은 모두 설명이 있고 이름이 겹치지 않는다. 사용자 기술은 설명 없음.
+    func testSkillGuideCoversDefaults() {
+        let names = SkillGuide.entries.map(\.name)
+        XCTAssertEqual(Set(names).count, names.count)
+        XCTAssertTrue(SkillGuide.entries.allSatisfy { !$0.summary.isEmpty && !$0.category.isEmpty })
+        XCTAssertNotNil(SkillGuide.summary(for: " 페이스오프 "))
+        XCTAssertNotNil(SkillGuide.summary(for: "포지셔닝"))
+        XCTAssertNil(SkillGuide.summary(for: "내가 만든 기술"))
+    }
+
     func testMoodClamp() {
         XCTAssertNil(Mood.clamp(0))
         XCTAssertEqual(Mood.clamp(5), 5)
