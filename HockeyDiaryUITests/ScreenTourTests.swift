@@ -58,7 +58,10 @@ final class ScreenTourTests: XCTestCase {
         if tapText("꾸미기") { sleep(1); snap("06c-customize"); tapButton("완료") }
         app.swipeUp()
         tab("락커")
-        if tapText("러너(날)") {
+        // 바로 가기에서 못 찾으면 문을 열고 스케이트 → A세트 길로 들어간다.
+        var inRunners = tapText("러너(날)")
+        if !inRunners, tapButton("문 열기"), tapText("스케이트 1켤레") { snap("06d-skate-detail"); inRunners = true }
+        if inRunners {
             snap("07-runners")
             if tapText("A세트") {
                 snap("07b-runner-detail")
