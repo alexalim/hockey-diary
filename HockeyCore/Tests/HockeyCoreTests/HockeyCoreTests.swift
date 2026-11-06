@@ -192,9 +192,13 @@ final class HollowTests: XCTestCase {
     // T15: 1/2 · 5/8 · 3/4 선택값이 정확히 저장되고 그림 깊이 순서가 일치한다.
     func testPresetLabelsAndDepthOrder() throws {
         let labels = Hollow.presets.map(\.label)
-        XCTAssertEqual(labels, ["3/8", "7/16", "1/2", "9/16", "5/8", "11/16", "3/4", "7/8", "1"])
+        XCTAssertEqual(labels, ["5/16", "3/8", "7/16", "1/2", "9/16", "5/8", "11/16", "3/4", "7/8", "1"])
         XCTAssertTrue(Hollow.presets.allSatisfy { $0.nickname != nil }, "프리셋마다 별명")
-        XCTAssertEqual(Hollow(label: "9/16")?.nickname, "딱 중간")
+        XCTAssertEqual(Hollow(label: "9/16")?.nickname, "맥데이빗")
+        XCTAssertEqual(Hollow(label: "1/2")?.playerNickname, "크로스비")
+        XCTAssertEqual(Hollow(label: "5/16")?.playerNickname, "차라")
+        XCTAssertNil(Hollow(label: "3/4")?.playerNickname)
+        XCTAssertEqual(Hollow(label: "3/4")?.nickname, "스피드 활주")
         XCTAssertNil(Hollow(label: "0.55")?.nickname, "직접 입력값은 별명 없음")
         XCTAssertEqual(Hollow(label: "1/2")?.feel, "깊은 홈")
         XCTAssertEqual(Hollow(label: "9/16")?.feel, "중간")

@@ -364,7 +364,7 @@ struct SharpeningEditorView: View {
             } header: {
                 Text("홀로우 (RoH)")
             } footer: {
-                Text("홈이 깊으면 날이 얼음을 꽉 잡아서 턴과 스톱이 단단해. 얕으면 덜 잡는 대신 쭉 나가. 그림은 깊이 차이만 보여줘. 모르면 비워둬도 돼.")
+                Text("홈이 깊으면 날이 얼음을 꽉 잡아서 턴과 스톱이 단단해. 얕으면 덜 잡는 대신 쭉 나가. 그림은 깊이 차이만 보여줘. 모르면 비워둬도 돼.\n\(Hollow.playerNicknameNote)")
             }
             Section("어디서?") { TextField("연마한 곳 (업체·링크장)", text: $shop) }
             Section("연마 후 느낌") {
@@ -411,7 +411,9 @@ struct HollowCard: View {
                 HollowGlyph(hollow: hollow).frame(height: 54)
                 Text(hollow.display).font(.headline)
                 if let nick = hollow.nickname {
-                    Text(nick).font(.caption.bold()).foregroundStyle(Theme.title).lineLimit(1).minimumScaleFactor(0.8)
+                    Text(nick).font(hollow.playerNickname != nil ? .subheadline.bold() : .caption.bold())
+                        .foregroundStyle(hollow.playerNickname != nil ? Theme.neonPink : Theme.title)
+                        .lineLimit(1).minimumScaleFactor(0.7)
                 }
                 Text(hollow.feel).font(.caption2.bold())
                     .foregroundStyle(hollow.feel == "깊은 홈" ? Theme.neonPink : (hollow.feel == "얕은 홈" ? Theme.accent : .secondary))
