@@ -11,7 +11,7 @@ struct RunnerListView: View {
     var body: some View {
         List {
             if runners.isEmpty {
-                Text("아직 러너 세트가 없어. 스케이트 화면에서 추가하면 바로 달려.")
+                Text("아직 러너(날)가 없어. 스케이트 화면에서 추가하면 바로 달려.")
                     .foregroundStyle(.secondary)
             }
             ForEach(runners.filter { $0.retiredAt == nil }) { r in
@@ -30,7 +30,7 @@ struct RunnerListView: View {
                 }
             }
         }
-        .navigationTitle(focusSharpening ? "연마" : "러너")
+        .navigationTitle(focusSharpening ? "연마" : "러너(날)")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button { adding = true } label: { Image(systemName: "plus") }.accessibilityLabel("러너 추가")
@@ -97,12 +97,16 @@ struct RunnerEditorView: View {
 
     var body: some View {
         Form {
-            Section("러너 세트") {
+            Section {
                 TextField("이름 (예: A세트, 스텔스)", text: $name)
                 TextField("모델 (예: Step Blacksteel)", text: $model)
+            } header: {
+                Text("러너(날)")
+            } footer: {
+                Text("러너는 부츠에 끼우는 날이야. 연마는 이 날을 가는 거야. 그래서 연마 기록과 알림도 날마다 따로 세.")
             }
             Section {
-                Toggle("점검 알림 받기", isOn: $useThreshold)
+                Toggle("연마 점검 알림 받기", isOn: $useThreshold)
                 if useThreshold {
                     Picker("기준", selection: $checkBy) {
                         ForEach(CheckBy.allCases, id: \.self) { Text($0.title).tag($0) }
@@ -115,9 +119,9 @@ struct RunnerEditorView: View {
                     }
                 }
             } header: {
-                Text("점검 알림")
+                Text("연마 점검 알림")
             } footer: {
-                Text("정해진 연마 주기는 없어. 내 느낌대로 정하면 돼.")
+                Text("이 날로 정해둔 만큼 타면 다시 갈 때가 됐다고 알려줘. 정해진 주기는 없으니 내 느낌대로 정하면 돼.")
             }
             Section {
                 Toggle("날 교체 알림 받기", isOn: $useReplace)
@@ -139,7 +143,7 @@ struct RunnerEditorView: View {
             }
             Section("메모") { TextField("메모", text: $memo, axis: .vertical) }
         }
-        .navigationTitle(runner == nil ? "러너 추가" : "러너 고치기")
+        .navigationTitle(runner == nil ? "러너(날) 추가" : "러너(날) 고치기")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) { Button("닫기") { dismiss() } }

@@ -67,7 +67,7 @@ struct LockerView: View {
                 Card {
                     CardHeader(title: "바로 가기", systemImage: "list.bullet")
                     NavigationLink { SkateListView() } label: { shortcut("스케이트", "shoeprints.fill", "\(skates.count)켤레") }
-                    NavigationLink { RunnerListView() } label: { shortcut("러너", "minus", nil) }
+                    NavigationLink { RunnerListView() } label: { shortcut("러너(날)", "minus", nil) }
                     NavigationLink { RunnerListView(focusSharpening: true) } label: { shortcut("연마", "wrench.and.screwdriver.fill", nil) }
                     ForEach(GearKind.Zone.allCases, id: \.self) { zone in
                         let count = gear.filter { zone.kinds.contains($0.kind) }.count
