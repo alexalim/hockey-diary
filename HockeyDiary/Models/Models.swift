@@ -244,6 +244,11 @@ final class RunnerSet {
     var checkThresholdMinutes: Int?
     /// 횟수로 정한 점검 기준(번). 시간 기준과 둘 중 하나만 쓴다. 나중에 추가된 값이라 기본 nil.
     var checkThresholdSessions: Int?
+    /// 날 교체 알림 기준: 연마 횟수 또는 사용 개월. 나중에 추가된 값이라 기본 nil.
+    var replaceAfterSharpenings: Int?
+    var replaceAfterMonths: Int?
+    /// 날을 바꿔서 그만 쓴 날. 기록은 남긴다.
+    var retiredAt: Date?
     var memo: String = ""
     var createdAt: Date = Date()
 
@@ -257,6 +262,21 @@ final class RunnerSet {
     }
 
     var lastSharpening: SharpeningLog? { sharpenings.max { $0.at < $1.at } }
+
+    /// 처음 쓴 날: 첫 장착일, 없으면 등록일.
+    var firstUsedAt: Date { installations.map(\.installedAt).min() ?? createdAt }
+
+    var needsReplacement: Bool {
+        retiredAt == nil && RunnerLife.needsReplacement(
+            sharpenings: sharpenings.count, monthsUsed: RunnerLife.monthsUsed(since: firstUsedAt),
+            afterSharpenings: replaceAfterSharpenings, afterMonths: replaceAfterMonths)
+    }
+
+    var lifeSummary: String {
+        let months = RunnerLife.monthsUsed(since: firstUsedAt)
+        let used = months == 0 ? "쓴 지 한 달 안 됐어" : "쓴 지 \(months)개월"
+        return "연마 \(sharpenings.count)번 · \(used)"
+    }
 
     var installedSkate: Skate? { installations.first { $0.removedAt == nil }?.skate }
 }

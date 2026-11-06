@@ -143,16 +143,20 @@ struct HomeView: View {
 
     @ViewBuilder
     private var sharpeningCard: some View {
-        let due = runners.filter { DiaryStore.needsCheck($0, context: context) }
+        let due = runners.filter { $0.retiredAt == nil && DiaryStore.needsCheck($0, context: context) }
+        let worn = runners.filter(\.needsReplacement)
         if skates.isEmpty {
             Card(tint: Theme.iceBlue) {
                 CardHeader(title: "장비 점검", systemImage: "shoeprints.fill")
                 Text("락커에 스케이트를 넣으면 연마하고 얼마나 탔는지 세어줄게.")
                     .font(.subheadline).foregroundStyle(.secondary)
             }
-        } else if !due.isEmpty {
+        } else if !due.isEmpty || !worn.isEmpty {
             Card(tint: Theme.iceBlue) {
                 CardHeader(title: "연마 점검해볼까?", systemImage: "wrench.and.screwdriver.fill")
+                ForEach(worn) { r in
+                    Text("러너 \(r.name): \(r.lifeSummary). 날 교체를 생각해볼 때야.").font(.subheadline)
+                }
                 ForEach(due) { r in
                     Text("러너 \(r.name): \(DiaryStore.sharpeningSummary(r, context: context)). 정해둔 만큼 탔어.")
                         .font(.subheadline)

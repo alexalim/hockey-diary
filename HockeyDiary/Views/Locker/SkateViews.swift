@@ -254,7 +254,7 @@ struct SkateDetailView: View {
     /// 이 부츠에 달 수 있는 다른 러너들 (이 부츠에 달린 적 있거나 어디에도 안 달린 러너).
     private var swappable: [RunnerSet] {
         runners.filter { r in
-            r.id != skate.currentRunner?.id
+            r.retiredAt == nil && r.id != skate.currentRunner?.id
                 && (r.installedSkate == nil || r.installations.contains { $0.skate?.id == skate.id })
         }
     }
