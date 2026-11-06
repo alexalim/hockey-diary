@@ -84,6 +84,27 @@ final class RinkSearch: NSObject, ObservableObject, MKLocalSearchCompleterDelega
         Task { @MainActor in self.failed = true }
     }
 
+    /// 한국 범위에서 장소를 바로 찾는다(링크장 둘러보기용). 실패하면 빈 목록.
+    func places(_ text: String) async -> [RinkPlace] {
+        let request = MKLocalSearch.Request()
+        request.naturalLanguageQuery = text
+        request.region = Self.korea
+        request.resultTypes = .pointOfInterest
+        guard let items = try? await MKLocalSearch(request: request).start().mapItems else {
+            failed = true
+            return []
+        }
+        failed = false
+        var seen = Set<String>()
+        return items.compactMap { item in
+            guard let name = item.name, seen.insert(name).inserted else { return nil }
+            let pm = item.placemark
+            let address = [pm.administrativeArea, pm.locality, pm.subLocality, pm.thoroughfare]
+                .compactMap { $0 }.joined(separator: " ")
+            return RinkPlace(name: name, address: address, coordinate: pm.coordinate)
+        }
+    }
+
     /// 자동완성 항목을 실제 장소(이름·주소·좌표)로 바꾼다. 실패하면 제목·부제만 쓴다.
     func resolve(_ completion: MKLocalSearchCompletion) async -> (name: String, address: String, lat: Double?, lon: Double?) {
         let request = MKLocalSearch.Request(completion: completion)
@@ -97,6 +118,14 @@ final class RinkSearch: NSObject, ObservableObject, MKLocalSearchCompleterDelega
         }
         return (completion.title, completion.subtitle, nil, nil)
     }
+}
+
+/// 지도에서 찾은 장소 하나(저장 전).
+struct RinkPlace: Identifiable {
+    let id = UUID()
+    let name: String
+    let address: String
+    let coordinate: CLLocationCoordinate2D?
 }
 
 enum RinkStore {
