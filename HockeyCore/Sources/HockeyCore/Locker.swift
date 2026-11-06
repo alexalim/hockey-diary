@@ -136,3 +136,31 @@ public enum Milestones {
         earned(f).subtracting(alreadyEarned).sorted()
     }
 }
+
+/// 락커 문을 손가락으로 여닫는 계산. 왼쪽 경첩 기준, 0°=닫힘, openAngle=활짝 열림.
+/// 손잡이(오른쪽)를 왼쪽으로 쓸면(음수 이동) 열린다.
+public enum DoorSwing {
+    public static let openAngle = 105.0
+    /// 문고리가 풀리는 각도(가벼운 진동 한 번).
+    public static let latchAngle = 12.0
+    /// 문 너비만큼 쓸면 몇 도 도는지.
+    public static let degreesPerWidth = 140.0
+
+    public static func angle(from base: Double, translation: Double, width: Double) -> Double {
+        guard width > 0 else { return base }
+        return min(max(base - translation / width * degreesPerWidth, 0), openAngle)
+    }
+
+    /// 손을 뗐을 때 열린 상태로 갈지. 지금 각도와 관성(예상 도착 각도)을 함께 본다.
+    public static func shouldOpen(current: Double, predicted: Double, wasOpen: Bool) -> Bool {
+        let p = min(max(predicted, -40), openAngle + 60)
+        if wasOpen {
+            // 열린 문은 절반 넘게 닫거나 휙 닫아야 닫힌다.
+            return !(current < openAngle * 0.55 || p < openAngle * 0.35)
+        }
+        return current > openAngle * 0.45 || p > openAngle * 0.6
+    }
+
+    /// 0~1 진행도(안쪽 장비함 크기·문 그림자에 쓴다).
+    public static func progress(_ angle: Double) -> Double { min(max(angle / openAngle, 0), 1) }
+}
