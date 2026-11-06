@@ -17,6 +17,9 @@ struct RuleDetailView: View {
                     RuleSceneCard(scenes: scenes)
                 }
                 if topic.id == "positions" { PositionsDiagram() }
+                if topic.id == "fouls" {
+                    FoulCards(points: topic.points)
+                } else {
                 Card {
                     CardHeader(title: "자세히", systemImage: "list.bullet")
                     ForEach(Array(topic.points.enumerated()), id: \.offset) { _, p in
@@ -25,6 +28,7 @@ struct RuleDetailView: View {
                             Text(p).font(.subheadline).fixedSize(horizontal: false, vertical: true)
                         }
                     }
+                }
                 }
                 quizCard
                 Text("\(RuleGuide.source)의 \(topic.reference) 내용을 보고 쉽게 풀어 썼어. 대회나 동호회마다 다를 수 있으니 꼭 확인해줘.")
@@ -262,4 +266,167 @@ struct PositionsDiagram: View {
         ("왼쪽 윙", CGPoint(x: 0.18, y: 0.24), Theme.neonPink),
         ("오른쪽 윙", CGPoint(x: 0.82, y: 0.24), Theme.neonPink),
     ]
+}
+
+/// 반칙 하나를 그림으로: 반칙한 선수(핑크)와 상대(파랑), 스틱, 화살표, 충돌 표시.
+struct FoulSketch {
+    var a: CGPoint = CGPoint(x: 0.28, y: 0.58)
+    var b: CGPoint = CGPoint(x: 0.7, y: 0.58)
+    var bTilt: Double = 0
+    var stick: (CGPoint, CGPoint)? = nil
+    var arrow: (CGPoint, CGPoint)? = nil
+    var bang: CGPoint? = nil
+    var hand: CGPoint? = nil
+    var puck: CGPoint? = nil
+    var blockedPath: (CGPoint, CGPoint)? = nil
+    var boards = false
+    var speedLines = false
+
+    static func named(_ name: String) -> FoulSketch? {
+        switch name {
+        case "후킹":
+            return FoulSketch(a: CGPoint(x: 0.3, y: 0.58), b: CGPoint(x: 0.68, y: 0.58),
+                              stick: (CGPoint(x: 0.38, y: 0.62), CGPoint(x: 0.62, y: 0.6)),
+                              arrow: (CGPoint(x: 0.72, y: 0.22), CGPoint(x: 0.5, y: 0.22)))
+        case "슬래싱":
+            return FoulSketch(stick: (CGPoint(x: 0.36, y: 0.5), CGPoint(x: 0.6, y: 0.42)),
+                              arrow: (CGPoint(x: 0.36, y: 0.2), CGPoint(x: 0.58, y: 0.28)),
+                              bang: CGPoint(x: 0.62, y: 0.42))
+        case "트리핑":
+            return FoulSketch(b: CGPoint(x: 0.7, y: 0.56), bTilt: 35,
+                              stick: (CGPoint(x: 0.36, y: 0.66), CGPoint(x: 0.66, y: 0.86)),
+                              bang: CGPoint(x: 0.68, y: 0.86))
+        case "홀딩":
+            return FoulSketch(a: CGPoint(x: 0.42, y: 0.58), b: CGPoint(x: 0.66, y: 0.58),
+                              hand: CGPoint(x: 0.55, y: 0.46))
+        case "인터피어런스":
+            return FoulSketch(a: CGPoint(x: 0.5, y: 0.58), b: CGPoint(x: 0.28, y: 0.58),
+                              puck: CGPoint(x: 0.86, y: 0.8),
+                              blockedPath: (CGPoint(x: 0.34, y: 0.8), CGPoint(x: 0.8, y: 0.8)))
+        case "하이 스틱":
+            return FoulSketch(stick: (CGPoint(x: 0.36, y: 0.5), CGPoint(x: 0.64, y: 0.22)),
+                              bang: CGPoint(x: 0.67, y: 0.22))
+        case "크로스 체킹":
+            return FoulSketch(a: CGPoint(x: 0.32, y: 0.58), b: CGPoint(x: 0.66, y: 0.58),
+                              stick: (CGPoint(x: 0.52, y: 0.36), CGPoint(x: 0.52, y: 0.72)),
+                              arrow: (CGPoint(x: 0.44, y: 0.16), CGPoint(x: 0.66, y: 0.16)),
+                              bang: CGPoint(x: 0.58, y: 0.5))
+        case "보딩":
+            return FoulSketch(a: CGPoint(x: 0.5, y: 0.58), b: CGPoint(x: 0.78, y: 0.58),
+                              arrow: (CGPoint(x: 0.42, y: 0.18), CGPoint(x: 0.7, y: 0.18)),
+                              bang: CGPoint(x: 0.9, y: 0.5), boards: true)
+        case "차징":
+            return FoulSketch(a: CGPoint(x: 0.46, y: 0.58), b: CGPoint(x: 0.72, y: 0.58),
+                              bang: CGPoint(x: 0.6, y: 0.5), speedLines: true)
+        default:
+            return nil
+        }
+    }
+}
+
+struct FoulSketchView: View {
+    let sketch: FoulSketch
+
+    var body: some View {
+        GeometryReader { geo in
+            let w = geo.size.width, h = geo.size.height
+            let p: (CGPoint) -> CGPoint = { CGPoint(x: $0.x * w, y: $0.y * h) }
+            ZStack {
+                RoundedRectangle(cornerRadius: 12).fill(Color(light: 0xF2FAFF, dark: 0x1B2A36))
+                if sketch.boards {
+                    Rectangle().fill(Color.secondary.opacity(0.5)).frame(width: 6, height: h * 0.9).position(x: w * 0.93, y: h / 2)
+                    Text("보드").font(.system(size: 9)).foregroundStyle(.secondary).position(x: w * 0.93, y: h * 0.06)
+                }
+                if sketch.speedLines {
+                    ForEach(0..<3, id: \.self) { i in
+                        Capsule().fill(Theme.neonPink.opacity(0.5))
+                            .frame(width: w * 0.2, height: 2.5)
+                            .position(x: w * 0.22, y: h * (0.45 + Double(i) * 0.12))
+                    }
+                }
+                if let path = sketch.blockedPath {
+                    Path { pp in pp.move(to: p(path.0)); pp.addLine(to: p(path.1)) }
+                        .stroke(Theme.accent.opacity(0.6), style: StrokeStyle(lineWidth: 2, dash: [5, 4]))
+                    Image(systemName: "xmark.circle.fill").foregroundStyle(Theme.neonPink)
+                        .position(p(CGPoint(x: (path.0.x + path.1.x) / 2, y: path.0.y)))
+                }
+                if let s = sketch.stick {
+                    Path { pp in pp.move(to: p(s.0)); pp.addLine(to: p(s.1)) }
+                        .stroke(Color.brown, style: StrokeStyle(lineWidth: 4, lineCap: .round))
+                }
+                if let ar = sketch.arrow {
+                    Path { pp in pp.move(to: p(ar.0)); pp.addLine(to: p(ar.1)) }
+                        .stroke(Theme.neonPink, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+                    Image(systemName: ar.1.x >= ar.0.x ? "arrowtriangle.right.fill" : "arrowtriangle.left.fill")
+                        .font(.system(size: 10)).foregroundStyle(Theme.neonPink).position(p(ar.1))
+                }
+                player(color: Theme.neonPink, mirrored: false).position(p(sketch.a))
+                player(color: Theme.cobalt, mirrored: true).rotationEffect(.degrees(sketch.bTilt)).position(p(sketch.b))
+                if let hand = sketch.hand {
+                    Image(systemName: "hand.raised.fill").font(.system(size: 16)).foregroundStyle(Theme.neonPink).position(p(hand))
+                }
+                if let puck = sketch.puck {
+                    Circle().fill(Color.black).frame(width: 9, height: 9).position(p(puck))
+                }
+                if let bang = sketch.bang {
+                    Image(systemName: "burst.fill").font(.system(size: 18)).foregroundStyle(.orange).position(p(bang))
+                }
+            }
+        }
+        .accessibilityHidden(true)
+    }
+
+    private func player(color: Color, mirrored: Bool) -> some View {
+        Image(systemName: "figure.hockey").font(.system(size: 30)).foregroundStyle(color)
+            .scaleEffect(x: mirrored ? -1 : 1, y: 1)
+    }
+}
+
+/// '자주 나오는 반칙' 그림 카드 목록. "이름: 설명" 문장을 나눠 그림과 함께 보여준다.
+struct FoulCards: View {
+    let points: [String]
+
+    var body: some View {
+        Card {
+            CardHeader(title: "그림으로 보기", systemImage: "photo")
+            HStack(spacing: 12) {
+                legend(Theme.neonPink, "반칙한 선수")
+                legend(Theme.cobalt, "상대")
+            }
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+                ForEach(items, id: \.0) { name, desc in
+                    VStack(alignment: .leading, spacing: 6) {
+                        if let s = FoulSketch.named(name) { FoulSketchView(sketch: s).frame(height: 88) }
+                        Text(name).font(.subheadline.bold()).foregroundStyle(Theme.title)
+                        Text(desc).font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
+                    .accessibilityElement(children: .combine)
+                }
+            }
+            ForEach(rest, id: \.self) { Text($0).font(.caption).foregroundStyle(.secondary) }
+        }
+    }
+
+    private var items: [(String, String)] {
+        points.compactMap { p in
+            guard let r = p.range(of: ": ") else { return nil }
+            let name = String(p[..<r.lowerBound])
+            return FoulSketch.named(name) == nil ? nil : (name, String(p[r.upperBound...]))
+        }
+    }
+
+    private var rest: [String] {
+        points.filter { p in
+            guard let r = p.range(of: ": ") else { return true }
+            return FoulSketch.named(String(p[..<r.lowerBound])) == nil
+        }
+    }
+
+    private func legend(_ c: Color, _ t: String) -> some View {
+        HStack(spacing: 4) {
+            Image(systemName: "figure.hockey").foregroundStyle(c)
+            Text(t).font(.caption2).foregroundStyle(.secondary)
+        }
+    }
 }

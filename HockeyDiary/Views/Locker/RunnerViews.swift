@@ -273,6 +273,8 @@ struct RunnerDetailView: View {
                 Text("교체했다고 하면 이 러너는 '교체한 날'로 옮겨져. 지난 기록은 그대로 남아.")
             }
 
+            Section { SharpeningGuideCard() }
+
             Section {
                 Button { addingSharpening = true } label: { Label("연마 기록 추가", systemImage: "plus") }
                 ForEach(runner.sharpenings.sorted { $0.at > $1.at }) { log in
@@ -336,7 +338,15 @@ struct SharpeningEditorView: View {
     var body: some View {
         Form {
             Section { DatePicker("연마일", selection: $at, displayedComponents: .date) }
+            Section { SharpeningGuideCard() }
             Section {
+                HStack {
+                    Label("그립 쪽", systemImage: "arrow.left").font(.caption.bold()).foregroundStyle(Theme.neonPink)
+                    Spacer()
+                    Text("숫자가 클수록").font(.caption2).foregroundStyle(.secondary)
+                    Spacer()
+                    Label("활주 쪽", systemImage: "arrow.right").labelStyle(TrailingIconLabel()).font(.caption.bold()).foregroundStyle(Theme.accent)
+                }
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
                     ForEach(Hollow.presets, id: \.self) { h in
                         HollowCard(hollow: h, selected: customHollow.isEmpty && hollowLabel == h.label) {
@@ -354,7 +364,7 @@ struct SharpeningEditorView: View {
             } header: {
                 Text("홀로우 (RoH)")
             } footer: {
-                Text("숫자가 작을수록 홈이 깊어. 그림은 깊이 차이만 보여주는 예시야. 모르면 비워둬도 돼.")
+                Text("숫자가 작을수록 홈이 깊어서 잘 물리고, 클수록 얕아서 잘 미끄러져. 그림은 깊이 차이만 보여주는 예시야. 모르면 비워둬도 돼.")
             }
             Section("어디서?") { TextField("연마한 곳 (업체·링크장)", text: $shop) }
             Section("연마 후 느낌") {
@@ -400,8 +410,11 @@ struct HollowCard: View {
             VStack(spacing: 6) {
                 HollowGlyph(hollow: hollow).frame(height: 54)
                 Text(hollow.display).font(.headline)
+                Text(hollow.feel).font(.caption2.bold())
+                    .foregroundStyle(hollow.feel == "그립 쪽" ? Theme.neonPink : (hollow.feel == "활주 쪽" ? Theme.accent : .secondary))
             }
-            .frame(maxWidth: .infinity, minHeight: 96)
+            .padding(.vertical, 6)
+            .frame(maxWidth: .infinity, minHeight: 112)
             .foregroundStyle(Theme.title)
             .background(selected ? Theme.cobaltSoft : Theme.card, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
@@ -446,5 +459,35 @@ struct BladeSection: Shape {
         p.addQuadCurve(to: CGPoint(x: x0, y: rect.maxY), control: CGPoint(x: rect.midX, y: rect.maxY - depth * 2))
         p.closeSubpath()
         return p
+    }
+}
+
+/// 연마 안내: 언제 갈까? / 어떻게 맡길까? / 타고 나면?
+struct SharpeningGuideCard: View {
+    @State private var tab = 0
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label("연마 안내", systemImage: "lightbulb").font(.headline).foregroundStyle(Theme.title)
+            ChoiceCards(options: SharpeningGuide.sections.indices.map { i in
+                ChoiceOption(value: i, title: SharpeningGuide.sections[i].title,
+                             art: .symbol(["calendar.badge.clock", "storefront", "drop"][i]))
+            }, selection: $tab, columns: 3, minHeight: 60)
+            ForEach(Array(SharpeningGuide.sections[tab].points.enumerated()), id: \.offset) { i, p in
+                HStack(alignment: .top, spacing: 8) {
+                    Text("\(i + 1)").font(.caption.bold()).foregroundStyle(.white)
+                        .frame(width: 20, height: 20).background(Theme.cobalt, in: Circle())
+                    Text(p).font(.subheadline).fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+        .padding(.vertical, 4)
+    }
+}
+
+/// 아이콘을 글자 오른쪽에 두는 라벨.
+struct TrailingIconLabel: LabelStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        HStack(spacing: 4) { configuration.title; configuration.icon }
     }
 }

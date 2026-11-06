@@ -214,9 +214,9 @@ struct JournalRow: View {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 6) {
                         Text(journal.entryDate.dayTitle).font(.caption).foregroundStyle(.secondary)
-                        if journal.isPrivate {
-                            Image(systemName: "lock.fill").font(.caption2).foregroundStyle(.secondary)
-                                .accessibilityLabel("비공개")
+                        if !journal.isPrivate {
+                            Image(systemName: "square.and.arrow.up").font(.caption2).foregroundStyle(.secondary)
+                                .accessibilityLabel("리포트 공유")
                         }
                     }
                     if !journal.body.isEmpty {

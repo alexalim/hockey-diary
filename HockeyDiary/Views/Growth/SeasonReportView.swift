@@ -8,6 +8,7 @@ struct SeasonReportView: View {
     @Query(sort: \Session.startsAt) private var sessions: [Session]
     @Query private var learnings: [SkillLearning]
     @Query private var attempts: [SkillAttempt]
+    @Query private var journals: [DailyJournal]
     @Environment(\.displayScale) private var displayScale
 
     enum Range: String, CaseIterable { case season, year, quarter, all
@@ -40,7 +41,10 @@ struct SeasonReportView: View {
             guard let n = a.skill?.name, let at = a.session?.startsAt else { return nil }
             return .init(skill: n, at: at, lesson: false, tried: a.tried)
         }
-        return SeasonReport.make(title: range.title, from: from, to: to, samples: sessions.map(\.sample), skillEvents: events)
+        // '리포트 공유'를 켠 일기만 넘긴다.
+        let shared = journals.filter { !$0.isPrivate }.map { SeasonReport.SharedLine(at: $0.entryDate, text: $0.body) }
+        return SeasonReport.make(title: range.title, from: from, to: to, samples: sessions.map(\.sample),
+                                 skillEvents: events, sharedLines: shared)
     }
 
     var body: some View {
@@ -63,7 +67,7 @@ struct SeasonReportView: View {
                     }
                     .buttonStyle(PinkButtonStyle())
                 }
-                Text("리포트에는 횟수, 시간, 기술 이름만 들어가. 일기, 메모, 잠, 심박, 사진, 위치는 안 넣어.")
+                Text("리포트에는 횟수, 시간, 기술 이름이 들어가. 일기는 '리포트 공유'를 켠 것만 한 줄 들어가. 메모, 잠, 심박, 사진, 위치는 안 넣어.")
                     .font(.caption).foregroundStyle(.secondary)
             }
             .padding(16)
@@ -111,8 +115,16 @@ struct ReportCard: View {
                 if !report.topSkills.isEmpty {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("많이 만난 기술").font(.caption.bold()).opacity(0.8)
-                        ForEach(report.topSkills, id: \.name) { s in
+                        ForEach(Array(report.topSkills.prefix(report.sharedLines.isEmpty ? 3 : 2)), id: \.name) { s in
                             Text("· \(s.name)  수업 \(s.lessons) · 경기에서 써봄 \(s.tried)").font(.subheadline)
+                        }
+                    }
+                }
+                if !report.sharedLines.isEmpty {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("한 줄 일기").font(.caption.bold()).opacity(0.8)
+                        ForEach(report.sharedLines, id: \.self) { line in
+                            Text("“\(line)”").font(.subheadline).lineLimit(2)
                         }
                     }
                 }
