@@ -7,7 +7,7 @@ public struct Hollow: Equatable, Hashable, Sendable {
     /// 반경(인치).
     public let inches: Double
 
-    public static let presets: [Hollow] = ["3/8", "7/16", "1/2", "9/16", "5/8", "11/16", "3/4", "7/8", "1"].compactMap(Hollow.init(label:))
+    public static let presets: [Hollow] = ["5/16", "3/8", "7/16", "1/2", "9/16", "5/8", "11/16", "3/4", "7/8", "1"].compactMap(Hollow.init(label:))
 
     /// 하키 날 폭(인치, 약 2.9mm). 단면 그림의 상대 깊이 계산에만 쓴다.
     public static let bladeWidthInches = 0.115
@@ -56,13 +56,17 @@ public struct Hollow: Equatable, Hashable, Sendable {
 
     public var display: String { "\(label)\"" }
 
-    /// 단계별 별명(마하다가 붙인 이름). 목록에 없는 값은 nil.
-    public var nickname: String? {
-        [
-            "3/8": "강력 집게", "7/16": "단단 그립", "1/2": "날카로운 턴", "9/16": "딱 중간", "5/8": "부드러운 활주",
-            "11/16": "쭉쭉 활주", "3/4": "스피드 활주", "7/8": "미끄럼 대장", "1": "활주 끝판왕",
-        ][label]
+    /// 국내 연마점에서 단계를 부르는 선수 이름 별명. 그 선수가 실제로 쓰는 값이라는 뜻은 아니다.
+    public var playerNickname: String? {
+        ["5/16": "차라", "3/8": "말킨", "7/16": "오베츠킨", "1/2": "크로스비", "9/16": "맥데이빗", "5/8": "케인"][label]
     }
+
+    /// 화면에 보일 별명: 선수 별명이 있으면 그것, 없으면 느낌 별명. 목록에 없는 값은 nil.
+    public var nickname: String? {
+        playerNickname ?? ["11/16": "쭉쭉 활주", "3/4": "스피드 활주", "7/8": "미끄럼 대장", "1": "활주 끝판왕"][label]
+    }
+
+    public static let playerNicknameNote = "선수 이름은 연마점에서 단계를 부르는 별명이야. 그 선수가 실제로 쓰는 값은 아니야."
 
     /// 홈 깊이 구분. 반경이 작을수록 홈이 깊다(기하 사실).
     public var feel: String {
