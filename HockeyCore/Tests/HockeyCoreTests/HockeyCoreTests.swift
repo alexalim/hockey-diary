@@ -269,6 +269,46 @@ final class SleepTests: XCTestCase {
     }
 }
 
+final class LockerTests: XCTestCase {
+    // T17: 번호판 007은 문자열 그대로, 앞자리 0 유지, 4자리까지.
+    func testLockerNumberKeepsLeadingZeros() {
+        XCTAssertEqual(LockerNumber.normalize("007"), "007")
+        XCTAssertEqual(LockerNumber.normalize("00"), "00")
+        XCTAssertEqual(LockerNumber.normalize("12345"), "1234")
+        XCTAssertEqual(LockerNumber.normalize("9a-8"), "98")
+        XCTAssertEqual(LockerNumber.normalize("٣"), "", "아라비아 숫자 등 비ASCII 숫자는 받지 않음")
+        XCTAssertEqual(LockerNumber.normalize(""), "")
+    }
+
+    func testPlacementClamp() {
+        let p = Placement(x: 1.4, y: -0.2, scale: 9, rotation: 540, z: 2).clamped()
+        XCTAssertEqual(p.x, 1); XCTAssertEqual(p.y, 0); XCTAssertEqual(p.scale, 3)
+        XCTAssertEqual(p.rotation, 180)
+        XCTAssertEqual(Placement(x: 0.5, y: 0.5, rotation: -200).clamped().rotation, 160)
+    }
+
+    func testStickerOrder() {
+        let a = UUID(), b = UUID(), c = UUID()
+        XCTAssertEqual(StickerOrder.bringToFront(a, in: [a, b, c]), [b, c, a])
+        XCTAssertEqual(StickerOrder.sendToBack(c, in: [a, b, c]), [c, a, b])
+        XCTAssertEqual(StickerOrder.bringToFront(UUID(), in: [a, b]), [a, b])
+    }
+
+    // LK-13: 실제 기록과 연결된 성취 스티커, 중복 발급 없음.
+    func testMilestonesNoDuplicates() {
+        let f = MilestoneFacts(lessons: 1, games: 2, goals: 0, sessions: 10, pondSessions: 0, sharpenings: 1)
+        XCTAssertEqual(Milestones.earned(f), ["first-lesson", "first-game", "ten-sessions", "first-sharpening"])
+        XCTAssertEqual(Milestones.newlyEarned(f, alreadyEarned: ["first-lesson", "ten-sessions"]), ["first-game", "first-sharpening"])
+        XCTAssertEqual(Milestones.newlyEarned(f, alreadyEarned: Milestones.earned(f)), [])
+        XCTAssertTrue(Milestones.earned(f).allSatisfy { StickerCatalog.def($0)?.kind == .achievement })
+    }
+
+    func testCatalogKeysUnique() {
+        let keys = StickerCatalog.all.map(\.key)
+        XCTAssertEqual(Set(keys).count, keys.count)
+    }
+}
+
 final class DomainTests: XCTestCase {
     // FR-02: 미니게임은 점수 없이, 정규게임 스탯은 정규게임에서만 보인다.
     func testGameStatsOnlyForRegularGame() {

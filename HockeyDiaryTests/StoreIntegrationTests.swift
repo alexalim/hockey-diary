@@ -107,4 +107,57 @@ final class StoreIntegrationTests: XCTestCase {
         XCTAssertEqual(s.usages.count, 1)
         XCTAssertEqual(s.usages.first?.iceMinutes, 70)
     }
+
+    // T18: 스티커 4개 배치·회전 후 다시 열어도 위치·크기·각도·앞뒤 순서가 그대로.
+    func testStickerPlacementsPersist() throws {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("t18-\(UUID().uuidString).store")
+        let schema = Schema(AppSchema.models)
+        do {
+            let c = try ModelContainer(for: schema, configurations: [ModelConfiguration(schema: schema, url: url)])
+            let ctx = ModelContext(c)
+            for i in 0..<4 {
+                let p = StickerPlacement(stickerKey: "star", x: 0.1 * Double(i + 1), y: 0.2, zIndex: i)
+                ctx.insert(p)
+                p.placement = Placement(x: p.x, y: 0.2 + 0.1 * Double(i), scale: 1.5, rotation: 30 * Double(i), z: 3 - i)
+            }
+            try ctx.save()
+        }
+        let c2 = try ModelContainer(for: schema, configurations: [ModelConfiguration(schema: schema, url: url)])
+        let back = try ModelContext(c2).fetch(FetchDescriptor<StickerPlacement>()).sorted { $0.x < $1.x }
+        XCTAssertEqual(back.count, 4)
+        for (i, p) in back.enumerated() {
+            XCTAssertEqual(p.x, 0.1 * Double(i + 1), accuracy: 1e-9)
+            XCTAssertEqual(p.y, 0.2 + 0.1 * Double(i), accuracy: 1e-9)
+            XCTAssertEqual(p.scale, 1.5)
+            XCTAssertEqual(p.rotation, 30 * Double(i), accuracy: 1e-9)
+            XCTAssertEqual(p.zIndex, 3 - i)
+        }
+    }
+
+    // T19·T17: 락커 테마·번호를 바꿔도 장비·연마 원본은 그대로, 번호 007 유지.
+    func testLockerThemeDoesNotTouchEquipment() throws {
+        let skate = Skate(brand: "Bauer", model: "Vapor")
+        let runner = RunnerSet(name: "A")
+        context.insert(skate); context.insert(runner)
+        let log = SharpeningLog(hollow: "5/8")
+        context.insert(log); log.runner = runner
+        try context.save()
+        let profile = LockerStore.profile(context)
+        profile.numberText = LockerNumber.normalize("007")
+        profile.theme = .neonPink
+        try context.save()
+        XCTAssertEqual(try context.fetch(FetchDescriptor<LockerProfile>()).first?.numberText, "007")
+        XCTAssertEqual(try context.fetchCount(FetchDescriptor<Skate>()), 1)
+        XCTAssertEqual(runner.sharpenings.first?.hollow, "5/8")
+        XCTAssertEqual(skate.name, "Bauer Vapor")
+    }
+
+    // LK-13: 성취 스티커는 기록 기준으로 한 번만 발급.
+    func testMilestoneStickersAwardedOnce() throws {
+        context.insert(Session(type: .lesson))
+        try context.save()
+        XCTAssertEqual(LockerStore.awardMilestones(context), ["first-lesson"])
+        XCTAssertEqual(LockerStore.awardMilestones(context), [])
+        XCTAssertEqual(try context.fetchCount(FetchDescriptor<EarnedSticker>()), 1)
+    }
 }

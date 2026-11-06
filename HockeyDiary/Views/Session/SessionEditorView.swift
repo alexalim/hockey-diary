@@ -331,7 +331,11 @@ struct SessionEditorView: View {
     private var placeSection: some View {
         Section {
             SurfacePicker(value: $surface)
-            TextField(surface == .pond ? "장소 메모 (예: 동네 저수지)" : "링크장 이름", text: $rinkName)
+            if surface == .indoorRink || surface == .outdoorRink {
+                RinkNameField(text: $rinkName)
+            } else {
+                TextField(surface == .pond ? "장소 메모 (예: 동네 저수지)" : "장소 이름", text: $rinkName)
+            }
             if surface != .unknown {
                 Picker("체감 빙질", selection: $iceFeel) {
                     Text("선택 안 함").tag(IceFeel?.none)
@@ -495,6 +499,8 @@ struct SessionEditorView: View {
         let skate = skates.first { $0.id == skateID }
         let runner = skate?.installations.compactMap(\.runner).first { $0.id == runnerID }
         DiaryStore.setUsage(for: target, skate: skate, runner: runner, iceMinutes: iceMinutes, context: context)
+        // 실내·야외 링크장 이름은 다음 기록 추천용으로 남긴다. 폰드 장소는 남기지 않는다.
+        if surface == .indoorRink || surface == .outdoorRink { RinkStore.touch(name: target.rinkName, context: context) }
 
         for photo in target.photos where removedPhotoIDs.contains(photo.id) {
             context.delete(photo)

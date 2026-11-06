@@ -29,11 +29,14 @@ struct ExploreView: View {
                     Text("대회·동호회마다 규칙 적용이 다를 수 있어. 대회 운영 규정을 꼭 확인해줘.")
                         .font(.caption).foregroundStyle(.secondary)
                 }
-                Card {
-                    CardHeader(title: "링크장 찾기 · 곧 열려", systemImage: "map.fill")
-                    Text("지금은 기록할 때 링크장 이름을 직접 적어줘. 최근 장소를 다음 기록에 제안해줄게.")
-                        .font(.subheadline).foregroundStyle(.secondary)
+                NavigationLink { RinkFinderView() } label: {
+                    Card {
+                        CardHeader(title: "링크장 찾기", systemImage: "map.fill")
+                        Text("이름이나 지역으로 찾고, 즐겨찾기와 내가 확인한 시설 정보를 모아둬.")
+                            .font(.subheadline).foregroundStyle(.secondary)
+                    }
                 }
+                .buttonStyle(.plain)
             }
             .padding(16)
         }

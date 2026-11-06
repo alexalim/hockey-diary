@@ -328,6 +328,8 @@ enum AppSchema {
         Session.self, Skill.self, SkillLearning.self, SkillAttempt.self,
         DailyJournal.self, PhotoAsset.self,
         Skate.self, RunnerSet.self, RunnerInstallation.self, SharpeningLog.self, EquipmentUsage.self,
+        Rink.self,
+        LockerProfile.self, StickerPlacement.self, EarnedSticker.self, GearItem.self,
     ]
 
     static func container(inMemory: Bool = false) throws -> ModelContainer {

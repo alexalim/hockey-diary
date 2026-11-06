@@ -189,12 +189,16 @@ struct SettingsView: View {
         List {
             Section("내 기록은 어디에 있어?") {
                 Label("모든 기록은 이 아이폰 안에만 저장돼.", systemImage: "iphone")
-                Label("서버나 iCloud로 보내지 않아.", systemImage: "icloud.slash")
+                Label("서버나 iCloud로 보내지 않아. 링크장 검색어만 Apple 지도로 보내.", systemImage: "icloud.slash")
+                Label("Apple 건강은 연결했을 때만 읽고, 앱에 저장하지 않아.", systemImage: "heart.text.square")
                 Label("일기는 기본 비공개고, 내용을 자동으로 분석하지 않아.", systemImage: "lock.fill")
                 Label("사진은 고른 것만 사본으로 담고 위치 정보는 지워.", systemImage: "photo")
             }
+            Section("연결") {
+                NavigationLink { HealthConnectView() } label: { Label("Apple 건강", systemImage: "heart.text.square.fill") }
+            }
             Section("아직 없는 기능") {
-                Text("Apple 건강·Apple Watch·Garmin 연동, 락커 꾸미기, 규칙 도감, 링크장 찾기는 다음 업데이트에서 열려.")
+                Text("Apple Watch 앱, 규칙 도감, 시즌 리포트는 다음 업데이트에서 열려.")
                     .font(.subheadline).foregroundStyle(.secondary)
             }
             Section("앱 정보") {
