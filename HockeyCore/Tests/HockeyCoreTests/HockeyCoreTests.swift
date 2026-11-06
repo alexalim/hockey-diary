@@ -193,9 +193,9 @@ final class HollowTests: XCTestCase {
     func testPresetLabelsAndDepthOrder() throws {
         let labels = Hollow.presets.map(\.label)
         XCTAssertEqual(labels, ["3/8", "7/16", "1/2", "9/16", "5/8", "11/16", "3/4", "7/8", "1"])
-        XCTAssertEqual(Hollow(label: "1/2")?.feel, "그립 쪽")
+        XCTAssertEqual(Hollow(label: "1/2")?.feel, "깊은 홈")
         XCTAssertEqual(Hollow(label: "9/16")?.feel, "중간")
-        XCTAssertEqual(Hollow(label: "5/8")?.feel, "활주 쪽")
+        XCTAssertEqual(Hollow(label: "5/8")?.feel, "얕은 홈")
         let depths = Hollow.presets.map(\.grooveDepthInches)
         XCTAssertEqual(depths, depths.sorted(by: >), "반경이 작을수록 홈이 깊다")
         let half = try XCTUnwrap(Hollow(label: "1/2"))

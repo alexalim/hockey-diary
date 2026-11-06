@@ -15,8 +15,8 @@ public struct TacticTopic: Equatable, Sendable, Identifiable {
 public enum TacticGuide {
     public static let topics: [TacticTopic] = [
         TacticTopic(
-            id: "forecheck-121", title: "1-2-1 압박", tag: "포어체크",
-            summary: "상대 진영에서 맨 앞 한 명이 퍽 잡은 수비수를 먼저 몰아붙여.",
+            id: "forecheck-121", title: "1-2-1 포어체크", tag: "포어체크",
+            summary: "한 명은 깊이 들어가 퍽을 쫓고, 두 명은 양옆, 한 명은 뒤에 남는 배치야.",
             points: [
                 "첫 번째 선수(F1)는 퍽 가진 상대에게 곧장 붙어. 한쪽 보드로 몰아.",
                 "두 번째 줄 두 명은 양쪽 보드 쪽에 서서 위로 가는 패스를 막아.",
@@ -25,7 +25,7 @@ public enum TacticGuide {
             when: "점수를 따라가야 할 때, 상대 수비가 퍽 다루는 게 서툴 때.",
             practice: "F1은 퍽이 아니라 몸 쪽으로 각을 잡고 들어가봐. 보드 쪽으로만 몰면 반은 성공이야."),
         TacticTopic(
-            id: "forecheck-122", title: "1-2-2 기다리기", tag: "포어체크",
+            id: "forecheck-122", title: "1-2-2 포어체크", tag: "포어체크",
             summary: "한 명만 들어가 방향을 정하고, 나머지는 자리를 지키며 기다려.",
             points: [
                 "F1은 깊이 들어가되 무리하게 뺏지 않아. 퍽을 한쪽으로 보내는 게 목표야.",
@@ -35,8 +35,8 @@ public enum TacticGuide {
             when: "앞서고 있을 때, 체력을 아껴야 할 때, 상대가 빠를 때.",
             practice: "퍽이 보드로 가는 순간 그쪽 F2가 바로 붙는 타이밍을 맞춰봐."),
         TacticTopic(
-            id: "breakout", title: "우리 진영 빠져나오기", tag: "브레이크아웃",
-            summary: "골대 뒤에서 퍽을 잡은 뒤 보드 쪽 윙에게 줘서 빠르게 나가.",
+            id: "breakout", title: "브레이크아웃", tag: "수비 지역",
+            summary: "우리 지역에서 퍽을 되찾은 뒤 윙에게 연결해 밖으로 몰고 나가는 첫 패스야.",
             points: [
                 "수비수가 골대 뒤에서 퍽을 잡아. 고개를 들고 압박이 어디서 오는지 봐.",
                 "윙은 보드 쪽 해시마크 근처로 내려와서 패스를 받아.",
@@ -46,12 +46,12 @@ public enum TacticGuide {
             when: "우리 진영에서 퍽을 되찾았을 때마다.",
             practice: "윙은 보드에 등을 붙이고 받는 연습부터. 받자마자 블루라인 쪽으로 첫발을 떼봐."),
         TacticTopic(
-            id: "board-house", title: "보드 패스로 하우스 침투", tag: "공격",
-            summary: "보드를 타고 퍽을 돌려준 뒤, 골대 앞 하우스로 들어가 패스를 받아 쏴.",
+            id: "board-house", title: "보드 리턴 후 골대 앞", tag: "공격",
+            summary: "보드를 맞혀 동료에게 주고, 곧장 골대 앞 슬롯으로 파고들어 다시 받아.",
             points: [
-                "하우스는 골대 앞, 두 페이스오프 점 사이 공간이야. 골이 가장 많이 나는 곳이야.",
+                "슬롯은 골대 바로 앞, 두 페이스오프 점 사이야. 슛이 가장 잘 들어가는 자리야.",
                 "퍽을 가진 선수는 보드를 이용해 뒤쪽 동료에게 퍽을 보내.",
-                "패스를 준 선수는 바로 하우스로 들어가. 받자마자 쏠 준비를 해.",
+                "패스를 준 선수는 멈추지 말고 바로 슬롯으로 들어가. 받자마자 쏠 수 있게 스틱을 얼음에 대고 있어.",
             ],
             when: "공격 지역에서 수비가 보드 쪽으로 쏠렸을 때.",
             practice: "패스 주고 멈추지 말기. 주고-들어가기를 한 동작처럼 이어서 연습해봐."),

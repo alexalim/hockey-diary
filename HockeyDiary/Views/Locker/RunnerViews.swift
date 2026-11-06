@@ -341,11 +341,11 @@ struct SharpeningEditorView: View {
             Section { SharpeningGuideCard() }
             Section {
                 HStack {
-                    Label("그립 쪽", systemImage: "arrow.left").font(.caption.bold()).foregroundStyle(Theme.neonPink)
+                    Text("작은 숫자 · 깊은 홈").font(.caption.bold()).foregroundStyle(Theme.neonPink)
                     Spacer()
-                    Text("숫자가 클수록").font(.caption2).foregroundStyle(.secondary)
+                    Image(systemName: "arrow.left.and.right").font(.caption).foregroundStyle(.secondary)
                     Spacer()
-                    Label("활주 쪽", systemImage: "arrow.right").labelStyle(TrailingIconLabel()).font(.caption.bold()).foregroundStyle(Theme.accent)
+                    Text("큰 숫자 · 얕은 홈").font(.caption.bold()).foregroundStyle(Theme.accent)
                 }
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
                     ForEach(Hollow.presets, id: \.self) { h in
@@ -364,7 +364,7 @@ struct SharpeningEditorView: View {
             } header: {
                 Text("홀로우 (RoH)")
             } footer: {
-                Text("숫자가 작을수록 홈이 깊어서 잘 물리고, 클수록 얕아서 잘 미끄러져. 그림은 깊이 차이만 보여주는 예시야. 모르면 비워둬도 돼.")
+                Text("홈이 깊으면 날이 얼음을 꽉 잡아서 턴과 스톱이 단단해. 얕으면 덜 잡는 대신 쭉 나가. 그림은 깊이 차이만 보여줘. 모르면 비워둬도 돼.")
             }
             Section("어디서?") { TextField("연마한 곳 (업체·링크장)", text: $shop) }
             Section("연마 후 느낌") {
@@ -411,7 +411,7 @@ struct HollowCard: View {
                 HollowGlyph(hollow: hollow).frame(height: 54)
                 Text(hollow.display).font(.headline)
                 Text(hollow.feel).font(.caption2.bold())
-                    .foregroundStyle(hollow.feel == "그립 쪽" ? Theme.neonPink : (hollow.feel == "활주 쪽" ? Theme.accent : .secondary))
+                    .foregroundStyle(hollow.feel == "깊은 홈" ? Theme.neonPink : (hollow.feel == "얕은 홈" ? Theme.accent : .secondary))
             }
             .padding(.vertical, 6)
             .frame(maxWidth: .infinity, minHeight: 112)
@@ -462,17 +462,17 @@ struct BladeSection: Shape {
     }
 }
 
-/// 연마 안내: 언제 갈까? / 어떻게 맡길까? / 타고 나면?
+/// 날 관리 메모: 타기 전 체크 / 얼음 위 느낌 / 연마점에서 / 보관
 struct SharpeningGuideCard: View {
     @State private var tab = 0
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Label("연마 안내", systemImage: "lightbulb").font(.headline).foregroundStyle(Theme.title)
+            Label("날 관리 메모", systemImage: "lightbulb").font(.headline).foregroundStyle(Theme.title)
             ChoiceCards(options: SharpeningGuide.sections.indices.map { i in
                 ChoiceOption(value: i, title: SharpeningGuide.sections[i].title,
-                             art: .symbol(["calendar.badge.clock", "storefront", "drop"][i]))
-            }, selection: $tab, columns: 3, minHeight: 60)
+                             art: .symbol(["eye", "figure.skating", "wrench.and.screwdriver", "bag"][i]))
+            }, selection: $tab, columns: 4, minHeight: 60)
             ForEach(Array(SharpeningGuide.sections[tab].points.enumerated()), id: \.offset) { i, p in
                 HStack(alignment: .top, spacing: 8) {
                     Text("\(i + 1)").font(.caption.bold()).foregroundStyle(.white)

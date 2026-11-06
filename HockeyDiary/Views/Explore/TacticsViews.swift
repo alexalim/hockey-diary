@@ -103,7 +103,7 @@ struct TacticPlay {
             moves: [Move(kind: .pass, from: CGPoint(x: 0.75, y: 0.12), to: CGPoint(x: 0.92, y: 0.22)),
                     Move(kind: .skate, from: CGPoint(x: 0.74, y: 0.15), to: CGPoint(x: 0.82, y: 0.48)),
                     Move(kind: .pass, from: CGPoint(x: 0.92, y: 0.25), to: CGPoint(x: 0.82, y: 0.48))],
-            caption: "보드로 퍽을 돌려주고 하우스로 들어가. 다시 받아서 바로 쏴."),
+            caption: "보드를 맞혀 주고 바로 골대 앞으로 들어가. 다시 받아서 쏴."),
         "cycle": TacticPlay(
             players: [
                 Player(label: "F1", side: .us, from: CGPoint(x: 0.88, y: 0.12), to: CGPoint(x: 0.78, y: 0.2)),
