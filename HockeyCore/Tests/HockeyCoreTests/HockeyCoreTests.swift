@@ -226,6 +226,49 @@ final class InsightsTests: XCTestCase {
     }
 }
 
+final class SleepTests: XCTestCase {
+    // 2026-11-05 00:00 KST 기준 시각 도우미
+    let base = ISO8601DateFormatter().date(from: "2026-11-04T15:00:00Z")!
+    func at(_ hours: Double) -> Date { base.addingTimeInterval(hours * 3600) }
+
+    // T07: 자정 넘는 수면(전날 23:30~다음날 07:00)이 다음날 저녁 경기 직전 잠으로 귀속된다.
+    func testCrossMidnightSleepAttributedToNextActivity() throws {
+        let segs = [
+            SleepSegment(start: at(-0.5), end: at(3)),   // 23:30~03:00
+            SleepSegment(start: at(3.3), end: at(7)),    // 잠깐 깼다가 03:18~07:00
+            SleepSegment(start: at(13), end: at(13.5)),  // 13:00 낮잠 30분
+        ]
+        let night = try XCTUnwrap(SleepAttribution.nightBefore(at(20), segments: segs))
+        XCTAssertEqual(night.start, at(-0.5))
+        XCTAssertEqual(night.end, at(7))
+        XCTAssertEqual(night.asleepMinutes, 3 * 60 + 30 + 222, "중간에 깬 18분은 빼고 합산")
+    }
+
+    func testOverlappingSourcesCountOnce() throws {
+        // 워치와 가민이 같은 잠을 둘 다 기록
+        let segs = [SleepSegment(start: at(0), end: at(7)), SleepSegment(start: at(0.2), end: at(7.1))]
+        XCTAssertEqual(try XCTUnwrap(SleepAttribution.nightBefore(at(19), segments: segs)).asleepMinutes, 426)
+    }
+
+    func testSleepAfterActivityIsIgnored() {
+        let segs = [SleepSegment(start: at(23), end: at(31))]
+        XCTAssertNil(SleepAttribution.nightBefore(at(20), segments: segs), "활동 뒤의 잠은 귀속하지 않음")
+        XCTAssertNil(SleepAttribution.nightBefore(at(20), segments: []))
+    }
+
+    // 7.2: 표본이 모자라면 문장 없음, 충분하면 관찰 사실만.
+    func testSleepMoodComparison() {
+        let few = SleepMoodComparison.compute([(480, 5), (300, 2)])
+        XCTAssertNil(few.sentence)
+        let pairs: [(sleepMinutes: Int, moodAfter: Int?)] = [(480, 5), (450, 4), (500, 5), (300, 3), (360, 2), (390, 3), (400, nil)]
+        let c = SleepMoodComparison.compute(pairs)
+        XCTAssertEqual(c.longCount, 3)
+        XCTAssertEqual(c.shortCount, 3, "기분 없는 기록은 제외")
+        XCTAssertEqual(c.sentence, "최근 6번 중 7시간 이상 잔 날(3번)의 운동 후 기분이 덜 잔 날(3번)보다 더 높게 기록됐어.")
+        XCTAssertFalse(c.sentence!.contains("때문"))
+    }
+}
+
 final class DomainTests: XCTestCase {
     // FR-02: 미니게임은 점수 없이, 정규게임 스탯은 정규게임에서만 보인다.
     func testGameStatsOnlyForRegularGame() {
