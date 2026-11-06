@@ -98,7 +98,7 @@ struct JournalEditorView: View {
             } footer: {
                 Text(isPrivate
                      ? "비공개 일기는 하키 리포트나 공유에 들어가지 않아. 일기 내용을 자동으로 분석하지도 않아."
-                     : "공개로 바꿔도 공유할 때마다 한 번 더 물어볼게.")
+                     : "지금은 일기를 밖으로 공유하는 기능이 없어. 비공개 일기는 시즌 리포트·AI 요약에도 들어가지 않아.")
             }
             if !canSave {
                 Section { Text("기분을 고르거나 한 줄만 써도 저장돼.").font(.footnote).foregroundStyle(.secondary) }

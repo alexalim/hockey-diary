@@ -543,7 +543,7 @@ struct StickerLibraryView: View {
     private var photoSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("내 사진 스티커").font(.headline).foregroundStyle(Theme.title)
-            Text("다른 사람 얼굴이나 팀 로고는 써도 되는 것만 붙여줘. 락커를 공유할 때 사진 스티커는 기본으로 숨겨.")
+            Text("다른 사람 얼굴이나 팀 로고는 써도 되는 것만 붙여줘. 사진 스티커는 이 아이폰 안에만 있어.")
                 .font(.caption).foregroundStyle(.secondary)
             PhotosPicker(selection: $photoItem, matching: .images) {
                 Label("사진 고르기", systemImage: "photo.badge.plus").frame(maxWidth: .infinity, minHeight: Theme.touch)
