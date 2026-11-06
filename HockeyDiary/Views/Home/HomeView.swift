@@ -192,15 +192,12 @@ struct SettingsView: View {
                 Label("서버나 iCloud로 보내지 않아. 링크장 검색어만 Apple 지도로 보내.", systemImage: "icloud.slash")
                 Label("Apple 건강은 연결했을 때만 읽고, 앱에 저장하지 않아.", systemImage: "heart.text.square")
                 Label("AI 요약은 켰을 때만, 기기 안에서 하키 기록만 써.", systemImage: "sparkles")
+                Label("Apple Watch로 잰 운동은 건강 앱에 운동 기록으로 저장돼.", systemImage: "applewatch")
                 Label("일기는 기본 비공개고, 내용을 자동으로 분석하지 않아.", systemImage: "lock.fill")
                 Label("사진은 고른 것만 사본으로 담고 위치 정보는 지워.", systemImage: "photo")
             }
             Section("연결") {
                 NavigationLink { HealthConnectView() } label: { Label("Apple 건강", systemImage: "heart.text.square.fill") }
-            }
-            Section("아직 없는 기능") {
-                Text("Apple Watch 앱은 다음 업데이트에서 열려.")
-                    .font(.subheadline).foregroundStyle(.secondary)
             }
             Section("앱 정보") {
                 HStack {

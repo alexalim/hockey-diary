@@ -388,6 +388,21 @@ final class CycleTests: XCTestCase {
     }
 }
 
+final class WatchPayloadTests: XCTestCase {
+    // P2 워치: 아이폰으로 보내는 형식 왕복, 잘못된 값은 거부.
+    func testRoundTripAndValidation() throws {
+        let t = Date(timeIntervalSince1970: 1_800_000_000)
+        let p = WatchWorkoutPayload(type: .miniGame, start: t, end: t.addingTimeInterval(3600), moodBefore: 2, moodAfter: 4, savedToHealth: true)
+        let back = try XCTUnwrap(WatchWorkoutPayload(dictionary: p.dictionary))
+        XCTAssertEqual(back, p)
+        var bad = p.dictionary; bad["end"] = t.addingTimeInterval(-10).timeIntervalSince1970
+        XCTAssertNil(WatchWorkoutPayload(dictionary: bad), "끝이 시작보다 빠르면 거부")
+        var odd = p.dictionary; odd["moodAfter"] = 9
+        XCTAssertNil(WatchWorkoutPayload(dictionary: odd)?.moodAfter, "범위 밖 기분은 버림")
+        XCTAssertNil(WatchWorkoutPayload(dictionary: ["kind": "other"]))
+    }
+}
+
 final class DomainTests: XCTestCase {
     // FR-02: 미니게임은 점수 없이, 정규게임 스탯은 정규게임에서만 보인다.
     func testGameStatsOnlyForRegularGame() {

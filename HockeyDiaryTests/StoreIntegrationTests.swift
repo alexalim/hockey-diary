@@ -160,4 +160,18 @@ final class StoreIntegrationTests: XCTestCase {
         XCTAssertEqual(LockerStore.awardMilestones(context), [])
         XCTAssertEqual(try context.fetchCount(FetchDescriptor<EarnedSticker>()), 1)
     }
+
+    // P2 워치: 같은 전달이 두 번 와도 활동은 한 건만, 기분·시간 보존.
+    func testWatchWorkoutImportedOnce() throws {
+        let t0 = Date().addingTimeInterval(-7200)
+        let p = WatchWorkoutPayload(type: .regularGame, start: t0, end: t0.addingTimeInterval(5400), moodBefore: 2, moodAfter: 4)
+        WatchBridge.importWorkout(p, context: context)
+        WatchBridge.importWorkout(p, context: context)
+        let all = try context.fetch(FetchDescriptor<Session>())
+        XCTAssertEqual(all.count, 1)
+        XCTAssertEqual(all[0].id, p.id)
+        XCTAssertEqual(all[0].minutes, 90)
+        XCTAssertEqual(all[0].type, .regularGame)
+        XCTAssertEqual(all[0].moodAfter, 4)
+    }
 }
