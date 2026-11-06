@@ -123,6 +123,21 @@ targets:
         BUNDLE_LOADER: $(TEST_HOST)
         TARGETED_DEVICE_FAMILY: "1"
 
+  # 화면 점검(E2E): 예시 데이터로 앱을 띄워 주요 화면 스크린샷을 남긴다 (.github/workflows/ui-screens.yml).
+  HockeyDiaryUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: HockeyDiaryUITests
+    dependencies:
+      - target: HockeyDiary
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.aspynlim.hockeydiary.uitests
+        TEST_TARGET_NAME: HockeyDiary
+        TARGETED_DEVICE_FAMILY: "1"
+
 schemes:
   HockeyDiary:
     build:
@@ -132,6 +147,7 @@ schemes:
       config: Debug
       targets:
         - HockeyDiaryTests
+        - HockeyDiaryUITests
     run:
       config: Debug
     archive:

@@ -6,7 +6,8 @@ struct HockeyDiaryApp: App {
     let container: ModelContainer
 
     init() {
-        let inMemory = CommandLine.arguments.contains("-inMemoryStore")
+        // 화면 점검(-ui-demo)은 실제 기록을 건드리지 않게 메모리 저장소만 쓴다.
+        let inMemory = CommandLine.arguments.contains("-inMemoryStore") || DemoData.isEnabled
         do {
             container = try AppSchema.container(inMemory: inMemory)
         } catch {
@@ -15,6 +16,7 @@ struct HockeyDiaryApp: App {
             container = try! AppSchema.container(inMemory: true)
         }
         DiaryStore.seedIfNeeded(container.mainContext)
+        if DemoData.isEnabled { DemoData.seed(container.mainContext) }
         WatchBridge.shared.activate(container: container)
     }
 
