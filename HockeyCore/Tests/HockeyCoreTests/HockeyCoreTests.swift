@@ -309,6 +309,85 @@ final class LockerTests: XCTestCase {
     }
 }
 
+final class RuleGuideTests: XCTestCase {
+    // 8.2: 초기 주제 6개, 각 카드에 퀴즈 1문항, 정답 번호가 보기 범위 안.
+    func testTopicsAreComplete() {
+        XCTAssertEqual(RuleGuide.topics.map(\.id), ["offside", "icing", "faceoff", "linechange", "penalties", "positions"])
+        for t in RuleGuide.topics {
+            XCTAssertFalse(t.summary.isEmpty)
+            XCTAssertGreaterThanOrEqual(t.points.count, 3, t.id)
+            XCTAssertTrue(t.quiz.options.indices.contains(t.quiz.answer), t.id)
+            XCTAssertTrue(t.reference.hasPrefix("Rule"), t.id)
+        }
+    }
+}
+
+final class SeasonReportTests: XCTestCase {
+    let t0 = Date(timeIntervalSince1970: 1_800_000_000)
+
+    // T09·P1 시즌 리포트: 기간 안 활동만, 기술은 많이 나온 순, 기분 값은 내보내지 않고 '최고의 날' 수만.
+    func testReportSummaries() {
+        let samples = [
+            ActivitySample(sessionID: UUID(), at: t0, type: .lesson, surface: .indoorRink, minutes: 60, moodBefore: 2, moodAfter: 5),
+            ActivitySample(sessionID: UUID(), at: t0.addingTimeInterval(3600 * 24), type: .miniGame, surface: .pond, minutes: 40, moodAfter: 4),
+            ActivitySample(sessionID: UUID(), at: t0.addingTimeInterval(-3600 * 24 * 400), type: .lesson, surface: .indoorRink, minutes: 60),
+        ]
+        let events = [
+            SeasonReport.SkillEvent(skill: "크로스오버", at: t0, lesson: true, tried: false),
+            SeasonReport.SkillEvent(skill: "크로스오버", at: t0.addingTimeInterval(86_400), lesson: false, tried: true),
+            SeasonReport.SkillEvent(skill: "하키 스톱", at: t0, lesson: true, tried: false),
+            SeasonReport.SkillEvent(skill: "하키 스톱", at: t0.addingTimeInterval(86_400), lesson: false, tried: false),
+        ]
+        let r = SeasonReport.make(title: "이번 시즌", from: t0.addingTimeInterval(-86_400 * 30), to: t0.addingTimeInterval(86_400 * 2),
+                                  samples: samples, skillEvents: events)
+        XCTAssertEqual(r.sessions, 2, "기간 밖 활동 제외")
+        XCTAssertEqual(r.minutes, 100)
+        XCTAssertEqual(r.byType[.lesson], 1)
+        XCTAssertEqual(r.bySurface[.pond], 1)
+        XCTAssertEqual(r.skillsLearned, 2)
+        XCTAssertEqual(r.topSkills.first?.name, "크로스오버")
+        XCTAssertEqual(r.topSkills.first?.tried, 1)
+        XCTAssertEqual(r.topSkills.last?.tried, 0, "미시도는 시도로 세지 않음")
+        XCTAssertEqual(r.bestDays, 1)
+    }
+
+    // 11.2 deny-by-default: 리포트 타입에 민감 정보 칸이 없다.
+    func testReportHasNoSensitiveFields() {
+        let r = SeasonReport.make(title: "t", from: nil, to: t0, samples: [], skillEvents: [])
+        let labels = Mirror(reflecting: r).children.compactMap(\.label).joined(separator: ",").lowercased()
+        for banned in ["journal", "diary", "body", "sleep", "heart", "health", "photo", "latitude", "location", "mood"] {
+            XCTAssertFalse(labels.contains(banned), banned)
+        }
+    }
+}
+
+final class SummaryFactsTests: XCTestCase {
+    // P2 AI 요약: 고른 기간 사실만, 미시도는 '기회 없음'으로, 메모는 켰을 때만.
+    func testFactsText() {
+        let t = Date(timeIntervalSince1970: 1_800_000_000)
+        let s = [SummaryFacts.SessionFact(at: t, type: .miniGame, minutes: 60, learned: [],
+                                          tried: [("크로스오버", .partial)], untried: ["하키 스톱"], notes: "턴이 늦었다")]
+        let with = SummaryFacts.text(periodTitle: "최근 30일", sessions: s, includeNotes: true)
+        XCTAssertTrue(with.contains("크로스오버(일부 성공)"))
+        XCTAssertTrue(with.contains("기회가 없어 못 써본 기술: 하키 스톱"))
+        XCTAssertTrue(with.contains("메모: 턴이 늦었다"))
+        XCTAssertFalse(SummaryFacts.text(periodTitle: "x", sessions: s, includeNotes: false).contains("턴이 늦었다"))
+        XCTAssertTrue(SummaryFacts.instructions.contains("의료"))
+    }
+}
+
+final class CycleTests: XCTestCase {
+    // F-C04·7.2: 표본이 모자라면 문장 없음, 충분하면 관찰 사실만(처방 없음).
+    func testCycleFatigueComparison() {
+        XCTAssertNil(CycleFatigueComparison.compute([(true, 4), (false, 2)]).sentence)
+        let pairs: [(inPeriod: Bool, fatigue: Int?)] = [(true, 4), (true, 5), (true, 4), (false, 2), (false, 3), (false, 2), (false, nil)]
+        let c = CycleFatigueComparison.compute(pairs)
+        XCTAssertEqual(c.otherCount, 3)
+        XCTAssertEqual(c.sentence, "생리 기간에 한 활동(3번)의 피로도가 다른 날(3번)보다 더 높게 기록됐어.")
+        for banned in ["하면 안", "쉬어", "때문"] { XCTAssertFalse(c.sentence!.contains(banned)) }
+    }
+}
+
 final class DomainTests: XCTestCase {
     // FR-02: 미니게임은 점수 없이, 정규게임 스탯은 정규게임에서만 보인다.
     func testGameStatsOnlyForRegularGame() {

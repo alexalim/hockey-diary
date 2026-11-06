@@ -54,6 +54,10 @@ struct HealthConnectView: View {
                 Text("연결하지 않아도 모든 기록은 그대로 쓸 수 있어. 항목별 허용은 iPhone 설정 → 건강 → 데이터 접근 및 기기 → 마하다에서 언제든 바꿀 수 있어.")
             }
 
+            if enabled {
+                CycleConsentSection()
+            }
+
             Section("가민을 쓰고 있다면") {
                 Text("Garmin Connect 앱 → 설정 → 연결된 앱 → Apple 건강에서 동기화를 켜면, 가민의 수면·심박·운동이 여기로 들어와. 기기와 항목에 따라 일부만 들어올 수 있고, 가민 앱이 동기화해야 보여.")
                     .font(.subheadline).foregroundStyle(.secondary)
@@ -187,5 +191,69 @@ struct SleepGrowthCard: View {
             SleepAttribution.nightBefore(s.at, segments: segments).map { (sleepMinutes: $0.asleepMinutes, moodAfter: s.moodAfter) }
         }
         loaded = true
+    }
+}
+
+/// 생리 주기: 따로 동의한 사람만. 켤 때 그 항목 권한만 따로 요청한다.
+struct CycleConsentSection: View {
+    @AppStorage(HealthPrefs.cycleKey) private var cycleEnabled = false
+    @State private var errorText: String?
+
+    var body: some View {
+        Section {
+            Toggle("생리 주기와 컨디션 같이 보기", isOn: Binding(get: { cycleEnabled }, set: { on in
+                if on {
+                    Task {
+                        do { try await HealthService.shared.requestCycleAccess(); cycleEnabled = true }
+                        catch { errorText = "권한 화면을 열지 못했어." }
+                    }
+                } else { cycleEnabled = false }
+            }))
+            if let errorText { Text(errorText).font(.footnote).foregroundStyle(Theme.neonPink) }
+        } header: {
+            Text("생리 주기 (선택)")
+        } footer: {
+            Text("켜면 건강 앱의 생리 기록만 따로 읽어서, 생리 기간에 한 활동의 피로도를 다른 날과 나란히 보여줘. 운동을 하라 말라 정하지 않고, 리포트·공유·AI 요약에는 절대 넣지 않아.")
+        }
+    }
+}
+
+/// 성장 탭: 생리 기간과 피로도 비교 카드.
+struct CycleGrowthCard: View {
+    let sessions: [(at: Date, fatigue: Int?)]
+    let periodTitle: String
+    @AppStorage(HealthPrefs.enabledKey) private var enabled = false
+    @AppStorage(HealthPrefs.cycleKey) private var cycleEnabled = false
+    @State private var comparison: CycleFatigueComparison?
+
+    var body: some View {
+        if enabled && cycleEnabled {
+            Card(tint: Theme.iceBlue) {
+                CardHeader(title: "주기와 컨디션", systemImage: "drop.fill")
+                if let c = comparison {
+                    if let s = c.sentence {
+                        Text(s).font(.subheadline)
+                    } else {
+                        Text("생리 기간과 다른 날에 피로도를 남긴 활동이 각각 3번 이상 모이면 비교해 줄게.")
+                            .font(.subheadline).foregroundStyle(.secondary)
+                    }
+                    Text("피로도는 내가 고른 자기평가야. 운동 강도를 정해주는 기능이 아니야.").font(.caption).foregroundStyle(.secondary)
+                    Text(Insights.footnote(periodTitle: periodTitle, count: c.periodCount + c.otherCount, source: "Apple 건강 생리 기록 + 직접 입력 피로도"))
+                        .font(.caption2).foregroundStyle(.secondary)
+                } else {
+                    ProgressView().frame(maxWidth: .infinity)
+                }
+            }
+            .task(id: sessions.map(\.at)) { await load() }
+        }
+    }
+
+    private func load() async {
+        guard let first = sessions.map(\.at).min(), let last = sessions.map(\.at).max() else {
+            comparison = CycleFatigueComparison.compute([]); return
+        }
+        let days = (try? await HealthService.shared.menstrualDays(from: first.addingTimeInterval(-86_400), to: last.addingTimeInterval(86_400))) ?? []
+        let cal = Calendar.current
+        comparison = CycleFatigueComparison.compute(sessions.map { (inPeriod: days.contains(cal.startOfDay(for: $0.at)), fatigue: $0.fatigue) })
     }
 }

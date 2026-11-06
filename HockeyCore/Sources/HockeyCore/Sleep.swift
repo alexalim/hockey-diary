@@ -78,3 +78,27 @@ public struct SleepMoodComparison: Equatable, Sendable {
         return "최근 \(total)번 중 \(hours)시간 이상 잔 날(\(longCount)번)의 운동 후 기분이 덜 잔 날(\(shortCount)번)보다 \(compare) 기록됐어."
     }
 }
+
+/// 생리 기간에 한 활동과 다른 날 활동의 피로도(자기평가) 비교. 별도 동의한 사람에게만 보여준다 (F-C04).
+/// 관찰된 차이만 말하고, 운동 강도를 처방하거나 원인을 단정하지 않는다 (7.2, 12.3).
+public struct CycleFatigueComparison: Equatable, Sendable {
+    public var periodCount: Int
+    public var otherCount: Int
+    public var periodAverage: Double?
+    public var otherAverage: Double?
+    public var sufficiency: Sufficiency
+
+    public static func compute(_ pairs: [(inPeriod: Bool, fatigue: Int?)], minimumPerGroup: Int = 3) -> CycleFatigueComparison {
+        let valid = pairs.compactMap { p in p.fatigue.flatMap { (1...5).contains($0) ? (p.inPeriod, $0) : nil } }
+        let a = valid.filter { $0.0 }.map(\.1), b = valid.filter { !$0.0 }.map(\.1)
+        func avg(_ xs: [Int]) -> Double? { xs.isEmpty ? nil : Double(xs.reduce(0, +)) / Double(xs.count) }
+        return CycleFatigueComparison(periodCount: a.count, otherCount: b.count, periodAverage: avg(a), otherAverage: avg(b),
+                                      sufficiency: Sufficiency(count: min(a.count, b.count), minimum: minimumPerGroup))
+    }
+
+    public var sentence: String? {
+        guard sufficiency.isSufficient, let p = periodAverage, let o = otherAverage else { return nil }
+        let compare = p - o >= 0.3 ? "더 높게" : (o - p >= 0.3 ? "더 낮게" : "비슷하게")
+        return "생리 기간에 한 활동(\(periodCount)번)의 피로도가 다른 날(\(otherCount)번)보다 \(compare) 기록됐어."
+    }
+}
