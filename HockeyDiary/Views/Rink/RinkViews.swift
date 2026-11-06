@@ -76,16 +76,45 @@ struct RinkNameField: View {
 }
 
 /// 탐색 탭: 링크장 찾기 (S10). 지역명·이름 검색, 즐겨찾기, 내가 확인한 시설 정보.
+/// 탐색 탭: 링크장 찾기 (S10). 들어오자마자 전국 아이스링크를 지도와 목록으로 보여주고,
+/// 이름·지역으로 찾고, 고른 곳은 '내 링크장'에 모은다. 위치 권한은 쓰지 않는다.
 struct RinkFinderView: View {
     @Environment(\.modelContext) private var context
     @Query(sort: \Rink.lastUsedAt, order: .reverse) private var rinks: [Rink]
     @StateObject private var search = RinkSearch()
     @State private var query = ""
+    @State private var browse: [RinkPlace] = []
+    @State private var browseQuery = "아이스링크"
+    @State private var browsing = false
+    @State private var opened: Rink?
+
+    private let quick = ["아이스링크", "아이스하키", "빙상장"]
 
     var body: some View {
         List {
+            if query.isEmpty {
+                Section {
+                    Map(initialPosition: .region(RinkSearch.korea)) {
+                        ForEach(browse) { p in
+                            if let c = p.coordinate { Marker(p.name, systemImage: "figure.hockey", coordinate: c).tint(Theme.cobalt) }
+                        }
+                        ForEach(rinks.filter { $0.latitude != nil }) { r in
+                            Marker(r.name, systemImage: r.isFavorite ? "star.fill" : "mappin",
+                                   coordinate: CLLocationCoordinate2D(latitude: r.latitude!, longitude: r.longitude!)).tint(Theme.neonPink)
+                        }
+                    }
+                    .frame(height: 220)
+                    .listRowInsets(EdgeInsets())
+                    ChoiceCards(options: quick.map { ChoiceOption(value: $0, title: $0, art: .symbol("magnifyingglass")) },
+                                selection: Binding(get: { browseQuery }, set: { browseQuery = $0; Task { await loadBrowse() } }),
+                                columns: 3, minHeight: 52)
+                } footer: {
+                    Text("핑크는 내 링크장, 파랑은 찾은 곳이야.")
+                }
+            }
+
             if !query.isEmpty {
-                Section("Apple 지도 검색") {
+                Section("검색 결과") {
                     if search.results.isEmpty {
                         Text(search.failed ? "지금은 지도 검색이 안 돼." : "결과가 없어. 동네 이름을 붙여서 찾아봐. 예: 목동 아이스링크")
                             .font(.subheadline).foregroundStyle(.secondary)
@@ -94,38 +123,77 @@ struct RinkFinderView: View {
                         Button {
                             Task {
                                 let p = await search.resolve(c)
-                                RinkStore.upsert(name: p.name, address: p.address, lat: p.lat, lon: p.lon, context: context)
-                                context.saveOrReport()
+                                open(RinkStore.upsert(name: p.name, address: p.address, lat: p.lat, lon: p.lon, context: context))
                                 query = ""
                             }
-                        } label: {
-                            VStack(alignment: .leading) {
-                                Text(c.title).foregroundStyle(.primary)
-                                Text(c.subtitle).font(.caption).foregroundStyle(.secondary)
-                            }
-                        }
+                        } label: { placeRow(c.title, c.subtitle, saved: rinks.contains { $0.name == c.title }) }
                     }
                 }
             }
+
             let favorites = rinks.filter(\.isFavorite)
             if !favorites.isEmpty {
                 Section("즐겨찾기") { ForEach(favorites) { r in NavigationLink { RinkDetailView(rink: r) } label: { RinkRow(rink: r) } } }
             }
             let others = rinks.filter { !$0.isFavorite }
-            Section("내 링크장") {
-                if others.isEmpty && favorites.isEmpty {
-                    Text("위에서 찾아서 넣어봐. 기록할 때 고른 링크장도 여기 모여.").font(.subheadline).foregroundStyle(.secondary)
-                }
-                ForEach(others) { r in NavigationLink { RinkDetailView(rink: r) } label: { RinkRow(rink: r) } }
+            if !others.isEmpty {
+                Section("내 링크장") { ForEach(others) { r in NavigationLink { RinkDetailView(rink: r) } label: { RinkRow(rink: r) } } }
             }
+
+            if query.isEmpty {
+                Section {
+                    if browsing && browse.isEmpty {
+                        HStack { ProgressView(); Text("찾는 중…").foregroundStyle(.secondary) }
+                    } else if browse.isEmpty {
+                        Text(search.failed ? "지금은 지도 검색이 안 돼. 인터넷 연결을 확인해줘." : "찾은 곳이 없어. 위 검색창에 이름이나 동네를 적어봐.")
+                            .font(.subheadline).foregroundStyle(.secondary)
+                    }
+                    ForEach(browse) { p in
+                        Button {
+                            open(RinkStore.upsert(name: p.name, address: p.address, lat: p.coordinate?.latitude, lon: p.coordinate?.longitude, context: context))
+                        } label: { placeRow(p.name, p.address, saved: rinks.contains { $0.name == p.name }) }
+                    }
+                } header: {
+                    Text("'\(browseQuery)' 찾은 곳")
+                } footer: {
+                    Text("누르면 내 링크장에 담기고 자세히 볼 수 있어.")
+                }
+            }
+
             Section {
                 Text("검색어는 Apple 지도로 가. 내 위치는 쓰지 않아. 운영 시간과 대관은 자주 바뀌니 공식 안내를 확인해줘.")
                     .font(.caption).foregroundStyle(.secondary)
             }
         }
-        .searchable(text: $query, prompt: "링크장·지역 찾기")
+        .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: "링크장 이름이나 동네")
         .onChange(of: query) { _, q in search.update(q) }
         .navigationTitle("링크장 찾기")
+        .navigationDestination(item: $opened) { r in RinkDetailView(rink: r) }
+        .task { if browse.isEmpty { await loadBrowse() } }
+    }
+
+    private func placeRow(_ title: String, _ subtitle: String, saved: Bool) -> some View {
+        HStack {
+            Image(systemName: "figure.hockey").foregroundStyle(Theme.accent).frame(width: 28)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).foregroundStyle(.primary)
+                if !subtitle.isEmpty { Text(subtitle).font(.caption).foregroundStyle(.secondary).lineLimit(1) }
+            }
+            Spacer()
+            Image(systemName: saved ? "checkmark.circle.fill" : "plus.circle").foregroundStyle(saved ? Theme.neonPink : Theme.accent)
+        }
+        .frame(minHeight: Theme.touch)
+    }
+
+    private func open(_ rink: Rink) {
+        context.saveOrReport()
+        opened = rink
+    }
+
+    private func loadBrowse() async {
+        browsing = true
+        browse = await search.places(browseQuery)
+        browsing = false
     }
 }
 
