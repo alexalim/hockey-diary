@@ -23,6 +23,7 @@ struct SessionDetailView: View {
                 if hasMood { moodCard }
                 if hasNotes { notesCard }
                 placeCard
+                SessionHealthCard(start: session.startsAt, end: session.endsAt)
                 if let usage = session.usages.first { equipmentCard(usage) }
                 if !session.photos.isEmpty { photosCard }
                 Button(role: .destructive) {

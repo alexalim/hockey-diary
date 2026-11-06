@@ -25,11 +25,7 @@ struct GrowthView: View {
                 moodCard
                 surfaceCard
                 skillsCard
-                Card(tint: Theme.iceBlue) {
-                    CardHeader(title: "수면·컨디션", systemImage: "bed.double.fill")
-                    Text("Apple 건강 연동은 다음 업데이트에서 열려. 지금은 직접 남긴 기분과 피로도만 봐.")
-                        .font(.subheadline).foregroundStyle(.secondary)
-                }
+                SleepGrowthCard(samples: samples, periodTitle: period.longTitle)
             }
             .padding(16)
         }

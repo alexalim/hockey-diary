@@ -28,6 +28,11 @@ targets:
       - path: HockeyDiary
     dependencies:
       - package: HockeyCore
+    entitlements:
+      path: HockeyDiary/HockeyDiary.entitlements
+      properties:
+        com.apple.developer.healthkit: true
+        com.apple.developer.healthkit.access: []
     info:
       path: HockeyDiary/Info.plist
       properties:
@@ -38,6 +43,9 @@ targets:
           UIColorName: LaunchBackground
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         ITSAppUsesNonExemptEncryption: false
+        NSHealthShareUsageDescription: "하키 전날 밤 수면, 수업·경기 시간대 심박, 워치·가민이 잰 운동을 내 기록 옆에 보여주려고 읽어. 읽기만 하고 앱 밖으로 보내지 않아."
+        # 쓰지 않지만 HealthKit 권한이 있으면 Apple이 쓰기 설명도 요구한다(없으면 업로드 거절).
+        NSHealthUpdateUsageDescription: "마하다는 건강 앱에 데이터를 쓰지 않아. 수면·심박·운동을 읽기만 해."
         # 사진은 PhotosPicker(시스템 선택기)로만 받아 앨범 전체 권한을 요청하지 않는다 (FR-08, T10).
     settings:
       base:

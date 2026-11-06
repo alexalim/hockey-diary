@@ -1,0 +1,138 @@
+import Foundation
+
+/// 락커 번호판. 숫자 0~4자리 문자열, 앞자리 0 유지("007"), 중복 허용 (LK-09, T17).
+public enum LockerNumber {
+    public static let maxDigits = 4
+
+    /// 입력에서 숫자만 남기고 4자리까지 자른다. 앞자리 0은 지우지 않는다.
+    public static func normalize(_ input: String) -> String {
+        String(input.filter { $0.isASCII && $0.isNumber }.prefix(maxDigits))
+    }
+}
+
+/// 락커 색 테마 (LK-10). 장비 데이터와 분리된 장식 값이다.
+public enum LockerTheme: String, CaseIterable, Sendable {
+    case cobalt, navy, neonPink, iceBlue
+
+    public var title: String {
+        switch self {
+        case .cobalt: return "코발트"
+        case .navy: return "네이비"
+        case .neonPink: return "네온 핑크"
+        case .iceBlue: return "아이스 블루"
+        }
+    }
+}
+
+/// 스티커 하나의 배치. 좌표는 문 크기에 대한 0~1 정규화 값이라 화면 크기가 달라도 같은 자리에 붙는다 (StickerPlacement).
+public struct Placement: Equatable, Sendable {
+    public var x: Double
+    public var y: Double
+    public var scale: Double
+    public var rotation: Double
+    public var z: Int
+
+    public static let scaleRange = 0.4...3.0
+
+    public init(x: Double, y: Double, scale: Double = 1, rotation: Double = 0, z: Int = 0) {
+        self.x = x; self.y = y; self.scale = scale; self.rotation = rotation; self.z = z
+    }
+
+    /// 문 밖으로 나가거나 너무 작거나 크지 않게, 각도는 -180~180으로 맞춘다.
+    public func clamped() -> Placement {
+        var p = self
+        p.x = min(max(x, 0), 1)
+        p.y = min(max(y, 0), 1)
+        p.scale = min(max(scale, Placement.scaleRange.lowerBound), Placement.scaleRange.upperBound)
+        var r = rotation.truncatingRemainder(dividingBy: 360)
+        if r > 180 { r -= 360 }
+        if r <= -180 { r += 360 }
+        p.rotation = r
+        return p
+    }
+}
+
+public enum StickerOrder {
+    /// 고른 스티커를 맨 앞으로. 나머지 순서는 유지하고 0부터 다시 매긴다.
+    public static func bringToFront(_ id: UUID, in order: [UUID]) -> [UUID] {
+        guard order.contains(id) else { return order }
+        return order.filter { $0 != id } + [id]
+    }
+
+    public static func sendToBack(_ id: UUID, in order: [UUID]) -> [UUID] {
+        guard order.contains(id) else { return order }
+        return [id] + order.filter { $0 != id }
+    }
+}
+
+/// 스티커 사전. 실제 팀 로고는 넣지 않고 기호 그림만 쓴다.
+public struct StickerDef: Equatable, Sendable {
+    public enum Kind: String, Sendable { case basic, hockey, deco, achievement }
+    public let key: String
+    public let title: String
+    public let symbol: String
+    public let kind: Kind
+    /// 0 핑크, 1 코발트, 2 흰색, 3 금색
+    public let palette: Int
+}
+
+public enum StickerCatalog {
+    public static let all: [StickerDef] = [
+        StickerDef(key: "star", title: "별", symbol: "star.fill", kind: .basic, palette: 3),
+        StickerDef(key: "heart", title: "하트", symbol: "heart.fill", kind: .basic, palette: 0),
+        StickerDef(key: "bolt", title: "번개", symbol: "bolt.fill", kind: .basic, palette: 3),
+        StickerDef(key: "flame", title: "불꽃", symbol: "flame.fill", kind: .basic, palette: 0),
+        StickerDef(key: "sparkles", title: "반짝", symbol: "sparkles", kind: .basic, palette: 2),
+        StickerDef(key: "puck", title: "퍽", symbol: "hockey.puck.fill", kind: .hockey, palette: 1),
+        StickerDef(key: "player", title: "하키 선수", symbol: "figure.hockey", kind: .hockey, palette: 1),
+        StickerDef(key: "skate", title: "스케이트", symbol: "figure.skating", kind: .hockey, palette: 2),
+        StickerDef(key: "trophy", title: "트로피", symbol: "trophy.fill", kind: .hockey, palette: 3),
+        StickerDef(key: "snowflake", title: "눈꽃", symbol: "snowflake", kind: .hockey, palette: 2),
+        StickerDef(key: "crown", title: "왕관", symbol: "crown.fill", kind: .deco, palette: 3),
+        StickerDef(key: "moon", title: "달과 별", symbol: "moon.stars.fill", kind: .deco, palette: 2),
+        StickerDef(key: "music", title: "음표", symbol: "music.note", kind: .deco, palette: 0),
+        StickerDef(key: "smile", title: "스마일", symbol: "face.smiling.inverse", kind: .deco, palette: 3),
+        StickerDef(key: "first-lesson", title: "첫 수업", symbol: "graduationcap.fill", kind: .achievement, palette: 0),
+        StickerDef(key: "first-game", title: "첫 경기", symbol: "flag.checkered", kind: .achievement, palette: 1),
+        StickerDef(key: "first-goal", title: "첫 골", symbol: "target", kind: .achievement, palette: 0),
+        StickerDef(key: "ten-sessions", title: "빙판 10회", symbol: "10.circle.fill", kind: .achievement, palette: 3),
+        StickerDef(key: "first-pond", title: "첫 폰드", symbol: "water.waves", kind: .achievement, palette: 2),
+        StickerDef(key: "first-sharpening", title: "첫 연마 기록", symbol: "wrench.and.screwdriver.fill", kind: .achievement, palette: 1),
+    ]
+
+    public static func def(_ key: String) -> StickerDef? { all.first { $0.key == key } }
+}
+
+/// 성취 스티커 판정에 쓰는 기록 요약.
+public struct MilestoneFacts: Equatable, Sendable {
+    public var lessons: Int
+    public var games: Int
+    public var goals: Int
+    public var sessions: Int
+    public var pondSessions: Int
+    public var sharpenings: Int
+
+    public init(lessons: Int = 0, games: Int = 0, goals: Int = 0, sessions: Int = 0, pondSessions: Int = 0, sharpenings: Int = 0) {
+        self.lessons = lessons; self.games = games; self.goals = goals
+        self.sessions = sessions; self.pondSessions = pondSessions; self.sharpenings = sharpenings
+    }
+}
+
+public enum Milestones {
+    /// 기록으로 얻은 성취 스티커 키.
+    public static func earned(_ f: MilestoneFacts) -> Set<String> {
+        var s = Set<String>()
+        if f.lessons >= 1 { s.insert("first-lesson") }
+        if f.games >= 1 { s.insert("first-game") }
+        if f.goals >= 1 { s.insert("first-goal") }
+        if f.sessions >= 10 { s.insert("ten-sessions") }
+        if f.pondSessions >= 1 { s.insert("first-pond") }
+        if f.sharpenings >= 1 { s.insert("first-sharpening") }
+        return s
+    }
+
+    /// 이미 받은 것은 다시 발급하지 않는다 (EarnedSticker 중복 방지).
+    public static func newlyEarned(_ f: MilestoneFacts, alreadyEarned: Set<String>) -> [String] {
+        earned(f).subtracting(alreadyEarned).sorted()
+    }
+}
