@@ -31,7 +31,7 @@ targets:
     info:
       path: HockeyDiary/Info.plist
       properties:
-        CFBundleDisplayName: 하키 다이어리
+        CFBundleDisplayName: myHADA
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         UILaunchScreen:
