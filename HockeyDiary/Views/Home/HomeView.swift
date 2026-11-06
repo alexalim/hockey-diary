@@ -38,7 +38,7 @@ struct HomeView: View {
             .padding(16)
         }
         .screenBackground()
-        .navigationTitle("오늘의 빙판")
+        .navigationTitle("오늘의 하키")
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button { showingSettings = true } label: {
