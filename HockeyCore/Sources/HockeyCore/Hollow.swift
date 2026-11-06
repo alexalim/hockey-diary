@@ -63,7 +63,7 @@ public struct Hollow: Equatable, Hashable, Sendable {
 
     /// 화면에 보일 별명: 선수 별명이 있으면 그것, 없으면 느낌 별명. 목록에 없는 값은 nil.
     public var nickname: String? {
-        playerNickname ?? ["11/16": "쭉쭉 활주", "3/4": "스피드 활주", "7/8": "미끄럼 대장", "1": "활주 끝판왕"][label]
+        playerNickname ?? (Hollow.presets.contains(self) && inches > 0.625 ? "활주 스타일" : nil)
     }
 
     public static let playerNicknameNote = "선수 이름은 연마점에서 단계를 부르는 별명이야. 그 선수가 실제로 쓰는 값은 아니야."
