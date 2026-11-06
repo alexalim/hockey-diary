@@ -97,8 +97,8 @@ struct JournalEditorView: View {
                 Toggle("비공개", isOn: $isPrivate)
             } footer: {
                 Text(isPrivate
-                     ? "비공개 일기는 하키 리포트나 공유에 들어가지 않아. 일기 내용을 자동으로 분석하지도 않아."
-                     : "지금은 일기를 밖으로 공유하는 기능이 없어. 비공개 일기는 시즌 리포트·AI 요약에도 들어가지 않아.")
+                     ? "비공개 일기는 리포트나 공유에 안 들어가. 내용을 따로 분석하지도 않아."
+                     : "지금은 일기를 공유하는 기능이 없어. 리포트나 AI 요약에도 일기는 안 들어가.")
             }
             if !canSave {
                 Section { Text("기분을 고르거나 한 줄만 써도 저장돼.").font(.footnote).foregroundStyle(.secondary) }
@@ -112,7 +112,7 @@ struct JournalEditorView: View {
         .confirmationDialog("이 일기를 지울까?", isPresented: $confirmingDelete, titleVisibility: .visible) {
             Button("지우기", role: .destructive, action: delete)
         } message: {
-            Text("앱 안에 담은 사진 사본도 함께 지워져. 사진 앱의 원본은 그대로야.")
+            Text("앱에 복사해 둔 사진도 같이 지워져. 사진 앱 원본은 그대로야.")
         }
         .navigationTitle(journal == nil ? "하루 일기" : "일기 고치기")
         .navigationBarTitleDisplayMode(.inline)

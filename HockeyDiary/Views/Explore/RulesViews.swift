@@ -27,7 +27,7 @@ struct RuleDetailView: View {
                     }
                 }
                 quizCard
-                Text("\(RuleGuide.source) \(topic.reference) 기준으로 직접 정리한 설명이야. 대회·동호회마다 적용이 다를 수 있으니 대회 운영 규정을 꼭 확인해줘.")
+                Text("\(RuleGuide.source)의 \(topic.reference) 내용을 보고 쉽게 풀어 썼어. 대회나 동호회마다 다를 수 있으니 꼭 확인해줘.")
                     .font(.caption).foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -133,7 +133,7 @@ struct RuleScene {
                       markers: [Marker(kind: .defender, from: CGPoint(x: 0.5, y: 0.8), to: CGPoint(x: 0.5, y: 0.14)),
                                 Marker(kind: .attacker, from: CGPoint(x: 0.35, y: 0.12), to: CGPoint(x: 0.4, y: 0.62)),
                                 Marker(kind: .puck, from: CGPoint(x: 0.45, y: 0.7), to: CGPoint(x: 0.45, y: 0.7))],
-                      caption: "나가는 선수가 벤치 1.5m 안에 들어온 뒤 새 선수가 플레이해 → 정상"),
+                      caption: "나가는 선수가 벤치 1.5m 안에 들어온 뒤 새 선수가 뛰어 → 정상"),
         ],
     ]
 }

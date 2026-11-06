@@ -52,7 +52,7 @@ struct HomeView: View {
 
     private var storeWarning: some View {
         Card(tint: Theme.neonPink.opacity(0.15)) {
-            Label(health.openFailed ? "저장소를 열지 못해서 지금 기록은 앱을 끄면 사라져. 앱을 다시 켜봐."
+            Label(health.openFailed ? "기록을 불러오지 못했어. 지금 쓰는 건 앱을 끄면 사라져. 앱을 다시 켜봐."
                                     : "방금 기록을 저장하지 못했어. 한 번 더 저장해줘.",
                   systemImage: "exclamationmark.triangle.fill")
                 .font(.subheadline)
@@ -66,7 +66,7 @@ struct HomeView: View {
                 .font(.subheadline).foregroundStyle(.white.opacity(0.8))
             if todaySessions.isEmpty && todayJournal == nil {
                 Text("오늘은 아직 기록이 없어.").font(.title3.bold()).foregroundStyle(.white)
-                Text("수업 끝나고 10분 안에 남기면 잊기 전에 붙잡을 수 있어.")
+                Text("수업 끝나고 10분 안에 남겨봐. 잊어버리기 전에.")
                     .font(.subheadline).foregroundStyle(.white.opacity(0.85))
             } else {
                 Text("오늘 \(todaySessions.count)개 활동\(todayJournal == nil ? "" : " · 일기 1개")")
@@ -150,17 +150,17 @@ struct HomeView: View {
         if skates.isEmpty {
             Card(tint: Theme.iceBlue) {
                 CardHeader(title: "장비 점검", systemImage: "shoeprints.fill")
-                Text("락커에 스케이트를 등록하면 연마 후 얼음 위 시간을 세어줄게.")
+                Text("락커에 스케이트를 넣으면 연마하고 얼마나 탔는지 세어줄게.")
                     .font(.subheadline).foregroundStyle(.secondary)
             }
         } else if !due.isEmpty {
             Card(tint: Theme.iceBlue) {
                 CardHeader(title: "연마 점검해볼까?", systemImage: "wrench.and.screwdriver.fill")
                 ForEach(due) { r in
-                    Text("러너 \(r.name): 마지막 연마 후 \(minutesText(DiaryStore.minutesSinceSharpening(r, context: context))) 탔어. 내가 정한 기준에 닿았어.")
+                    Text("러너 \(r.name): 연마하고 \(minutesText(DiaryStore.minutesSinceSharpening(r, context: context))) 탔어. 정해둔 시간이 됐어.")
                         .font(.subheadline)
                 }
-                Text("엣지가 밀리는 느낌이 없으면 더 타도 돼. 기준은 락커에서 바꿀 수 있어.")
+                Text("엣지가 밀리지 않으면 더 타도 돼. 시간은 락커에서 바꿀 수 있어.")
                     .font(.caption).foregroundStyle(.secondary)
             }
         }
@@ -188,13 +188,13 @@ struct SettingsView: View {
     var body: some View {
         List {
             Section("내 기록은 어디에 있어?") {
-                Label("모든 기록은 이 아이폰 안에만 저장돼.", systemImage: "iphone")
-                Label("서버나 iCloud로 보내지 않아. 링크장 검색어만 Apple 지도로 보내.", systemImage: "icloud.slash")
-                Label("Apple 건강은 연결했을 때만 읽고, 앱에 저장하지 않아.", systemImage: "heart.text.square")
-                Label("AI 요약은 켰을 때만, 기기 안에서 하키 기록만 써.", systemImage: "sparkles")
-                Label("Apple Watch로 잰 운동은 건강 앱에 운동 기록으로 저장돼.", systemImage: "applewatch")
-                Label("일기는 기본 비공개고, 내용을 자동으로 분석하지 않아.", systemImage: "lock.fill")
-                Label("사진은 고른 것만 사본으로 담고 위치 정보는 지워.", systemImage: "photo")
+                Label("기록은 모두 이 아이폰에만 저장돼.", systemImage: "iphone")
+                Label("서버나 iCloud로 안 보내. 링크장 검색어만 Apple 지도로 가.", systemImage: "icloud.slash")
+                Label("Apple 건강은 연결했을 때만 읽어. 읽은 값은 따로 저장하지 않아.", systemImage: "heart.text.square")
+                Label("AI 요약은 켰을 때만 써. 아이폰 안에서 하키 기록만 봐.", systemImage: "sparkles")
+                Label("Apple Watch로 잰 운동은 건강 앱에도 저장돼.", systemImage: "applewatch")
+                Label("일기는 처음부터 비공개야. 내용을 따로 분석하지 않아.", systemImage: "lock.fill")
+                Label("사진은 고른 것만 복사해 둬. 위치 정보는 지워.", systemImage: "photo")
             }
             Section("연결") {
                 NavigationLink { HealthConnectView() } label: { Label("Apple 건강", systemImage: "heart.text.square.fill") }
@@ -206,7 +206,7 @@ struct SettingsView: View {
                     Text(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "-")
                         .foregroundStyle(.secondary)
                 }
-                Text("분석은 내 기록의 경향만 보여줘. 의료 조언이나 경기력 예측이 아니야.")
+                Text("분석은 내 기록이 어땠는지만 보여줘. 의료 조언이나 실력 예측은 하지 않아.")
                     .font(.footnote).foregroundStyle(.secondary)
             }
         }

@@ -47,7 +47,7 @@ struct SessionDetailView: View {
         .confirmationDialog("이 기록을 지울까?", isPresented: $confirmingDelete, titleVisibility: .visible) {
             Button("지우기", role: .destructive) { delete() }
         } message: {
-            Text("기술 연결과 장비 사용 시간도 함께 지워져. 사진 앱의 원본 사진은 그대로야.")
+            Text("이 기록의 기술과 장비 시간도 같이 지워져. 사진 앱 원본은 그대로야.")
         }
     }
 
@@ -174,7 +174,7 @@ struct SessionDetailView: View {
             let runner = runners.first { $0.id == usage.runnerID }
             Text([skate?.name, runner.map { "러너 \($0.name)" }].compactMap { $0 }.joined(separator: " · "))
                 .font(.subheadline)
-            Text("얼음 위 \(minutesText(usage.iceMinutes))").font(.caption).foregroundStyle(.secondary)
+            Text("탄 시간 \(minutesText(usage.iceMinutes))").font(.caption).foregroundStyle(.secondary)
         }
     }
 

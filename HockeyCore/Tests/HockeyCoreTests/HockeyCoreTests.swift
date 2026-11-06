@@ -191,7 +191,7 @@ final class InsightsTests: XCTestCase {
         XCTAssertEqual(change.paired, 3)
         XCTAssertEqual(change.improved, 2)
         XCTAssertEqual(change.same, 1)
-        XCTAssertEqual(change.sentence, "운동 전후 기분을 둘 다 남긴 3번 중 2번은 운동 후 기분이 더 좋게 기록됐어.")
+        XCTAssertEqual(change.sentence, "운동 전후 기분을 다 남긴 3번 중 2번은 운동하고 기분이 나아졌어.")
         XCTAssertFalse(change.sentence!.contains("때문"), "원인 단정 금지")
     }
 
@@ -264,7 +264,7 @@ final class SleepTests: XCTestCase {
         let c = SleepMoodComparison.compute(pairs)
         XCTAssertEqual(c.longCount, 3)
         XCTAssertEqual(c.shortCount, 3, "기분 없는 기록은 제외")
-        XCTAssertEqual(c.sentence, "최근 6번 중 7시간 이상 잔 날(3번)의 운동 후 기분이 덜 잔 날(3번)보다 더 높게 기록됐어.")
+        XCTAssertEqual(c.sentence, "최근 6번 기록이야. 7시간 넘게 잔 날(3번)이 덜 잔 날(3번)보다 운동 후 기분이 더 좋았어.")
         XCTAssertFalse(c.sentence!.contains("때문"))
     }
 }
@@ -397,7 +397,7 @@ final class CycleTests: XCTestCase {
         let pairs: [(inPeriod: Bool, fatigue: Int?)] = [(true, 4), (true, 5), (true, 4), (false, 2), (false, 3), (false, 2), (false, nil)]
         let c = CycleFatigueComparison.compute(pairs)
         XCTAssertEqual(c.otherCount, 3)
-        XCTAssertEqual(c.sentence, "생리 기간에 한 활동(3번)의 피로도가 다른 날(3번)보다 더 높게 기록됐어.")
+        XCTAssertEqual(c.sentence, "생리 기간에 탄 날(3번)이 다른 날(3번)보다 피로도가 더 높았어.")
         for banned in ["하면 안", "쉬어", "때문"] { XCTAssertFalse(c.sentence!.contains(banned)) }
     }
 }

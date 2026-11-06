@@ -36,8 +36,8 @@ public enum Sufficiency: Equatable, Sendable {
     public var message: String {
         switch self {
         case .empty: return "아직 기록이 없어. 첫 기록을 남겨보자."
-        case .insufficient(let count, let needed): return "기록 \(count)건이야. \(needed)건부터 경향을 보여줄게. 기록을 더 모아보자."
-        case .sufficient(let count): return "기록 \(count)건 기준"
+        case .insufficient(let count, let needed): return "기록이 \(count)건이야. \(needed)건이 되면 보여줄게. 조금만 더 모아보자."
+        case .sufficient(let count): return "기록 \(count)건"
         }
     }
 }

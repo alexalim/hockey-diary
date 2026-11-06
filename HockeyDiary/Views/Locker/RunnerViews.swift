@@ -11,7 +11,7 @@ struct RunnerListView: View {
     var body: some View {
         List {
             if runners.isEmpty {
-                Text("러너 세트가 없어. 스케이트 상세에서 추가하면 바로 장착돼.")
+                Text("아직 러너 세트가 없어. 스케이트 화면에서 추가하면 바로 달려.")
                     .foregroundStyle(.secondary)
             }
             ForEach(runners) { r in
@@ -85,9 +85,9 @@ struct RunnerEditorView: View {
                     Stepper("연마 후 \(thresholdHours)시간 타면 알려줘", value: $thresholdHours, in: 1...100)
                 }
             } header: {
-                Text("내 점검 기준")
+                Text("점검 알림")
             } footer: {
-                Text("정답인 연마 주기는 없어. 내 느낌과 기록에 맞춰 정해줘.")
+                Text("정해진 연마 주기는 없어. 내 느낌대로 정하면 돼.")
             }
             Section("메모") { TextField("메모", text: $memo, axis: .vertical) }
         }
@@ -151,18 +151,18 @@ struct RunnerDetailView: View {
                     }
                 }
                 HStack {
-                    Text("마지막 연마 후 얼음 위")
+                    Text("연마하고 탄 시간")
                     Spacer()
                     Text(minutesText(since)).bold()
                 }
                 if let t = runner.checkThresholdMinutes {
                     ProgressView(value: min(Double(since), Double(t)), total: Double(t)) {
-                        Text("내 점검 기준 \(minutesText(t))").font(.caption)
+                        Text("\(minutesText(t)) 타면 알림").font(.caption)
                     }
                     .tint(since >= t ? Theme.neonPink : Theme.accent)
                 }
             } footer: {
-                Text("기록한 활동에서 고른 러너의 '실제 얼음 위 시간'만 더해.")
+                Text("활동마다 고른 러너의 '실제로 탄 시간'만 더해.")
             }
 
             Section {
@@ -237,7 +237,7 @@ struct SharpeningEditorView: View {
             } header: {
                 Text("홀로우 (RoH)")
             } footer: {
-                Text("그림은 상대적인 깊이를 보여주는 도식이야. 숫자가 작을수록 홈이 깊어. 모르면 비워둬도 돼.")
+                Text("숫자가 작을수록 홈이 깊어. 그림은 깊이 차이만 보여주는 예시야. 모르면 비워둬도 돼.")
             }
             Section("어디서?") { TextField("연마한 곳 (업체·링크장)", text: $shop) }
             Section("연마 후 느낌") {

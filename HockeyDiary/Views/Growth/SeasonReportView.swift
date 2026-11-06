@@ -63,7 +63,7 @@ struct SeasonReportView: View {
                     }
                     .buttonStyle(PinkButtonStyle())
                 }
-                Text("리포트에는 활동 횟수·시간·기술 이름만 들어가. 하루 일기, 기분 메모, 수면·심박, 사진, 장소 위치는 넣지 않아.")
+                Text("리포트에는 횟수, 시간, 기술 이름만 들어가. 일기, 메모, 잠, 심박, 사진, 위치는 안 넣어.")
                     .font(.caption).foregroundStyle(.secondary)
             }
             .padding(16)
@@ -102,7 +102,7 @@ struct ReportCard: View {
                     Text("\(report.sessions)").font(.system(size: 54, weight: .black, design: .rounded))
                     Text("번 빙판에 섰어").font(.headline)
                 }
-                Text("얼음 위 \(minutesText(report.minutes))").font(.title3.bold())
+                Text("모두 \(minutesText(report.minutes)) 탔어").font(.title3.bold())
                 HStack(spacing: 8) {
                     stat("수업", report.byType[.lesson] ?? 0)
                     stat("경기", (report.byType[.miniGame] ?? 0) + (report.byType[.regularGame] ?? 0))

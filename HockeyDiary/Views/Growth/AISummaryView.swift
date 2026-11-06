@@ -24,7 +24,7 @@ struct AISummaryView: View {
                     Toggle("수업·경기 메모도 넣기", isOn: $includeNotes)
                 }
             } footer: {
-                Text("켜면 고른 기간의 하키 기록(활동, 배운·써본 기술\(includeNotes ? ", 수업·경기 메모" : ""))만 이 아이폰 안의 Apple Intelligence 모델로 요약해. 하루 일기와 건강 데이터는 넣지 않고, 어디에도 보내지 않아.")
+                Text("켜면 고른 기간의 하키 기록(활동, 배운·써본 기술\(includeNotes ? ", 수업·경기 메모" : ""))만 아이폰 안의 Apple Intelligence로 요약해. 일기와 건강 데이터는 안 넣어. 어디에도 안 보내.")
             }
             if enabled {
                 Section {
@@ -47,7 +47,7 @@ struct AISummaryView: View {
                     } header: {
                         Text("\(period.longTitle) 돌아보기")
                     } footer: {
-                        Text("AI가 쓴 요약이라 틀릴 수 있어. 기록 \(facts.count)건 기준, 경기력 예측이나 몸 상태 판단이 아니야.")
+                        Text("AI가 쓴 거라 틀릴 수 있어. 기록 \(facts.count)건으로 만들었어. 실력이나 몸 상태를 판단하는 건 아니야.")
                     }
                 }
                 if let errorText { Section { Text(errorText).foregroundStyle(Theme.neonPink) } }
@@ -96,7 +96,7 @@ struct AISummaryView: View {
                 return
             }
             #endif
-            errorText = "AI 요약은 iOS 26 이상, Apple Intelligence가 되는 아이폰에서 쓸 수 있어."
+            errorText = "AI 요약은 iOS 26 이상이고 Apple Intelligence가 되는 아이폰에서만 돼."
         }
     }
 }
