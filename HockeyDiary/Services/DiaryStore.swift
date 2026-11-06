@@ -40,6 +40,29 @@ enum DiaryStore {
         return all.compactMap(\.record)
     }
 
+    static func sessionsSinceSharpening(_ runner: RunnerSet, context: ModelContext) -> Int {
+        EquipmentMath.sessionsSinceSharpening(runnerID: runner.id, usages: usageRecords(context),
+                                              lastSharpenedAt: runner.lastSharpening?.at)
+    }
+
+    /// 정해둔 점검 기준(시간 또는 횟수)에 닿았는지.
+    static func needsCheck(_ runner: RunnerSet, context: ModelContext) -> Bool {
+        EquipmentMath.needsCheck(minutesSince: minutesSinceSharpening(runner, context: context),
+                                 sessionsSince: sessionsSinceSharpening(runner, context: context),
+                                 thresholdMinutes: runner.checkThresholdMinutes,
+                                 thresholdSessions: runner.checkThresholdSessions)
+    }
+
+    /// "연마한 지 5일 · 3번 탔어" 같은 한 줄 요약.
+    static func sharpeningSummary(_ runner: RunnerSet, context: ModelContext) -> String {
+        let n = sessionsSinceSharpening(runner, context: context)
+        let ride = n == 0 ? "아직 안 탔어" : "\(n)번 탔어"
+        guard let last = runner.lastSharpening else { return "연마 기록 없음 · \(ride)" }
+        let ago = ElapsedText.since(last.at)
+        let head = ago == "오늘" ? "오늘 연마" : (ago == "어제" ? "어제 연마" : "연마한 지 \(ago.replacingOccurrences(of: " 전", with: ""))")
+        return "\(head) · \(ride)"
+    }
+
     static func minutesSinceSharpening(_ runner: RunnerSet, context: ModelContext) -> Int {
         EquipmentMath.iceMinutesSinceSharpening(runnerID: runner.id, usages: usageRecords(context),
                                                 lastSharpenedAt: runner.lastSharpening?.at)

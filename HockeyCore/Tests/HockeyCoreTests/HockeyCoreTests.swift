@@ -98,6 +98,40 @@ final class EquipmentTests: XCTestCase {
         XCTAssertEqual(EquipmentMath.iceMinutesSinceSharpening(runnerID: runnerB, usages: usages, lastSharpenedAt: nil), 60)
     }
 
+    // 연마한 지 얼마나 됐는지: 날짜 기준, 3개월이 넘어도 '개월 전'으로.
+    func testElapsedText() {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = TimeZone(identifier: "Asia/Seoul")!
+        let now = cal.date(from: DateComponents(year: 2026, month: 11, day: 6, hour: 12))!
+        func ago(_ d: Int, hour: Int = 12) -> String {
+            let past = cal.date(byAdding: .day, value: -d, to: now)!
+            return ElapsedText.since(cal.date(bySettingHour: hour, minute: 0, second: 0, of: past)!, now: now, calendar: cal)
+        }
+        XCTAssertEqual(ago(0), "오늘")
+        XCTAssertEqual(ago(1, hour: 23), "어제", "어젯밤 연마도 어제")
+        XCTAssertEqual(ago(5), "5일 전")
+        XCTAssertEqual(ago(21), "3주 전")
+        XCTAssertEqual(ago(95), "3개월 전")
+        XCTAssertEqual(ago(400), "1년 전")
+    }
+
+    // 연마 후 횟수로 세는 사람: 같은 활동은 1번, 연마 이전 활동은 빼고 센다.
+    func testSessionsSinceSharpening() {
+        let s = UUID()
+        let usages = [
+            UsageRecord(sessionID: UUID(), at: day(1), skateID: skate1, runnerID: runnerA, iceMinutes: 50),
+            UsageRecord(sessionID: s, at: day(3), skateID: skate1, runnerID: runnerA, iceMinutes: 40),
+            UsageRecord(sessionID: s, at: day(3), skateID: skate1, runnerID: runnerA, iceMinutes: 40),
+            UsageRecord(sessionID: UUID(), at: day(4), skateID: skate1, runnerID: runnerA, iceMinutes: 30),
+            UsageRecord(sessionID: UUID(), at: day(4), skateID: skate2, runnerID: runnerB, iceMinutes: 30),
+        ]
+        XCTAssertEqual(EquipmentMath.sessionsSinceSharpening(runnerID: runnerA, usages: usages, lastSharpenedAt: day(2)), 2)
+        XCTAssertTrue(EquipmentMath.needsCheck(minutesSince: 10, sessionsSince: 8, thresholdMinutes: nil, thresholdSessions: 8))
+        XCTAssertFalse(EquipmentMath.needsCheck(minutesSince: 10, sessionsSince: 7, thresholdMinutes: nil, thresholdSessions: 8))
+        XCTAssertTrue(EquipmentMath.needsCheck(minutesSince: 600, sessionsSince: 1, thresholdMinutes: 600, thresholdSessions: 8))
+        XCTAssertFalse(EquipmentMath.needsCheck(minutesSince: 999, sessionsSince: 99, thresholdMinutes: nil, thresholdSessions: nil))
+    }
+
     func testCheckOnlyWithUserThreshold() {
         XCTAssertFalse(EquipmentMath.needsCheck(minutesSince: 10_000, thresholdMinutes: nil), "기준 없으면 처방하지 않음")
         XCTAssertTrue(EquipmentMath.needsCheck(minutesSince: 600, thresholdMinutes: 600))
