@@ -242,6 +242,8 @@ final class RunnerSet {
     var currentHollow: String?
     /// 사용자가 정한 점검 기준(분). 없으면 알림 없음.
     var checkThresholdMinutes: Int?
+    /// 횟수로 정한 점검 기준(번). 시간 기준과 둘 중 하나만 쓴다. 나중에 추가된 값이라 기본 nil.
+    var checkThresholdSessions: Int?
     var memo: String = ""
     var createdAt: Date = Date()
 

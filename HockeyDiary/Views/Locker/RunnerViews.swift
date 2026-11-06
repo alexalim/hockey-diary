@@ -44,7 +44,7 @@ struct RunnerRow: View {
             }
             VStack(alignment: .leading, spacing: 2) {
                 Text(runner.name).font(.subheadline.bold())
-                Text("RoH \(runner.currentHollow.map { "\($0)\"" } ?? "미확인") · 연마 후 \(minutesText(DiaryStore.minutesSinceSharpening(runner, context: context)))")
+                Text("RoH \(runner.currentHollow.map { "\($0)\"" } ?? "미확인") · \(DiaryStore.sharpeningSummary(runner, context: context))")
                     .font(.caption).foregroundStyle(.secondary)
             }
             Spacer()
@@ -69,8 +69,13 @@ struct RunnerEditorView: View {
     @State private var name = ""
     @State private var model = ""
     @State private var memo = ""
+    enum CheckBy: String, CaseIterable { case hours, sessions
+        var title: String { self == .hours ? "탄 시간" : "탄 횟수" }
+    }
     @State private var useThreshold = false
+    @State private var checkBy: CheckBy = .sessions
     @State private var thresholdHours = 10
+    @State private var thresholdSessions = 8
     @State private var loaded = false
 
     var body: some View {
@@ -82,7 +87,15 @@ struct RunnerEditorView: View {
             Section {
                 Toggle("점검 알림 받기", isOn: $useThreshold)
                 if useThreshold {
-                    Stepper("연마 후 \(thresholdHours)시간 타면 알려줘", value: $thresholdHours, in: 1...100)
+                    Picker("기준", selection: $checkBy) {
+                        ForEach(CheckBy.allCases, id: \.self) { Text($0.title).tag($0) }
+                    }
+                    .pickerStyle(.segmented)
+                    if checkBy == .hours {
+                        Stepper("연마하고 \(thresholdHours)시간 타면 알려줘", value: $thresholdHours, in: 1...100)
+                    } else {
+                        Stepper("연마하고 \(thresholdSessions)번 타면 알려줘", value: $thresholdSessions, in: 1...60)
+                    }
                 }
             } header: {
                 Text("점검 알림")
@@ -103,7 +116,8 @@ struct RunnerEditorView: View {
             guard !loaded, let runner else { return }
             loaded = true
             name = runner.name; model = runner.model; memo = runner.memo
-            if let t = runner.checkThresholdMinutes { useThreshold = true; thresholdHours = max(1, t / 60) }
+            if let t = runner.checkThresholdMinutes { useThreshold = true; checkBy = .hours; thresholdHours = max(1, t / 60) }
+            if let n = runner.checkThresholdSessions { useThreshold = true; checkBy = .sessions; thresholdSessions = n }
         }
     }
 
@@ -118,7 +132,8 @@ struct RunnerEditorView: View {
         target.name = name.trimmingCharacters(in: .whitespaces)
         target.model = model
         target.memo = memo
-        target.checkThresholdMinutes = useThreshold ? thresholdHours * 60 : nil
+        target.checkThresholdMinutes = useThreshold && checkBy == .hours ? thresholdHours * 60 : nil
+        target.checkThresholdSessions = useThreshold && checkBy == .sessions ? thresholdSessions : nil
         context.saveOrReport()
         if runner == nil, let installOn {
             DiaryStore.install(target, on: installOn, context: context)
@@ -137,6 +152,7 @@ struct RunnerDetailView: View {
 
     var body: some View {
         let since = DiaryStore.minutesSinceSharpening(runner, context: context)
+        let rides = DiaryStore.sessionsSinceSharpening(runner, context: context)
         List {
             Section {
                 HStack(spacing: 16) {
@@ -151,18 +167,37 @@ struct RunnerDetailView: View {
                     }
                 }
                 HStack {
-                    Text("연마하고 탄 시간")
+                    Text("마지막 연마")
+                    Spacer()
+                    if let last = runner.lastSharpening {
+                        Text("\(ElapsedText.since(last.at)) · \(last.at.formatted(.dateTime.month().day()))").bold()
+                    } else {
+                        Text("기록 없음").foregroundStyle(.secondary)
+                    }
+                }
+                HStack {
+                    Text("그 뒤로 탄 횟수")
+                    Spacer()
+                    Text(rides == 0 ? "아직 안 탔어" : "\(rides)번").bold()
+                }
+                HStack {
+                    Text("그 뒤로 탄 시간")
                     Spacer()
                     Text(minutesText(since)).bold()
                 }
-                if let t = runner.checkThresholdMinutes {
+                if let n = runner.checkThresholdSessions {
+                    ProgressView(value: Double(min(rides, n)), total: Double(n)) {
+                        Text("\(n)번 타면 알림").font(.caption)
+                    }
+                    .tint(rides >= n ? Theme.neonPink : Theme.accent)
+                } else if let t = runner.checkThresholdMinutes {
                     ProgressView(value: min(Double(since), Double(t)), total: Double(t)) {
                         Text("\(minutesText(t)) 타면 알림").font(.caption)
                     }
                     .tint(since >= t ? Theme.neonPink : Theme.accent)
                 }
             } footer: {
-                Text("활동마다 고른 러너의 '실제로 탄 시간'만 더해.")
+                Text("기록할 때 이 러너를 고른 활동만 세. 시간은 '실제로 탄 시간'으로 더해.")
             }
 
             Section {

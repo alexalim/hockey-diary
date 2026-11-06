@@ -143,10 +143,7 @@ struct HomeView: View {
 
     @ViewBuilder
     private var sharpeningCard: some View {
-        let due = runners.filter { r in
-            EquipmentMath.needsCheck(minutesSince: DiaryStore.minutesSinceSharpening(r, context: context),
-                                     thresholdMinutes: r.checkThresholdMinutes)
-        }
+        let due = runners.filter { DiaryStore.needsCheck($0, context: context) }
         if skates.isEmpty {
             Card(tint: Theme.iceBlue) {
                 CardHeader(title: "장비 점검", systemImage: "shoeprints.fill")
@@ -157,10 +154,10 @@ struct HomeView: View {
             Card(tint: Theme.iceBlue) {
                 CardHeader(title: "연마 점검해볼까?", systemImage: "wrench.and.screwdriver.fill")
                 ForEach(due) { r in
-                    Text("러너 \(r.name): 연마하고 \(minutesText(DiaryStore.minutesSinceSharpening(r, context: context))) 탔어. 정해둔 시간이 됐어.")
+                    Text("러너 \(r.name): \(DiaryStore.sharpeningSummary(r, context: context)). 정해둔 만큼 탔어.")
                         .font(.subheadline)
                 }
-                Text("엣지가 밀리지 않으면 더 타도 돼. 시간은 락커에서 바꿀 수 있어.")
+                Text("엣지가 밀리지 않으면 더 타도 돼. 기준은 락커에서 바꿀 수 있어.")
                     .font(.caption).foregroundStyle(.secondary)
             }
         }

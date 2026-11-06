@@ -31,6 +31,19 @@ public enum EquipmentMath {
             .reduce(0) { $0 + max($1.iceMinutes, 0) }
     }
 
+    /// 그 러너로 마지막 연마 이후 몇 번 탔는지. 같은 활동은 한 번만 센다.
+    public static func sessionsSinceSharpening(runnerID: UUID, usages: [UsageRecord], lastSharpenedAt: Date?) -> Int {
+        dedupedBySession(usages.filter { $0.runnerID == runnerID })
+            .filter { lastSharpenedAt == nil || $0.at > lastSharpenedAt! }
+            .count
+    }
+
+    /// 시간 기준·횟수 기준 중 하나라도 정해둔 값에 닿으면 알린다. 둘 다 없으면 알리지 않는다.
+    public static func needsCheck(minutesSince: Int, sessionsSince: Int, thresholdMinutes: Int?, thresholdSessions: Int?) -> Bool {
+        if let t = thresholdSessions, t > 0, sessionsSince >= t { return true }
+        return needsCheck(minutesSince: minutesSince, thresholdMinutes: thresholdMinutes)
+    }
+
     /// 스케이트별 누적 얼음 시간. 그 스케이트를 고른 활동에만 귀속한다 (T13).
     public static func iceMinutes(skateID: UUID, usages: [UsageRecord]) -> Int {
         dedupedBySession(usages.filter { $0.skateID == skateID })
@@ -97,6 +110,25 @@ public enum InstallPlanner {
         switch validate(new, existing: trimmed) {
         case .success: return .success((closing, new))
         case .failure(let e): return .failure(e)
+        }
+    }
+}
+
+/// "연마한 지 얼마나 됐는지"를 날짜 단위로 쉽게 말한다(얼음 위에서 탄 시간과 따로 보여준다).
+public enum ElapsedText {
+    public static func since(_ date: Date, now: Date = Date(), calendar: Calendar = .current) -> String {
+        let days = calendar.dateComponents([.day], from: calendar.startOfDay(for: date), to: calendar.startOfDay(for: now)).day ?? 0
+        switch days {
+        case ..<1: return "오늘"
+        case 1: return "어제"
+        case 2..<14: return "\(days)일 전"
+        case 14..<60: return "\(days / 7)주 전"
+        case 60..<365:
+            let months = max(2, calendar.dateComponents([.month], from: date, to: now).month ?? days / 30)
+            return "\(months)개월 전"
+        default:
+            let years = max(1, calendar.dateComponents([.year], from: date, to: now).year ?? days / 365)
+            return "\(years)년 전"
         }
     }
 }
