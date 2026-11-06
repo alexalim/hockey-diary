@@ -9,14 +9,14 @@ enum Theme {
     static let cobalt = Color(hex: 0x0047AB)
     /// 글자·아이콘·틴트용. 다크 모드에서는 밝은 코발트로 바꿔 대비를 지킨다.
     static let accent = Color(light: 0x0047AB, dark: 0x7AA7FF)
-    static let cobaltSoft = Color(light: 0xE7F0FF, dark: 0x1B2D4D)
-    static let iceBlue = Color(light: 0xE9F6FB, dark: 0x16303A)
+    static let cobaltSoft = Color(light: 0xDCE7FB, dark: 0x1B2D4D)
+    static let iceBlue = Color(light: 0xD4EBFA, dark: 0x16303A)
     static let neonPink = Color(hex: 0xFF2D95)
 
     /// 제목·강조 텍스트. 어두운 화면에서는 밝은 아이스 톤.
     static let title = Color(light: 0x152B4F, dark: 0xE7F0FF)
     static let card = Color(light: 0xFFFFFF, dark: 0x1C1F26)
-    static let background = Color(light: 0xF4F7FC, dark: 0x0E1117)
+    static let background = Color(light: 0xEDF1F7, dark: 0x0E1117)
 
     static let corner: CGFloat = 18
     /// 터치 타깃 44pt 이상.
