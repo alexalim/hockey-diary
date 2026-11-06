@@ -210,13 +210,13 @@ struct SkateDetailView: View {
                             errorText = message(e)
                         }
                     } label: {
-                        Label("\(r.name)(으)로 교체\(r.installedSkate.map { " · 지금 \($0.name)에서 떼어 옴" } ?? "")",
+                        Label("\(Josa.ro(r.name)) 교체\(r.installedSkate.map { " · 지금 \($0.name)에서 떼어 옴" } ?? "")",
                               systemImage: "arrow.triangle.2.circlepath")
                     }
                 }
                 Button { addingRunner = true } label: { Label("새 러너(날) 추가", systemImage: "plus") }
             } header: {
-                Text("러너")
+                Text("러너(날)")
             } footer: {
                 Text("러너 하나는 부츠 하나에만 달 수 있어. 바꿔 달면 언제부터 언제까지 썼는지 남아.")
             }
@@ -264,5 +264,23 @@ struct SkateDetailView: View {
         case .runnerAlreadyInstalled: return "이 러너는 그때 다른 부츠에 달려 있었어."
         case .invalidRange: return "장착 기간이 맞지 않아."
         }
+    }
+}
+
+/// 받침에 따라 조사를 고른다. 한글이 아닌 글자로 끝나면 받침 없는 쪽을 쓴다.
+enum Josa {
+    /// "A세트로", "블랙스틸로", "1번으로". ㄹ 받침은 '로'.
+    static func ro(_ word: String) -> String {
+        guard let last = word.unicodeScalars.last else { return word + "로" }
+        let v = last.value
+        if (0xAC00...0xD7A3).contains(v) {
+            let jong = (v - 0xAC00) % 28
+            return word + ((jong == 0 || jong == 8) ? "로" : "으로")
+        }
+        // 숫자로 끝나면 읽는 소리 기준: 0,1,3,6,7,8은 받침 있음(영, 일, 삼, 육, 칠, 팔). 1·7·8은 ㄹ이라 '로'.
+        if let d = Int(String(last)), (0...9).contains(d) {
+            return word + ([0, 3, 6].contains(d) ? "으로" : "로")
+        }
+        return word + "로"
     }
 }

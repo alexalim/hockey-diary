@@ -145,8 +145,14 @@ struct RinkFinderView: View {
                     if browsing && browse.isEmpty {
                         HStack { ProgressView(); Text("찾는 중…").foregroundStyle(.secondary) }
                     } else if browse.isEmpty {
-                        Text(search.failed ? "지금은 지도 검색이 안 돼. 인터넷 연결을 확인해줘." : "찾은 곳이 없어. 위 검색창에 이름이나 동네를 적어봐.")
+                        Text(search.failed ? "지금은 지도 검색이 안 돼. 인터넷 연결을 확인해줘." : "여기서는 찾은 곳이 없어. 위 검색창에 이름이나 동네를 적어봐.")
                             .font(.subheadline).foregroundStyle(.secondary)
+                        // 결과가 비어도 막히지 않게 지도 앱 검색으로 넘겨준다.
+                        if let url = URL(string: "maps://?q=\(browseQuery.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")") {
+                            Link(destination: url) {
+                                Label("지도 앱에서 '\(browseQuery)' 찾기", systemImage: "map")
+                            }
+                        }
                     }
                     ForEach(browse) { p in
                         Button {
