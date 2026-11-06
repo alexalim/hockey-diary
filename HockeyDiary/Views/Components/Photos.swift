@@ -64,6 +64,7 @@ struct PhotoPickerRow: View {
                     .symbolRenderingMode(.palette)
                     .foregroundStyle(.white, .black.opacity(0.6))
             }
+            .buttonStyle(.borderless)
             .padding(2)
             .accessibilityLabel("사진 빼기")
         }

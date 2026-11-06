@@ -15,6 +15,15 @@ struct SessionDetailView: View {
     @State private var confirmingDelete = false
 
     var body: some View {
+        // 지운 직후 화면이 닫히는 동안 삭제된 기록을 읽지 않게 한다.
+        if session.isDeleted || session.modelContext == nil {
+            Color.clear
+        } else {
+            detail
+        }
+    }
+
+    private var detail: some View {
         ScrollView {
             VStack(spacing: 12) {
                 header
@@ -190,10 +199,14 @@ struct SessionDetailView: View {
     }
 
     private func delete() {
-        for p in session.photos { context.delete(p) }
-        context.delete(session)
-        context.saveOrReport()
+        // 화면을 먼저 닫고, 닫힌 뒤에 지운다(지운 기록을 다시 그리다 멈추는 것 방지).
+        let target = session, ctx = context
         dismiss()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            for p in target.photos { ctx.delete(p) }
+            ctx.delete(target)
+            ctx.saveOrReport()
+        }
     }
 }
 

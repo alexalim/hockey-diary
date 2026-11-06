@@ -14,8 +14,9 @@ struct LockerView: View {
     @State private var dragBase: Double?
     @State private var horizontalDrag: Bool?
     @State private var latchTick = 0
+    @GestureState private var doorActive = false
     @State private var hinted = false
-    @State private var customizing = false
+    @State private var editingProfile: LockerProfile?
     @State private var newStickers: [String] = []
 
     @Query private var skates: [Skate]
@@ -52,13 +53,19 @@ struct LockerView: View {
                 }
                 .frame(height: 440)
                 .sensoryFeedback(.selection, trigger: latchTick)
+                // 스크롤 등에 손가락을 빼앗겨 onEnded가 안 불려도 상태를 정리하고 문을 가까운 쪽으로 보낸다.
+                .onChange(of: doorActive) { _, active in
+                    guard !active else { return }
+                    if dragBase != nil { dragBase = nil; setOpen(angle > DoorSwing.openAngle / 2) }
+                    horizontalDrag = nil
+                }
                 .sensoryFeedback(.impact(weight: .medium), trigger: isOpen)
 
                 HStack(spacing: 8) {
                     Button(isOpen ? "문 닫기" : "문 열기", action: toggle)
                         .buttonStyle(.bordered)
                     Spacer()
-                    Button { customizing = true } label: { Label("꾸미기", systemImage: "paintbrush.fill") }
+                    Button { editingProfile = LockerStore.profile(context) } label: { Label("꾸미기", systemImage: "paintbrush.fill") }
                         .buttonStyle(.borderedProminent)
                         .tint(Theme.neonPink)
                 }
@@ -79,8 +86,8 @@ struct LockerView: View {
         }
         .screenBackground()
         .navigationTitle("나의 락커")
-        .sheet(isPresented: $customizing) {
-            NavigationStack { LockerCustomizeView(profile: LockerStore.profile(context)) }
+        .sheet(item: $editingProfile) { profile in
+            NavigationStack { LockerCustomizeView(profile: profile) }
         }
         .onAppear {
             let fresh = LockerStore.awardMilestones(context)
@@ -93,6 +100,7 @@ struct LockerView: View {
     /// 손잡이를 잡고 가로로 쓸어 문을 연다. 세로 움직임은 스크롤에 양보한다.
     private func swipe(width: CGFloat) -> some Gesture {
         DragGesture(minimumDistance: 8)
+            .updating($doorActive) { _, state, _ in state = true }
             .onChanged { value in
                 if horizontalDrag == nil {
                     horizontalDrag = abs(value.translation.width) > abs(value.translation.height)
@@ -514,6 +522,7 @@ struct EditableSticker: View {
     let onSelect: () -> Void
     let onEnd: () -> Void
     @State private var base: Placement?
+    @GestureState private var active = false
 
     var body: some View {
         StickerView(key: item.stickerKey, photo: item.photoData, side: 64)
@@ -524,6 +533,7 @@ struct EditableSticker: View {
             .zIndex(Double(item.zIndex) + (isSelected ? 1000 : 0))
             .gesture(
                 SimultaneousGesture(DragGesture(minimumDistance: 2), SimultaneousGesture(MagnifyGesture(), RotateGesture()))
+                    .updating($active) { _, state, _ in state = true }
                     .onChanged { value in
                         let b: Placement
                         if let base { b = base } else { b = item.placement; base = b; onSelect() }
@@ -541,6 +551,10 @@ struct EditableSticker: View {
                         onEnd()
                     })
             .onTapGesture(perform: onSelect)
+            // 제스처가 취소돼도 기준점을 비워서 다음 드래그가 튀지 않게 한다.
+            .onChange(of: active) { _, isActive in
+                if !isActive, base != nil { base = nil; onEnd() }
+            }
     }
 }
 
@@ -685,6 +699,7 @@ struct GearEditorView: View {
     @State private var memo = ""
     @State private var photos: [Data] = []
     @State private var removed: Set<UUID> = []
+    @State private var removePhoto = false
     @State private var loaded = false
 
     var body: some View {
@@ -696,7 +711,12 @@ struct GearEditorView: View {
                 LabeledChoice(title: "상태", options: SkateStatus.choices, selection: $status, columns: 4, minHeight: 64)
             }
             Section("사진") {
-                if let data = item?.photo, photos.isEmpty { PhotoThumb(data: data, size: 90) }
+                if let data = item?.photo, photos.isEmpty, !removePhoto {
+                    HStack {
+                        PhotoThumb(data: data, size: 90)
+                        Button("사진 빼기", role: .destructive) { removePhoto = true }.buttonStyle(.borderless)
+                    }
+                }
                 PhotoPickerRow(existing: [], removedIDs: $removed, added: Binding(get: { photos }, set: { photos = Array($0.suffix(1)) }))
             }
             Section("메모") { TextField("메모", text: $memo, axis: .vertical) }
@@ -725,7 +745,7 @@ struct GearEditorView: View {
         target.size = size
         target.status = status
         target.memo = memo
-        if let p = photos.last { target.photo = p }
+        if let p = photos.last { target.photo = p } else if removePhoto { target.photo = nil }
         context.saveOrReport()
         dismiss()
     }

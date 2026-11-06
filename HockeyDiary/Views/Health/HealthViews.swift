@@ -179,7 +179,7 @@ struct SleepGrowthCard: View {
                     .font(.caption2).foregroundStyle(.secondary)
             }
         }
-        .task(id: samples.map(\.sessionID)) { await load() }
+        .task(id: "\(enabled)-\(samples.map(\.sessionID))") { loaded = false; await load() }
     }
 
     private func load() async {
