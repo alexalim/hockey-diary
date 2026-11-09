@@ -40,13 +40,13 @@ final class ScreenTourTests: XCTestCase {
         app.swipeUp(); snap("04b-growth-mid")
         app.swipeUp(); snap("04c-growth-bottom")
 
-        // 탐색: 목록, 반칙 그림, 링크 구조, 전술, 링크장 찾기
-        tab("탐색"); snap("05-explore")
+        // 룰: 목록, 반칙 그림, 링크 구조, 전술, 링크장 찾기
+        tab("룰"); snap("05-explore")
         if tapText("자주 나오는 반칙") { snap("05b-fouls"); app.swipeUp(); snap("05c-fouls-bottom"); back() }
         for (name, shot) in [("링크 구조", "05d-rink-rule"), ("선수 장비", "05d2-equipment"), ("주요 페널티", "05d3-penalties"),
                              ("경기 시간·연장", "05e-gametime"), ("골 무효", "05f-nogoal"), ("골키퍼가 반칙하면", "05f2-goalie"),
                              ("자주 듣는 말", "05f3-terms")] {
-            tab("탐색")
+            tab("룰")
             if tapText(name) { snap(shot); back() }
         }
         if tapText("1-2-1 포어체크") { sleep(3); snap("05g-tactic"); back() }

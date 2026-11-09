@@ -1,7 +1,7 @@
 import SwiftUI
 import HockeyCore
 
-/// 탐색 (하키 라이브러리). 규칙 도감과 링크장 찾기.
+/// 룰 탭. 규칙 도감, 전술 노트, 링크장 찾기.
 struct ExploreView: View {
     var body: some View {
         ScrollView {
@@ -69,6 +69,6 @@ struct ExploreView: View {
             .padding(16)
         }
         .screenBackground()
-        .navigationTitle("탐색")
+        .navigationTitle("룰")
     }
 }

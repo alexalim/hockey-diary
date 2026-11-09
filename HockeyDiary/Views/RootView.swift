@@ -34,7 +34,7 @@ struct RootView: View {
                 .tabItem { Label("성장", systemImage: "chart.line.uptrend.xyaxis") }
                 .tag(Tab.growth)
             NavigationStack { ExploreView().toolbar { plusButton } }
-                .tabItem { Label("탐색", systemImage: "book.closed.fill") }
+                .tabItem { Label("룰", systemImage: "book.closed.fill") }
                 .tag(Tab.explore)
             NavigationStack { LockerView().toolbar { plusButton } }
                 .tabItem { Label("락커", systemImage: "door.left.hand.closed") }

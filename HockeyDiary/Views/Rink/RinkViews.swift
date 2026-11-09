@@ -87,6 +87,9 @@ struct RinkFinderView: View {
     @State private var browseQuery = "아이스링크"
     @State private var browsing = false
     @State private var opened: Rink?
+    @State private var found: [RinkPlace] = []
+    @State private var finding = false
+    @State private var findTask: Task<Void, Never>?
 
     private let quick = ["아이스링크", "아이스하키", "빙상장"]
 
@@ -114,20 +117,24 @@ struct RinkFinderView: View {
             }
 
             if !query.isEmpty {
-                Section("검색 결과") {
-                    if search.results.isEmpty {
-                        Text(search.failed ? "지금은 지도 검색이 안 돼." : "결과가 없어. 동네 이름을 붙여서 찾아봐. 예: 목동 아이스링크")
+                Section {
+                    if finding && found.isEmpty {
+                        HStack { ProgressView(); Text("찾는 중…").foregroundStyle(.secondary) }
+                    } else if found.isEmpty {
+                        Text(search.failed ? "지금은 지도 검색이 안 돼. 인터넷 연결을 확인해줘."
+                             : "'\(query)' 근처엔 찾은 링크장이 없어. 다른 동네 이름이나 링크장 이름으로 찾아봐.")
                             .font(.subheadline).foregroundStyle(.secondary)
                     }
-                    ForEach(search.results, id: \.self) { c in
+                    ForEach(found) { p in
                         Button {
-                            Task {
-                                let p = await search.resolve(c)
-                                open(RinkStore.upsert(name: p.name, address: p.address, lat: p.lat, lon: p.lon, context: context))
-                                query = ""
-                            }
-                        } label: { placeRow(c.title, c.subtitle, saved: rinks.contains { $0.name == c.title }) }
+                            open(RinkStore.upsert(name: p.name, address: p.address, lat: p.coordinate?.latitude, lon: p.coordinate?.longitude, context: context))
+                            query = ""
+                        } label: { placeRow(p.name, p.address, saved: rinks.contains { $0.name == p.name }) }
                     }
+                } header: {
+                    Text("'\(query)' 검색 결과")
+                } footer: {
+                    Text("동네 이름만 쳐도 그 근처 링크장을 찾아줘.")
                 }
             }
 
@@ -172,7 +179,21 @@ struct RinkFinderView: View {
             }
         }
         .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: "링크장 이름이나 동네")
-        .onChange(of: query) { _, q in search.update(q) }
+        .onChange(of: query) { _, q in
+            // 글자를 치는 동안엔 기다렸다가, 0.4초 멈추면 찾는다.
+            findTask?.cancel()
+            let text = q.trimmingCharacters(in: .whitespaces)
+            guard !text.isEmpty else { found = []; finding = false; return }
+            finding = true
+            findTask = Task {
+                try? await Task.sleep(nanoseconds: 400_000_000)
+                guard !Task.isCancelled else { return }
+                let r = await search.findRinks(text)
+                guard !Task.isCancelled else { return }
+                found = r
+                finding = false
+            }
+        }
         .navigationTitle("링크장 찾기")
         .navigationDestination(item: $opened) { r in RinkDetailView(rink: r) }
         .task { if browse.isEmpty { await loadBrowse() } }

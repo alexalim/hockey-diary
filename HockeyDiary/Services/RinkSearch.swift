@@ -116,6 +116,38 @@ final class RinkSearch: NSObject, ObservableObject, MKLocalSearchCompleterDelega
         return matched.isEmpty ? Array(all.prefix(15)) : matched
     }
 
+    static let rinkWords = ["아이스", "링크", "빙상", "스케이트", "얼음", "하키", "ice", "rink", "skat", "hockey"]
+
+    /// 사람이 친 검색어로 링크장을 찾는다. "역삼"처럼 동네만 치면 주소만 나오므로,
+    /// 빙상 관련 말이 없으면 "역삼 아이스링크", "역삼 빙상장"도 같이 찾는다. 한국 안 결과만.
+    func findRinks(_ text: String) async -> [RinkPlace] {
+        let t = text.trimmingCharacters(in: .whitespaces)
+        guard !t.isEmpty else { return [] }
+        let hasRinkWord = Self.rinkWords.contains { t.localizedCaseInsensitiveContains($0) }
+        let queries = hasRinkWord ? [t] : [t, "\(t) 아이스링크", "\(t) 빙상장", "\(t) 스케이트장"]
+        var all: [RinkPlace] = []
+        var anySucceeded = false
+        for q in queries {
+            let request = MKLocalSearch.Request()
+            request.naturalLanguageQuery = q
+            request.region = Self.korea
+            request.resultTypes = .pointOfInterest
+            guard let items = try? await MKLocalSearch(request: request).start().mapItems else { continue }
+            anySucceeded = true
+            for item in items where item.placemark.isoCountryCode == "KR" {
+                guard let name = item.name, !all.contains(where: { $0.name == name }) else { continue }
+                let pm = item.placemark
+                let address = [pm.administrativeArea, pm.locality, pm.subLocality, pm.thoroughfare].compactMap { $0 }.joined(separator: " ")
+                all.append(RinkPlace(name: name, address: address, coordinate: pm.coordinate))
+            }
+        }
+        failed = !anySucceeded
+        // 이름이 빙상 관련인 곳만. 동네를 쳤을 때 그 동네의 카페·식당이 섞이지 않게.
+        let matched = all.filter { p in Self.rinkWords.contains { p.name.localizedCaseInsensitiveContains($0) } }
+        // 이름으로 바로 친 경우(예: 목동 아이스링크)는 이름에 단어가 있는 것만, 동네 검색도 같은 기준.
+        return matched
+    }
+
     /// 자동완성 항목을 실제 장소(이름·주소·좌표)로 바꾼다. 실패하면 제목·부제만 쓴다.
     func resolve(_ completion: MKLocalSearchCompletion) async -> (name: String, address: String, lat: Double?, lon: Double?) {
         let request = MKLocalSearch.Request(completion: completion)
