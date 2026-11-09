@@ -90,6 +90,8 @@ struct RinkFinderView: View {
     @State private var found: [RinkPlace] = []
     @State private var finding = false
     @State private var findTask: Task<Void, Never>?
+    @State private var addManually = false
+    @State private var manualName = ""
 
     private let quick = ["아이스링크", "아이스하키", "빙상장"]
 
@@ -122,8 +124,10 @@ struct RinkFinderView: View {
                         HStack { ProgressView(); Text("찾는 중…").foregroundStyle(.secondary) }
                     } else if found.isEmpty {
                         Text(search.failed ? "지금은 지도 검색이 안 돼. 인터넷 연결을 확인해줘."
-                             : "'\(query)' 근처엔 찾은 링크장이 없어. 다른 동네 이름이나 링크장 이름으로 찾아봐.")
+                             : "Apple 지도에서는 '\(query)' 근처 링크장을 못 찾았어. 다른 지도로 찾아보거나 직접 추가해봐.")
                             .font(.subheadline).foregroundStyle(.secondary)
+                        otherMapLinks(for: query)
+                        Button { addManually = true } label: { Label("링크장 직접 추가", systemImage: "plus.circle") }
                     }
                     ForEach(found) { p in
                         Button {
@@ -154,12 +158,7 @@ struct RinkFinderView: View {
                     } else if browse.isEmpty {
                         Text(search.failed ? "지금은 지도 검색이 안 돼. 인터넷 연결을 확인해줘." : "여기서는 찾은 곳이 없어. 위 검색창에 이름이나 동네를 적어봐.")
                             .font(.subheadline).foregroundStyle(.secondary)
-                        // 결과가 비어도 막히지 않게 지도 앱 검색으로 넘겨준다.
-                        if let url = URL(string: "maps://?q=\(browseQuery.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")") {
-                            Link(destination: url) {
-                                Label("지도 앱에서 '\(browseQuery)' 찾기", systemImage: "map")
-                            }
-                        }
+                        otherMapLinks(for: browseQuery)
                     }
                     ForEach(browse) { p in
                         Button {
@@ -196,6 +195,19 @@ struct RinkFinderView: View {
         }
         .navigationTitle("링크장 찾기")
         .navigationDestination(item: $opened) { r in RinkDetailView(rink: r) }
+        .alert("링크장 직접 추가", isPresented: $addManually) {
+            TextField("링크장 이름", text: $manualName)
+            Button("추가") {
+                let name = manualName.trimmingCharacters(in: .whitespaces)
+                guard !name.isEmpty else { return }
+                open(RinkStore.upsert(name: name, address: "", lat: nil, lon: nil, context: context))
+                manualName = ""
+                query = ""
+            }
+            Button("취소", role: .cancel) { manualName = "" }
+        } message: {
+            Text("지도에 없는 곳도 이름만 적으면 기록할 때 고를 수 있어. 주소와 시설 정보는 다음 화면에서 적어.")
+        }
         .task { if browse.isEmpty { await loadBrowse() } }
     }
 
@@ -210,6 +222,24 @@ struct RinkFinderView: View {
             Image(systemName: saved ? "checkmark.circle.fill" : "plus.circle").foregroundStyle(saved ? Theme.neonPink : Theme.accent)
         }
         .frame(minHeight: Theme.touch)
+    }
+
+    /// Apple 지도에 없는 곳을 찾을 수 있게 다른 지도 검색으로 넘겨준다.
+    private func otherMapLinks(for text: String) -> some View {
+        let term = Self.rinkWordsIn(text) ? text : "\(text) 아이스링크"
+        let enc = term.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        return Group {
+            if let u = URL(string: "https://map.naver.com/p/search/\(enc)") {
+                Link(destination: u) { Label("네이버 지도에서 '\(term)' 찾기", systemImage: "map") }
+            }
+            if let u = URL(string: "https://map.kakao.com/?q=\(enc)") {
+                Link(destination: u) { Label("카카오맵에서 찾기", systemImage: "map") }
+            }
+        }
+    }
+
+    private static func rinkWordsIn(_ text: String) -> Bool {
+        RinkSearch.rinkWords.contains { text.localizedCaseInsensitiveContains($0) }
     }
 
     private func open(_ rink: Rink) {
@@ -243,8 +273,8 @@ struct RinkDetailView: View {
     var body: some View {
         Form {
             Section {
-                Text(rink.name).font(.title3.bold())
-                if !rink.address.isEmpty { Text(rink.address).foregroundStyle(.secondary) }
+                TextField("링크장 이름", text: $rink.name).font(.title3.bold())
+                TextField("주소", text: $rink.address).foregroundStyle(.secondary)
                 Toggle("즐겨찾기", isOn: $rink.isFavorite)
                 Button { rink.openInMaps() } label: { Label("지도에서 보기", systemImage: "map") }
                 if let url = URL(string: rink.officialURL), !rink.officialURL.isEmpty, url.scheme?.hasPrefix("http") == true {

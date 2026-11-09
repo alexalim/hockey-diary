@@ -118,33 +118,72 @@ final class RinkSearch: NSObject, ObservableObject, MKLocalSearchCompleterDelega
 
     static let rinkWords = ["아이스", "링크", "빙상", "스케이트", "얼음", "하키", "ice", "rink", "skat", "hockey"]
 
-    /// 사람이 친 검색어로 링크장을 찾는다. "역삼"처럼 동네만 치면 주소만 나오므로,
-    /// 빙상 관련 말이 없으면 "역삼 아이스링크", "역삼 빙상장"도 같이 찾는다. 한국 안 결과만.
+    /// 한국 안의 장소(POI)만 모아 돌려준다. 실패(네트워크 등)면 nil.
+    private func pois(_ query: String, in region: MKCoordinateRegion) async -> [RinkPlace]? {
+        let request = MKLocalSearch.Request()
+        request.naturalLanguageQuery = query
+        request.region = region
+        request.resultTypes = .pointOfInterest
+        guard let items = try? await MKLocalSearch(request: request).start().mapItems else { return nil }
+        return items.compactMap { item in
+            guard item.placemark.isoCountryCode == "KR", let name = item.name else { return nil }
+            let pm = item.placemark
+            let address = [pm.administrativeArea, pm.locality, pm.subLocality, pm.thoroughfare].compactMap { $0 }.joined(separator: " ")
+            return RinkPlace(name: name, address: address, coordinate: pm.coordinate)
+        }
+    }
+
+    /// "역삼"처럼 동네 이름의 위치를 찾는다. 한국 안이 아니면 nil.
+    private func locate(_ text: String) async -> CLLocationCoordinate2D? {
+        let request = MKLocalSearch.Request()
+        request.naturalLanguageQuery = text
+        request.region = Self.korea
+        request.resultTypes = .address
+        guard let pm = try? await MKLocalSearch(request: request).start().mapItems.first?.placemark,
+              pm.isoCountryCode == "KR" else { return nil }
+        return pm.coordinate
+    }
+
+    /// 사람이 친 검색어로 링크장을 찾는다.
+    /// 링크장 이름이면 그대로 찾고, "역삼"처럼 동네 이름이면 그 위치를 먼저 찾은 뒤 주변 12km 안에서
+    /// 아이스링크·빙상장·스케이트장을 찾아 가까운 순으로 보여준다. 한국 안, 이름이 빙상 관련인 곳만.
     func findRinks(_ text: String) async -> [RinkPlace] {
         let t = text.trimmingCharacters(in: .whitespaces)
         guard !t.isEmpty else { return [] }
         let hasRinkWord = Self.rinkWords.contains { t.localizedCaseInsensitiveContains($0) }
-        let queries = hasRinkWord ? [t] : [t, "\(t) 아이스링크", "\(t) 빙상장", "\(t) 스케이트장"]
-        var all: [RinkPlace] = []
-        var anySucceeded = false
-        for q in queries {
-            let request = MKLocalSearch.Request()
-            request.naturalLanguageQuery = q
-            request.region = Self.korea
-            request.resultTypes = .pointOfInterest
-            guard let items = try? await MKLocalSearch(request: request).start().mapItems else { continue }
-            anySucceeded = true
-            for item in items where item.placemark.isoCountryCode == "KR" {
-                guard let name = item.name, !all.contains(where: { $0.name == name }) else { continue }
-                let pm = item.placemark
-                let address = [pm.administrativeArea, pm.locality, pm.subLocality, pm.thoroughfare].compactMap { $0 }.joined(separator: " ")
-                all.append(RinkPlace(name: name, address: address, coordinate: pm.coordinate))
+        var center: CLLocationCoordinate2D?
+        var batches: [[RinkPlace]?] = []
+
+        if hasRinkWord {
+            batches.append(await pois(t, in: Self.korea))
+        } else {
+            center = await locate(t)
+            if let c = center {
+                let near = MKCoordinateRegion(center: c, latitudinalMeters: 12_000, longitudinalMeters: 12_000)
+                for word in ["아이스링크", "빙상장", "스케이트장", "ice rink"] {
+                    batches.append(await pois(word, in: near))
+                }
+            }
+            for q in ["\(t) 아이스링크", "\(t) 빙상장"] {
+                batches.append(await pois(q, in: Self.korea))
             }
         }
-        failed = !anySucceeded
-        // 이름이 빙상 관련인 곳만. 동네를 쳤을 때 그 동네의 카페·식당이 섞이지 않게.
-        let matched = all.filter { p in Self.rinkWords.contains { p.name.localizedCaseInsensitiveContains($0) } }
-        // 이름으로 바로 친 경우(예: 목동 아이스링크)는 이름에 단어가 있는 것만, 동네 검색도 같은 기준.
+        failed = !batches.contains { $0 != nil }
+        var all: [RinkPlace] = []
+        for p in batches.compactMap({ $0 }).flatMap({ $0 }) where !all.contains(where: { $0.name == p.name }) {
+            all.append(p)
+        }
+
+        var matched = all.filter { p in Self.rinkWords.contains { p.name.localizedCaseInsensitiveContains($0) } }
+        if let c = center {
+            let origin = CLLocation(latitude: c.latitude, longitude: c.longitude)
+            func dist(_ p: RinkPlace) -> Double {
+                guard let k = p.coordinate else { return .greatestFiniteMagnitude }
+                return CLLocation(latitude: k.latitude, longitude: k.longitude).distance(from: origin)
+            }
+            // 동네로 찾았을 땐 너무 먼 곳(40km 밖)은 뺀다.
+            matched = matched.filter { dist($0) < 40_000 }.sorted { dist($0) < dist($1) }
+        }
         return matched
     }
 
