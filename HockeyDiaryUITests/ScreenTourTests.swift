@@ -76,6 +76,14 @@ final class ScreenTourTests: XCTestCase {
             if tapText(name) { snap(shot); back() }
         }
         if tapText("1-2-1 포어체크") { sleep(3); snap("05g-tactic"); back() }
+        // 하단 바 가림 검사: 룰 목록 맨 아래 카드(링크장 찾기)가 끝까지 내렸을 때 바 위에 온전히 보여야 한다.
+        tab("룰")
+        for _ in 0..<6 { app.swipeUp() }
+        sleep(1); snap("05g2-explore-bottom")
+        let lastCard = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "링크장 찾기")).firstMatch
+        let barTop = app.buttons["tab-룰"].frame.minY - 20   // 바 위 여백(6) + 홈 원이 솟은 높이(14)
+        XCTAssertTrue(lastCard.exists, "룰 맨 아래 카드가 없다")
+        XCTAssertLessThanOrEqual(lastCard.frame.maxY, barTop + 1, "맨 아래 카드가 하단 바에 가려짐: 카드 끝 \(lastCard.frame.maxY) > 바 위 \(barTop)")
         if tapText("링크장 찾기") { sleep(4); snap("05h-rink-finder"); app.swipeUp(); snap("05i-rink-finder-list"); back() }
 
         // 락커: 닫힌 문 → 문 열기 → 꾸미기 → 러너 → 연마 기록
