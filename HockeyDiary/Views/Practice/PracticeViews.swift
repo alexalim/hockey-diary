@@ -138,6 +138,8 @@ struct RoutineRunView: View {
     @State private var done: [String] = []
     @State private var finishedTick = 0
     @State private var repTick = 0
+    /// 소리로 세기. 기본 켬, 한 번 끄면 기억한다.
+    @AppStorage("practiceVoice") private var voiceOn = true
 
     private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -158,17 +160,29 @@ struct RoutineRunView: View {
         .onReceive(timer) { _ in
             guard timerOn, secondsLeft > 0 else { return }
             secondsLeft -= 1
-            if secondsLeft == 0 { timerOn = false; finishedTick += 1 }
+            if voiceOn && secondsLeft == 60 { Speaker.shared.say("1분 남았어") }
+            if voiceOn && secondsLeft == 10 { Speaker.shared.say("10초") }
+            if secondsLeft == 0 {
+                timerOn = false; finishedTick += 1
+                if voiceOn { Speaker.shared.say("끝. 잘했어") }
+            }
         }
         .sensoryFeedback(.success, trigger: finishedTick)
         .sensoryFeedback(.selection, trigger: repTick)
+        // 다음 드릴로 넘어갈 땐 +1과 다른 묵직한 진동.
+        .sensoryFeedback(.impact(weight: .heavy), trigger: run.index)
         .onAppear(perform: resetForCurrent)
     }
 
     private func drillScreen(_ drill: Drill, _ item: RoutineItem) -> some View {
         VStack(spacing: 16) {
-            if run.items.count > 1 {
-                Text("\(run.index + 1) / \(run.items.count)").font(.caption.bold()).foregroundStyle(.secondary)
+            HStack {
+                if run.items.count > 1 {
+                    Text("\(run.index + 1) / \(run.items.count)").font(.caption.bold()).foregroundStyle(.secondary)
+                }
+                Spacer()
+                Toggle(isOn: $voiceOn) { Label("소리로 세기", systemImage: voiceOn ? "speaker.wave.2.fill" : "speaker.slash") }
+                    .toggleStyle(.button).font(.caption.bold()).tint(Theme.cobalt)
             }
             Card(tint: Theme.cobalt) {
                 Text(drill.skillName).font(.caption.bold()).foregroundStyle(.white.opacity(0.85))
@@ -220,11 +234,14 @@ struct RoutineRunView: View {
 
     private func counterBlock(_ item: RoutineItem) -> some View {
         VStack(spacing: 12) {
-            Text("\(count)")
-                .font(.system(size: 88, weight: .black, design: .rounded)).monospacedDigit()
+            // 큰 숫자는 하나만: 목표 전엔 남은 횟수, 다 하면 한 횟수.
+            let left = max(item.target - count, 0)
+            Text("\(count >= item.target ? count : left)")
+                .font(.system(size: 96, weight: .black, design: .rounded)).monospacedDigit()
                 .foregroundStyle(count >= item.target ? Theme.success : Theme.title)
                 .contentTransition(.numericText())
-            Text(count >= item.target ? "목표 \(item.target)번 다 했어!" : "목표 \(item.target)번").font(.subheadline).foregroundStyle(.secondary)
+                .accessibilityLabel(count >= item.target ? "\(count)번 했어" : "\(left)번 남았어")
+            Text(count >= item.target ? "목표 \(item.target)번 다 했어!" : "번 남았어 · 지금 \(count)번").font(.subheadline).foregroundStyle(.secondary)
             HStack(spacing: 10) {
                 Button { if count > 0 { count -= 1 } } label: { Image(systemName: "minus").frame(width: 64, height: 64) }
                     .buttonStyle(.bordered).accessibilityLabel("하나 빼기")
@@ -232,11 +249,18 @@ struct RoutineRunView: View {
                     withAnimation(.snappy) { count += 1 }
                     repTick += 1
                     if count == item.target { finishedTick += 1 }
+                    if voiceOn, let line = Speaker.repLine(count: count, target: item.target) { Speaker.shared.say(line) }
                 } label: {
                     Text("+1").font(.title.bold()).frame(maxWidth: .infinity, minHeight: 64)
                 }
                 .buttonStyle(.borderedProminent).tint(Theme.cobalt)
-                Button { withAnimation(.snappy) { count += 5 }; repTick += 1 } label: { Text("+5").font(.headline).frame(width: 64, height: 64) }
+                Button {
+                    let before = count
+                    withAnimation(.snappy) { count += 5 }
+                    repTick += 1
+                    if before < item.target && count >= item.target { finishedTick += 1 }
+                    if voiceOn { Speaker.shared.say(count >= item.target && before < item.target ? "\(count)번. 목표 다 했어" : "\(count)번") }
+                } label: { Text("+5").font(.headline).frame(width: 64, height: 64) }
                     .buttonStyle(.bordered)
             }
         }

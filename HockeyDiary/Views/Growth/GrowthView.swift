@@ -11,6 +11,7 @@ struct GrowthView: View {
     @Query(sort: \DrillLog.at, order: .reverse) private var allDrills: [DrillLog]
 
     @State private var period: Period = .month
+    @State private var metric: TrendMetric = .sessions
 
     private var periodSessions: [Session] {
         let from = period.start(from: Date())
@@ -28,6 +29,7 @@ struct GrowthView: View {
                     ForEach(Period.allCases, id: \.self) { p in Text(p.title).tag(p) }
                 }
                 .pickerStyle(.segmented)
+                trendCard
                 activityCard
                 moodCard
                 surfaceCard
@@ -56,6 +58,71 @@ struct GrowthView: View {
         }
         .screenBackground()
         .navigationTitle("성장")
+    }
+
+    // MARK: - 추세 (맨 위)
+
+    private var trend: Trend {
+        let items: [(at: Date, value: Int)]
+        switch metric {
+        case .sessions: items = sessions.map { ($0.startsAt, 1) }
+        case .minutes: items = sessions.map { ($0.startsAt, $0.minutes) }
+        case .drills: items = allDrills.map { ($0.at, 1) }
+        }
+        return Trend.build(items, period: period, now: Date())
+    }
+
+    private func bucketLabel(_ d: Date) -> String {
+        switch period {
+        case .week: return d.formatted(.dateTime.weekday(.narrow))
+        case .all: return d.formatted(.dateTime.month(.defaultDigits)) + "월"
+        default: return d.formatted(.dateTime.month(.defaultDigits).day())
+        }
+    }
+
+    private var trendCard: some View {
+        let t = trend
+        return Card {
+            CardHeader(title: "늘고 있어?", systemImage: "chart.line.uptrend.xyaxis")
+            Picker("무엇을 볼까", selection: $metric) {
+                ForEach(TrendMetric.allCases, id: \.self) { Text($0.title).tag($0) }
+            }
+            .pickerStyle(.segmented)
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Text(metric == .minutes ? minutesText(t.total) : "\(t.total)\(metric.unit)")
+                    .font(.largeTitle.bold()).foregroundStyle(Theme.title)
+                Text(period.longTitle).font(.subheadline).foregroundStyle(.secondary)
+            }
+            if t.total == 0 && (t.previousTotal ?? 0) == 0 {
+                EmptyHint(text: metric == .drills ? "이 기간엔 연습 기록이 없어. 성장 탭 연습에서 드릴을 세면 여기 쌓여." : "이 기간엔 기록이 없어.")
+            } else {
+                Chart {
+                    ForEach(Array(t.buckets.enumerated()), id: \.offset) { i, b in
+                        if let p = b.previous {
+                            BarMark(x: .value("칸", bucketLabel(b.start)), y: .value("값", p), width: .ratio(0.7))
+                                .foregroundStyle(Color.secondary.opacity(0.25))
+                                .position(by: .value("기간", "앞선 기간"))
+                        }
+                        BarMark(x: .value("칸", bucketLabel(b.start)), y: .value("값", b.current), width: .ratio(0.7))
+                            .foregroundStyle(Theme.cobalt)
+                            .position(by: .value("기간", "이번 기간"))
+                    }
+                }
+                .chartLegend(.hidden)
+                .frame(height: 160)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("\(period.longTitle) \(metric.title) 합계 \(t.total)\(metric.unit)")
+                HStack {
+                    if t.previousTotal != nil {
+                        Legend(items: [.init(color: Theme.cobalt, title: "이번 기간"), .init(color: Color.secondary.opacity(0.35), title: "앞선 기간")])
+                    }
+                    Spacer()
+                }
+                if let line = t.comparison(metric, periodTitle: period.title) {
+                    Text(line).font(.subheadline.bold()).foregroundStyle(Theme.title)
+                }
+            }
+        }
     }
 
     // MARK: - 활동량
@@ -183,6 +250,24 @@ struct GrowthView: View {
                         }
                     }
                 }
+                let byGame = Dictionary(grouping: allShots, by: \.sessionID)
+                let games = periodSessions.filter { byGame[$0.id] != nil }.prefix(5)
+                if !games.isEmpty {
+                    Text("어느 경기였어?").font(.caption.bold()).foregroundStyle(.secondary).padding(.top, 4)
+                    ForEach(Array(games), id: \.id) { g in
+                        let marks = byGame[g.id] ?? []
+                        NavigationLink { SessionDetailView(session: g) } label: {
+                            HStack {
+                                Text(g.title).font(.subheadline).foregroundStyle(Theme.title).lineLimit(1)
+                                Spacer()
+                                Text("슛 \(marks.count) · 골 \(marks.filter { $0.point.outcome == .goal }.count)").font(.caption.bold()).foregroundStyle(Theme.accent)
+                                Image(systemName: "chevron.right").font(.caption).foregroundStyle(.secondary)
+                            }
+                            .frame(minHeight: 36)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
                 Text("골로 찍은 표시만 세. 성공률은 골 ÷ 전체 슛이야.").font(.caption2).foregroundStyle(.secondary)
             }
             footnote(shots.count)
@@ -296,6 +381,7 @@ struct SkillRow: View {
 /// 기술 하나의 학습·적용 타임라인 (S04, FR-04).
 struct SkillDetailView: View {
     let skill: Skill
+    @Query(sort: \DrillLog.at, order: .reverse) private var drills: [DrillLog]
 
     private enum Event: Identifiable {
         case learned(SkillLearning, Session)
@@ -311,6 +397,65 @@ struct SkillDetailView: View {
         var session: Session {
             switch self {
             case .learned(_, let s), .attempted(_, let s): return s
+            }
+        }
+    }
+
+    /// 경기에서 가장 많이 시도한 날 3번(성공이 앞), 연습을 가장 많이 한 날 3번. 올해 것엔 표시.
+    private var topGames: [SkillAttempt] {
+        skill.attempts.filter { $0.tried && $0.session != nil }
+            .sorted { ($0.outcome == .success ? 1 : 0, $0.count ?? 0) > ($1.outcome == .success ? 1 : 0, $1.count ?? 0) }
+            .prefix(3).map { $0 }
+    }
+
+    private var topPracticeDays: [(day: Date, amount: Int, unit: String)] {
+        let cal = Calendar.current
+        let mine = drills.filter { $0.skillName == skill.name }
+        let byDay = Dictionary(grouping: mine) { cal.startOfDay(for: $0.at) }
+        return byDay.map { (day: $0.key, amount: $0.value.reduce(0) { $0 + $1.amount }, unit: $0.value.first?.unit.title ?? "") }
+            .sorted { $0.amount > $1.amount }.prefix(3).map { $0 }
+    }
+
+    @ViewBuilder
+    private var bestsCard: some View {
+        let games = topGames, days = topPracticeDays
+        if !games.isEmpty || !days.isEmpty {
+            let year = Calendar.current.component(.year, from: Date())
+            Card {
+                CardHeader(title: "내 최고", systemImage: "rosette")
+                ForEach(Array(games.enumerated()), id: \.element.id) { i, a in
+                    if let s = a.session {
+                        NavigationLink { SessionDetailView(session: s) } label: {
+                            HStack {
+                                Text("\(i + 1)").font(.headline).foregroundStyle(Theme.neonPink).frame(width: 20)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(s.title).font(.subheadline.bold()).foregroundStyle(Theme.title)
+                                    Text("\(s.startsAt.formatted(date: .abbreviated, time: .omitted))\(Calendar.current.component(.year, from: s.startsAt) == year ? " · 올해" : "")")
+                                        .font(.caption).foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                Text([a.outcome?.title, a.count.map { "\($0)번 시도" }].compactMap { $0 }.joined(separator: " · "))
+                                    .font(.caption.bold()).foregroundStyle(Theme.accent)
+                                Image(systemName: "chevron.right").font(.caption).foregroundStyle(.secondary)
+                            }
+                            .frame(minHeight: Theme.touch)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                if !days.isEmpty {
+                    Text("연습 많이 한 날").font(.caption.bold()).foregroundStyle(.secondary).padding(.top, 4)
+                    ForEach(Array(days.enumerated()), id: \.offset) { i, d in
+                        HStack {
+                            Text("\(i + 1)").font(.headline).foregroundStyle(Theme.neonPink).frame(width: 20)
+                            Text(d.day.formatted(date: .abbreviated, time: .omitted)).font(.subheadline)
+                            Spacer()
+                            Text("\(d.amount)\(d.unit)").font(.subheadline.bold()).foregroundStyle(Theme.title)
+                        }
+                        .frame(minHeight: 32)
+                    }
+                }
+                Text("경기는 성공한 날이 앞, 그다음 시도 횟수 순이야.").font(.caption2).foregroundStyle(.secondary)
             }
         }
     }
@@ -348,6 +493,7 @@ struct SkillDetailView: View {
                             .font(.caption).foregroundStyle(.secondary)
                     }
                 }
+                bestsCard
                 Card {
                     CardHeader(title: "타임라인", systemImage: "clock")
                     ForEach(events) { e in

@@ -795,3 +795,77 @@ final class QuickPrefillTests: XCTestCase {
         XCTAssertEqual(q.source, .none); XCTAssertEqual(q.start, d(20, 40))
     }
 }
+
+final class TrendTests: XCTestCase {
+    var cal: Calendar = { var c = Calendar(identifier: .gregorian); c.timeZone = TimeZone(identifier: "Asia/Seoul")!; return c }()
+    func day(_ d: Int, _ h: Int = 20) -> Date { cal.date(from: DateComponents(year: 2026, month: 11, day: d, hour: h))! }
+
+    func testWeekDailyBucketsAndPrevious() {
+        let now = day(10, 22)
+        let items: [(at: Date, value: Int)] = [(day(10), 1), (day(10, 8), 1), (day(4), 1), (day(3), 1), (day(1), 1)]
+        let t = Trend.build(items, period: .week, now: now, calendar: cal)
+        XCTAssertEqual(t.buckets.count, 7)
+        XCTAssertEqual(t.buckets.last?.current, 2, "오늘 칸")
+        XCTAssertEqual(t.buckets.first?.current, 1, "11/4 칸")
+        XCTAssertEqual(t.total, 3)
+        XCTAssertEqual(t.previousTotal, 2, "11/3, 11/1은 앞선 7일")
+        XCTAssertEqual(t.comparison(.sessions, periodTitle: "7일"), "앞선 7일보다 1회 늘었어.")
+    }
+
+    func testMonthAndQuarterShapes() {
+        let now = day(10)
+        XCTAssertEqual(Trend.build([], period: .month, now: now, calendar: cal).buckets.count, 5)
+        XCTAssertEqual(Trend.build([], period: .quarter, now: now, calendar: cal).buckets.count, 13)
+        XCTAssertNil(Trend.build([], period: .month, now: now, calendar: cal).comparison(.minutes, periodTitle: "30일"))
+    }
+
+    func testAllIsMonthlyWithoutComparison() {
+        let t = Trend.build([(day(2), 60), (day(10), 30)], period: .all, now: day(10), calendar: cal)
+        XCTAssertEqual(t.buckets.count, 12)
+        XCTAssertEqual(t.buckets.last?.current, 90)
+        XCTAssertNil(t.previousTotal)
+    }
+}
+
+final class HabitTests: XCTestCase {
+    var cal: Calendar = { var c = Calendar(identifier: .gregorian); c.timeZone = TimeZone(identifier: "Asia/Seoul")!; return c }()
+    // 2026-11-09는 월요일
+    func d(_ m: Int, _ day: Int, _ h: Int = 20) -> Date { cal.date(from: DateComponents(year: 2026, month: m, day: day, hour: h))! }
+
+    func testStreakCountsWeeksAndKeepsThisWeekPending() {
+        // 10/19주, 10/26주, 11/2주 탐. 이번 주(11/9~)는 아직.
+        let s = WeeklyStreak.compute([d(10, 20), d(10, 28), d(11, 3), d(11, 5)], now: d(11, 10), calendar: cal)
+        XCTAssertEqual(s.current, 3)
+        XCTAssertTrue(s.thisWeekPending)
+        XCTAssertEqual(s.best, 3)
+    }
+
+    func testGapBreaksButRestDoesNot() {
+        let dates = [d(10, 6), d(10, 13), d(11, 3), d(11, 10)]   // 10/20주, 10/27주 비었음
+        XCTAssertEqual(WeeklyStreak.compute(dates, now: d(11, 10), calendar: cal).current, 2)
+        XCTAssertEqual(WeeklyStreak.compute(dates, now: d(11, 10), calendar: cal).best, 2)
+        let rest = [RestRange(start: d(10, 19, 0), end: d(11, 1, 0))]
+        let r = WeeklyStreak.compute(dates, rests: rest, now: d(11, 10), calendar: cal)
+        XCTAssertEqual(r.current, 4, "쉬는 기간은 끊지 않는다")
+        XCTAssertEqual(r.milestone, 4)
+    }
+
+    func testRestRangeRoundTrip() {
+        let list = [RestRange(start: d(1, 1), end: d(2, 1)), RestRange(start: d(11, 1))]
+        XCTAssertEqual(RestRange.decode(RestRange.encode(list)), list)
+    }
+
+    func testHomePromptOrder() {
+        let ev = HomePrompt.Event(title: "정규게임", start: d(11, 10, 19), minutes: 90, logged: false)
+        XCTAssertEqual(HomePrompt.pick(now: d(11, 10, 21), resting: false, events: [ev], loggedToday: false, journaledToday: false, goal: nil, calendar: cal),
+                       .logEvent(title: "정규게임"))
+        XCTAssertEqual(HomePrompt.pick(now: d(11, 10, 9), resting: false, events: [ev], loggedToday: false, journaledToday: false, goal: "스톱", calendar: cal),
+                       .beforeEvent(title: "정규게임", at: d(11, 10, 19)))
+        XCTAssertEqual(HomePrompt.pick(now: d(11, 10, 9), resting: false, events: [], loggedToday: false, journaledToday: false, goal: "스톱", calendar: cal),
+                       .morningGoal(goal: "스톱"))
+        XCTAssertEqual(HomePrompt.pick(now: d(11, 10, 22), resting: false, events: [], loggedToday: true, journaledToday: false, goal: nil, calendar: cal),
+                       .eveningJournal)
+        XCTAssertNil(HomePrompt.pick(now: d(11, 10, 15), resting: false, events: [], loggedToday: false, journaledToday: false, goal: nil, calendar: cal))
+        XCTAssertEqual(HomePrompt.pick(now: d(11, 10, 22), resting: true, events: [ev], loggedToday: false, journaledToday: false, goal: nil, calendar: cal), .resting)
+    }
+}
