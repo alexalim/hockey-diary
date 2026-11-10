@@ -96,9 +96,9 @@ struct SessionShareCard: View {
             .foregroundStyle(.white)
             HStack(spacing: 8) {
                 stat(minutesText(session.minutes), "탄 시간")
-                if session.type == .lesson {
+                if session.type == .lesson && !session.learnings.isEmpty {
                     stat("\(session.learnings.count)개", "배운 기술")
-                } else if session.type.isGame {
+                } else if session.type.isGame && !session.attempts.isEmpty {
                     stat("\(triedCount)/\(session.attempts.count)", "써본 기술")
                 }
                 if session.playedGoalie, let s = session.saves {
