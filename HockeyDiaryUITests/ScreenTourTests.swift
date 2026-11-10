@@ -20,7 +20,7 @@ final class ScreenTourTests: XCTestCase {
     }
 
     func test_tour() {
-        XCTAssertTrue(app.tabBars.buttons["홈"].waitForExistence(timeout: 15), "홈 탭이 보여야 한다")
+        XCTAssertTrue(app.buttons["tab-홈"].waitForExistence(timeout: 15), "홈 탭이 보여야 한다")
         snap("01-home")
         app.swipeUp(); snap("01b-home-bottom")
 
@@ -114,8 +114,11 @@ final class ScreenTourTests: XCTestCase {
     }
 
     private func tab(_ name: String) {
+        // 직접 그린 하단 바(식별자 tab-이름). 예전 기본 탭 바도 받아준다.
+        let custom = app.buttons["tab-\(name)"]
+        if custom.waitForExistence(timeout: 5) { custom.tap(); return }
         let b = app.tabBars.buttons[name]
-        if b.waitForExistence(timeout: 5) { b.tap() } else { XCTFail("탭 \(name)이 없다") }
+        if b.waitForExistence(timeout: 3) { b.tap() } else { XCTFail("탭 \(name)이 없다") }
     }
 
     private func back() {
