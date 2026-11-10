@@ -46,6 +46,8 @@ struct RootView: View {
     @State private var tab: Tab = .home
     @State private var newEntry: NewEntry?
     @State private var showingQuickMenu = false
+    @Environment(\.modelContext) private var context
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         // TabView(UIKit 탭 컨트롤러)는 바깥에서 건 안전영역 여백을 탭 안의 스크롤에 전해 주지 않아
@@ -63,6 +65,8 @@ struct RootView: View {
         .safeAreaInset(edge: .bottom, spacing: 0) { MahadaTabBar(selection: $tab) }
         .contentMargins(.bottom, MahadaTabBar.height, for: .scrollContent)
         .contentMargins(.bottom, MahadaTabBar.height, for: .scrollIndicators)
+        .task { await TeamReminder.reschedule(context) }
+        .onChange(of: scenePhase) { _, p in if p == .active { Task { await TeamReminder.reschedule(context) } } }
         .confirmationDialog("무엇을 기록할까?", isPresented: $showingQuickMenu, titleVisibility: .visible) {
             Button("수업 기록") { newEntry = .session(.lesson) }
             Button("미니게임 리뷰") { newEntry = .session(.miniGame) }

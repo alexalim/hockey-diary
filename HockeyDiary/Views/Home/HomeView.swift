@@ -15,6 +15,16 @@ struct HomeView: View {
     @Query private var teams: [Team]
 
     @State private var showingSettings = false
+    @State private var showingEdit = false
+    @AppStorage(RestPrefs.key) private var restJSON = "[]"
+    @AppStorage("homeBlocks") private var orderRaw = HomeBlock.defaultOrder
+    @AppStorage("homeHidden") private var hiddenRaw = ""
+
+    private var resting: Bool { RestPrefs.isResting(restJSON) }
+    private var visibleBlocks: [HomeBlock] {
+        let hidden = Set(hiddenRaw.split(separator: ",").map(String.init))
+        return HomeBlock.order(orderRaw).filter { !hidden.contains($0.rawValue) }
+    }
     private var health = StoreHealth.shared
 
     init(newEntry: Binding<NewEntry?>) {
@@ -30,13 +40,15 @@ struct HomeView: View {
         ScrollView {
             VStack(spacing: 12) {
                 if health.openFailed || health.lastSaveFailed { storeWarning }
+                promptCard
                 todayCard
                 quickButtons
-                goalCard
-                feedbackCard
-                sharpeningCard
-                teamCard
-                recentCard
+                ForEach(visibleBlocks) { b in block(b) }
+                Button { showingEdit = true } label: {
+                    Label("홈 꾸미기", systemImage: "slider.horizontal.3").font(.footnote.weight(.semibold))
+                        .frame(maxWidth: .infinity, minHeight: Theme.touch)
+                }
+                .buttonStyle(.plain).foregroundStyle(Theme.accent)
             }
             .padding(16)
         }
@@ -51,6 +63,83 @@ struct HomeView: View {
             }
         }
         .sheet(isPresented: $showingSettings) { NavigationStack { SettingsView() } }
+        .sheet(isPresented: $showingEdit) { NavigationStack { HomeEditView() } }
+    }
+
+    @ViewBuilder
+    private func block(_ b: HomeBlock) -> some View {
+        switch b {
+        case .goal: goalCard
+        case .feedback: feedbackCard
+        case .sharpening: sharpeningCard
+        case .team: teamCard
+        case .recent: recentCard
+        }
+    }
+
+    // MARK: - 지금 할 일 하나 (시간대·오늘 상태로 고른다)
+
+    private var prompt: HomePrompt? {
+        HomePrompt.pick(now: Date(), resting: resting,
+                        events: teamEvents.map { .init(title: $0.title, start: $0.at, minutes: $0.minutes, logged: $0.sessionID != nil) },
+                        loggedToday: !todaySessions.isEmpty, journaledToday: todayJournal != nil,
+                        goal: lastWithGoal?.nextGoal)
+    }
+
+    @ViewBuilder
+    private var promptCard: some View {
+        if let p = prompt {
+            Card(tint: p == .resting ? Theme.iceBlue : Theme.neonPink.opacity(0.12)) {
+                switch p {
+                case .resting:
+                    Label("쉬는 중이야", systemImage: "moon.zzz.fill").font(.headline).foregroundStyle(Theme.title)
+                    Text("연속 기록과 목표는 그대로 둘게. 돌아오면 이어서 세.").font(.subheadline).foregroundStyle(.secondary)
+                    Button("다시 탈래") { restJSON = RestPrefs.toggled(restJSON) }.buttonStyle(.bordered)
+                case .logEvent(let title):
+                    Label("\(title) 끝났지? 바로 남기자", systemImage: "pencil.and.list.clipboard").font(.headline).foregroundStyle(Theme.title)
+                    Text("시간이랑 장소는 팀 일정으로 채워둘게.").font(.subheadline).foregroundStyle(.secondary)
+                    Button {
+                        let kind = teamEvents.first { $0.title == title && $0.sessionID == nil }.flatMap { ActivityType(rawValue: $0.kindRaw) } ?? .regularGame
+                        newEntry = .session(kind)
+                    } label: { Text("기록하기").frame(maxWidth: .infinity, minHeight: Theme.touch) }
+                    .buttonStyle(PinkButtonStyle())
+                case .beforeEvent(let title, let at):
+                    Label("오늘 \(at.formatted(date: .omitted, time: .shortened)) \(title)", systemImage: "calendar.badge.clock").font(.headline).foregroundStyle(Theme.title)
+                    if let g = lastWithGoal?.nextGoal, !g.isEmpty {
+                        Text("오늘 목표: \(g)").font(.subheadline).foregroundStyle(Theme.title)
+                    } else {
+                        Text("오늘 해볼 거 하나 정해두면 좋아.").font(.subheadline).foregroundStyle(.secondary)
+                    }
+                case .morningGoal(let goal):
+                    Label("오늘 해볼 거", systemImage: "target").font(.headline).foregroundStyle(Theme.title)
+                    Text(goal).font(.subheadline).foregroundStyle(Theme.title)
+                case .eveningJournal:
+                    Label("오늘 어땠어?", systemImage: "book.fill").font(.headline).foregroundStyle(Theme.title)
+                    Text("한 줄이면 돼. 내일의 나한테 남기는 거야.").font(.subheadline).foregroundStyle(.secondary)
+                    Button { newEntry = .journal(Date()) } label: { Text("일기 쓰기").frame(maxWidth: .infinity, minHeight: Theme.touch) }
+                        .buttonStyle(PinkButtonStyle())
+                }
+            }
+        }
+    }
+
+    // MARK: - 오늘 카드의 원 3개
+
+    private var weekCount: Int {
+        var cal = Calendar.current; cal.firstWeekday = 2
+        guard let w = cal.dateInterval(of: .weekOfYear, for: Date()) else { return 0 }
+        return sessions.filter { w.contains($0.startsAt) }.count
+    }
+
+    private var todayMood: Int? { todaySessions.compactMap(\.moodAfter).first ?? todayJournal?.mood }
+
+    private var rings: some View {
+        HStack(spacing: 4) {
+            HomeRing(value: todaySessions.isEmpty ? 0 : 1, center: "\(todaySessions.count)", label: "오늘 기록", color: Theme.neonPink)
+            HomeRing(value: Double(weekCount) / 2, center: "\(weekCount)/2", label: "이번 주", color: Color(hex: 0x4CC38A))
+            HomeRing(value: Double(todayMood ?? 0) / 5, center: todayMood.map(Mood.face) ?? "–", label: "컨디션", color: Color(hex: 0xFFC04D))
+        }
+        .padding(.top, 4)
     }
 
     private var storeWarning: some View {
@@ -87,6 +176,8 @@ struct HomeView: View {
                     }
                 }
             }
+            rings
+            Text("이번 주는 두 번 타면 원이 다 차.").font(.caption2).foregroundStyle(.white.opacity(0.7))
         }
     }
 
@@ -123,10 +214,14 @@ struct HomeView: View {
 
     @ViewBuilder
     private var goalCard: some View {
-        if let s = lastWithGoal {
+        if let s = lastWithGoal, !resting {
             Card {
                 CardHeader(title: "다음 목표", systemImage: "target", trailing: s.startsAt.dayTitle)
                 Text(s.nextGoal).font(.body).foregroundStyle(Theme.title)
+                Button { restJSON = RestPrefs.toggled(restJSON) } label: {
+                    Label("한동안 쉬어 (비시즌·부상)", systemImage: "moon.zzz").font(.caption)
+                }
+                .buttonStyle(.borderless).foregroundStyle(.secondary)
             }
         }
     }
@@ -209,6 +304,9 @@ struct HomeView: View {
 /// 설정 (홈 아바타). 개인정보 원칙과 앱 정보.
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
+    @AppStorage(RestPrefs.key) private var restJSON = "[]"
+    @AppStorage(TeamReminder.enabledKey) private var teamReminder = false
+    @Environment(\.modelContext) private var context
 
     var body: some View {
         List {
@@ -223,6 +321,19 @@ struct SettingsView: View {
             }
             Section("연결") {
                 NavigationLink { HealthConnectView() } label: { Label("Apple 건강", systemImage: "heart.text.square.fill") }
+            }
+            Section {
+                Toggle(isOn: Binding(get: { RestPrefs.isResting(restJSON) }, set: { _ in restJSON = RestPrefs.toggled(restJSON) })) {
+                    Label("쉬는 중", systemImage: "moon.zzz.fill")
+                }
+                Toggle(isOn: Binding(get: { teamReminder }, set: { on in
+                    Task { @MainActor in
+                        teamReminder = on ? await TeamReminder.requestPermission() : false
+                        await TeamReminder.reschedule(context)
+                    }
+                })) { Label("팀 경기 이틀 전 알림", systemImage: "bell.badge") }
+            } footer: {
+                Text("쉬는 동안엔 주간 연속 기록이 안 끊겨. 팀 알림은 아직 참석을 안 정한 사람이 있을 때만 이 폰에서 울려.")
             }
             Section("앱 정보") {
                 HStack {

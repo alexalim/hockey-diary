@@ -13,6 +13,7 @@ struct DiaryView: View {
     @State private var month = Calendar.current.dateInterval(of: .month, for: Date())?.start ?? Date()
     @State private var selectedDay = Calendar.current.startOfDay(for: Date())
     @State private var search = ""
+    @AppStorage(RestPrefs.key) private var restJSON = "[]"
 
     private let calendar = Calendar.current
 
@@ -20,6 +21,7 @@ struct DiaryView: View {
         ScrollView {
             VStack(spacing: 12) {
                 if search.isEmpty {
+                    streakCard
                     calendarCard
                     DayTimeline(day: selectedDay, sessions: sessionsOn(selectedDay), journals: journalsOn(selectedDay),
                                 newEntry: $newEntry)
@@ -32,6 +34,39 @@ struct DiaryView: View {
         .screenBackground()
         .navigationTitle("다이어리")
         .searchable(text: $search, prompt: "일기·메모·기술 찾기")
+    }
+
+    // MARK: - 주간 연속 기록
+
+    @ViewBuilder
+    private var streakCard: some View {
+        let st = WeeklyStreak.compute(sessions.map(\.startsAt), rests: RestPrefs.ranges(restJSON), now: Date())
+        if st.best > 0 {
+            Card {
+                HStack(spacing: 12) {
+                    Image(systemName: "flame.fill").font(.title).foregroundStyle(st.current > 0 ? Theme.neonPink : Color.secondary)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(st.current > 0 ? "\(st.current)주 연속 탔어" : "이번 주 한 번 타면 다시 시작해")
+                            .font(.headline).foregroundStyle(Theme.title)
+                        Text(streakSubtitle(st)).font(.caption).foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    if let m = st.milestone {
+                        Text("\(m)주").font(.caption.bold())
+                            .padding(.horizontal, 10).padding(.vertical, 6)
+                            .background(Theme.neonPink.opacity(0.15), in: Capsule())
+                            .foregroundStyle(Theme.neonPink)
+                            .accessibilityLabel("\(m)주 연속 배지")
+                    }
+                }
+            }
+        }
+    }
+
+    private func streakSubtitle(_ st: WeeklyStreak) -> String {
+        if RestPrefs.isResting(restJSON) { return "쉬는 중이라 안 끊겨. 최고 \(st.best)주" }
+        if st.thisWeekPending { return "이번 주에 한 번 타면 이어져. 최고 \(st.best)주" }
+        return "한 주에 한 번이면 이어져. 최고 \(st.best)주"
     }
 
     // MARK: - 달력

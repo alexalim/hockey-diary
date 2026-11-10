@@ -75,6 +75,15 @@ final class ScreenTourTests: XCTestCase {
             back()
         }
 
+        // 성장: 기술 상세(내 최고)
+        tab("성장")
+        if tapText("하키 스톱") { sleep(1); snap("04g-skill-detail"); app.swipeUp(); snap("04h-skill-detail-bottom"); back() }
+
+        // 홈 꾸미기·설정
+        tab("홈")
+        if tapText("홈 꾸미기") { sleep(1); snap("01f-home-edit"); tapButton("완료") }
+        if tapButton("설정") { sleep(1); app.swipeUp(); snap("01g-settings"); tapButton("닫기") }
+
         // 다이어리
         tab("다이어리"); snap("03-diary")
         // 성장
