@@ -33,6 +33,14 @@ final class ScreenTourTests: XCTestCase {
             tapButton("닫기")
         }
 
+        // 우리 팀: 일정·참석·라인업
+        tab("홈")
+        if tapText("목동 펭귄스") {
+            snap("01c-team")
+            if tapText("강남 베어스") { snap("01d-team-event"); app.swipeUp(); snap("01e-team-event-bottom"); back() }
+            back()
+        }
+
         // 미니게임 기록: 슛 차트
         if tapText("경기 리뷰") {
             snap("02d-game-editor")

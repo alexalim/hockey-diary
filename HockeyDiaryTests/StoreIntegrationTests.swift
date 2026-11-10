@@ -239,4 +239,23 @@ final class StoreIntegrationTests: XCTestCase {
         XCTAssertEqual(by["퍽 드리블"]?.sessions, 2)
         XCTAssertNil(by[""], "기술 없는 드릴은 기술별 집계에서 빠짐")
     }
+
+    // 팀: 명단·일정·참석·라인업 저장, 일정으로 경기 기록 만들기는 한 번만.
+    func testTeamEventAndSession() throws {
+        let team = Team(name: "펭귄스"); context.insert(team)
+        let a = TeamMember(teamID: team.id, name: "민수"), b = TeamMember(teamID: team.id, name: "지훈")
+        context.insert(a); context.insert(b)
+        let ev = TeamEvent(teamID: team.id, at: Date().addingTimeInterval(86_400)); ev.opponent = "베어스"; ev.rinkName = "목동"
+        context.insert(ev)
+        var att = AttendanceSheet(); att[a.id] = .going; ev.attendance = att
+        var lu = Lineup(); lu.assign(a.id, to: .c1); ev.lineup = lu
+        try context.save()
+        XCTAssertEqual(TeamStore.members(of: team, context: context).count, 2)
+        XCTAssertEqual(ev.attendance.count(.going, among: [a.id, b.id]), 1)
+        XCTAssertEqual(ev.lineup[.c1], a.id)
+        let s1 = TeamStore.makeSession(for: ev, context: context)
+        let s2 = TeamStore.makeSession(for: ev, context: context)
+        XCTAssertEqual(s1.id, s2.id, "두 번 눌러도 기록은 하나")
+        XCTAssertEqual(s1.opponent, "베어스"); XCTAssertEqual(s1.rinkName, "목동"); XCTAssertEqual(s1.type, .regularGame)
+    }
 }

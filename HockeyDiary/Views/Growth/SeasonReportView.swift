@@ -79,7 +79,7 @@ struct SeasonReportView: View {
 
     @MainActor
     private func render(_ r: SeasonReport) -> Image? {
-        let renderer = ImageRenderer(content: ReportCard(report: r).frame(width: 360, height: 450))
+        let renderer = ImageRenderer(content: ReportCard(report: r).frame(width: 360, height: 450).environment(\.colorScheme, .light))
         renderer.scale = 3
         guard let ui = renderer.uiImage else { return nil }
         return Image(uiImage: ui)

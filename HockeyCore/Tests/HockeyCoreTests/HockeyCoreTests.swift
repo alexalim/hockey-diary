@@ -624,6 +624,41 @@ final class DrillTests: XCTestCase {
     }
 }
 
+final class TeamTests: XCTestCase {
+    let a = UUID(), b = UUID(), c = UUID()
+
+    // 라인업: 한 사람은 한 자리에만, 왕복 저장, 카톡 글.
+    func testLineup() {
+        var l = Lineup()
+        l.assign(a, to: .c1); l.assign(b, to: .lw1); l.assign(a, to: .c2)
+        XCTAssertNil(l[.c1], "다른 자리로 옮기면 원래 자리는 비운다")
+        XCTAssertEqual(l[.c2], a)
+        l.assign(c, to: .g1)
+        XCTAssertEqual(Lineup.decode(l.encode()), l)
+        XCTAssertEqual(Lineup.decode("깨짐"), Lineup())
+        let names = [a: "민수", b: "지훈", c: "골리킴"]
+        XCTAssertEqual(l.text(names: names), "1라인  지훈 · — · —\n2라인  — · 민수 · —\n골리  골리킴")
+        XCTAssertEqual(l.assignedMembers, [a, b, c])
+    }
+
+    func testAttendance() {
+        var s = AttendanceSheet()
+        s[a] = .going; s[b] = .maybe; s[c] = .going
+        XCTAssertEqual(s.count(.going, among: [a, b, c]), 2)
+        XCTAssertEqual(s[UUID()], .unknown)
+        s[a] = .unknown
+        XCTAssertNil(s.marks[a], "답 없음은 저장하지 않는다")
+        XCTAssertEqual(AttendanceSheet.decode(s.encode()), s)
+    }
+
+    func testEventText() {
+        let t = TeamText.event(teamName: "목동 펭귄스", title: "정규게임", when: "11월 15일 (토) 21:00", rink: "목동 아이스링크",
+                               opponent: "강남 베어스", memo: "흰 저지", going: 11, maybe: 2, total: 15, lineup: "1라인  A · B · C")
+        XCTAssertTrue(t.hasPrefix("[목동 펭귄스] 정규게임\n⏰ 11월 15일 (토) 21:00\n📍 목동 아이스링크\n🆚 강남 베어스\n✅ 참석 11명 · 미정 2명 (15명 중)"))
+        XCTAssertTrue(t.hasSuffix("라인업\n1라인  A · B · C"))
+    }
+}
+
 final class DomainTests: XCTestCase {
     // FR-02: 미니게임은 점수 없이, 정규게임 스탯은 정규게임에서만 보인다.
     func testGameStatsOnlyForRegularGame() {

@@ -11,6 +11,8 @@ struct HomeView: View {
     @Query(sort: \DailyJournal.entryDate, order: .reverse) private var journals: [DailyJournal]
     @Query(sort: \RunnerSet.createdAt) private var runners: [RunnerSet]
     @Query private var skates: [Skate]
+    @Query(sort: \TeamEvent.at) private var teamEvents: [TeamEvent]
+    @Query private var teams: [Team]
 
     @State private var showingSettings = false
     private var health = StoreHealth.shared
@@ -33,6 +35,7 @@ struct HomeView: View {
                 goalCard
                 feedbackCard
                 sharpeningCard
+                teamCard
                 recentCard
             }
             .padding(16)
@@ -165,6 +168,27 @@ struct HomeView: View {
                     .font(.caption).foregroundStyle(.secondary)
             }
         }
+    }
+
+    /// 우리 팀: 다음 일정 하나. 팀이 없으면 만들기 안내.
+    @ViewBuilder
+    private var teamCard: some View {
+        let next = teamEvents.first { $0.at >= Calendar.current.startOfDay(for: Date()) }
+        NavigationLink { TeamView() } label: {
+            Card {
+                CardHeader(title: teams.first?.name ?? "우리 팀", systemImage: "person.3.fill",
+                           trailing: next.map { $0.at.formatted(.dateTime.month().day().weekday(.abbreviated)) })
+                if let next {
+                    Text("\(next.title) · \(next.at.formatted(.dateTime.hour().minute()))\(next.rinkName.isEmpty ? "" : " · \(next.rinkName)")")
+                        .font(.subheadline).foregroundStyle(Theme.title)
+                } else if teams.isEmpty {
+                    Text("팀 일정·참석·라인업을 정리하고 카톡에 올려봐.").font(.subheadline).foregroundStyle(.secondary)
+                } else {
+                    Text("다음 일정이 없어. 하나 넣어볼까?").font(.subheadline).foregroundStyle(.secondary)
+                }
+            }
+        }
+        .buttonStyle(.plain)
     }
 
     @ViewBuilder

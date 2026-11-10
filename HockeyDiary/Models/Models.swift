@@ -392,6 +392,7 @@ enum AppSchema {
         Rink.self,
         LockerProfile.self, StickerPlacement.self, EarnedSticker.self, GearItem.self,
         ShotMark.self, DrillLog.self, PracticeRoutine.self,
+        Team.self, TeamMember.self, TeamEvent.self,
     ]
 
     static func container(inMemory: Bool = false) throws -> ModelContainer {

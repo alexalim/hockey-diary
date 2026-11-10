@@ -85,6 +85,20 @@ enum DemoData {
         context.saveOrReport()
         LockerStore.awardMilestones(context)
         PracticeStore.seedRoutinesIfNeeded(context)
+        let team = Team(name: "목동 펭귄스"); context.insert(team)
+        var ids: [UUID] = []
+        for (n, num, pos) in [("민수", "9", Position.forward), ("지훈", "17", .forward), ("현우", "23", .forward), ("서준", "4", .defense),
+                              ("도윤", "7", .defense), ("골리킴", "30", .goalie), ("용병 재호", "", .any)] {
+            let m = TeamMember(teamID: team.id, name: n); m.number = num; m.position = pos; m.isGuest = n.hasPrefix("용병")
+            context.insert(m); ids.append(m.id)
+        }
+        let ev = TeamEvent(teamID: team.id, at: cal.date(byAdding: .day, value: 3, to: daysAgo(0, hour: 21))!)
+        ev.rinkName = "목동 아이스링크"; ev.opponent = "강남 베어스"; ev.memo = "흰 저지 · 20:30 집합"
+        var att = AttendanceSheet(); for i in 0..<5 { att[ids[i]] = .going }; att[ids[5]] = .maybe; ev.attendance = att
+        var lu = Lineup(); lu.assign(ids[0], to: .lw1); lu.assign(ids[1], to: .c1); lu.assign(ids[2], to: .rw1)
+        lu.assign(ids[3], to: .ld1); lu.assign(ids[4], to: .rd1); lu.assign(ids[5], to: .g1); ev.lineup = lu
+        context.insert(ev)
+        context.saveOrReport()
         if let d1 = DrillCatalog.drill("stickhandle-8"), let d2 = DrillCatalog.drill("stop-lines"), let d3 = DrillCatalog.drill("office-ball") {
             context.insert(DrillLog(drill: d1, amount: 3, at: daysAgo(2, hour: 19)))
             context.insert(DrillLog(drill: d2, amount: 10, at: daysAgo(2, hour: 19)))
