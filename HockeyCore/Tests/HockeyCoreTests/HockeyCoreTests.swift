@@ -743,3 +743,55 @@ final class RinkDirectoryTests: XCTestCase {
         }
     }
 }
+
+final class PersonalBestTests: XCTestCase {
+    func testNewGoalRecord() {
+        let past = [BestInput(type: .miniGame, minutes: 60, goals: 1), BestInput(type: .regularGame, minutes: 90, goals: 2)]
+        let r = PersonalBest.check(BestInput(type: .miniGame, minutes: 60, goals: 3), history: past)
+        XCTAssertEqual(r.map(\.title), ["한 경기 최다 골"])
+        XCTAssertEqual(r.first?.previous, 2)
+    }
+
+    func testNoBadgeWithoutHistoryOrZero() {
+        XCTAssertTrue(PersonalBest.check(BestInput(type: .miniGame, minutes: 60, goals: 2), history: []).isEmpty)
+        let past = [BestInput(type: .miniGame, minutes: 60, goals: 0)]
+        XCTAssertEqual(PersonalBest.check(BestInput(type: .miniGame, minutes: 60, goals: 0), history: past).count, 0)
+        // 지난 기록에 골 칸이 비어 있으면 비교할 게 없다.
+        XCTAssertTrue(PersonalBest.check(BestInput(type: .miniGame, minutes: 50, goals: 2), history: [BestInput(type: .miniGame, minutes: 60)]).isEmpty)
+    }
+
+    func testLongestSameTypeOnly() {
+        let past = [BestInput(type: .lesson, minutes: 60), BestInput(type: .freePractice, minutes: 120)]
+        XCTAssertEqual(PersonalBest.check(BestInput(type: .lesson, minutes: 90), history: past).map(\.title), ["가장 오래 탄 수업"])
+        XCTAssertTrue(PersonalBest.check(BestInput(type: .lesson, minutes: 60), history: past).isEmpty, "같으면 새 기록 아님")
+    }
+}
+
+final class QuickPrefillTests: XCTestCase {
+    var cal: Calendar = { var c = Calendar(identifier: .gregorian); c.timeZone = TimeZone(identifier: "Asia/Seoul")!; return c }()
+    func d(_ h: Int, _ m: Int) -> Date { cal.date(from: DateComponents(year: 2026, month: 11, day: 10, hour: h, minute: m))! }
+
+    func testWorkoutWins() {
+        let p = QuickPrefill.plan(now: d(21, 40), defaultMinutes: 60, lastMinutes: 50,
+                                  events: [.init(start: d(20, 0), minutes: 90)],
+                                  workouts: [(d(20, 5), d(21, 20))], calendar: cal)
+        XCTAssertEqual(p.source, .workout)
+        XCTAssertEqual(p.start, d(20, 5)); XCTAssertEqual(p.minutes, 75)
+    }
+
+    func testOldWorkoutIgnoredThenTeamEvent() {
+        let p = QuickPrefill.plan(now: d(21, 40), defaultMinutes: 60, lastMinutes: 50,
+                                  events: [.init(start: d(9, 0), minutes: 60), .init(start: d(20, 0), minutes: 90)],
+                                  workouts: [(d(10, 0), d(11, 0))], calendar: cal)
+        XCTAssertEqual(p.source, .teamEvent(index: 1))
+        XCTAssertEqual(p.start, d(20, 0)); XCTAssertEqual(p.minutes, 90)
+    }
+
+    func testLastSessionMinutesRoundedDown() {
+        let p = QuickPrefill.plan(now: d(21, 43), defaultMinutes: 60, lastMinutes: 50, events: [], workouts: [], calendar: cal)
+        XCTAssertEqual(p.source, .lastSession)
+        XCTAssertEqual(p.minutes, 50); XCTAssertEqual(p.start, d(20, 50))
+        let q = QuickPrefill.plan(now: d(21, 43), defaultMinutes: 60, lastMinutes: nil, events: [], workouts: [], calendar: cal)
+        XCTAssertEqual(q.source, .none); XCTAssertEqual(q.start, d(20, 40))
+    }
+}

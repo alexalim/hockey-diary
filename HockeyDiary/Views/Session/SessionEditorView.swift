@@ -30,8 +30,11 @@ struct SessionEditorView: View {
     @Query(sort: \Skill.name) private var allSkills: [Skill]
     @Query(sort: \Skate.createdAt) private var skates: [Skate]
     @Query(sort: \Session.startsAt, order: .reverse) private var allSessions: [Session]
+    @Query(sort: \TeamEvent.at) private var teamEvents: [TeamEvent]
 
     private let session: Session?
+    /// 방금 끝난 운동을 적는 경우(+ 버튼·홈 바로가기). 달력에서 고른 날이면 false.
+    private let fromNow: Bool
 
     @State private var type: ActivityType
     @State private var startsAt: Date
@@ -75,9 +78,18 @@ struct SessionEditorView: View {
     @State private var showingSkillPicker = false
     @State private var showingMore = false
     @State private var didPrefill = false
+    /// 새 기록은 핵심만 보이고 나머지는 '더 적기'에 접어 둔다. 고치기는 다 펼친다.
+    @State private var expanded: Bool
+    @State private var prefillNote: String?
+    @State private var userTouchedTime = false
+    @State private var linkedEventID: UUID?
+    @State private var saved: Session?
+    @State private var bests: [PersonalBest] = []
 
-    init(newType: ActivityType, startsAt: Date = Date()) {
+    init(newType: ActivityType, startsAt: Date = Date(), fromNow: Bool = false) {
         session = nil
+        self.fromNow = fromNow
+        _expanded = State(initialValue: false)
         _type = State(initialValue: newType)
         _startsAt = State(initialValue: startsAt)
         _minutes = State(initialValue: newType.isGame ? 90 : 60)
@@ -109,6 +121,8 @@ struct SessionEditorView: View {
 
     init(session: Session) {
         self.session = session
+        self.fromNow = false
+        _expanded = State(initialValue: true)
         _type = State(initialValue: session.type)
         _startsAt = State(initialValue: session.startsAt)
         _minutes = State(initialValue: max(session.minutes, 1))
@@ -174,18 +188,32 @@ struct SessionEditorView: View {
     }
 
     var body: some View {
+        if let saved {
+            SessionSavedView(session: saved, bests: bests, shotCount: shots.count) { dismiss() }
+        } else {
+            form
+        }
+    }
+
+    private var form: some View {
         Form {
             basicsSection
             if type == .lesson { lessonSkillsSection }
             if type.isGame { gameSkillsSection }
             moodSection
-            if type.isGame { goalieSection }
-            if type.isGame && !playedGoalie { shotSection }
+            if expanded {
+                if type.isGame { goalieSection }
+                if type.isGame && !playedGoalie { shotSection }
+            }
             notesSection
-            placeSection
-            equipmentSection
-            Section("사진") {
-                PhotoPickerRow(existing: session?.photos ?? [], removedIDs: $removedPhotoIDs, added: $addedPhotos)
+            if expanded {
+                placeSection
+                equipmentSection
+                Section("사진") {
+                    PhotoPickerRow(existing: session?.photos ?? [], removedIDs: $removedPhotoIDs, added: $addedPhotos)
+                }
+            } else {
+                moreSection
             }
             if let saveHint {
                 Section { Text(saveHint).font(.footnote).foregroundStyle(Theme.danger) }
@@ -218,9 +246,47 @@ struct SessionEditorView: View {
             LabeledChoice(title: "종류",
                           options: ActivityType.allCases.map { ChoiceOption(value: $0, title: $0.title, art: .symbol($0.systemImage)) },
                           selection: $type, columns: 4, minHeight: 68)
-            DatePicker("시작", selection: $startsAt)
-            Stepper("활동 시간 \(minutesText(minutes))", value: $minutes, in: 1...360, step: 5)
+            DatePicker("시작", selection: Binding(get: { startsAt }, set: { startsAt = $0; userTouchedTime = true }))
+            Stepper("활동 시간 \(minutesText(minutes))", value: Binding(get: { minutes }, set: { minutes = $0; userTouchedTime = true }), in: 1...360, step: 5)
+        } footer: {
+            if let prefillNote { Text(prefillNote) }
         }
+    }
+
+    /// 접힌 항목 안내. 숨어 있어도 저장되는 값(장소·장비)을 한 줄로 보여준다.
+    private var moreSection: some View {
+        Section {
+            Button {
+                withAnimation { expanded = true }
+            } label: {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("더 적기").font(.headline).foregroundStyle(Theme.accent)
+                        Text(moreSummary).font(.caption).foregroundStyle(.secondary).lineLimit(2)
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.down").foregroundStyle(Theme.accent)
+                }
+                .frame(minHeight: Theme.touch)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("더 적기")
+        } footer: {
+            Text(type.isGame ? "슛 차트, 골리, 경기 정보, 장소, 장비, 사진은 여기 있어. 안 열어도 저장돼."
+                             : (type == .lesson ? "코치 메모, 다음 목표, 장소, 장비, 사진은 여기 있어. 안 열어도 저장돼."
+                                                : "장소, 장비, 사진은 여기 있어. 안 열어도 저장돼."))
+        }
+    }
+
+    private var moreSummary: String {
+        var parts: [String] = []
+        if !rinkName.isEmpty { parts.append(rinkName) } else if surface != .unknown { parts.append(surface.title) }
+        if let skate = skates.first(where: { $0.id == skateID }) {
+            parts.append(skate.name)
+            if let r = skate.installations.compactMap(\.runner).first(where: { $0.id == runnerID }) { parts.append(r.name) }
+        }
+        return parts.isEmpty ? "장소·장비 안 고름" : parts.joined(separator: " · ")
     }
 
     private var lessonSkillsSection: some View {
@@ -315,12 +381,12 @@ struct SessionEditorView: View {
     private var notesSection: some View {
         Section {
             TextField("오늘의 배움 한 줄", text: $learnedToday, axis: .vertical)
-            if type == .lesson {
+            if expanded && type == .lesson {
                 TextField("코치 메모", text: $coachNotes, axis: .vertical)
                 TextField("다음 목표", text: $nextGoal, axis: .vertical)
                 ScalePicker(title: "오늘 내 평가", low: "아쉬움", high: "만족", value: $selfRating)
             }
-            if type.isGame {
+            if expanded && type.isGame {
                 DisclosureGroup("경기 정보 더 기록하기", isExpanded: $showingMore) {
                     TextField("상대 팀", text: $opponent)
                     if type.showsGameStats {
@@ -487,11 +553,62 @@ struct SessionEditorView: View {
             surface = last.surface
             rinkName = last.rinkName
         }
+        let lastSame = allSessions.first { $0.type == type }
+        if fromNow {
+            let open = openEvents
+            let plan = QuickPrefill.plan(now: Date(), defaultMinutes: minutes, lastMinutes: lastSame?.minutes,
+                                         events: open.map { .init(start: $0.at, minutes: $0.minutes) }, workouts: [])
+            apply(plan, events: open)
+            Task { await prefillFromHealth(open) }
+        } else if let lastSame {
+            minutes = max(lastSame.minutes, 1)
+        }
         if let primary = skates.first(where: { $0.isPrimary && $0.status.isActive }) ?? skates.first(where: { $0.status.isActive }) {
             skateID = primary.id
             runnerID = primary.currentRunner?.id
         }
         if type.isGame { suggestSkills() }
+    }
+
+    /// 아직 기록과 이어지지 않은 팀 일정.
+    private var openEvents: [TeamEvent] { teamEvents.filter { $0.sessionID == nil } }
+
+    private func apply(_ plan: QuickPrefill.Plan, events: [TeamEvent]) {
+        startsAt = plan.start
+        minutes = plan.minutes
+        if !iceMinutesEdited { iceMinutes = plan.minutes }
+        switch plan.source {
+        case .teamEvent(let i):
+            let e = events[i]
+            linkedEventID = e.id
+            if let k = ActivityType(rawValue: e.kindRaw), k.isGame == type.isGame { type = k }
+            if !e.rinkName.isEmpty {
+                rinkName = e.rinkName
+                if surface == .unknown { surface = .indoorRink }
+            }
+            if !e.opponent.isEmpty { opponent = e.opponent }
+            prefillNote = "팀 일정(\(e.at.formatted(date: .omitted, time: .shortened)))으로 채웠어. 맞는지만 봐줘."
+        case .workout:
+            linkedEventID = nil
+            prefillNote = "Apple 건강 운동 기록으로 시간을 채웠어. 맞는지만 봐줘."
+        case .lastSession:
+            prefillNote = "지난 \(type.title) 시간(\(minutesText(plan.minutes)))만큼 지금부터 거슬러 채웠어."
+        case .none:
+            prefillNote = nil
+        }
+    }
+
+    /// 건강 앱에 방금 끝난 하키·스케이트 운동이 있으면 그 시간으로 바꾼다. 사용자가 이미 고쳤으면 건드리지 않는다.
+    /// 권한 창은 여기서 띄우지 않는다(연결은 설정에서만).
+    private func prefillFromHealth(_ open: [TeamEvent]) async {
+        guard UserDefaults.standard.bool(forKey: HealthPrefs.enabledKey), HealthService.shared.isAvailable else { return }
+        let now = Date()
+        guard let ws = try? await HealthService.shared.workouts(from: now.addingTimeInterval(-4 * 3600), to: now) else { return }
+        let hockey = ws.filter { $0.activityName == "하키" || $0.activityName == "스케이팅" }.map { (start: $0.start, end: $0.end) }
+        guard !hockey.isEmpty, !userTouchedTime, saved == nil else { return }
+        let plan = QuickPrefill.plan(now: now, defaultMinutes: minutes, lastMinutes: nil,
+                                     events: open.map { .init(start: $0.at, minutes: $0.minutes) }, workouts: hockey)
+        if plan.source == .workout { apply(plan, events: open) }
     }
 
     private func suggestSkills() {
@@ -600,8 +717,23 @@ struct SessionEditorView: View {
             p.session = target
         }
 
+        if isNew, let id = linkedEventID, let e = teamEvents.first(where: { $0.id == id }), e.sessionID == nil {
+            e.sessionID = target.id
+        }
+
         context.saveOrReport()
-        dismiss()
+        guard isNew else { dismiss(); return }
+        // 새 기록은 완료 화면으로. 개인 최고는 이번 기록을 뺀 지난 기록과 견준다.
+        let marks = (try? context.fetch(FetchDescriptor<ShotMark>())) ?? []
+        let shotCounts = Dictionary(grouping: marks, by: \.sessionID).mapValues(\.count)
+        let history = allSessions.filter { $0.id != target.id }.map { bestInput($0, shots: shotCounts[$0.id]) }
+        let myShots = type.isGame && !playedGoalie && !shots.isEmpty ? shots.count : nil
+        bests = PersonalBest.check(bestInput(target, shots: myShots), history: history)
+        withAnimation { saved = target }
+    }
+
+    private func bestInput(_ s: Session, shots: Int?) -> BestInput {
+        BestInput(type: s.type, minutes: s.minutes, goals: s.goals, assists: s.assists, saves: s.saves, shots: shots)
     }
 }
 

@@ -3,13 +3,14 @@ import HockeyCore
 
 /// 무엇을 새로 기록할지.
 enum NewEntry: Identifiable, Hashable {
-    case session(ActivityType, Date = Date())
+    /// 날짜가 nil이면 방금 끝난 운동(시간을 미리 채운다). 달력에서 고른 날이면 그 날짜.
+    case session(ActivityType, Date? = nil)
     case journal(Date)
     case practice
 
     var id: String {
         switch self {
-        case .session(let t, let d): return "session-\(t.rawValue)-\(d.timeIntervalSince1970)"
+        case .session(let t, let d): return "session-\(t.rawValue)-\(d?.timeIntervalSince1970 ?? 0)"
         case .journal(let d): return "journal-\(d.timeIntervalSince1970)"
         case .practice: return "practice"
         }
@@ -73,7 +74,7 @@ struct RootView: View {
         .sheet(item: $newEntry) { entry in
             switch entry {
             case .session(let type, let date):
-                NavigationStack { SessionEditorView(newType: type, startsAt: date) }
+                NavigationStack { SessionEditorView(newType: type, startsAt: date ?? Date(), fromNow: date == nil) }
             case .journal(let date):
                 NavigationStack { JournalEditorView(newDate: date) }
             case .practice:

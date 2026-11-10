@@ -28,9 +28,25 @@ final class ScreenTourTests: XCTestCase {
         app.swipeDown()
         if tapText("수업 기록") {
             snap("02-lesson-editor")
-            app.swipeUp(); snap("02b-lesson-editor-mid")
-            app.swipeUp(); snap("02c-lesson-editor-bottom")
+            if tapText("더 적기") { snap("02b-lesson-editor-mid"); app.swipeUp(); snap("02c-lesson-editor-bottom") }
             tapButton("닫기")
+        }
+
+        // 접힌 상태로도 저장되고 완료 화면이 나와야 한다(한 줄만 적고 저장).
+        tab("홈")
+        if tapText("수업 기록") {
+            let line = app.textFields["오늘의 배움 한 줄"].firstMatch
+            let lineView = line.exists ? line : app.textViews["오늘의 배움 한 줄"].firstMatch
+            if lineView.waitForExistence(timeout: 3) {
+                lineView.tap(); lineView.typeText("스톱 왼쪽이 잘 됐어")
+                XCTAssertTrue(tapButton("저장"), "저장 버튼이 없다")
+                XCTAssertTrue(app.staticTexts["저장했어"].waitForExistence(timeout: 5), "저장 후 완료 화면이 안 나왔다")
+                snap("02h-saved")
+                tapButton("닫기")
+            } else {
+                XCTFail("오늘의 배움 칸을 못 찾았다")
+                tapButton("닫기")
+            }
         }
 
         // 우리 팀: 일정·참석·라인업
@@ -44,7 +60,7 @@ final class ScreenTourTests: XCTestCase {
         // 미니게임 기록: 슛 차트
         if tapText("경기 리뷰") {
             snap("02d-game-editor")
-            if tapText("슛 차트") { snap("02e-shot-chart") }
+            if tapText("더 적기"), tapText("슛 차트") { snap("02e-shot-chart") }
             tapButton("닫기")
         }
         // 최근 기록에서 미니게임 상세
@@ -146,18 +162,15 @@ final class ScreenTourTests: XCTestCase {
     @discardableResult
     private func tapText(_ text: String) -> Bool {
         let pred = NSPredicate(format: "label CONTAINS %@", text)
+        // 하단 바(있으면 그 윗선, 시트 안이면 화면 92%) 아래는 누르지 않는다. 바 뒤를 누르면 바의 탭이 대신 눌린다.
+        let bar = app.buttons["tab-홈"]
+        let limit = bar.exists && bar.isHittable ? bar.frame.minY - 20 : app.frame.height * 0.92
         for _ in 0..<10 {
             for q in [app.buttons, app.cells, app.staticTexts] {
                 let el = q.matching(pred).firstMatch
-                // 탭바에 가려진 아래쪽(화면 85% 아래)은 누르지 않고 더 내린다.
-                if el.exists && el.isHittable && el.frame.midY < app.frame.height * 0.85 { el.tap(); return true }
+                if el.exists && el.isHittable && el.frame.midY < limit { el.tap(); return true }
             }
             nudgeUp()
-        }
-        // 끝까지 내려도 85% 아래에 머무는 마지막 카드는 보이기만 하면 누른다.
-        for q in [app.buttons, app.cells, app.staticTexts] {
-            let el = q.matching(pred).firstMatch
-            if el.exists && el.isHittable { el.tap(); return true }
         }
         XCTContext.runActivity(named: "못 찾음: \(text)") { _ in }
         snap("miss-\(text)")   // 왜 못 찾았는지 화면으로 남긴다.
