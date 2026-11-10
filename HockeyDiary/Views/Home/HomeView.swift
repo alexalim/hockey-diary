@@ -214,7 +214,11 @@ struct HomeView: View {
 
     @ViewBuilder
     private var goalCard: some View {
-        if let s = lastWithGoal, !resting {
+        // 맨 위 안내 카드가 이미 목표를 보여주면 아래 목표 카드는 숨긴다(같은 말 두 번).
+        let promptShowsGoal: Bool = {
+            switch prompt { case .morningGoal?, .beforeEvent?: return true; default: return false }
+        }()
+        if let s = lastWithGoal, !resting, !promptShowsGoal {
             Card {
                 CardHeader(title: "다음 목표", systemImage: "target", trailing: s.startsAt.dayTitle)
                 Text(s.nextGoal).font(.body).foregroundStyle(Theme.title)

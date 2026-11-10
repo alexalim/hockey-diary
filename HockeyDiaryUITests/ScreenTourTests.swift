@@ -35,8 +35,12 @@ final class ScreenTourTests: XCTestCase {
         // 접힌 상태로도 저장되고 완료 화면이 나와야 한다(한 줄만 적고 저장).
         tab("홈")
         if tapText("수업 기록") {
-            let line = app.textFields["오늘의 배움 한 줄"].firstMatch
-            let lineView = line.exists ? line : app.textViews["오늘의 배움 한 줄"].firstMatch
+            // Form은 화면 밖 칸을 아직 안 만든다. 보일 때까지 조금씩 내린다.
+            var lineView = app.textViews["오늘의 배움 한 줄"].firstMatch
+            for _ in 0..<6 where !(lineView.exists && lineView.isHittable) {
+                if app.textFields["오늘의 배움 한 줄"].firstMatch.exists { lineView = app.textFields["오늘의 배움 한 줄"].firstMatch; break }
+                nudgeUp()
+            }
             if lineView.waitForExistence(timeout: 3) {
                 lineView.tap(); lineView.typeText("스톱 왼쪽이 잘 됐어")
                 XCTAssertTrue(tapButton("저장"), "저장 버튼이 없다")
@@ -60,7 +64,11 @@ final class ScreenTourTests: XCTestCase {
         // 미니게임 기록: 슛 차트
         if tapText("경기 리뷰") {
             snap("02d-game-editor")
-            if tapText("더 적기"), tapText("슛 차트") { snap("02e-shot-chart") }
+            if tapText("더 적기") {
+                // 펼치면 슛 차트가 지금 위치보다 위에 생긴다. 위로 올린 뒤 찾는다.
+                for _ in 0..<3 { app.swipeDown() }
+                if tapText("슛 차트") { snap("02e-shot-chart") }
+            }
             tapButton("닫기")
         }
         // 최근 기록에서 미니게임 상세
@@ -87,7 +95,7 @@ final class ScreenTourTests: XCTestCase {
         // 다이어리
         tab("다이어리"); snap("03-diary")
         // 성장
-        tab("성장"); snap("04-growth")
+        tab("성장"); for _ in 0..<3 { app.swipeDown() }; snap("04-growth")
         app.swipeUp(); snap("04b-growth-mid")
         app.swipeUp(); snap("04c-growth-bottom")
 
@@ -173,7 +181,8 @@ final class ScreenTourTests: XCTestCase {
         let pred = NSPredicate(format: "label CONTAINS %@", text)
         // 하단 바(있으면 그 윗선, 시트 안이면 화면 92%) 아래는 누르지 않는다. 바 뒤를 누르면 바의 탭이 대신 눌린다.
         let bar = app.buttons["tab-홈"]
-        let limit = bar.exists && bar.isHittable ? bar.frame.minY - 20 : app.frame.height * 0.92
+        // tab-홈 버튼의 프레임은 바 윗선 바로 아래에서 시작한다(솟은 원은 offset이라 프레임 밖).
+        let limit = bar.exists && bar.isHittable ? bar.frame.minY - 4 : app.frame.height * 0.92
         for _ in 0..<10 {
             for q in [app.buttons, app.cells, app.staticTexts] {
                 let el = q.matching(pred).firstMatch
