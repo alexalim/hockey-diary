@@ -233,7 +233,7 @@ struct RoutineRunView: View {
                     repTick += 1
                     if count == item.target { finishedTick += 1 }
                 } label: {
-                    Label("+1", systemImage: "plus").font(.title2.bold()).frame(maxWidth: .infinity, minHeight: 64)
+                    Text("+1").font(.title.bold()).frame(maxWidth: .infinity, minHeight: 64)
                 }
                 .buttonStyle(.borderedProminent).tint(Theme.cobalt)
                 Button { withAnimation(.snappy) { count += 5 }; repTick += 1 } label: { Text("+5").font(.headline).frame(width: 64, height: 64) }
