@@ -54,6 +54,15 @@ struct SessionEditorView: View {
     @State private var goals: Int?
     @State private var assists: Int?
     @State private var review: String
+    @State private var plusMinus: Int?
+    @State private var penaltyMinutes: Int?
+    @State private var shifts: Int?
+    @State private var playedGoalie = false
+    @State private var saves: Int?
+    @State private var goalsAgainst: Int?
+    @State private var shots: [ShotPoint] = []
+    @State private var shotOutcome: ShotOutcome = .goal
+    @State private var didLoadShots = false
     @State private var learnings: [LearningDraft]
     @State private var attempts: [AttemptDraft]
     @State private var skateID: UUID?
@@ -121,6 +130,12 @@ struct SessionEditorView: View {
         _goals = State(initialValue: session.goals)
         _assists = State(initialValue: session.assists)
         _review = State(initialValue: session.review)
+        _plusMinus = State(initialValue: session.plusMinus)
+        _penaltyMinutes = State(initialValue: session.penaltyMinutes)
+        _shifts = State(initialValue: session.shifts)
+        _playedGoalie = State(initialValue: session.playedGoalie)
+        _saves = State(initialValue: session.saves)
+        _goalsAgainst = State(initialValue: session.goalsAgainst)
         _learnings = State(initialValue: session.learnings.compactMap { l in
             guard let skill = l.skill else { return nil }
             return LearningDraft(skillID: skill.id, name: skill.name, feedback: l.feedback, difficulty: l.difficulty)
@@ -164,6 +179,8 @@ struct SessionEditorView: View {
             if type == .lesson { lessonSkillsSection }
             if type.isGame { gameSkillsSection }
             moodSection
+            if type.isGame { goalieSection }
+            if type.isGame && !playedGoalie { shotSection }
             notesSection
             placeSection
             equipmentSection
@@ -310,8 +327,13 @@ struct SessionEditorView: View {
                         OptionalNumberField(title: "우리 팀 점수", value: $scoreFor)
                         OptionalNumberField(title: "상대 팀 점수", value: $scoreAgainst)
                         TextField("포지션", text: $position)
-                        OptionalNumberField(title: "골", value: $goals)
-                        OptionalNumberField(title: "어시스트", value: $assists)
+                        if !playedGoalie {
+                            OptionalNumberField(title: "골", value: $goals)
+                            OptionalNumberField(title: "어시스트", value: $assists)
+                            OptionalNumberField(title: "+/- (내가 있을 때 득점−실점)", value: $plusMinus)
+                        }
+                        OptionalNumberField(title: "페널티 (분)", value: $penaltyMinutes)
+                        OptionalNumberField(title: "쉬프트 수", value: $shifts)
                     }
                     TextField("경기 회고", text: $review, axis: .vertical)
                     TextField("다음 목표", text: $nextGoal, axis: .vertical)
@@ -404,7 +426,60 @@ struct SessionEditorView: View {
 
     // MARK: - Actions
 
+    /// 골리로 뛴 날: 세이브·실점·세이브율.
+    private var goalieSection: some View {
+        Section {
+            Toggle("오늘 골리로 뛰었어", isOn: $playedGoalie)
+            if playedGoalie {
+                OptionalNumberField(title: "세이브", value: $saves)
+                OptionalNumberField(title: "실점", value: $goalsAgainst)
+                let g = GoalieStats(saves: saves ?? 0, goalsAgainst: goalsAgainst ?? 0)
+                HStack {
+                    Text("세이브율")
+                    Spacer()
+                    Text(g.shotsFaced == 0 ? "아직 없음" : "\(g.savePctText) · 상대 슛 \(g.shotsFaced)개").bold()
+                }
+            }
+        } footer: {
+            if playedGoalie { Text("세이브율은 세이브 ÷ (세이브 + 실점)이야. 몰라도 저장돼.") }
+        }
+    }
+
+    /// 슛 차트: 결과를 고르고 그림을 누르면 그 자리에 표시가 찍힌다.
+    private var shotSection: some View {
+        Section {
+            ChoiceCards(options: ShotOutcome.choices, selection: $shotOutcome, columns: 4, minHeight: 60)
+            ShotChartCanvas(shots: shots, editable: true) { x, y in
+                withAnimation(.spring(response: 0.25)) { shots.append(ShotPoint(x: x, y: y, outcome: shotOutcome)) }
+            }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("슛 차트. 표시 \(shots.count)개. 아래 숫자 칸으로도 적을 수 있어.")
+            HStack {
+                ShotLegend()
+                Spacer()
+                if !shots.isEmpty {
+                    Button { withAnimation { _ = shots.popLast() } } label: { Label("되돌리기", systemImage: "arrow.uturn.backward") }
+                        .buttonStyle(.borderless).font(.footnote)
+                }
+            }
+            if !shots.isEmpty {
+                Text(shotSummaryText(ShotStats.compute(shots))).font(.subheadline.bold()).foregroundStyle(Theme.title)
+            }
+        } header: {
+            Text("슛 차트")
+        } footer: {
+            Text("위에서 결과를 고르고, 슛을 쏜 자리를 눌러. 위가 상대 골대야. 골로 찍은 수는 골 칸과 따로 세.")
+        }
+    }
+
+    private func loadShotsIfNeeded() {
+        guard !didLoadShots else { return }
+        didLoadShots = true
+        if let session { shots = DiaryStore.shots(for: session.id, context: context).map(\.point) }
+    }
+
     private func prefill() {
+        loadShotsIfNeeded()
         guard isNew, !didPrefill else { return }
         didPrefill = true
         // 최근 활동의 빙판 유형·링크장을 제안한다. 확인은 사용자 몫.
@@ -468,6 +543,13 @@ struct SessionEditorView: View {
         target.goals = type.showsGameStats ? goals : nil
         target.assists = type.showsGameStats ? assists : nil
         target.review = review
+        target.plusMinus = type.showsGameStats && !playedGoalie ? plusMinus : nil
+        target.penaltyMinutes = type.showsGameStats ? penaltyMinutes : nil
+        target.shifts = type.showsGameStats ? shifts : nil
+        target.playedGoalie = type.isGame && playedGoalie
+        target.saves = target.playedGoalie ? saves : nil
+        target.goalsAgainst = target.playedGoalie ? goalsAgainst : nil
+        DiaryStore.replaceShots(for: target.id, with: type.isGame && !playedGoalie ? shots : [], context: context)
 
         // 기술 연결은 초안대로 다시 만든다. 통계는 연결에서 계산되므로 원본 손실이 없다.
         // 지금 종류에 해당하는 연결만 다시 만든다. 종류를 바꿔도 다른 쪽 기록은 지우지 않는다.

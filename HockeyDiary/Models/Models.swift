@@ -40,6 +40,13 @@ final class Session {
     var goals: Int?
     var assists: Int?
     var review: String = ""
+    // 정규게임 선택 스탯(나중에 추가, 기본 nil). 골리로 뛴 날은 세이브·실점.
+    var plusMinus: Int?
+    var penaltyMinutes: Int?
+    var shifts: Int?
+    var playedGoalie: Bool = false
+    var saves: Int?
+    var goalsAgainst: Int?
 
     var createdAt: Date = Date()
 
@@ -345,6 +352,35 @@ final class EquipmentUsage {
     }
 }
 
+/// 슛 표시 하나. Session과 관계 대신 sessionID로 묶어서 기존 Session 구조를 건드리지 않는다.
+@Model
+final class ShotMark {
+    var id: UUID = UUID()
+    var sessionID: UUID = UUID()
+    var x: Double = 0.5
+    var y: Double = 0.5
+    var outcomeRaw: String = ShotOutcome.saved.rawValue
+    var createdAt: Date = Date()
+
+    init(sessionID: UUID, point: ShotPoint) {
+        self.id = UUID()
+        self.sessionID = sessionID
+        self.x = point.x
+        self.y = point.y
+        self.outcomeRaw = point.outcome.rawValue
+        self.createdAt = Date()
+    }
+
+    var point: ShotPoint { ShotPoint(x: x, y: y, outcome: ShotOutcome(rawValue: outcomeRaw) ?? .saved) }
+}
+
+extension Session {
+    var goalieStats: GoalieStats? {
+        guard playedGoalie, saves != nil || goalsAgainst != nil else { return nil }
+        return GoalieStats(saves: saves ?? 0, goalsAgainst: goalsAgainst ?? 0)
+    }
+}
+
 enum AppSchema {
     static let models: [any PersistentModel.Type] = [
         Session.self, Skill.self, SkillLearning.self, SkillAttempt.self,
@@ -352,6 +388,7 @@ enum AppSchema {
         Skate.self, RunnerSet.self, RunnerInstallation.self, SharpeningLog.self, EquipmentUsage.self,
         Rink.self,
         LockerProfile.self, StickerPlacement.self, EarnedSticker.self, GearItem.self,
+        ShotMark.self,
     ]
 
     static func container(inMemory: Bool = false) throws -> ModelContainer {

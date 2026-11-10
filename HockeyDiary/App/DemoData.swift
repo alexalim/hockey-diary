@@ -53,6 +53,12 @@ enum DemoData {
             let t = SkillAttempt(); context.insert(t); t.skill = s; t.session = game; t.tried = false
         }
         DiaryStore.setUsage(for: game, skate: skate, runner: a, iceMinutes: 45, context: context)
+        game.shifts = 14; game.penaltyMinutes = 2
+        DiaryStore.replaceShots(for: game.id, with: [
+            ShotPoint(x: 0.48, y: 0.3, outcome: .goal), ShotPoint(x: 0.55, y: 0.36, outcome: .saved),
+            ShotPoint(x: 0.22, y: 0.4, outcome: .missed), ShotPoint(x: 0.5, y: 0.8, outcome: .blocked),
+            ShotPoint(x: 0.62, y: 0.28, outcome: .goal),
+        ], context: context)
 
         // 폰드
         let pond = Session(type: .freePractice, startsAt: daysAgo(10, hour: 15), minutes: 40)

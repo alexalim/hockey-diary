@@ -8,6 +8,7 @@ struct SessionDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Query private var skates: [Skate]
     @Query private var runners: [RunnerSet]
+    @Query private var allShots: [ShotMark]
 
     let session: Session
 
@@ -29,6 +30,8 @@ struct SessionDetailView: View {
                 header
                 if !session.learnings.isEmpty { learningsCard }
                 if !session.attempts.isEmpty { attemptsCard }
+                if let g = session.goalieStats { goalieCard(g) }
+                if !shots.isEmpty { shotsCard }
                 if hasMood { moodCard }
                 if hasNotes { notesCard }
                 placeCard
@@ -61,9 +64,45 @@ struct SessionDetailView: View {
     }
 
     private var hasMood: Bool { session.moodBefore != nil || session.moodAfter != nil || session.fatigue != nil }
+    private var shots: [ShotPoint] {
+        allShots.filter { $0.sessionID == session.id }.sorted { $0.createdAt < $1.createdAt }.map(\.point)
+    }
+
+    private var shotsCard: some View {
+        let st = ShotStats.compute(shots)
+        return Card {
+            CardHeader(title: "슛 차트", systemImage: "scope", trailing: shotSummaryText(st))
+            ShotChartCanvas(shots: shots)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(shotSummaryText(st))
+            ShotLegend()
+            if let s = st.sentence() { Text(s).font(.subheadline) }
+        }
+    }
+
+    private func goalieCard(_ g: GoalieStats) -> some View {
+        Card(tint: Theme.iceBlue) {
+            CardHeader(title: "골리로 뛴 날", systemImage: "figure.hockey")
+            HStack(spacing: 16) {
+                stat("세이브", "\(g.saves)")
+                stat("실점", "\(g.goalsAgainst)")
+                stat("세이브율", g.savePctText)
+            }
+        }
+    }
+
+    private func stat(_ title: String, _ value: String) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(value).font(.title3.bold()).foregroundStyle(Theme.title)
+            Text(title).font(.caption).foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
     private var hasNotes: Bool {
         ![session.learnedToday, session.coachNotes, session.nextGoal, session.review].allSatisfy(\.isEmpty)
             || session.scoreFor != nil || session.goals != nil || session.assists != nil
+            || session.plusMinus != nil || session.penaltyMinutes != nil || session.shifts != nil
     }
 
     private var header: some View {
@@ -146,6 +185,10 @@ struct SessionDetailView: View {
             if session.type.showsGameStats, let f = session.scoreFor, let a = session.scoreAgainst {
                 Text("스코어 \(f) : \(a)").font(.headline)
             }
+            if session.plusMinus != nil || session.penaltyMinutes != nil || session.shifts != nil {
+                Text([session.plusMinus.map { "+/- \($0 > 0 ? "+" : "")\($0)" }, session.penaltyMinutes.map { "페널티 \($0)분" }, session.shifts.map { "쉬프트 \($0)번" }]
+                    .compactMap { $0 }.joined(separator: " · ")).font(.subheadline)
+            }
             if session.goals != nil || session.assists != nil {
                 Text("골 \(session.goals ?? 0) · 어시스트 \(session.assists ?? 0)\(session.position.isEmpty ? "" : " · \(session.position)")")
                     .font(.subheadline)
@@ -204,6 +247,7 @@ struct SessionDetailView: View {
         dismiss()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
             for p in target.photos { ctx.delete(p) }
+            DiaryStore.deleteShots(for: target.id, context: ctx)
             ctx.delete(target)
             ctx.saveOrReport()
         }

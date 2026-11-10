@@ -103,6 +103,23 @@ enum DiaryStore {
         context.saveOrReport()
     }
 
+    // MARK: - 슛 차트
+
+    static func shots(for sessionID: UUID, context: ModelContext) -> [ShotMark] {
+        let all = (try? context.fetch(FetchDescriptor<ShotMark>())) ?? []
+        return all.filter { $0.sessionID == sessionID }.sorted { $0.createdAt < $1.createdAt }
+    }
+
+    /// 활동의 슛 표시를 초안대로 다시 만든다.
+    static func replaceShots(for sessionID: UUID, with points: [ShotPoint], context: ModelContext) {
+        for old in shots(for: sessionID, context: context) { context.delete(old) }
+        for p in points { context.insert(ShotMark(sessionID: sessionID, point: p)) }
+    }
+
+    static func deleteShots(for sessionID: UUID, context: ModelContext) {
+        for old in shots(for: sessionID, context: context) { context.delete(old) }
+    }
+
     // MARK: - 기술
 
     static func skill(named raw: String, category: String = "내 기술", context: ModelContext) -> Skill? {

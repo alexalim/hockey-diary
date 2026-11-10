@@ -174,4 +174,39 @@ final class StoreIntegrationTests: XCTestCase {
         XCTAssertEqual(all[0].type, .regularGame)
         XCTAssertEqual(all[0].moodAfter, 4)
     }
+
+    // 슛 차트: 활동별로 저장·교체되고, 활동을 지우면 같이 지워진다.
+    func testShotsFollowSession() throws {
+        let game = Session(type: .miniGame)
+        context.insert(game)
+        let other = Session(type: .miniGame)
+        context.insert(other)
+        try context.save()
+        DiaryStore.replaceShots(for: game.id, with: [ShotPoint(x: 0.5, y: 0.3, outcome: .goal), ShotPoint(x: 0.2, y: 0.4, outcome: .saved)], context: context)
+        DiaryStore.replaceShots(for: other.id, with: [ShotPoint(x: 0.5, y: 0.8, outcome: .missed)], context: context)
+        try context.save()
+        XCTAssertEqual(DiaryStore.shots(for: game.id, context: context).count, 2)
+        XCTAssertEqual(ShotStats.compute(DiaryStore.shots(for: game.id, context: context).map(\.point)).goals, 1)
+
+        DiaryStore.replaceShots(for: game.id, with: [ShotPoint(x: 0.5, y: 0.3, outcome: .blocked)], context: context)
+        try context.save()
+        XCTAssertEqual(DiaryStore.shots(for: game.id, context: context).map(\.point.outcome), [.blocked], "초안대로 교체")
+        XCTAssertEqual(DiaryStore.shots(for: other.id, context: context).count, 1, "다른 활동 슛은 그대로")
+
+        DiaryStore.deleteShots(for: game.id, context: context)
+        context.delete(game)
+        try context.save()
+        XCTAssertEqual(try context.fetchCount(FetchDescriptor<ShotMark>()), 1)
+    }
+
+    // 골리 모드: 세이브·실점이 보존되고 세이브율이 맞다.
+    func testGoalieFields() throws {
+        let game = Session(type: .regularGame)
+        context.insert(game)
+        game.playedGoalie = true; game.saves = 27; game.goalsAgainst = 3
+        try context.save()
+        let back = try XCTUnwrap(context.fetch(FetchDescriptor<Session>()).first)
+        XCTAssertEqual(back.goalieStats?.savePctText, "90.0%")
+        XCTAssertNil(Session(type: .lesson).goalieStats)
+    }
 }

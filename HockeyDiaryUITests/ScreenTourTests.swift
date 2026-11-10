@@ -33,6 +33,16 @@ final class ScreenTourTests: XCTestCase {
             tapButton("닫기")
         }
 
+        // 미니게임 기록: 슛 차트
+        if tapText("경기 리뷰") {
+            snap("02d-game-editor")
+            if tapText("슛 차트") { snap("02e-shot-chart") }
+            tapButton("닫기")
+        }
+        // 최근 기록에서 미니게임 상세
+        tab("홈")
+        if tapText("미니게임") { snap("02f-game-detail"); app.swipeUp(); snap("02g-game-detail-bottom"); back() }
+
         // 다이어리
         tab("다이어리"); snap("03-diary")
         // 성장

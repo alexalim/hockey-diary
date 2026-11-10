@@ -503,6 +503,40 @@ final class TacticGuideTests: XCTestCase {
     }
 }
 
+final class ShotTests: XCTestCase {
+    // 슛 차트: 구역 나누기, 성공률, 표본 부족 처리, 골리 세이브율.
+    func testZones() {
+        XCTAssertEqual(ShotZone.classify(x: 0.5, y: 0.35), .slot)
+        XCTAssertEqual(ShotZone.classify(x: 0.2, y: 0.35), .leftCircle)
+        XCTAssertEqual(ShotZone.classify(x: 0.8, y: 0.35), .rightCircle)
+        XCTAssertEqual(ShotZone.classify(x: 0.5, y: 0.8), .point)
+        XCTAssertEqual(ShotZone.classify(x: 0.5, y: 0.05), .nearGoalLine)
+        XCTAssertEqual(ShotPoint(x: 1.4, y: -1, outcome: .goal).x, 1, "좌표는 0~1로 자른다")
+    }
+
+    func testShotStats() {
+        let shots = [
+            ShotPoint(x: 0.5, y: 0.3, outcome: .goal), ShotPoint(x: 0.5, y: 0.4, outcome: .saved), ShotPoint(x: 0.55, y: 0.3, outcome: .goal),
+            ShotPoint(x: 0.2, y: 0.3, outcome: .missed), ShotPoint(x: 0.5, y: 0.8, outcome: .blocked),
+        ]
+        let st = ShotStats.compute(shots)
+        XCTAssertEqual(st.total, 5); XCTAssertEqual(st.goals, 2); XCTAssertEqual(st.onTarget, 3)
+        XCTAssertEqual(st.byZone[.slot]?.shots, 3); XCTAssertEqual(st.byZone[.slot]?.goals, 2)
+        XCTAssertEqual(st.bestZone(), .slot)
+        XCTAssertEqual(st.sentence(), "슛 5번 중 2골. 슬롯에서 3번 쏴서 2골(67%)로 가장 잘 들어갔어.")
+        XCTAssertNil(ShotStats.compute([shots[0]]).sentence(), "표본 부족이면 문장 없음")
+        XCTAssertNil(ShotStats.compute([]).shootingRate, "슛이 없으면 0%가 아니라 없음")
+    }
+
+    func testGoalieStats() {
+        let g = GoalieStats(saves: 27, goalsAgainst: 3)
+        XCTAssertEqual(g.shotsFaced, 30)
+        XCTAssertEqual(g.savePctText, "90.0%")
+        XCTAssertNil(GoalieStats(saves: 0, goalsAgainst: 0).savePct)
+        XCTAssertEqual(GoalieStats.sum([g, GoalieStats(saves: 13, goalsAgainst: 2)]).savePctText, "88.9%")
+    }
+}
+
 final class DomainTests: XCTestCase {
     // FR-02: 미니게임은 점수 없이, 정규게임 스탯은 정규게임에서만 보인다.
     func testGameStatsOnlyForRegularGame() {

@@ -7,6 +7,7 @@ import HockeyCore
 struct GrowthView: View {
     @Query(sort: \Session.startsAt, order: .reverse) private var sessions: [Session]
     @Query(sort: \Skill.name) private var skills: [Skill]
+    @Query private var allShots: [ShotMark]
 
     @State private var period: Period = .month
 
@@ -29,6 +30,8 @@ struct GrowthView: View {
                 activityCard
                 moodCard
                 surfaceCard
+                shotsCard
+                goalieCard
                 skillsCard
                 SleepGrowthCard(samples: samples, periodTitle: period.longTitle)
                 CycleGrowthCard(sessions: periodSessions.map { (at: $0.startsAt, fatigue: $0.fatigue) }, periodTitle: period.longTitle)
@@ -148,6 +151,73 @@ struct GrowthView: View {
     }
 
     // MARK: - 기술 (S04)
+
+    // MARK: - 슛 차트 누적
+
+    private var periodShots: [ShotPoint] {
+        let ids = Set(periodSessions.map(\.id))
+        return allShots.filter { ids.contains($0.sessionID) }.map(\.point)
+    }
+
+    private var shotsCard: some View {
+        let shots = periodShots
+        let st = ShotStats.compute(shots)
+        return Card {
+            CardHeader(title: "슛 차트", systemImage: "scope", trailing: shots.isEmpty ? nil : shotSummaryText(st))
+            if shots.isEmpty {
+                EmptyHint(text: "경기 기록에서 슛 자리를 찍으면 여기에 쌓여. 어디서 쏘면 잘 들어가는지 보여줄게.", systemImage: "scope")
+            } else {
+                ShotChartCanvas(shots: Array(shots.suffix(200)))
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(shotSummaryText(st))
+                ShotLegend()
+                if let s = st.sentence() {
+                    Text(s).font(.subheadline).foregroundStyle(Theme.title)
+                } else {
+                    Text(Sufficiency(count: shots.count).message).font(.subheadline).foregroundStyle(.secondary)
+                }
+                if shots.count >= 3 {
+                    ForEach(ShotZone.allCases, id: \.self) { z in
+                        if let line = st.byZone[z], line.shots > 0 {
+                            HStack {
+                                Text(z.title).font(.caption)
+                                Spacer()
+                                Text(line.shots >= 3 ? "\(line.goals)/\(line.shots) · \(Int(((line.rate ?? 0) * 100).rounded()))%" : "\(line.goals)/\(line.shots) · 더 모아보자")
+                                    .font(.caption).foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                }
+                Text("골로 찍은 표시만 세. 성공률은 골 ÷ 전체 슛이야.").font(.caption2).foregroundStyle(.secondary)
+            }
+            footnote(shots.count)
+        }
+    }
+
+    @ViewBuilder
+    private var goalieCard: some View {
+        let games = periodSessions.compactMap(\.goalieStats)
+        if !games.isEmpty {
+            let total = GoalieStats.sum(games)
+            Card(tint: Theme.iceBlue) {
+                CardHeader(title: "골리 기록", systemImage: "figure.hockey", trailing: "\(games.count)경기")
+                HStack(spacing: 8) {
+                    moodStat("세이브", total.saves, Theme.accent)
+                    moodStat("실점", total.goalsAgainst, Theme.neonPink)
+                    VStack {
+                        Text(total.savePctText).font(.title2.bold()).foregroundStyle(Theme.title)
+                        Text("세이브율").font(.caption).foregroundStyle(.secondary)
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 56)
+                    .background(Theme.cobaltSoft.opacity(0.5), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                }
+                if games.count < 3 {
+                    Text("3경기부터 흐름을 보여줄게.").font(.caption).foregroundStyle(.secondary)
+                }
+                footnote(games.count, note: "골리로 뛴 경기만")
+            }
+        }
+    }
 
     private var skillsCard: some View {
         let used = skills.filter { !$0.learnings.isEmpty || !$0.attempts.isEmpty }
