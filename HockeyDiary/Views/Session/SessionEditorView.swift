@@ -374,7 +374,7 @@ struct SessionEditorView: View {
         Section("기분·컨디션") {
             MoodPicker(title: "운동 전 기분", value: $moodBefore)
             MoodPicker(title: "운동 후 기분", value: $moodAfter)
-            ScalePicker(title: "피로도", low: "가뿐", high: "녹초", value: $fatigue)
+            EffortPicker(value: $fatigue)
         }
     }
 

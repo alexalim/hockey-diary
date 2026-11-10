@@ -74,6 +74,46 @@ struct ScalePicker: View {
     }
 }
 
+/// "얼마나 힘들었어?" 다섯 단계. 숫자 뜻을 몰라도 고를 수 있게 고른 단계의 말을 같이 보여준다.
+/// 저장 값은 피로도와 같은 1~5라 예전 기록과 그대로 이어진다.
+struct EffortPicker: View {
+    @Binding var value: Int?
+    static let words = ["쉬웠어", "할 만했어", "적당히 힘들었어", "꽤 힘들었어", "다 짜냈어"]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text("얼마나 힘들었어?").font(.subheadline).foregroundStyle(.secondary)
+                Spacer()
+                if let v = value { Text(Self.words[v - 1]).font(.subheadline.bold()).foregroundStyle(Theme.title) }
+            }
+            HStack(spacing: 6) {
+                ForEach(1...5, id: \.self) { v in
+                    let selected = value == v
+                    Button {
+                        value = selected ? nil : v
+                    } label: {
+                        Text("\(v)")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity, minHeight: Theme.touch)
+                            .foregroundStyle(selected ? .white : Theme.title)
+                            .background(selected ? Theme.cobalt : Theme.cobaltSoft,
+                                        in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(Self.words[v - 1])
+                    .accessibilityAddTraits(selected ? .isSelected : [])
+                }
+            }
+            HStack {
+                Text(Self.words[0]); Spacer(); Text(Self.words[4])
+            }
+            .font(.caption2).foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 4)
+    }
+}
+
 extension SurfaceType {
     var systemImage: String {
         switch self {
