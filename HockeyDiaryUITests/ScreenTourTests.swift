@@ -146,6 +146,11 @@ final class ScreenTourTests: XCTestCase {
             }
             nudgeUp()
         }
+        // 끝까지 내려도 85% 아래에 머무는 마지막 카드는 보이기만 하면 누른다.
+        for q in [app.buttons, app.cells, app.staticTexts] {
+            let el = q.matching(pred).firstMatch
+            if el.exists && el.isHittable { el.tap(); return true }
+        }
         XCTContext.runActivity(named: "못 찾음: \(text)") { _ in }
         return false
     }

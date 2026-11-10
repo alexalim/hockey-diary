@@ -102,17 +102,23 @@ struct RootView: View {
 struct MahadaTabBar: View {
     @Binding var selection: RootView.Tab
 
+    /// 홈 원이 바 위로 솟은 높이. 이만큼 투명한 띠를 두어 화면 내용이 원 뒤에 가려지지 않게 한다.
+    static let raise: CGFloat = 14
+
     var body: some View {
-        HStack(alignment: .bottom, spacing: 0) {
-            ForEach(RootView.Tab.allCases, id: \.self) { t in
-                if t == .home { homeButton } else { item(t) }
+        VStack(spacing: 0) {
+            Color.clear.frame(height: Self.raise)
+            HStack(alignment: .bottom, spacing: 0) {
+                ForEach(RootView.Tab.allCases, id: \.self) { t in
+                    if t == .home { homeButton } else { item(t) }
+                }
             }
+            .padding(.horizontal, 8)
+            .padding(.top, 6)
+            .padding(.bottom, 4)
+            .background(.bar, ignoresSafeAreaEdges: .bottom)
+            .overlay(alignment: .top) { Divider() }
         }
-        .padding(.horizontal, 8)
-        .padding(.top, 6)
-        .padding(.bottom, 4)
-        .background(.bar, ignoresSafeAreaEdges: .bottom)
-        .overlay(alignment: .top) { Divider() }
     }
 
     private func item(_ t: RootView.Tab) -> some View {
@@ -150,7 +156,7 @@ struct MahadaTabBar: View {
                         .foregroundStyle(on ? .white : Theme.accent)
                 }
                 .frame(width: 62, height: 62)
-                .offset(y: -14)
+                .offset(y: -Self.raise)
                 Text("홈").font(.system(size: 10, weight: .semibold))
                     .foregroundStyle(on ? Theme.accent : Color.secondary)
                     .offset(y: -12)
