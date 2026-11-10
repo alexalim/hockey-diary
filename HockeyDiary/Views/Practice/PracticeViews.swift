@@ -199,7 +199,7 @@ struct RoutineRunView: View {
         VStack(spacing: 12) {
             Text(String(format: "%d:%02d", secondsLeft / 60, secondsLeft % 60))
                 .font(.system(size: 72, weight: .black, design: .rounded)).monospacedDigit()
-                .foregroundStyle(secondsLeft == 0 ? Theme.neonPink : Theme.title)
+                .foregroundStyle(secondsLeft == 0 ? Theme.success : Theme.title)
             Text(secondsLeft == 0 ? "다 했어! 다음으로 넘어가." : "목표 \(item.target)분").font(.subheadline).foregroundStyle(.secondary)
             HStack(spacing: 10) {
                 Button { timerOn.toggle() } label: {
@@ -222,7 +222,7 @@ struct RoutineRunView: View {
         VStack(spacing: 12) {
             Text("\(count)")
                 .font(.system(size: 88, weight: .black, design: .rounded)).monospacedDigit()
-                .foregroundStyle(count >= item.target ? Theme.neonPink : Theme.title)
+                .foregroundStyle(count >= item.target ? Theme.success : Theme.title)
                 .contentTransition(.numericText())
             Text(count >= item.target ? "목표 \(item.target)번 다 했어!" : "목표 \(item.target)번").font(.subheadline).foregroundStyle(.secondary)
             HStack(spacing: 10) {

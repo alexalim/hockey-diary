@@ -83,10 +83,10 @@ struct DiaryView: View {
             VStack(spacing: 2) {
                 Text("\(calendar.component(.day, from: day))")
                     .font(.caption.weight(isToday ? .bold : .regular))
-                    .foregroundStyle(isToday ? Theme.neonPink : Theme.title)
+                    .foregroundStyle(isToday ? Theme.accent : Theme.title)
                 Text(mood.map(Mood.face) ?? " ").font(.callout)
                 Circle()
-                    .fill(daySessions.isEmpty ? Color.clear : Theme.accent)
+                    .fill(daySessions.first?.type.color ?? Color.clear)
                     .frame(width: 5, height: 5)
             }
             .frame(maxWidth: .infinity, minHeight: 48)

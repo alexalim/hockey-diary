@@ -81,7 +81,7 @@ struct TeamView: View {
                                 Text(m.position.short).font(.caption.bold()).foregroundStyle(.white)
                                     .frame(width: 26, height: 26).background(m.position == .goalie ? Theme.neonPink : Theme.cobalt, in: Circle())
                                 Text(m.display).foregroundStyle(Theme.title)
-                                if m.isGuest { Text("용병").font(.caption2.bold()).padding(.horizontal, 6).padding(.vertical, 2).background(Theme.cobaltSoft, in: Capsule()) }
+                                if m.isGuest { StatusTag(text: "용병") }
                                 Spacer()
                                 Image(systemName: "chevron.right").font(.caption).foregroundStyle(.secondary)
                             }
@@ -129,7 +129,7 @@ struct TeamView: View {
             }
             Spacer()
             if !members.isEmpty {
-                Text("참석 \(going)").font(.caption.bold()).foregroundStyle(going >= 10 ? Theme.accent : .secondary)
+                StatusTag(text: "참석 \(going)", kind: going >= 10 ? .success : .neutral)
             }
             Image(systemName: "chevron.right").font(.caption).foregroundStyle(.secondary)
         }

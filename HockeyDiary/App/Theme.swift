@@ -21,6 +21,72 @@ enum Theme {
     static let corner: CGFloat = 18
     /// 터치 타깃 44pt 이상.
     static let touch: CGFloat = 44
+
+    // MARK: 상태색 — 뜻이 있는 색. 핑크는 ① 주요 버튼 ② 선택됨 ③ 골 표시에만 쓴다.
+    /// 참석, 여유 있음, 목표 달성, 복사 완료.
+    static let success = Color(light: 0x1B8F5A, dark: 0x4CC38A)
+    static let successSoft = Color(light: 0xDDF3E7, dark: 0x173A2B)
+    /// 미정, 점검 시기 가까움, 블록.
+    static let warning = Color(light: 0xC77700, dark: 0xFFC04D)
+    static let warningFill = Color(light: 0xFFB020, dark: 0xFFC04D)
+    static let warningSoft = Color(light: 0xFFF1D6, dark: 0x3D2E10)
+    /// 불참, 오류, 교체 시기, 지우기.
+    static let danger = Color(light: 0xD8343F, dark: 0xFF6B6B)
+    static let dangerSoft = Color(light: 0xFCE1E3, dark: 0x3F1C1F)
+
+    // MARK: 링크 그림 — 슛 차트·규칙 그림·전술·링크 도면이 같은 색을 쓴다.
+    static let rinkRed = Color(hex: 0xE5484D)
+    static let rinkBlue = Color(hex: 0x2F6BFF)
+    static let ice = Color(light: 0xF2FAFF, dark: 0x1B2A36)
+
+    /// 심박 구간 5단계: 가볍게 → 전력.
+    static let heartZones: [Color] = [Color(light: 0x9FB7D9, dark: 0x5E6F8A), accent, success, warningFill, danger]
+}
+
+extension ActivityType {
+    /// 활동 종류 색. 아이콘 배경, 달력 점, 성장 막대, 팀 일정에 공통.
+    var color: Color {
+        switch self {
+        case .lesson: return Theme.cobalt
+        case .miniGame: return Color(light: 0x18A999, dark: 0x2CC4B4)
+        case .regularGame: return Color(light: 0x152B4F, dark: 0x4C6A9B)
+        case .freePractice: return Color(light: 0x5B8DEF, dark: 0x7AA7FF)
+        }
+    }
+}
+
+extension SurfaceType {
+    /// 빙판 유형 색. 선택 카드, 장소 카드, 성장 목록에 공통.
+    var color: Color {
+        switch self {
+        case .indoorRink: return Theme.cobalt
+        case .outdoorRink: return Color(light: 0x2E8FD6, dark: 0x5DB4F0)
+        case .pond: return Color(light: 0x2BAE8E, dark: 0x4FD1B0)
+        case .other, .unknown: return Color.secondary
+        }
+    }
+}
+
+extension ShotOutcome {
+    var color: Color {
+        switch self {
+        case .goal: return Theme.neonPink
+        case .saved: return Theme.cobalt
+        case .missed: return Color.secondary
+        case .blocked: return Theme.warningFill
+        }
+    }
+}
+
+extension Attendance {
+    var color: Color {
+        switch self {
+        case .going: return Theme.success
+        case .maybe: return Theme.warningFill
+        case .notGoing: return Theme.danger
+        case .unknown: return Color.secondary
+        }
+    }
 }
 
 extension Color {

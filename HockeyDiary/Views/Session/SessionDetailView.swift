@@ -84,20 +84,12 @@ struct SessionDetailView: View {
     private func goalieCard(_ g: GoalieStats) -> some View {
         Card(tint: Theme.iceBlue) {
             CardHeader(title: "골리로 뛴 날", systemImage: "figure.hockey")
-            HStack(spacing: 16) {
-                stat("세이브", "\(g.saves)")
-                stat("실점", "\(g.goalsAgainst)")
-                stat("세이브율", g.savePctText)
+            HStack(spacing: 8) {
+                StatTile(title: "세이브", value: "\(g.saves)", tint: Theme.success)
+                StatTile(title: "실점", value: "\(g.goalsAgainst)", tint: Theme.danger)
+                StatTile(title: "세이브율", value: g.savePctText)
             }
         }
-    }
-
-    private func stat(_ title: String, _ value: String) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(value).font(.title3.bold()).foregroundStyle(Theme.title)
-            Text(title).font(.caption).foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var effort: EffortSummary {
@@ -128,7 +120,7 @@ struct SessionDetailView: View {
     }
 
     private var header: some View {
-        Card(tint: Theme.cobalt) {
+        Card(tint: session.type.color) {
             HStack {
                 Image(systemName: session.type.systemImage).font(.title)
                 VStack(alignment: .leading) {
@@ -234,7 +226,11 @@ struct SessionDetailView: View {
 
     private var placeCard: some View {
         Card(tint: Theme.iceBlue) {
-            CardHeader(title: "장소", systemImage: session.surface.systemImage)
+            HStack {
+                Label(title: { Text("장소") }, icon: { Image(systemName: session.surface.systemImage).foregroundStyle(session.surface.color) })
+                    .font(.headline).foregroundStyle(Theme.title)
+                Spacer()
+            }
             Text(session.surface.title + (session.rinkName.isEmpty ? "" : " · \(session.rinkName)")).font(.subheadline)
             if let feel = session.iceFeel { Text("체감 빙질: \(feel.title)").font(.caption).foregroundStyle(.secondary) }
             if !session.weatherMemo.isEmpty { Text(session.weatherMemo).font(.caption).foregroundStyle(.secondary) }
@@ -286,7 +282,7 @@ struct SessionRow: View {
                 .font(.title3)
                 .foregroundStyle(.white)
                 .frame(width: 40, height: 40)
-                .background(Theme.cobalt, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .background(session.type.color, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
             VStack(alignment: .leading, spacing: 2) {
                 Text(session.title).font(.subheadline.bold()).foregroundStyle(Theme.title)
                 Text("\(session.startsAt.dayTitle) · \(minutesText(session.minutes)) · \(session.surface.title)")

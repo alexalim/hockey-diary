@@ -61,7 +61,7 @@ struct SkateRow: View {
             }
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 4) {
-                    if skate.isPrimary { Image(systemName: "star.fill").foregroundStyle(Theme.neonPink).font(.caption) }
+                    if skate.isPrimary { Image(systemName: "star.fill").foregroundStyle(Theme.warningFill).font(.caption) }
                     Text(skate.name).font(.subheadline.bold())
                 }
                 Text([skate.size.isEmpty ? nil : "사이즈 \(skate.size)", skate.status.title,
@@ -176,7 +176,7 @@ struct SkateDetailView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
                         Text(skate.name).font(.title3.bold())
-                        if skate.isPrimary { Image(systemName: "star.fill").foregroundStyle(Theme.neonPink) }
+                        if skate.isPrimary { Image(systemName: "star.fill").foregroundStyle(Theme.warningFill) }
                     }
                     Text([skate.size.isEmpty ? nil : "사이즈 \(skate.size)", skate.fit.isEmpty ? nil : skate.fit, skate.status.title]
                         .compactMap { $0 }.joined(separator: " · "))

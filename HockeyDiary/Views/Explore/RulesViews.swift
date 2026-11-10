@@ -32,7 +32,7 @@ struct RuleDetailView: View {
                     CardHeader(title: "자세히", systemImage: "list.bullet")
                     ForEach(Array(topic.points.enumerated()), id: \.offset) { _, p in
                         HStack(alignment: .top, spacing: 8) {
-                            Circle().fill(Theme.neonPink).frame(width: 6, height: 6).padding(.top, 7)
+                            Circle().fill(Theme.accent).frame(width: 6, height: 6).padding(.top, 7)
                             Text(p).font(.subheadline).fixedSize(horizontal: false, vertical: true)
                         }
                     }
@@ -63,8 +63,8 @@ struct RuleDetailView: View {
                     HStack {
                         Text(option)
                         Spacer()
-                        if picked != nil && isAnswer { Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.accent) }
-                        if chosen && !isAnswer { Image(systemName: "xmark.circle.fill").foregroundStyle(Theme.neonPink) }
+                        if picked != nil && isAnswer { Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.success) }
+                        if chosen && !isAnswer { Image(systemName: "xmark.circle.fill").foregroundStyle(Theme.danger) }
                     }
                     .padding(.horizontal, 14)
                     .frame(maxWidth: .infinity, minHeight: Theme.touch)
@@ -95,8 +95,8 @@ struct RuleScene {
     var markers: [Marker]
     var caption: String
 
-    static let blue = Color(hex: 0x2F6BFF)
-    static let red = Color(hex: 0xE5484D)
+    static let blue = Theme.rinkBlue
+    static let red = Theme.rinkRed
 
     static let scenes: [String: [RuleScene]] = [
         "offside": [
@@ -170,7 +170,7 @@ struct RuleSceneCard: View {
                 .accessibilityLabel(scene.caption)
             HStack(spacing: 6) {
                 Image(systemName: scene.ok ? "checkmark.circle.fill" : "xmark.octagon.fill")
-                    .foregroundStyle(scene.ok ? Theme.accent : Theme.neonPink)
+                    .foregroundStyle(scene.ok ? Theme.success : Theme.danger)
                 Text(scene.caption).font(.subheadline)
             }
             if !reduceMotion {
@@ -203,7 +203,7 @@ struct RinkSketch: View, Animatable {
         GeometryReader { geo in
             let w = geo.size.width, h = geo.size.height
             ZStack {
-                RoundedRectangle(cornerRadius: 16).fill(Color(light: 0xF2FAFF, dark: 0x1B2A36))
+                RoundedRectangle(cornerRadius: 16).fill(Theme.ice)
                 RoundedRectangle(cornerRadius: 16).stroke(Color.secondary.opacity(0.3), lineWidth: 1)
                 if scene.bench {
                     RoundedRectangle(cornerRadius: 6).fill(Color.secondary.opacity(0.25))
@@ -234,7 +234,7 @@ struct RinkSketch: View, Animatable {
             Ellipse().fill(Color.black).frame(width: 18, height: 10)
                 .overlay(Ellipse().stroke(.white.opacity(0.7), lineWidth: 1))
         case .attacker:
-            Image(systemName: "figure.hockey").font(.title2).foregroundStyle(Theme.neonPink)
+            Image(systemName: "figure.hockey").font(.title2).foregroundStyle(Theme.danger)
         case .defender:
             Image(systemName: "figure.hockey").font(.title2).foregroundStyle(Theme.accent)
                 .scaleEffect(x: -1, y: 1)
@@ -250,7 +250,7 @@ struct PositionsDiagram: View {
             GeometryReader { geo in
                 let w = geo.size.width, h = geo.size.height
                 ZStack {
-                    RoundedRectangle(cornerRadius: 16).fill(Color(light: 0xF2FAFF, dark: 0x1B2A36))
+                    RoundedRectangle(cornerRadius: 16).fill(Theme.ice)
                     ForEach(Self.spots, id: \.0) { name, p, color in
                         VStack(spacing: 2) {
                             Circle().fill(color).frame(width: 22, height: 22)
@@ -267,12 +267,12 @@ struct PositionsDiagram: View {
     }
 
     static let spots: [(String, CGPoint, Color)] = [
-        ("골키퍼", CGPoint(x: 0.5, y: 0.88), Theme.deepNavy),
+        ("골키퍼", CGPoint(x: 0.5, y: 0.88), Theme.danger),
         ("왼쪽 수비", CGPoint(x: 0.3, y: 0.66), Theme.cobalt),
         ("오른쪽 수비", CGPoint(x: 0.7, y: 0.66), Theme.cobalt),
-        ("센터", CGPoint(x: 0.5, y: 0.38), Theme.neonPink),
-        ("왼쪽 윙", CGPoint(x: 0.18, y: 0.24), Theme.neonPink),
-        ("오른쪽 윙", CGPoint(x: 0.82, y: 0.24), Theme.neonPink),
+        ("센터", CGPoint(x: 0.5, y: 0.38), Theme.success),
+        ("왼쪽 윙", CGPoint(x: 0.18, y: 0.24), Theme.success),
+        ("오른쪽 윙", CGPoint(x: 0.82, y: 0.24), Theme.success),
     ]
 }
 
@@ -340,14 +340,14 @@ struct FoulSketchView: View {
             let w = geo.size.width, h = geo.size.height
             let p: (CGPoint) -> CGPoint = { CGPoint(x: $0.x * w, y: $0.y * h) }
             ZStack {
-                RoundedRectangle(cornerRadius: 12).fill(Color(light: 0xF2FAFF, dark: 0x1B2A36))
+                RoundedRectangle(cornerRadius: 12).fill(Theme.ice)
                 if sketch.boards {
                     Rectangle().fill(Color.secondary.opacity(0.5)).frame(width: 6, height: h * 0.9).position(x: w * 0.93, y: h / 2)
                     Text("보드").font(.system(size: 9)).foregroundStyle(.secondary).position(x: w * 0.93, y: h * 0.06)
                 }
                 if sketch.speedLines {
                     ForEach(0..<3, id: \.self) { i in
-                        Capsule().fill(Theme.neonPink.opacity(0.5))
+                        Capsule().fill(Theme.danger.opacity(0.5))
                             .frame(width: w * 0.2, height: 2.5)
                             .position(x: w * 0.22, y: h * (0.45 + Double(i) * 0.12))
                     }
@@ -355,7 +355,7 @@ struct FoulSketchView: View {
                 if let path = sketch.blockedPath {
                     Path { pp in pp.move(to: p(path.0)); pp.addLine(to: p(path.1)) }
                         .stroke(Theme.accent.opacity(0.6), style: StrokeStyle(lineWidth: 2, dash: [5, 4]))
-                    Image(systemName: "xmark.circle.fill").foregroundStyle(Theme.neonPink)
+                    Image(systemName: "xmark.circle.fill").foregroundStyle(Theme.danger)
                         .position(p(CGPoint(x: (path.0.x + path.1.x) / 2, y: path.0.y)))
                 }
                 if let s = sketch.stick {
@@ -364,14 +364,14 @@ struct FoulSketchView: View {
                 }
                 if let ar = sketch.arrow {
                     Path { pp in pp.move(to: p(ar.0)); pp.addLine(to: p(ar.1)) }
-                        .stroke(Theme.neonPink, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+                        .stroke(Theme.danger, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
                     Image(systemName: ar.1.x >= ar.0.x ? "arrowtriangle.right.fill" : "arrowtriangle.left.fill")
-                        .font(.system(size: 10)).foregroundStyle(Theme.neonPink).position(p(ar.1))
+                        .font(.system(size: 10)).foregroundStyle(Theme.danger).position(p(ar.1))
                 }
-                player(color: Theme.neonPink, mirrored: false).position(p(sketch.a))
+                player(color: Theme.danger, mirrored: false).position(p(sketch.a))
                 player(color: Theme.cobalt, mirrored: true).rotationEffect(.degrees(sketch.bTilt)).position(p(sketch.b))
                 if let hand = sketch.hand {
-                    Image(systemName: "hand.raised.fill").font(.system(size: 16)).foregroundStyle(Theme.neonPink).position(p(hand))
+                    Image(systemName: "hand.raised.fill").font(.system(size: 16)).foregroundStyle(Theme.danger).position(p(hand))
                 }
                 if let puck = sketch.puck {
                     Circle().fill(Color.black).frame(width: 9, height: 9).position(p(puck))
@@ -398,7 +398,7 @@ struct FoulCards: View {
         Card {
             CardHeader(title: "그림으로 보기", systemImage: "photo")
             HStack(spacing: 12) {
-                legend(Theme.neonPink, "반칙한 선수")
+                legend(Theme.danger, "반칙한 선수")
                 legend(Theme.cobalt, "상대")
             }
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {

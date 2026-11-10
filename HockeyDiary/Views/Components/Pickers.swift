@@ -128,7 +128,7 @@ struct SurfacePicker: View {
             }
             .frame(maxWidth: .infinity, minHeight: 76)
             .foregroundStyle(selected ? .white : Theme.title)
-            .background(selected ? Theme.cobalt : Theme.iceBlue, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .background(selected ? s.color : Theme.iceBlue, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay(alignment: .topTrailing) {
                 if selected {
                     Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.neonPink).padding(6)

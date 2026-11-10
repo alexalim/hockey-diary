@@ -4,9 +4,9 @@ import HockeyCore
 // 규칙 도감 그림. 모두 앱 안에서 직접 그린다(외부 이미지 없음).
 // compact는 목록 썸네일용: 글자를 줄이고 핵심 모양만 남긴다.
 
-private let iceFill = Color(light: 0xF2FAFF, dark: 0x1B2A36)
-private let redLine = Color(hex: 0xE5484D)
-private let blueLine = Color(hex: 0x2F6BFF)
+private let iceFill = Theme.ice
+private let redLine = Theme.rinkRed
+private let blueLine = Theme.rinkBlue
 
 /// 주제별 그림을 고른다.
 struct RuleArt: View {
@@ -142,8 +142,8 @@ struct EquipmentArt: View {
                         let anchor = CGPoint(x: w * (left ? 0.45 : 0.55), y: h * y)
                         let label = CGPoint(x: w * (left ? 0.16 : 0.84), y: h * y)
                         Path { p in p.move(to: anchor); p.addLine(to: label) }
-                            .stroke(Theme.neonPink.opacity(0.7), lineWidth: 1)
-                        Circle().fill(Theme.neonPink).frame(width: 6, height: 6).position(anchor)
+                            .stroke(Theme.accent.opacity(0.7), lineWidth: 1)
+                        Circle().fill(Theme.accent).frame(width: 6, height: 6).position(anchor)
                         Text(name).font(.caption2.bold()).foregroundStyle(Theme.title)
                             .padding(.horizontal, 5).padding(.vertical, 2)
                             .background(Theme.card, in: Capsule())
@@ -162,8 +162,8 @@ struct PenaltyBarsArt: View {
     var compact = false
     private let rows: [(String, Double, String, Color)] = [
         ("마이너", 2, "2분 · 한 명 적게", Theme.accent),
-        ("메이저", 5, "5분 · 한 명 적게", Theme.neonPink),
-        ("미스컨덕트", 10, "10분 · 대신 들어가", Color.orange),
+        ("메이저", 5, "5분 · 한 명 적게", Theme.danger),
+        ("미스컨덕트", 10, "10분 · 대신 들어가", Theme.warningFill),
         ("게임 미스컨덕트", 12, "경기 끝까지 퇴장", Color.secondary),
     ]
 
@@ -214,9 +214,9 @@ struct GameClockArt: View {
             }
             HStack(spacing: compact ? 2 : 4) {
                 Image(systemName: "equal.circle.fill").foregroundStyle(.secondary).font(compact ? .caption2 : .body)
-                block("연장", "최대 5분 · 3대3", Theme.neonPink, 4)
+                block("연장", "최대 5분 · 3대3", Theme.warningFill, 4)
                 Image(systemName: "arrow.right").foregroundStyle(.secondary).font(compact ? .caption2 : .body)
-                block("슛아웃", "5명씩", Color.orange, 3)
+                block("슛아웃", "5명씩", Theme.danger, 3)
             }
             if !compact {
                 Text("비기면 연장, 연장에서 먼저 넣으면 끝. 그래도 안 나면 슛아웃.").font(.caption2).foregroundStyle(.secondary)
@@ -259,7 +259,7 @@ struct NoGoalArt: View {
                         goalFrame
                         Image(systemName: icon).font(compact ? .caption : .title3).foregroundStyle(Theme.cobalt)
                         Image(systemName: "xmark").font(compact ? .caption2.bold() : .title2.bold())
-                            .foregroundStyle(Theme.neonPink.opacity(0.85))
+                            .foregroundStyle(Theme.danger.opacity(0.9))
                             .offset(x: compact ? 8 : 18, y: compact ? -6 : -14)
                     }
                     .frame(height: compact ? 30 : 64)
@@ -315,14 +315,14 @@ struct GoalieArt: View {
                 RoundedRectangle(cornerRadius: 6).stroke(Color.secondary, style: StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
                     .frame(width: w * 0.26, height: h * 0.42).position(x: w * 0.82, y: h * 0.42)
                 if !compact { Text("페널티 박스").font(.caption2).foregroundStyle(.secondary).position(x: w * 0.82, y: h * 0.14) }
-                Image(systemName: "figure.hockey").font(.system(size: compact ? 16 : 28)).foregroundStyle(Theme.neonPink)
+                Image(systemName: "figure.hockey").font(.system(size: compact ? 16 : 28)).foregroundStyle(Theme.danger)
                     .position(x: w * 0.82, y: h * 0.44)
                 // 다른 선수가 대신 감
                 Path { p in p.move(to: CGPoint(x: w * 0.38, y: h * 0.6)); p.addLine(to: CGPoint(x: w * 0.66, y: h * 0.48)) }
-                    .stroke(Theme.neonPink, style: StrokeStyle(lineWidth: 2, dash: [5, 3]))
-                Image(systemName: "arrowtriangle.right.fill").font(.system(size: 9)).foregroundStyle(Theme.neonPink)
+                    .stroke(Theme.danger, style: StrokeStyle(lineWidth: 2, dash: [5, 3]))
+                Image(systemName: "arrowtriangle.right.fill").font(.system(size: 9)).foregroundStyle(Theme.danger)
                     .position(x: w * 0.66, y: h * 0.48)
-                if !compact { Text("다른 선수가 대신").font(.caption2.bold()).foregroundStyle(Theme.neonPink).position(x: w * 0.52, y: h * 0.75) }
+                if !compact { Text("다른 선수가 대신").font(.caption2.bold()).foregroundStyle(Theme.danger).position(x: w * 0.52, y: h * 0.75) }
             }
         }
     }
@@ -337,8 +337,8 @@ struct PowerPlayArt: View {
         HStack(spacing: compact ? 4 : 10) {
             panel(title: "파워플레이", sub: "5 대 4") {
                 VStack(spacing: compact ? 2 : 4) {
-                    dots(5, Theme.neonPink)
-                    dots(4, Theme.cobalt)
+                    dots(5, Theme.accent)
+                    dots(4, Color.secondary)
                 }
             }
             panel(title: "엠티넷", sub: "골대 비우고 +1") {
@@ -347,8 +347,8 @@ struct PowerPlayArt: View {
                         .frame(width: compact ? 10 : 18, height: compact ? 16 : 30)
                         .overlay(Image(systemName: "questionmark").font(.system(size: compact ? 7 : 11)).foregroundStyle(.secondary))
                     VStack(spacing: 2) {
-                        dots(5, Theme.neonPink)
-                        Text("+1").font(.system(size: compact ? 8 : 12, weight: .heavy)).foregroundStyle(Theme.neonPink)
+                        dots(5, Theme.accent)
+                        Text("+1").font(.system(size: compact ? 8 : 12, weight: .heavy)).foregroundStyle(Theme.accent)
                     }
                 }
             }

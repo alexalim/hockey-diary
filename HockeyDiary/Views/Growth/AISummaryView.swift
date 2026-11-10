@@ -50,7 +50,7 @@ struct AISummaryView: View {
                         Text("AI가 쓴 거라 틀릴 수 있어. 기록 \(facts.count)건으로 만들었어. 실력이나 몸 상태를 판단하는 건 아니야.")
                     }
                 }
-                if let errorText { Section { Text(errorText).foregroundStyle(Theme.neonPink) } }
+                if let errorText { Section { Text(errorText).foregroundStyle(Theme.danger) } }
             }
         }
         .navigationTitle("AI 돌아보기")

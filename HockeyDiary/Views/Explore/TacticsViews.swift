@@ -11,7 +11,7 @@ struct TacticDetailView: View {
                 Card(tint: Theme.cobalt) {
                     Text(topic.tag).font(.caption.bold()).foregroundStyle(.white)
                         .padding(.horizontal, 8).padding(.vertical, 3)
-                        .background(Theme.neonPink, in: Capsule())
+                        .background(Color.white.opacity(0.22), in: Capsule())
                     Text(topic.title).font(.title2.bold()).foregroundStyle(.white)
                     Text(topic.summary).font(.body).foregroundStyle(.white)
                 }
@@ -21,7 +21,7 @@ struct TacticDetailView: View {
                     ForEach(Array(topic.points.enumerated()), id: \.offset) { i, p in
                         HStack(alignment: .top, spacing: 8) {
                             Text("\(i + 1)").font(.caption.bold()).foregroundStyle(.white)
-                                .frame(width: 20, height: 20).background(Theme.neonPink, in: Circle())
+                                .frame(width: 20, height: 20).background(Theme.cobalt, in: Circle())
                             Text(p).font(.subheadline).fixedSize(horizontal: false, vertical: true)
                         }
                     }
@@ -167,15 +167,15 @@ struct TacticRink: View, Animatable {
             let w = geo.size.width, h = geo.size.height
             let p: (CGPoint) -> CGPoint = { CGPoint(x: $0.x * w, y: $0.y * h) }
             ZStack {
-                RoundedRectangle(cornerRadius: h * 0.28).fill(Color(light: 0xF2FAFF, dark: 0x1B2A36))
+                RoundedRectangle(cornerRadius: h * 0.28).fill(Theme.ice)
                 RoundedRectangle(cornerRadius: h * 0.28).stroke(Color.secondary.opacity(0.4), lineWidth: 1.5)
                 ForEach([0.06, 0.94], id: \.self) { x in
-                    Rectangle().fill(Color(hex: 0xE5484D).opacity(0.6)).frame(width: 1.5, height: h * 0.8).position(x: x * w, y: h / 2)
+                    Rectangle().fill(Theme.rinkRed.opacity(0.6)).frame(width: 1.5, height: h * 0.8).position(x: x * w, y: h / 2)
                 }
                 ForEach([0.35, 0.65], id: \.self) { x in
-                    Rectangle().fill(Color(hex: 0x2F6BFF)).frame(width: 4, height: h).position(x: x * w, y: h / 2)
+                    Rectangle().fill(Theme.rinkBlue).frame(width: 4, height: h).position(x: x * w, y: h / 2)
                 }
-                Rectangle().fill(Color(hex: 0xE5484D)).frame(width: 4, height: h).position(x: w / 2, y: h / 2)
+                Rectangle().fill(Theme.rinkRed).frame(width: 4, height: h).position(x: w / 2, y: h / 2)
                 ForEach([0.035, 0.965], id: \.self) { x in
                     RoundedRectangle(cornerRadius: 2).stroke(Color.secondary, lineWidth: 1.5)
                         .frame(width: w * 0.025, height: h * 0.14).position(x: x * w, y: h / 2)

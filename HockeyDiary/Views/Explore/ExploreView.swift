@@ -41,9 +41,7 @@ struct ExploreView: View {
                     ForEach(TacticGuide.topics) { t in
                         NavigationLink { TacticDetailView(topic: t) } label: {
                             HStack(spacing: 10) {
-                                Text(t.tag).font(.caption2.bold()).foregroundStyle(.white)
-                                    .padding(.horizontal, 7).padding(.vertical, 3)
-                                    .background(Theme.neonPink, in: Capsule())
+                                StatusTag(text: t.tag)
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(t.title).font(.subheadline.bold()).foregroundStyle(Theme.title)
                                     Text(t.summary).font(.caption).foregroundStyle(.secondary).lineLimit(1)

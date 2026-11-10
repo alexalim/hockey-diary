@@ -59,8 +59,7 @@ struct RunnerRow: View {
             }
             Spacer()
             if let badge {
-                Text(badge).font(.caption2.bold()).padding(.horizontal, 6).padding(.vertical, 3)
-                    .background(Theme.cobaltSoft, in: Capsule())
+                StatusTag(text: badge, kind: badge == "교체 시기" ? .danger : (badge.hasSuffix("교체") ? .neutral : .success))
             }
         }
         .frame(minHeight: Theme.touch)
@@ -230,15 +229,9 @@ struct RunnerDetailView: View {
                     Text(minutesText(since)).bold()
                 }
                 if let n = runner.checkThresholdSessions {
-                    ProgressView(value: Double(min(rides, n)), total: Double(n)) {
-                        Text("\(n)번 타면 홈에 표시").font(.caption)
-                    }
-                    .tint(rides >= n ? Theme.neonPink : Theme.accent)
+                    ProgressTrack(value: Double(rides), total: Double(n), label: "\(n)번 타면 홈에 표시", trailing: "\(rides)/\(n)")
                 } else if let t = runner.checkThresholdMinutes {
-                    ProgressView(value: min(Double(since), Double(t)), total: Double(t)) {
-                        Text("\(minutesText(t)) 타면 홈에 표시").font(.caption)
-                    }
-                    .tint(since >= t ? Theme.neonPink : Theme.accent)
+                    ProgressTrack(value: Double(since), total: Double(t), label: "\(minutesText(t)) 타면 홈에 표시", trailing: minutesText(since))
                 }
             } footer: {
                 Text("기록할 때 이 러너를 고른 활동만 세. 시간은 '실제로 탄 시간'으로 더해.")
@@ -251,16 +244,10 @@ struct RunnerDetailView: View {
                     Text(runner.lifeSummary).bold()
                 }
                 if let n = runner.replaceAfterSharpenings {
-                    ProgressView(value: Double(min(runner.sharpenings.count, n)), total: Double(n)) {
-                        Text("연마 \(n)번 하면 교체 표시").font(.caption)
-                    }
-                    .tint(runner.needsReplacement ? Theme.neonPink : Theme.accent)
+                    ProgressTrack(value: Double(runner.sharpenings.count), total: Double(n), label: "연마 \(n)번 하면 교체 표시", trailing: "\(runner.sharpenings.count)/\(n)")
                 } else if let m = runner.replaceAfterMonths {
                     let used = RunnerLife.monthsUsed(since: runner.firstUsedAt)
-                    ProgressView(value: Double(min(used, m)), total: Double(m)) {
-                        Text("\(m)개월 쓰면 교체 표시").font(.caption)
-                    }
-                    .tint(runner.needsReplacement ? Theme.neonPink : Theme.accent)
+                    ProgressTrack(value: Double(used), total: Double(m), label: "\(m)개월 쓰면 교체 표시", trailing: "\(used)개월")
                 }
                 if let retired = runner.retiredAt {
                     Text("\(retired.formatted(date: .abbreviated, time: .omitted))에 교체했어.").foregroundStyle(.secondary)
@@ -341,7 +328,7 @@ struct SharpeningEditorView: View {
             Section { SharpeningGuideCard() }
             Section {
                 HStack {
-                    Text("작은 숫자 · 깊은 홈").font(.caption.bold()).foregroundStyle(Theme.neonPink)
+                    Text("작은 숫자 · 깊은 홈").font(.caption.bold()).foregroundStyle(Theme.warning)
                     Spacer()
                     Image(systemName: "arrow.left.and.right").font(.caption).foregroundStyle(.secondary)
                     Spacer()
@@ -359,7 +346,7 @@ struct SharpeningEditorView: View {
                 TextField("직접 입력 (예: 9/16, 0.55)", text: $customHollow)
                     .keyboardType(.numbersAndPunctuation)
                 if customInvalid {
-                    Text("인치 값으로 적어줘. 예: 5/8, 0.55").font(.caption).foregroundStyle(Theme.neonPink)
+                    Text("인치 값으로 적어줘. 예: 5/8, 0.55").font(.caption).foregroundStyle(Theme.danger)
                 }
             } header: {
                 Text("홀로우 (RoH)")
@@ -412,11 +399,11 @@ struct HollowCard: View {
                 Text(hollow.display).font(.headline)
                 if let nick = hollow.nickname {
                     Text(nick).font(hollow.playerNickname != nil ? .subheadline.bold() : .caption.bold())
-                        .foregroundStyle(hollow.playerNickname != nil ? Theme.neonPink : Theme.title)
+                        .foregroundStyle(Theme.title)
                         .lineLimit(1).minimumScaleFactor(0.7)
                 }
                 Text(hollow.feel).font(.caption2.bold())
-                    .foregroundStyle(hollow.feel == "깊은 홈" ? Theme.neonPink : (hollow.feel == "얕은 홈" ? Theme.accent : .secondary))
+                    .foregroundStyle(hollow.feel == "깊은 홈" ? Theme.warning : (hollow.feel == "얕은 홈" ? Theme.accent : .secondary))
             }
             .padding(.vertical, 6)
             .frame(maxWidth: .infinity, minHeight: 128)

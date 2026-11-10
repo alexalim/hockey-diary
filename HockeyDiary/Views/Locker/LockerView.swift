@@ -62,8 +62,8 @@ struct LockerView: View {
                 .sensoryFeedback(.impact(weight: .medium), trigger: isOpen)
 
                 HStack(spacing: 8) {
-                    Button(isOpen ? "문 닫기" : "문 열기", action: toggle)
-                        .buttonStyle(.bordered)
+                    BigToggle(isOn: isOpen, onTitle: "문 닫기", offTitle: "문 열기", onImage: "door.left.hand.open", offImage: "door.left.hand.closed", action: toggle)
+                        .frame(maxWidth: 160)
                     Spacer()
                     Button { editingProfile = LockerStore.profile(context) } label: { Label("꾸미기", systemImage: "paintbrush.fill") }
                         .buttonStyle(.borderedProminent)
@@ -160,7 +160,7 @@ struct LockerView: View {
     }
 
     private var earnedBanner: some View {
-        Card(tint: Theme.neonPink.opacity(0.15)) {
+        Card(tint: Theme.successSoft) {
             Label("새 스티커를 받았어!", systemImage: "gift.fill").font(.headline).foregroundStyle(Theme.title)
             Text(newStickers.compactMap { StickerCatalog.def($0)?.title }.joined(separator: " · "))
                 .font(.subheadline)

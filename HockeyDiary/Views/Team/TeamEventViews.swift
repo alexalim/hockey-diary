@@ -12,7 +12,7 @@ struct TeamEventView: View {
 
     @State private var editing = false
     @State private var editingLineup = false
-    @State private var copied = false
+    @State private var toast: String?
     @State private var openSession: Session?
 
     private var members: [TeamMember] {
@@ -46,6 +46,7 @@ struct TeamEventView: View {
         .sheet(isPresented: $editing) { NavigationStack { TeamEventEditor(team: team, event: event) } }
         .sheet(isPresented: $editingLineup) { NavigationStack { LineupEditor(event: event, members: members.filter(\.isActive)) } }
         .navigationDestination(item: $openSession) { s in SessionDetailView(session: s) }
+        .toast($toast)
     }
 
     // MARK: - 참석
@@ -74,7 +75,7 @@ struct TeamEventView: View {
                             Text(a.title).font(.caption.bold())
                                 .frame(width: 48, height: 34)
                                 .foregroundStyle(on ? .white : Theme.title)
-                                .background(on ? (a == .going ? Theme.accent : (a == .maybe ? Color.orange : Theme.neonPink)) : Theme.cobaltSoft,
+                                .background(on ? a.color : Theme.cobaltSoft,
                                             in: RoundedRectangle(cornerRadius: 8, style: .continuous))
                         }
                         .buttonStyle(.plain)
@@ -131,10 +132,9 @@ struct TeamEventView: View {
                 }
                 Button {
                     UIPasteboard.general.string = shareText
-                    copied = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) { copied = false }
+                    toast = "글을 복사했어. 카톡에 붙여 넣어."
                 } label: {
-                    Label(copied ? "복사했어" : "글로 복사", systemImage: copied ? "checkmark" : "doc.on.doc").frame(maxWidth: .infinity, minHeight: Theme.touch)
+                    Label("글로 복사", systemImage: "doc.on.doc").frame(maxWidth: .infinity, minHeight: Theme.touch)
                 }
                 .buttonStyle(.bordered)
             }
@@ -256,7 +256,7 @@ struct LineupEditor: View {
                                     Text(m.position.short).font(.caption.bold()).foregroundStyle(.secondary).frame(width: 20)
                                     Text(m.display).foregroundStyle(.primary)
                                     Spacer()
-                                    if event.attendance[m.id] == .going { Text("참석").font(.caption2.bold()).foregroundStyle(Theme.accent) }
+                                    if event.attendance[m.id] == .going { StatusTag(text: "참석", kind: .success) }
                                     if lineup.assignedMembers.contains(m.id) { Text("배정됨").font(.caption2).foregroundStyle(.secondary) }
                                 }
                                 .frame(minHeight: Theme.touch)
@@ -332,8 +332,8 @@ struct TeamShareCard: View {
             .font(.subheadline).foregroundStyle(.white)
             if total > 0 {
                 HStack(spacing: 8) {
-                    pill("참석 \(going)", Color(hex: 0xFF2D95))
-                    pill("미정 \(maybe)", Color.orange)
+                    pill("참석 \(going)", Color(hex: 0x1B8F5A))
+                    pill("미정 \(maybe)", Color(hex: 0xFFB020))
                     pill("\(total)명 중", Color.white.opacity(0.2))
                 }
             }

@@ -188,7 +188,7 @@ struct SessionEditorView: View {
                 PhotoPickerRow(existing: session?.photos ?? [], removedIDs: $removedPhotoIDs, added: $addedPhotos)
             }
             if let saveHint {
-                Section { Text(saveHint).font(.footnote).foregroundStyle(Theme.neonPink) }
+                Section { Text(saveHint).font(.footnote).foregroundStyle(Theme.danger) }
             }
         }
         .navigationTitle(isNew ? "\(type.title) 기록" : "기록 고치기")

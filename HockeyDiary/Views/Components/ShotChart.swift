@@ -15,23 +15,23 @@ struct ShotChartCanvas: View {
             let w = geo.size.width, h = geo.size.height
             ZStack {
                 UnevenRoundedRectangle(topLeadingRadius: w * 0.28, bottomLeadingRadius: 6, bottomTrailingRadius: 6, topTrailingRadius: w * 0.28)
-                    .fill(Color(light: 0xF2FAFF, dark: 0x1B2A36))
+                    .fill(Theme.ice)
                 UnevenRoundedRectangle(topLeadingRadius: w * 0.28, bottomLeadingRadius: 6, bottomTrailingRadius: 6, topTrailingRadius: w * 0.28)
                     .stroke(Color.secondary.opacity(0.4), lineWidth: 1.5)
                 // 골라인·크리스·골대
-                Rectangle().fill(Color(hex: 0xE5484D).opacity(0.75)).frame(width: w * 0.86, height: 1.5).position(x: w / 2, y: h * goalLineY)
-                Circle().trim(from: 0, to: 0.5).stroke(Color(hex: 0x2F6BFF).opacity(0.6), lineWidth: 1.5)
+                Rectangle().fill(Theme.rinkRed.opacity(0.75)).frame(width: w * 0.86, height: 1.5).position(x: w / 2, y: h * goalLineY)
+                Circle().trim(from: 0, to: 0.5).stroke(Theme.rinkBlue.opacity(0.6), lineWidth: 1.5)
                     .frame(width: w * 0.22, height: w * 0.22).position(x: w / 2, y: h * goalLineY)
-                RoundedRectangle(cornerRadius: 2).stroke(Color(hex: 0xE5484D), lineWidth: 2)
+                RoundedRectangle(cornerRadius: 2).stroke(Theme.rinkRed, lineWidth: 2)
                     .frame(width: w * 0.16, height: h * 0.05).position(x: w / 2, y: h * goalLineY - h * 0.03)
                 // 페이스오프 서클 둘
                 ForEach([0.22, 0.78], id: \.self) { x in
-                    Circle().stroke(Color(hex: 0xE5484D).opacity(0.6), lineWidth: 1.2)
+                    Circle().stroke(Theme.rinkRed.opacity(0.6), lineWidth: 1.2)
                         .frame(width: w * 0.3, height: w * 0.3).position(x: w * x, y: h * 0.36)
-                    Circle().fill(Color(hex: 0xE5484D)).frame(width: 5, height: 5).position(x: w * x, y: h * 0.36)
+                    Circle().fill(Theme.rinkRed).frame(width: 5, height: 5).position(x: w * x, y: h * 0.36)
                 }
                 // 블루라인
-                Rectangle().fill(Color(hex: 0x2F6BFF)).frame(width: w, height: 5).position(x: w / 2, y: h * blueLineY)
+                Rectangle().fill(Theme.rinkBlue).frame(width: w, height: 5).position(x: w / 2, y: h * blueLineY)
                 // 슛 표시
                 ForEach(Array(shots.enumerated()), id: \.offset) { i, s in
                     mark(s.outcome).position(x: w * s.x, y: h * s.y)
@@ -64,7 +64,7 @@ struct ShotChartCanvas: View {
         case .missed:
             Image(systemName: "xmark").font(.system(size: 11, weight: .heavy)).foregroundStyle(Color.secondary)
         case .blocked:
-            RoundedRectangle(cornerRadius: 2).fill(Color.secondary.opacity(0.7)).frame(width: 11, height: 11)
+            RoundedRectangle(cornerRadius: 2).fill(Theme.warningFill).frame(width: 11, height: 11)
         }
     }
 }
@@ -72,22 +72,12 @@ struct ShotChartCanvas: View {
 /// 표시 뜻풀이.
 struct ShotLegend: View {
     var body: some View {
-        HStack(spacing: 12) {
-            item(Theme.neonPink, "star.fill", "골")
-            item(Theme.cobalt, nil, "막힘")
-            HStack(spacing: 3) { Image(systemName: "xmark").font(.caption2.weight(.heavy)).foregroundStyle(.secondary); Text("빗나감").font(.caption2).foregroundStyle(.secondary) }
-            HStack(spacing: 3) { RoundedRectangle(cornerRadius: 1).fill(Color.secondary.opacity(0.7)).frame(width: 8, height: 8); Text("블록").font(.caption2).foregroundStyle(.secondary) }
-        }
-    }
-
-    private func item(_ c: Color, _ symbol: String?, _ t: String) -> some View {
-        HStack(spacing: 3) {
-            ZStack {
-                Circle().fill(c).frame(width: 10, height: 10)
-                if let symbol { Image(systemName: symbol).font(.system(size: 5, weight: .bold)).foregroundStyle(.white) }
-            }
-            Text(t).font(.caption2).foregroundStyle(.secondary)
-        }
+        Legend(items: [
+            .init(color: Theme.neonPink, title: "골"),
+            .init(color: Theme.cobalt, title: "막힘"),
+            .init(color: .secondary, title: "빗나감", systemImage: "xmark"),
+            .init(color: Theme.warningFill, title: "블록", systemImage: "square.fill"),
+        ])
     }
 }
 

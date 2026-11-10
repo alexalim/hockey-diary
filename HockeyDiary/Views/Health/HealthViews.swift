@@ -50,7 +50,7 @@ struct HealthConnectView: View {
                     .disabled(requesting)
                     .listRowBackground(Color.clear)
                 }
-                if let errorText { Text(errorText).font(.footnote).foregroundStyle(Theme.neonPink) }
+                if let errorText { Text(errorText).font(.footnote).foregroundStyle(Theme.danger) }
             } footer: {
                 Text("연결 안 해도 기록은 다 쓸 수 있어. 허용 항목은 설정 → 건강 → 데이터 접근 및 기기 → 마하다에서 바꿔.")
             }
@@ -144,16 +144,7 @@ struct SessionHealthCard: View {
     }
 
     private func row(_ icon: String, _ title: String, _ value: String, _ detail: String?) -> some View {
-        HStack {
-            Image(systemName: icon).foregroundStyle(Theme.neonPink).frame(width: 24)
-            Text(title).font(.subheadline)
-            Spacer()
-            VStack(alignment: .trailing, spacing: 0) {
-                Text(value).font(.subheadline.bold())
-                if let detail { Text(detail).font(.caption2).foregroundStyle(.secondary) }
-            }
-        }
-        .accessibilityElement(children: .combine)
+        MetricRow(systemImage: icon, title: title, value: value, detail: detail, tint: icon == "heart.fill" ? Theme.danger : Theme.accent)
     }
 
     private func load() async {
@@ -231,7 +222,7 @@ struct CycleConsentSection: View {
                     }
                 } else { cycleEnabled = false }
             }))
-            if let errorText { Text(errorText).font(.footnote).foregroundStyle(Theme.neonPink) }
+            if let errorText { Text(errorText).font(.footnote).foregroundStyle(Theme.danger) }
         } header: {
             Text("생리 주기 (선택)")
         } footer: {
@@ -284,13 +275,13 @@ struct CycleGrowthCard: View {
 struct HeartZoneBar: View {
     let seconds: [Int]
     let maxHR: Int
-    private let colors: [Color] = [Color(hex: 0x9FB7D9), Theme.accent, Color(hex: 0x4CC38A), Color.orange, Theme.neonPink]
+    private let colors: [Color] = Theme.heartZones
 
     var body: some View {
         let total = max(seconds.reduce(0, +), 1)
         VStack(alignment: .leading, spacing: 6) {
             HStack {
-                Image(systemName: "waveform.path.ecg").foregroundStyle(Theme.neonPink).frame(width: 24)
+                Image(systemName: "waveform.path.ecg").foregroundStyle(Theme.danger).frame(width: 24)
                 Text("심박 구간").font(.subheadline)
                 Spacer()
                 Text("최고 \(maxHR) 기준").font(.caption2).foregroundStyle(.secondary)

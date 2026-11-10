@@ -54,7 +54,7 @@ struct HomeView: View {
     }
 
     private var storeWarning: some View {
-        Card(tint: Theme.neonPink.opacity(0.15)) {
+        Card(tint: Theme.dangerSoft) {
             Label(health.openFailed ? "기록을 불러오지 못했어. 지금 쓰는 건 앱을 끄면 사라져. 앱을 다시 켜봐."
                                     : "방금 기록을 저장하지 못했어. 한 번 더 저장해줘.",
                   systemImage: "exclamationmark.triangle.fill")

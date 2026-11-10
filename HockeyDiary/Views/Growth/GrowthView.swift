@@ -75,7 +75,7 @@ struct GrowthView: View {
                 }
                 Chart(rows, id: \.0) { row in
                     BarMark(x: .value("횟수", row.1.count), y: .value("종류", row.0.title))
-                        .foregroundStyle(row.0 == .lesson ? Theme.neonPink : Theme.accent)
+                        .foregroundStyle(row.0.color)
                         .annotation(position: .trailing) {
                             Text("\(row.1.count)").font(.caption2).foregroundStyle(.secondary)
                         }
@@ -98,9 +98,9 @@ struct GrowthView: View {
             if let sentence = change.sentence {
                 Text(sentence).font(.subheadline).foregroundStyle(Theme.title)
                 HStack(spacing: 8) {
-                    moodStat("나아짐", change.improved, Theme.neonPink)
-                    moodStat("그대로", change.same, Theme.cobalt)
-                    moodStat("낮아짐", change.worse, Color.secondary)
+                    StatTile(title: "나아짐", value: "\(change.improved)", tint: Theme.success)
+                    StatTile(title: "그대로", value: "\(change.same)", tint: Theme.title)
+                    StatTile(title: "낮아짐", value: "\(change.worse)", tint: Theme.danger)
                 }
                 Text("기분은 내가 고른 값이야. 운동 덕분이라고 말하는 건 아니야.")
                     .font(.caption).foregroundStyle(.secondary)
@@ -111,16 +111,6 @@ struct GrowthView: View {
             }
             footnote(change.paired, note: "전후 기분이 모두 있는 활동만")
         }
-    }
-
-    private func moodStat(_ title: String, _ value: Int, _ color: Color) -> some View {
-        VStack {
-            Text("\(value)").font(.title2.bold()).foregroundStyle(color)
-            Text(title).font(.caption).foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity, minHeight: 56)
-        .background(Theme.cobaltSoft.opacity(0.5), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .accessibilityElement(children: .combine)
     }
 
     // MARK: - 빙판 유형 (7.3)
@@ -136,9 +126,12 @@ struct GrowthView: View {
                     let v = bySurface[s] ?? CountMinutes()
                     if v.count > 0 {
                         HStack {
-                            Label(s.isUnspecified ? "미입력" : s.title, systemImage: s.systemImage)
-                                .font(.subheadline)
-                                .foregroundStyle(s.isUnspecified ? .secondary : Theme.title)
+                            Label {
+                                Text(s.isUnspecified ? "미입력" : s.title).foregroundStyle(s.isUnspecified ? .secondary : Theme.title)
+                            } icon: {
+                                Image(systemName: s.systemImage).foregroundStyle(s.color)
+                            }
+                            .font(.subheadline)
                             Spacer()
                             Text("\(v.count)회 · \(minutesText(v.minutes))").font(.subheadline).foregroundStyle(.secondary)
                         }
@@ -204,14 +197,9 @@ struct GrowthView: View {
             Card(tint: Theme.iceBlue) {
                 CardHeader(title: "골리 기록", systemImage: "figure.hockey", trailing: "\(games.count)경기")
                 HStack(spacing: 8) {
-                    moodStat("세이브", total.saves, Theme.accent)
-                    moodStat("실점", total.goalsAgainst, Theme.neonPink)
-                    VStack {
-                        Text(total.savePctText).font(.title2.bold()).foregroundStyle(Theme.title)
-                        Text("세이브율").font(.caption).foregroundStyle(.secondary)
-                    }
-                    .frame(maxWidth: .infinity, minHeight: 56)
-                    .background(Theme.cobaltSoft.opacity(0.5), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    StatTile(title: "세이브", value: "\(total.saves)", tint: Theme.success)
+                    StatTile(title: "실점", value: "\(total.goalsAgainst)", tint: Theme.danger)
+                    StatTile(title: "세이브율", value: total.savePctText)
                 }
                 if games.count < 3 {
                     Text("3경기부터 흐름을 보여줄게.").font(.caption).foregroundStyle(.secondary)
@@ -347,10 +335,10 @@ struct SkillDetailView: View {
                         .font(.subheadline).foregroundStyle(.white.opacity(0.85))
                 }
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
-                    stat("배운 수업", "\(st.lessonCount)회")
-                    stat("경기에서 써봄", "\(st.triedEvents)회")
-                    stat("기회가 없었음", "\(st.untriedEvents)회")
-                    stat("성공 기록", st.evaluated == 0 ? "평가 없음" : "\(st.successes)/\(st.evaluated)")
+                    StatTile(title: "배운 수업", value: "\(st.lessonCount)회")
+                    StatTile(title: "경기에서 써봄", value: "\(st.triedEvents)회")
+                    StatTile(title: "기회가 없었음", value: "\(st.untriedEvents)회")
+                    StatTile(title: "성공 기록", value: st.evaluated == 0 ? "평가 없음" : "\(st.successes)/\(st.evaluated)", tint: Theme.success)
                 }
                 if st.partials > 0 || st.difficulties > 0 {
                     Card {
@@ -375,23 +363,12 @@ struct SkillDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
-    private func stat(_ title: String, _ value: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(title).font(.caption).foregroundStyle(.secondary)
-            Text(value).font(.title3.bold()).foregroundStyle(Theme.title)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(14)
-        .background(Theme.card, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .accessibilityElement(children: .combine)
-    }
-
     @ViewBuilder
     private func eventRow(_ e: Event) -> some View {
         HStack(alignment: .top, spacing: 10) {
             switch e {
             case .learned(let l, let s):
-                Image(systemName: "graduationcap.fill").foregroundStyle(Theme.neonPink).frame(width: 24)
+                Image(systemName: "graduationcap.fill").foregroundStyle(ActivityType.lesson.color).frame(width: 24)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("\(s.startsAt.dayTitle) 수업에서 배움").font(.subheadline.bold())
                     if !l.feedback.isEmpty { Text(l.feedback).font(.caption).foregroundStyle(.secondary) }
