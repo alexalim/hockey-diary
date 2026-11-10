@@ -160,6 +160,7 @@ final class ScreenTourTests: XCTestCase {
             if el.exists && el.isHittable { el.tap(); return true }
         }
         XCTContext.runActivity(named: "못 찾음: \(text)") { _ in }
+        snap("miss-\(text)")   // 왜 못 찾았는지 화면으로 남긴다.
         return false
     }
 }
