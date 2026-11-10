@@ -47,20 +47,27 @@ struct RootView: View {
     @State private var showingQuickMenu = false
 
     var body: some View {
-        // 기본 탭 바는 숨기고 아래 MahadaTabBar를 그린다(가운데 홈을 크게 만들기 위해).
+        // 기본 탭 바는 숨기고 MahadaTabBar를 겹쳐 그린다(가운데 홈을 크게 만들기 위해).
+        // TabView에 safeAreaInset을 걸면 탭 안의 스크롤까지 전달되지 않아 마지막 줄이 바에 가려졌다.
+        // 그래서 탭마다 바 높이만큼 안전영역을 직접 넓힌다.
         TabView(selection: $tab) {
             NavigationStack { DiaryView(newEntry: $newEntry).toolbar { plusButton }.toolbar(.hidden, for: .tabBar) }
+                .safeAreaPadding(.bottom, MahadaTabBar.height)
                 .tag(Tab.diary)
             NavigationStack { GrowthView().toolbar { plusButton }.toolbar(.hidden, for: .tabBar) }
+                .safeAreaPadding(.bottom, MahadaTabBar.height)
                 .tag(Tab.growth)
             NavigationStack { HomeView(newEntry: $newEntry).toolbar { plusButton }.toolbar(.hidden, for: .tabBar) }
+                .safeAreaPadding(.bottom, MahadaTabBar.height)
                 .tag(Tab.home)
             NavigationStack { ExploreView().toolbar { plusButton }.toolbar(.hidden, for: .tabBar) }
+                .safeAreaPadding(.bottom, MahadaTabBar.height)
                 .tag(Tab.explore)
             NavigationStack { LockerView().toolbar { plusButton }.toolbar(.hidden, for: .tabBar) }
+                .safeAreaPadding(.bottom, MahadaTabBar.height)
                 .tag(Tab.locker)
         }
-        .safeAreaInset(edge: .bottom, spacing: 0) { MahadaTabBar(selection: $tab) }
+        .overlay(alignment: .bottom) { MahadaTabBar(selection: $tab) }
         .confirmationDialog("무엇을 기록할까?", isPresented: $showingQuickMenu, titleVisibility: .visible) {
             Button("수업 기록") { newEntry = .session(.lesson) }
             Button("미니게임 리뷰") { newEntry = .session(.miniGame) }
@@ -104,6 +111,11 @@ struct MahadaTabBar: View {
 
     /// 홈 원이 바 위로 솟은 높이. 이만큼 투명한 띠를 두어 화면 내용이 원 뒤에 가려지지 않게 한다.
     static let raise: CGFloat = 14
+    private static let itemHeight: CGFloat = 50
+    private static let padTop: CGFloat = 6
+    private static let padBottom: CGFloat = 4
+    /// 기기 아래 안전영역을 뺀 바 전체 높이. 각 탭 내용은 이만큼 아래 여백을 둔다.
+    static let height: CGFloat = raise + padTop + itemHeight + padBottom
 
     var body: some View {
         VStack(spacing: 0) {
@@ -114,8 +126,8 @@ struct MahadaTabBar: View {
                 }
             }
             .padding(.horizontal, 8)
-            .padding(.top, 6)
-            .padding(.bottom, 4)
+            .padding(.top, Self.padTop)
+            .padding(.bottom, Self.padBottom)
             .background(.bar, ignoresSafeAreaEdges: .bottom)
             .overlay(alignment: .top) { Divider() }
         }
@@ -131,7 +143,7 @@ struct MahadaTabBar: View {
                 Text(t.title).font(.system(size: 10, weight: on ? .semibold : .regular))
             }
             .foregroundStyle(on ? Theme.accent : Color.secondary)
-            .frame(maxWidth: .infinity, minHeight: 50)
+            .frame(maxWidth: .infinity, minHeight: Self.itemHeight)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -161,7 +173,7 @@ struct MahadaTabBar: View {
                     .foregroundStyle(on ? Theme.accent : Color.secondary)
                     .offset(y: -12)
             }
-            .frame(maxWidth: .infinity, minHeight: 50)
+            .frame(maxWidth: .infinity, minHeight: Self.itemHeight)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

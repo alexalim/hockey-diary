@@ -145,11 +145,17 @@ struct RinkFinderView: View {
 
             let favorites = rinks.filter(\.isFavorite)
             if !favorites.isEmpty {
-                Section("즐겨찾기") { ForEach(favorites) { r in NavigationLink { RinkDetailView(rink: r) } label: { RinkRow(rink: r) } } }
+                Section("즐겨찾기") { ForEach(favorites) { r in myRinkRow(r) } }
             }
             let others = rinks.filter { !$0.isFavorite }
             if !others.isEmpty {
-                Section("내 링크장") { ForEach(others) { r in NavigationLink { RinkDetailView(rink: r) } label: { RinkRow(rink: r) } } }
+                Section {
+                    ForEach(others) { r in myRinkRow(r) }
+                } header: {
+                    Text("내 링크장")
+                } footer: {
+                    Text("왼쪽으로 밀면 뺄 수 있어. 기록에 적힌 링크장 이름은 그대로 남아.")
+                }
             }
 
             if query.isEmpty {
@@ -212,6 +218,17 @@ struct RinkFinderView: View {
         .task { if browse.isEmpty { await loadBrowse() } }
     }
 
+    /// 내 링크장 한 줄. 왼쪽으로 밀어 뺀다(기록의 링크장 이름은 문자열이라 영향 없음).
+    private func myRinkRow(_ r: Rink) -> some View {
+        NavigationLink { RinkDetailView(rink: r) } label: { RinkRow(rink: r) }
+            .swipeActions(edge: .trailing) {
+                Button(role: .destructive) {
+                    context.delete(r)
+                    context.saveOrReport()
+                } label: { Label("빼기", systemImage: "trash") }
+            }
+    }
+
     private func placeRow(_ title: String, _ subtitle: String, saved: Bool, needsCheck: Bool = false) -> some View {
         HStack {
             Image(systemName: "figure.hockey").foregroundStyle(Theme.accent).frame(width: 28)
@@ -272,7 +289,9 @@ struct RinkRow: View {
 /// 링크장 상세. 시설 정보는 사용자가 확인해서 표시하고, 바꾸면 마지막 확인일이 갱신된다.
 struct RinkDetailView: View {
     @Environment(\.modelContext) private var context
+    @Environment(\.dismiss) private var dismiss
     @Bindable var rink: Rink
+    @State private var confirmRemove = false
 
     var body: some View {
         Form {
@@ -298,10 +317,28 @@ struct RinkDetailView: View {
                 Text(rink.verifiedAt.map { "\($0.formatted(date: .abbreviated, time: .omitted))에 확인했어. 그 뒤로 바뀌었을 수 있어." }
                      ?? "아직 확인한 게 없어. 직접 본 것만 골라줘.")
             }
+            Section {
+                Button(role: .destructive) { confirmRemove = true } label: { Label("내 링크장에서 빼기", systemImage: "trash") }
+            } footer: {
+                Text("기록에 적힌 링크장 이름은 그대로 남아. 다시 찾아서 담을 수 있어.")
+            }
         }
         .navigationTitle("링크장")
         .navigationBarTitleDisplayMode(.inline)
         .onDisappear { context.saveOrReport() }
+        .confirmationDialog("'\(rink.name)'을 내 링크장에서 뺄까?", isPresented: $confirmRemove, titleVisibility: .visible) {
+            Button("빼기", role: .destructive) {
+                // 먼저 화면을 닫고, 닫힌 뒤 지운다(지운 객체를 화면이 붙들고 있으면 멈춤).
+                dismiss()
+                let target = rink
+                Task { @MainActor in
+                    try? await Task.sleep(nanoseconds: 350_000_000)
+                    context.delete(target)
+                    context.saveOrReport()
+                }
+            }
+            Button("그대로 두기", role: .cancel) {}
+        }
     }
 
     private func facility(_ title: String, _ value: Binding<Bool?>) -> some View {
