@@ -226,6 +226,7 @@ struct RinkFinderView: View {
                     context.delete(r)
                     context.saveOrReport()
                 } label: { Label("빼기", systemImage: "trash") }
+                .tint(Theme.danger)   // 앱 전체 tint(파랑)가 이기지 않게 빨강을 못 박는다.
             }
     }
 
@@ -318,7 +319,9 @@ struct RinkDetailView: View {
                      ?? "아직 확인한 게 없어. 직접 본 것만 골라줘.")
             }
             Section {
-                Button(role: .destructive) { confirmRemove = true } label: { Label("내 링크장에서 빼기", systemImage: "trash") }
+                Button(role: .destructive) { confirmRemove = true } label: {
+                    Label("내 링크장에서 빼기", systemImage: "trash").foregroundStyle(Theme.danger)
+                }
             } footer: {
                 Text("기록에 적힌 링크장 이름은 그대로 남아. 다시 찾아서 담을 수 있어.")
             }
