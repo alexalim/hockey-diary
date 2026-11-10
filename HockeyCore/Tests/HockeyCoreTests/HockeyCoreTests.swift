@@ -693,3 +693,53 @@ final class DomainTests: XCTestCase {
         XCTAssertNil(Mood.clamp(nil))
     }
 }
+
+final class RinkDirectoryTests: XCTestCase {
+    let sample = [
+        RinkEntry(name: "아이스웍스 역삼점", aliases: ["아이스웍스", "역삼", "강남"], address: "서울특별시 강남구 역삼로 123", latitude: 37.49, longitude: 127.04),
+        RinkEntry(name: "목동아이스링크", aliases: ["목동", "양천"], address: "서울특별시 양천구 안양천로 939", latitude: 37.53, longitude: 126.87),
+        RinkEntry(name: "고양 어울림누리 얼음마루", aliases: ["고양", "성사동"], address: "경기도 고양시 덕양구 어울림로 33", latitude: 37.65, longitude: 126.83),
+    ]
+
+    func testNeighbourhoodFindsRink() {
+        XCTAssertEqual(RinkDirectory.search("역삼", in: sample).map(\.name), ["아이스웍스 역삼점"])
+        XCTAssertEqual(RinkDirectory.search("강남 아이스링크", in: sample).map(\.name), ["아이스웍스 역삼점"])
+    }
+
+    func testGenericWordAloneReturnsAll() {
+        XCTAssertEqual(RinkDirectory.search("아이스링크", in: sample).count, 3)
+        XCTAssertEqual(RinkDirectory.search("빙상장", in: sample).count, 3)
+        XCTAssertTrue(RinkDirectory.search("  ", in: sample).isEmpty)
+    }
+
+    func testNameMatchRanksAboveAddressMatch() {
+        // "양천"은 목동의 별칭이자 주소. 이름에 들어간 "목동"이 먼저.
+        XCTAssertEqual(RinkDirectory.search("목동", in: sample).first?.name, "목동아이스링크")
+        XCTAssertTrue(RinkDirectory.search("부산", in: sample).isEmpty)
+    }
+
+    func testMultipleTokensMustAllMatch() {
+        XCTAssertEqual(RinkDirectory.search("고양 덕양구", in: sample).count, 1)
+        XCTAssertTrue(RinkDirectory.search("고양 강남", in: sample).isEmpty)
+    }
+
+    func testSameRinkIgnoresSpacingAndPrefix() {
+        XCTAssertTrue(RinkDirectory.sameRink("목동 아이스링크", "목동아이스링크"))
+        XCTAssertTrue(RinkDirectory.sameRink("아이스웍스 역삼점", "아이스웍스"))
+        XCTAssertFalse(RinkDirectory.sameRink("목동아이스링크", "태릉국제스케이트장"))
+    }
+
+    func testBundledDirectoryCoversKnownRinks() {
+        let all = RinkDirectory.all
+        XCTAssertGreaterThanOrEqual(all.count, 30, "내장 목록이 너무 적다")
+        XCTAssertFalse(RinkDirectory.search("역삼").isEmpty, "역삼 검색이 비면 피드백 재발")
+        XCTAssertFalse(RinkDirectory.search("목동").isEmpty)
+        XCTAssertEqual(RinkDirectory.search("역삼").first?.name, "아이스웍스 역삼점")
+        XCTAssertTrue(RinkDirectory.search("역삼").first?.verified ?? false)
+        XCTAssertGreaterThanOrEqual(all.filter(\.verified).count, 30, "운영 확인된 곳이 너무 적다")
+        XCTAssertEqual(Set(all.map(\.name)).count, all.count, "이름 중복")
+        for e in all {
+            XCTAssertFalse(e.address.isEmpty, "\(e.name) 주소 없음")
+        }
+    }
+}

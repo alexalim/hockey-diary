@@ -1,4 +1,5 @@
 import Foundation
+import HockeyCore
 import MapKit
 import SwiftData
 import UIKit
@@ -113,7 +114,12 @@ final class RinkSearch: NSObject, ObservableObject, MKLocalSearchCompleterDelega
         failed = !anySucceeded
         let keywords = ["아이스", "링크", "빙상", "스케이트", "얼음", "하키", "ice", "rink", "skat", "hockey"]
         let matched = all.filter { p in keywords.contains { p.name.localizedCaseInsensitiveContains($0) } }
-        return matched.isEmpty ? Array(all.prefix(15)) : matched
+        return Self.merge(bundled: RinkDirectory.search(text).map(RinkPlace.init), map: matched.isEmpty ? Array(all.prefix(15)) : matched)
+    }
+
+    /// 내장 목록을 앞에, 지도에서 찾은 곳 중 같은 곳이 아닌 것만 뒤에 붙인다.
+    static func merge(bundled: [RinkPlace], map: [RinkPlace]) -> [RinkPlace] {
+        bundled + map.filter { m in !bundled.contains { RinkDirectory.sameRink($0.name, m.name) } }
     }
 
     static let rinkWords = ["아이스", "링크", "빙상", "스케이트", "얼음", "하키", "ice", "rink", "skat", "hockey"]
@@ -150,6 +156,12 @@ final class RinkSearch: NSObject, ObservableObject, MKLocalSearchCompleterDelega
     func findRinks(_ text: String) async -> [RinkPlace] {
         let t = text.trimmingCharacters(in: .whitespaces)
         guard !t.isEmpty else { return [] }
+        let bundled = RinkDirectory.search(t).map(RinkPlace.init)
+        return Self.merge(bundled: bundled, map: await mapRinks(t))
+    }
+
+    /// Apple 지도에서만 찾는다(내장 목록 제외).
+    private func mapRinks(_ t: String) async -> [RinkPlace] {
         let hasRinkWord = Self.rinkWords.contains { t.localizedCaseInsensitiveContains($0) }
         var center: CLLocationCoordinate2D?
         var batches: [[RinkPlace]?] = []
@@ -208,6 +220,20 @@ struct RinkPlace: Identifiable {
     let name: String
     let address: String
     let coordinate: CLLocationCoordinate2D?
+    /// 앱에 담긴 전국 목록에서 나온 곳이면 true. 지도 검색 결과는 false.
+    var bundled = false
+    /// 목록엔 있지만 최근 운영 근거를 못 찾은 곳. 가기 전에 확인하라고 알려준다.
+    var needsCheck = false
+
+    init(name: String, address: String, coordinate: CLLocationCoordinate2D?, bundled: Bool = false, needsCheck: Bool = false) {
+        self.name = name; self.address = address; self.coordinate = coordinate; self.bundled = bundled; self.needsCheck = needsCheck
+    }
+
+    init(_ e: RinkEntry) {
+        var c: CLLocationCoordinate2D?
+        if let la = e.latitude, let lo = e.longitude { c = CLLocationCoordinate2D(latitude: la, longitude: lo) }
+        self.init(name: e.name, address: e.address, coordinate: c, bundled: true, needsCheck: !e.verified)
+    }
 }
 
 enum RinkStore {

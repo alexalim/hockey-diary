@@ -1,3 +1,4 @@
+import HockeyCore
 import SwiftUI
 import SwiftData
 import MapKit
@@ -123,8 +124,8 @@ struct RinkFinderView: View {
                     if finding && found.isEmpty {
                         HStack { ProgressView(); Text("찾는 중…").foregroundStyle(.secondary) }
                     } else if found.isEmpty {
-                        Text(search.failed ? "지금은 지도 검색이 안 돼. 인터넷 연결을 확인해줘."
-                             : "Apple 지도에서는 '\(query)' 근처 링크장을 못 찾았어. 다른 지도로 찾아보거나 직접 추가해봐.")
+                        Text(search.failed ? "앱에 담긴 목록엔 없고, 지금은 지도 검색도 안 돼. 인터넷 연결을 확인해줘."
+                             : "'\(query)'로는 못 찾았어. 링크장 이름이나 구·동 이름으로 다시 찾아보거나 직접 추가해봐.")
                             .font(.subheadline).foregroundStyle(.secondary)
                         otherMapLinks(for: query)
                         Button { addManually = true } label: { Label("링크장 직접 추가", systemImage: "plus.circle") }
@@ -133,12 +134,12 @@ struct RinkFinderView: View {
                         Button {
                             open(RinkStore.upsert(name: p.name, address: p.address, lat: p.coordinate?.latitude, lon: p.coordinate?.longitude, context: context))
                             query = ""
-                        } label: { placeRow(p.name, p.address, saved: rinks.contains { $0.name == p.name }) }
+                        } label: { placeRow(p.name, p.address, saved: rinks.contains { $0.name == p.name }, needsCheck: p.needsCheck) }
                     }
                 } header: {
                     Text("'\(query)' 검색 결과")
                 } footer: {
-                    Text("동네 이름만 쳐도 그 근처 링크장을 찾아줘.")
+                    Text("동네나 역 이름만 쳐도 찾아줘. 전국 실내 링크장 목록이 앱에 들어 있어.")
                 }
             }
 
@@ -163,7 +164,7 @@ struct RinkFinderView: View {
                     ForEach(browse) { p in
                         Button {
                             open(RinkStore.upsert(name: p.name, address: p.address, lat: p.coordinate?.latitude, lon: p.coordinate?.longitude, context: context))
-                        } label: { placeRow(p.name, p.address, saved: rinks.contains { $0.name == p.name }) }
+                        } label: { placeRow(p.name, p.address, saved: rinks.contains { $0.name == p.name }, needsCheck: p.needsCheck) }
                     }
                 } header: {
                     Text("'\(browseQuery)' 찾은 곳")
@@ -173,7 +174,7 @@ struct RinkFinderView: View {
             }
 
             Section {
-                Text("검색어는 Apple 지도로 가. 내 위치는 쓰지 않아. 운영 시간과 대관은 자주 바뀌니 공식 안내를 확인해줘.")
+                Text("앱에 담긴 전국 링크장 목록에서 먼저 찾고, 없으면 Apple 지도에 검색어를 보내. 내 위치는 쓰지 않아. 운영 시간과 대관은 자주 바뀌니 공식 안내를 확인해줘.")
                     .font(.caption).foregroundStyle(.secondary)
             }
         }
@@ -211,12 +212,13 @@ struct RinkFinderView: View {
         .task { if browse.isEmpty { await loadBrowse() } }
     }
 
-    private func placeRow(_ title: String, _ subtitle: String, saved: Bool) -> some View {
+    private func placeRow(_ title: String, _ subtitle: String, saved: Bool, needsCheck: Bool = false) -> some View {
         HStack {
             Image(systemName: "figure.hockey").foregroundStyle(Theme.accent).frame(width: 28)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title).foregroundStyle(.primary)
                 if !subtitle.isEmpty { Text(subtitle).font(.caption).foregroundStyle(.secondary).lineLimit(1) }
+                if needsCheck { Text("운영 중인지 가기 전에 확인해줘").font(.caption2).foregroundStyle(Theme.warning) }
             }
             Spacer()
             Image(systemName: saved ? "checkmark.circle.fill" : "plus.circle").foregroundStyle(saved ? Theme.neonPink : Theme.accent)
@@ -249,6 +251,8 @@ struct RinkFinderView: View {
 
     private func loadBrowse() async {
         browsing = true
+        // 앱에 담긴 목록은 바로 보여주고, 지도 결과는 오는 대로 뒤에 붙인다.
+        browse = RinkDirectory.search(browseQuery).map(RinkPlace.init)
         browse = await search.places(browseQuery)
         browsing = false
     }
