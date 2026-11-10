@@ -4,6 +4,7 @@ import HockeyCore
 /// 기기 연동 (S07). 데이터마다 왜 읽는지 먼저 설명하고, 사용자가 누를 때만 iOS 권한 화면을 띄운다.
 struct HealthConnectView: View {
     @AppStorage(HealthPrefs.enabledKey) private var enabled = false
+    @AppStorage(HealthPrefs.maxHRKey) private var maxHRForSettings = HealthPrefs.defaultMaxHR
     @State private var requesting = false
     @State private var errorText: String?
 
@@ -58,6 +59,16 @@ struct HealthConnectView: View {
                 CycleConsentSection()
             }
 
+            if enabled {
+                Section {
+                    Stepper("최고 심박 \(maxHRForSettings)", value: $maxHRForSettings, in: 120...220, step: 5)
+                } header: {
+                    Text("심박 구간 기준")
+                } footer: {
+                    Text("심박 구간(가볍게~전력)은 이 값 대비 %로 나눠. 보통 220에서 나이를 뺀 값 근처야. 운동 중 본 최고 심박이 더 높으면 그걸로 올려.")
+                }
+            }
+
             Section("가민을 쓰고 있다면") {
                 Text("Garmin Connect 앱 → 설정 → 연결된 앱 → Apple 건강에서 동기화를 켜줘. 그러면 가민의 수면·심박·운동이 여기로 들어와. 기기에 따라 일부만 올 수 있어. 가민 앱이 동기화한 뒤에 보여.")
                     .font(.subheadline).foregroundStyle(.secondary)
@@ -87,6 +98,7 @@ struct SessionHealthCard: View {
     let start: Date
     let end: Date
     @AppStorage(HealthPrefs.enabledKey) private var enabled = false
+    @AppStorage(HealthPrefs.maxHRKey) private var maxHR = HealthPrefs.defaultMaxHR
     @State private var health: SessionHealth?
     @State private var loading = false
 
@@ -111,6 +123,16 @@ struct SessionHealthCard: View {
                     if h.workouts.count > 1 {
                         Text("같은 활동을 \(h.workouts.count)개 기기가 쟀어. 시간은 한 번만 세서 \(minutesText(h.mergedWorkoutMinutes))야.")
                             .font(.caption).foregroundStyle(.secondary)
+                    }
+                    if h.samples.count >= 6 {
+                        HeartZoneBar(seconds: HeartZones.seconds(h.samples, maxHR: Double(maxHR)), maxHR: maxHR)
+                        let spans = ShiftDetector.estimate(h.samples)
+                        if !spans.isEmpty {
+                            row("arrow.left.arrow.right", "심박으로 짐작한 쉬프트 (실험)",
+                                "\(spans.count)번", "얼음 위 약 \(minutesText(ShiftDetector.onIceSeconds(spans) / 60))")
+                            Text("심박이 높게 이어진 구간을 얼음 위로 본 거야. 워치에서 직접 누른 쉬프트가 더 정확해.")
+                                .font(.caption2).foregroundStyle(.secondary)
+                        }
                     }
                 } else {
                     EmptyHint(text: "이 시간에 건강 앱 기록이 없어. 권한이 꺼져 있거나 아직 동기화 전일 수 있어.",
@@ -255,5 +277,47 @@ struct CycleGrowthCard: View {
         let days = (try? await HealthService.shared.menstrualDays(from: first.addingTimeInterval(-86_400), to: last.addingTimeInterval(86_400))) ?? []
         let cal = Calendar.current
         comparison = CycleFatigueComparison.compute(sessions.map { (inPeriod: days.contains(cal.startOfDay(for: $0.at)), fatigue: $0.fatigue) })
+    }
+}
+
+/// 심박 구간 막대(5칸). 구간별 분을 색으로.
+struct HeartZoneBar: View {
+    let seconds: [Int]
+    let maxHR: Int
+    private let colors: [Color] = [Color(hex: 0x9FB7D9), Theme.accent, Color(hex: 0x4CC38A), Color.orange, Theme.neonPink]
+
+    var body: some View {
+        let total = max(seconds.reduce(0, +), 1)
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Image(systemName: "waveform.path.ecg").foregroundStyle(Theme.neonPink).frame(width: 24)
+                Text("심박 구간").font(.subheadline)
+                Spacer()
+                Text("최고 \(maxHR) 기준").font(.caption2).foregroundStyle(.secondary)
+            }
+            GeometryReader { g in
+                HStack(spacing: 2) {
+                    ForEach(0..<5, id: \.self) { i in
+                        if seconds[i] > 0 {
+                            RoundedRectangle(cornerRadius: 3).fill(colors[i])
+                                .frame(width: max(4, g.size.width * CGFloat(seconds[i]) / CGFloat(total)))
+                        }
+                    }
+                }
+            }
+            .frame(height: 12)
+            HStack(spacing: 6) {
+                ForEach(0..<5, id: \.self) { i in
+                    if seconds[i] >= 60 {
+                        HStack(spacing: 3) {
+                            Circle().fill(colors[i]).frame(width: 7, height: 7)
+                            Text("\(HeartZones.titles[i]) \(seconds[i] / 60)분").font(.caption2).foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("심박 구간: " + (0..<5).compactMap { seconds[$0] >= 60 ? "\(HeartZones.titles[$0]) \(seconds[$0] / 60)분" : nil }.joined(separator: ", "))
     }
 }

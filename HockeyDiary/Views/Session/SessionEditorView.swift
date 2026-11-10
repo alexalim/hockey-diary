@@ -147,7 +147,7 @@ struct SessionEditorView: View {
         let usage = session.usages.first
         _skateID = State(initialValue: usage?.skateID)
         _runnerID = State(initialValue: usage?.runnerID)
-        _iceMinutes = State(initialValue: usage?.iceMinutes ?? session.minutes)
+        _iceMinutes = State(initialValue: usage?.iceMinutes ?? session.onIceMinutes ?? session.minutes)
         _iceMinutesEdited = State(initialValue: usage != nil)
         _showingMore = State(initialValue: true)
     }

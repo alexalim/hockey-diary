@@ -173,6 +173,15 @@ final class StoreIntegrationTests: XCTestCase {
         XCTAssertEqual(all[0].minutes, 90)
         XCTAssertEqual(all[0].type, .regularGame)
         XCTAssertEqual(all[0].moodAfter, 4)
+
+        // 쉬프트·얼음 위 시간·거리·빙판 유형도 들어온다.
+        let q = WatchWorkoutPayload(type: .freePractice, start: t0, end: t0.addingTimeInterval(3600), shifts: 8, onIceSeconds: 930, distanceMeters: 2100, surface: .pond)
+        WatchBridge.importWorkout(q, context: context)
+        let pond = try XCTUnwrap(context.fetch(FetchDescriptor<Session>()).first { $0.id == q.id })
+        XCTAssertEqual(pond.surface, .pond)
+        XCTAssertEqual(pond.shifts, 8)
+        XCTAssertEqual(pond.onIceMinutes, 16, "930초 → 반올림 16분")
+        XCTAssertEqual(pond.distanceMeters, 2100)
     }
 
     // 슛 차트: 활동별로 저장·교체되고, 활동을 지우면 같이 지워진다.
@@ -208,5 +217,26 @@ final class StoreIntegrationTests: XCTestCase {
         let back = try XCTUnwrap(context.fetch(FetchDescriptor<Session>()).first)
         XCTAssertEqual(back.goalieStats?.savePctText, "90.0%")
         XCTAssertNil(Session(type: .lesson).goalieStats)
+    }
+
+    // 연습: 루틴 저장·왕복, 드릴 기록이 기술별로 묶인다.
+    func testRoutineAndDrillLogs() throws {
+        PracticeStore.seedRoutinesIfNeeded(context)
+        let routines = try context.fetch(FetchDescriptor<PracticeRoutine>())
+        XCTAssertGreaterThanOrEqual(routines.count, 2, "기본 루틴 2개")
+        let r = PracticeRoutine(name: "내 루틴", items: [RoutineItem(drillKey: "stop-lines", target: 12)])
+        context.insert(r)
+        try context.save()
+        XCTAssertEqual(r.items.first?.target, 12)
+
+        let d = try XCTUnwrap(DrillCatalog.drill("stickhandle-8"))
+        context.insert(DrillLog(drill: d, amount: 3))
+        context.insert(DrillLog(drill: d, amount: 2))
+        context.insert(DrillLog(customTitle: "내 드릴", skillName: "", unit: .reps, amount: 10))
+        try context.save()
+        let by = PracticeStore.bySkill(from: nil, to: Date().addingTimeInterval(60), context: context)
+        XCTAssertEqual(by["퍽 드리블"]?.minutes, 5)
+        XCTAssertEqual(by["퍽 드리블"]?.sessions, 2)
+        XCTAssertNil(by[""], "기술 없는 드릴은 기술별 집계에서 빠짐")
     }
 }

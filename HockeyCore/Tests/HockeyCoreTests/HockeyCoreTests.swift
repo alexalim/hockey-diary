@@ -489,6 +489,53 @@ final class WatchPayloadTests: XCTestCase {
         var odd = p.dictionary; odd["moodAfter"] = 9
         XCTAssertNil(WatchWorkoutPayload(dictionary: odd)?.moodAfter, "범위 밖 기분은 버림")
         XCTAssertNil(WatchWorkoutPayload(dictionary: ["kind": "other"]))
+        // 쉬프트·거리·빙판 유형 왕복, 음수는 버림
+        let q = WatchWorkoutPayload(type: .freePractice, start: t, end: t.addingTimeInterval(1800), shifts: 9, onIceSeconds: 840, distanceMeters: 2300, surface: .pond)
+        let qb = try XCTUnwrap(WatchWorkoutPayload(dictionary: q.dictionary))
+        XCTAssertEqual(qb, q)
+        var neg = q.dictionary; neg["shifts"] = -1; neg["distance"] = -5.0
+        let nb = try XCTUnwrap(WatchWorkoutPayload(dictionary: neg))
+        XCTAssertNil(nb.shifts); XCTAssertNil(nb.distanceMeters)
+    }
+}
+
+final class EffortTests: XCTestCase {
+    let t0 = Date(timeIntervalSince1970: 1_800_000_000)
+    func hr(_ pattern: [(seconds: Int, bpm: Double)]) -> [HeartSample] {
+        pattern.map { HeartSample(at: t0.addingTimeInterval(TimeInterval($0.seconds)), bpm: $0.bpm) }
+    }
+
+    // 심박 구간: 표본 사이 시간을 구간에 더한다. 끊긴 구간은 60초까지만.
+    func testZones() {
+        let s = hr([(0, 100), (10, 150), (20, 175), (30, 175), (400, 120)])
+        let z = HeartZones.seconds(s, maxHR: 190)   // 100/190=.53→0, 150=.79→2, 175=.92→4, 175→4(60초 상한)
+        XCTAssertEqual(z, [10, 0, 10, 0, 70])
+        XCTAssertEqual(HeartZones.zoneIndex(0.3), 0)
+        XCTAssertEqual(HeartZones.zoneIndex(0.95), 4)
+        XCTAssertEqual(HeartZones.seconds([], maxHR: 190), [0, 0, 0, 0, 0])
+    }
+
+    // 쉬프트 짐작: 높은 심박 구간 두 개, 짧은 튐과 짧은 끊김은 무시.
+    func testShiftEstimate() {
+        var p: [(Int, Double)] = []
+        for s in stride(from: 0, to: 60, by: 5) { p.append((s, 110)) }        // 벤치 1분
+        for s in stride(from: 60, to: 120, by: 5) { p.append((s, 165)) }      // 얼음 1분
+        p.append((122, 120)); p.append((127, 118))                             // 10초 끊김(이어 붙임)
+        for s in stride(from: 130, to: 160, by: 5) { p.append((s, 168)) }     // 얼음 30초 더
+        for s in stride(from: 160, to: 240, by: 5) { p.append((s, 108)) }     // 벤치
+        p.append((245, 170))                                                   // 5초 튐(무시)
+        for s in stride(from: 250, to: 320, by: 5) { p.append((s, 105)) }
+        for s in stride(from: 320, to: 380, by: 5) { p.append((s, 170)) }     // 얼음 1분
+        let spans = ShiftDetector.estimate(hr(p.map { (seconds: $0.0, bpm: $0.1) }))
+        XCTAssertEqual(spans.count, 2)
+        XCTAssertEqual(ShiftDetector.onIceSeconds(spans), 95 + 55)
+        XCTAssertEqual(ShiftDetector.estimate(hr([(0, 120), (30, 122), (60, 121), (90, 119), (120, 120), (150, 123)])), [], "심박 차이가 작으면 못 나눔")
+    }
+
+    func testEffortLines() {
+        XCTAssertEqual(EffortSummary(shifts: 9, onIceMinutes: 14, distanceMeters: 2340, kilocalories: 512.4).lines,
+                       ["쉬프트 9번", "얼음 위 14분", "2.3km", "512kcal"])
+        XCTAssertEqual(EffortSummary(distanceMeters: 50).lines, [], "100m 미만 거리는 안 보여줌")
     }
 }
 
@@ -534,6 +581,46 @@ final class ShotTests: XCTestCase {
         XCTAssertEqual(g.savePctText, "90.0%")
         XCTAssertNil(GoalieStats(saves: 0, goalsAgainst: 0).savePct)
         XCTAssertEqual(GoalieStats.sum([g, GoalieStats(saves: 13, goalsAgainst: 2)]).savePctText, "88.9%")
+    }
+}
+
+final class DrillTests: XCTestCase {
+    // 드릴은 모두 기존 기술 사전의 기술과 이어져야 한다(연습량이 기술 성장에 붙으려면).
+    func testCatalogLinksToSkills() {
+        let skills = Set(SkillGuide.entries.map(\.name))
+        for d in DrillCatalog.all {
+            XCTAssertTrue(skills.contains(d.skillName), "\(d.key) → \(d.skillName)")
+            XCTAssertFalse(d.howTo.isEmpty)
+            XCTAssertGreaterThan(d.defaultTarget, 0)
+        }
+        XCTAssertEqual(Set(DrillCatalog.all.map(\.key)).count, DrillCatalog.all.count, "키 중복 없음")
+        XCTAssertFalse(DrillCatalog.offIce.isEmpty)
+    }
+
+    func testRoutineRoundTripAndEstimate() {
+        for r in StarterRoutine.all {
+            XCTAssertTrue(r.items.allSatisfy { DrillCatalog.drill($0.drillKey) != nil }, r.name)
+        }
+        let items = StarterRoutine.all[1].items
+        XCTAssertEqual(RoutineItem.decode(RoutineItem.encode(items)), items)
+        XCTAssertEqual(RoutineItem.decode("깨진 값"), [])
+        // 10번(1분) + 10번(1분) + 3분 + 50번(5분) + 25번(3분) = 13분
+        XCTAssertEqual(StarterRoutine.estimatedMinutes(items), 13)
+        XCTAssertEqual(RoutineItem(drillKey: "x", target: 0).target, 1, "목표는 1 이상")
+    }
+
+    func testDrillStats() {
+        let t = Date(timeIntervalSince1970: 1_800_000_000)
+        let e = [
+            DrillStats.Entry(skillName: "퍽 드리블", at: t, amount: 2, unit: .minutes),
+            DrillStats.Entry(skillName: "퍽 드리블", at: t.addingTimeInterval(600), amount: 5, unit: .minutes),
+            DrillStats.Entry(skillName: "리스트 샷", at: t.addingTimeInterval(86_400), amount: 25, unit: .reps),
+        ]
+        let by = DrillStats.bySkill(e)
+        XCTAssertEqual(by["퍽 드리블"], DrillStats.SkillLine(sessions: 2, reps: 0, minutes: 7))
+        XCTAssertEqual(by["리스트 샷"]?.text, "1회 · 25번")
+        var cal = Calendar(identifier: .gregorian); cal.timeZone = TimeZone(identifier: "Asia/Seoul")!
+        XCTAssertEqual(DrillStats.practiceDays(e, calendar: cal), 2)
     }
 }
 

@@ -36,6 +36,7 @@ struct SessionDetailView: View {
                 if hasNotes { notesCard }
                 placeCard
                 SessionHealthCard(start: session.startsAt, end: session.endsAt)
+                if !effort.lines.isEmpty { effortCard }
                 if let usage = session.usages.first { equipmentCard(usage) }
                 if !session.photos.isEmpty { photosCard }
                 Button(role: .destructive) {
@@ -97,6 +98,27 @@ struct SessionDetailView: View {
             Text(title).font(.caption).foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var effort: EffortSummary {
+        EffortSummary(shifts: session.shifts, onIceMinutes: session.onIceMinutes, distanceMeters: session.distanceMeters)
+    }
+
+    /// 워치에서 직접 누른 쉬프트·얼음 위 시간·GPS 총거리.
+    private var effortCard: some View {
+        Card {
+            CardHeader(title: "워치로 잰 운동량", systemImage: "applewatch")
+            HStack(spacing: 10) {
+                ForEach(effort.lines, id: \.self) { line in
+                    Text(line).font(.subheadline.bold()).foregroundStyle(Theme.title)
+                        .padding(.horizontal, 10).padding(.vertical, 6)
+                        .background(Theme.cobaltSoft, in: Capsule())
+                }
+            }
+            if session.distanceMeters != nil {
+                Text("거리는 야외·폰드에서 GPS로 잰 총거리야. 어디를 지났는지는 남기지 않았어.").font(.caption2).foregroundStyle(.secondary)
+            }
+        }
     }
 
     private var hasNotes: Bool {

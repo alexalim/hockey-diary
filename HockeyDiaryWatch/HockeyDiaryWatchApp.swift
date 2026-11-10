@@ -46,6 +46,19 @@ struct StartView: View {
                     }
                     .tint(model.type == t ? pink : .gray)
                 }
+                Text("어디서?").font(.caption).foregroundStyle(.secondary).padding(.top, 4)
+                HStack(spacing: 4) {
+                    ForEach([SurfaceType.indoorRink, .outdoorRink, .pond], id: \.self) { s in
+                        Button { model.surface = s } label: {
+                            Text(s == .indoorRink ? "실내" : (s == .outdoorRink ? "야외" : "폰드"))
+                                .font(.caption2.bold()).frame(maxWidth: .infinity, minHeight: 30)
+                        }
+                        .tint(model.surface == s ? cobalt : .gray)
+                    }
+                }
+                if model.usesGPS {
+                    Text("야외·폰드는 GPS로 총거리만 재. 경로는 안 남겨.").font(.system(size: 10)).foregroundStyle(.secondary)
+                }
                 Text("시작 전 기분").font(.caption).foregroundStyle(.secondary).padding(.top, 4)
                 WatchMoodRow(value: $model.moodBefore)
                 Button {
@@ -64,24 +77,46 @@ struct RunningView: View {
     @EnvironmentObject var model: WorkoutModel
 
     var body: some View {
+        ScrollView {
         VStack(spacing: 6) {
             Text(model.type.title).font(.headline)
             TimelineView(.periodic(from: .now, by: 1)) { ctx in
                 Text(elapsed(at: ctx.date))
-                    .font(.system(size: 34, weight: .bold, design: .rounded))
+                    .font(.system(size: 30, weight: .bold, design: .rounded))
                     .monospacedDigit()
             }
-            if let hr = model.heartRate {
-                Label("\(Int(hr.rounded()))", systemImage: "heart.fill").foregroundStyle(pink)
-            } else {
-                Text(model.usingHealth ? "심박 재는 중" : "타이머로 재는 중").font(.caption2).foregroundStyle(.secondary)
+            HStack(spacing: 8) {
+                if let hr = model.heartRate {
+                    Label("\(Int(hr.rounded()))", systemImage: "heart.fill").foregroundStyle(pink)
+                } else {
+                    Text(model.usingHealth ? "심박 재는 중" : "타이머로 재는 중").font(.caption2).foregroundStyle(.secondary)
+                }
+                if model.usesGPS {
+                    Text(model.locationDenied ? "위치 꺼짐" : String(format: "%.1fkm", model.distanceMeters / 1000))
+                        .font(.caption2).foregroundStyle(.secondary)
+                }
             }
+            // 쉬프트: 얼음에 오를 때 누르고, 벤치로 올 때 다시 누른다.
+            Button {
+                model.toggleShift()
+            } label: {
+                VStack(spacing: 2) {
+                    Text(model.onIce ? "벤치로" : "얼음으로").font(.headline)
+                    TimelineView(.periodic(from: .now, by: 1)) { ctx in
+                        Text("쉬프트 \(model.shiftCount) · 얼음 위 \(model.onIceSeconds(at: ctx.date) / 60)분")
+                            .font(.caption2).monospacedDigit()
+                    }
+                }
+                .frame(maxWidth: .infinity, minHeight: 48)
+            }
+            .tint(model.onIce ? cobalt : .gray)
             Button {
                 Task { await model.stop() }
             } label: {
-                Label("끝내기", systemImage: "stop.fill").frame(maxWidth: .infinity, minHeight: 44)
+                Label("끝내기", systemImage: "stop.fill").frame(maxWidth: .infinity, minHeight: 40)
             }
             .tint(pink)
+        }
         }
     }
 

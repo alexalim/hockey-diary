@@ -21,6 +21,8 @@ struct SessionHealth: Equatable {
     var averageHeartRate: Double?
     var maxHeartRate: Double?
     var workouts: [HealthWorkout]
+    /// 활동 시간대 심박 표본(구간·쉬프트 짐작용). 앱에 저장하지 않는다.
+    var samples: [HeartSample] = []
     /// 여러 기기가 잰 운동 시간을 한 번만 센 값 (9.2).
     var mergedWorkoutMinutes: Int { TimeMerge.unionMinutes(workouts.map(\.span)) }
     var isEmpty: Bool { night == nil && averageHeartRate == nil && workouts.isEmpty }
@@ -83,6 +85,16 @@ final class HealthService {
         }
     }
 
+    /// 활동 시간대 심박 표본(시간순).
+    func heartRateSamples(from: Date, to: Date) async throws -> [HeartSample] {
+        let predicate = HKQuery.predicateForSamples(withStart: from, end: to, options: .strictStartDate)
+        let descriptor = HKSampleQueryDescriptor(
+            predicates: [.quantitySample(type: Self.heartRateType, predicate: predicate)],
+            sortDescriptors: [SortDescriptor(\.startDate)], limit: 4000)
+        let unit = HKUnit.count().unitDivided(by: .minute())
+        return try await descriptor.result(for: store).map { HeartSample(at: $0.startDate, bpm: $0.quantity.doubleValue(for: unit)) }
+    }
+
     /// 활동 하나에 필요한 건강 데이터를 한 번에 읽는다.
     func health(for start: Date, end: Date) async -> SessionHealth {
         let sleepFrom = start.addingTimeInterval(-30 * 3600)
@@ -92,8 +104,9 @@ final class HealthService {
         let window = TimeSpan(start: start.addingTimeInterval(-900), end: end.addingTimeInterval(900))
         let ws = ((try? await workouts(from: window.start, to: window.end)) ?? [])
             .filter { TimeMerge.isMergeCandidate($0.span, TimeSpan(start: start, end: end), ratio: 0.3) }
+        let samples = (try? await heartRateSamples(from: start, to: end)) ?? []
         return SessionHealth(night: SleepAttribution.nightBefore(start, segments: segments),
-                             averageHeartRate: hr?.average, maxHeartRate: hr?.max, workouts: ws)
+                             averageHeartRate: hr?.average, maxHeartRate: hr?.max, workouts: ws, samples: samples)
     }
 
     // MARK: - 생리 주기 (별도 동의, F-C04)
@@ -142,4 +155,7 @@ final class HealthService {
 enum HealthPrefs {
     static let enabledKey = "healthEnabled"
     static let cycleKey = "cycleEnabled"
+    /// 심박 구간 계산에 쓰는 최고 심박. 사용자가 설정에서 바꾼다.
+    static let maxHRKey = "maxHeartRate"
+    static let defaultMaxHR = 190
 }

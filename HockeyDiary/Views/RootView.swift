@@ -5,11 +5,13 @@ import HockeyCore
 enum NewEntry: Identifiable, Hashable {
     case session(ActivityType, Date = Date())
     case journal(Date)
+    case practice
 
     var id: String {
         switch self {
         case .session(let t, let d): return "session-\(t.rawValue)-\(d.timeIntervalSince1970)"
         case .journal(let d): return "journal-\(d.timeIntervalSince1970)"
+        case .practice: return "practice"
         }
     }
 }
@@ -46,6 +48,7 @@ struct RootView: View {
             Button("정규게임 리뷰") { newEntry = .session(.regularGame) }
             Button("자유 연습") { newEntry = .session(.freePractice) }
             Button("하루 일기") { newEntry = .journal(Date()) }
+            Button("연습 드릴") { newEntry = .practice }
         }
         .sheet(item: $newEntry) { entry in
             switch entry {
@@ -53,6 +56,10 @@ struct RootView: View {
                 NavigationStack { SessionEditorView(newType: type, startsAt: date) }
             case .journal(let date):
                 NavigationStack { JournalEditorView(newDate: date) }
+            case .practice:
+                NavigationStack {
+                    PracticeView().toolbar { ToolbarItem(placement: .cancellationAction) { Button("닫기") { newEntry = nil } } }
+                }
             }
         }
     }

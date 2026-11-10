@@ -34,6 +34,10 @@ final class WatchBridge: NSObject, WCSessionDelegate {
         s.endsAt = p.end
         s.moodBefore = p.moodBefore
         s.moodAfter = p.moodAfter
+        if let surface = p.surface { s.surface = surface }
+        s.shifts = p.shifts
+        s.onIceMinutes = p.onIceSeconds.map { max(1, Int((Double($0) / 60).rounded())) }
+        s.distanceMeters = p.distanceMeters
         context.insert(s)
         context.saveOrReport()
     }

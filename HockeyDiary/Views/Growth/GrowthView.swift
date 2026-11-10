@@ -8,6 +8,7 @@ struct GrowthView: View {
     @Query(sort: \Session.startsAt, order: .reverse) private var sessions: [Session]
     @Query(sort: \Skill.name) private var skills: [Skill]
     @Query private var allShots: [ShotMark]
+    @Query(sort: \DrillLog.at, order: .reverse) private var allDrills: [DrillLog]
 
     @State private var period: Period = .month
 
@@ -35,6 +36,7 @@ struct GrowthView: View {
                 skillsCard
                 SleepGrowthCard(samples: samples, periodTitle: period.longTitle)
                 CycleGrowthCard(sessions: periodSessions.map { (at: $0.startsAt, fatigue: $0.fatigue) }, periodTitle: period.longTitle)
+                practiceCard
                 NavigationLink { AISummaryView() } label: {
                     Card {
                         Label("AI로 돌아보기", systemImage: "sparkles").font(.headline).foregroundStyle(Theme.title)
@@ -219,15 +221,53 @@ struct GrowthView: View {
         }
     }
 
+    // MARK: - 연습
+
+    private var periodDrills: [DrillLog] {
+        let from = period.start(from: Date())
+        return allDrills.filter { from == nil || $0.at >= from! }
+    }
+
+    private var practiceCard: some View {
+        let logs = periodDrills
+        let by = DrillStats.bySkill(logs.compactMap(\.entry))
+        return Card {
+            CardHeader(title: "연습", systemImage: "figure.hockey",
+                       trailing: logs.isEmpty ? nil : "연습한 날 \(DrillStats.practiceDays(logs.compactMap(\.entry)))일")
+            if logs.isEmpty {
+                EmptyHint(text: "드릴을 세면서 연습하면 기술별 연습량이 여기 쌓여.", systemImage: "figure.hockey")
+            } else {
+                ForEach(by.keys.sorted { (by[$0]?.sessions ?? 0) > (by[$1]?.sessions ?? 0) }, id: \.self) { name in
+                    if let line = by[name] {
+                        HStack {
+                            Text(name).font(.subheadline).foregroundStyle(Theme.title)
+                            Spacer()
+                            Text(line.text).font(.subheadline).foregroundStyle(.secondary)
+                        }
+                        .frame(minHeight: 28)
+                    }
+                }
+            }
+            NavigationLink { PracticeView() } label: {
+                Label("연습하러 가기", systemImage: "play.fill").frame(maxWidth: .infinity, minHeight: Theme.touch)
+            }
+            .buttonStyle(.bordered)
+            footnote(logs.count, note: "드릴 기록")
+        }
+    }
+
     private var skillsCard: some View {
-        let used = skills.filter { !$0.learnings.isEmpty || !$0.attempts.isEmpty }
+        let practiced = Set(allDrills.map(\.skillName))
+        let used = skills.filter { !$0.learnings.isEmpty || !$0.attempts.isEmpty || practiced.contains($0.name) }
         return Card {
             CardHeader(title: "기술 성장", systemImage: "chart.line.uptrend.xyaxis")
             if used.isEmpty {
                 EmptyHint(text: "수업에서 배운 기술을 남기면 경기에서 써본 것까지 이어서 볼 수 있어.")
             }
             ForEach(used) { skill in
-                NavigationLink { SkillDetailView(skill: skill) } label: { SkillRow(skill: skill) }
+                NavigationLink { SkillDetailView(skill: skill) } label: {
+                    SkillRow(skill: skill, practiceCount: allDrills.filter { $0.skillName == skill.name }.count)
+                }
                     .buttonStyle(.plain)
             }
             if !used.isEmpty {
@@ -244,13 +284,14 @@ struct GrowthView: View {
 
 struct SkillRow: View {
     let skill: Skill
+    var practiceCount = 0
 
     var body: some View {
         let st = skill.stats
         HStack {
             VStack(alignment: .leading, spacing: 2) {
                 Text(skill.name).font(.subheadline.bold()).foregroundStyle(Theme.title)
-                Text("수업 \(st.lessonCount) · 써봄 \(st.triedEvents) · 못 써봄 \(st.untriedEvents)")
+                Text("수업 \(st.lessonCount) · 써봄 \(st.triedEvents) · 못 써봄 \(st.untriedEvents)\(practiceCount > 0 ? " · 연습 \(practiceCount)" : "")")
                     .font(.caption).foregroundStyle(.secondary)
             }
             Spacer()

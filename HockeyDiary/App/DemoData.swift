@@ -84,5 +84,12 @@ enum DemoData {
 
         context.saveOrReport()
         LockerStore.awardMilestones(context)
+        PracticeStore.seedRoutinesIfNeeded(context)
+        if let d1 = DrillCatalog.drill("stickhandle-8"), let d2 = DrillCatalog.drill("stop-lines"), let d3 = DrillCatalog.drill("office-ball") {
+            context.insert(DrillLog(drill: d1, amount: 3, at: daysAgo(2, hour: 19)))
+            context.insert(DrillLog(drill: d2, amount: 10, at: daysAgo(2, hour: 19)))
+            context.insert(DrillLog(drill: d3, amount: 5, at: daysAgo(0, hour: 8)))
+            context.saveOrReport()
+        }
     }
 }

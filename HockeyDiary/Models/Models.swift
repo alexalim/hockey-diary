@@ -44,6 +44,9 @@ final class Session {
     var plusMinus: Int?
     var penaltyMinutes: Int?
     var shifts: Int?
+    /// 워치로 잰 얼음 위 시간(분)과 야외·폰드 GPS 총거리(m). 나중에 추가, 기본 nil.
+    var onIceMinutes: Int?
+    var distanceMeters: Double?
     var playedGoalie: Bool = false
     var saves: Int?
     var goalsAgainst: Int?
@@ -388,7 +391,7 @@ enum AppSchema {
         Skate.self, RunnerSet.self, RunnerInstallation.self, SharpeningLog.self, EquipmentUsage.self,
         Rink.self,
         LockerProfile.self, StickerPlacement.self, EarnedSticker.self, GearItem.self,
-        ShotMark.self,
+        ShotMark.self, DrillLog.self, PracticeRoutine.self,
     ]
 
     static func container(inMemory: Bool = false) throws -> ModelContainer {

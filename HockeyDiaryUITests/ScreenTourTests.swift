@@ -43,6 +43,14 @@ final class ScreenTourTests: XCTestCase {
         tab("홈")
         if tapText("미니게임") { snap("02f-game-detail"); app.swipeUp(); snap("02g-game-detail-bottom"); back() }
 
+        // 연습: 홈 → (+) 메뉴 대신 성장 탭의 연습 카드로
+        tab("성장")
+        if tapText("연습하러 가기") {
+            snap("04d-practice")
+            if tapText("드릴 고르기") { snap("04e-drill-picker"); if tapText("라인 스톱") { sleep(1); snap("04f-drill-run"); tapButton("그만") } else { tapButton("닫기") } }
+            back()
+        }
+
         // 다이어리
         tab("다이어리"); snap("03-diary")
         // 성장

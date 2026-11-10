@@ -95,6 +95,7 @@ targets:
         WKBackgroundModes: [workout-processing]
         NSHealthShareUsageDescription: "하키 하는 동안 심박을 보여줄게. 어디에도 안 보내."
         NSHealthUpdateUsageDescription: "워치로 잰 하키 운동을 건강 앱에 저장해."
+        NSLocationWhenInUseUsageDescription: "야외 링크나 폰드에서 탈 때 총거리만 재. 어디를 지났는지는 남기지 않아."
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.aspynlim.hockeydiary.watchkitapp
