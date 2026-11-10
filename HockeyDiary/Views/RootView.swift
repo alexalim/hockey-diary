@@ -47,27 +47,17 @@ struct RootView: View {
     @State private var showingQuickMenu = false
 
     var body: some View {
-        // 기본 탭 바는 숨기고 MahadaTabBar를 겹쳐 그린다(가운데 홈을 크게 만들기 위해).
-        // TabView에 safeAreaInset을 걸면 탭 안의 스크롤까지 전달되지 않아 마지막 줄이 바에 가려졌다.
-        // 그래서 탭마다 바 높이만큼 안전영역을 직접 넓힌다.
-        TabView(selection: $tab) {
-            NavigationStack { DiaryView(newEntry: $newEntry).toolbar { plusButton }.toolbar(.hidden, for: .tabBar) }
-                .safeAreaPadding(.bottom, MahadaTabBar.height)
-                .tag(Tab.diary)
-            NavigationStack { GrowthView().toolbar { plusButton }.toolbar(.hidden, for: .tabBar) }
-                .safeAreaPadding(.bottom, MahadaTabBar.height)
-                .tag(Tab.growth)
-            NavigationStack { HomeView(newEntry: $newEntry).toolbar { plusButton }.toolbar(.hidden, for: .tabBar) }
-                .safeAreaPadding(.bottom, MahadaTabBar.height)
-                .tag(Tab.home)
-            NavigationStack { ExploreView().toolbar { plusButton }.toolbar(.hidden, for: .tabBar) }
-                .safeAreaPadding(.bottom, MahadaTabBar.height)
-                .tag(Tab.explore)
-            NavigationStack { LockerView().toolbar { plusButton }.toolbar(.hidden, for: .tabBar) }
-                .safeAreaPadding(.bottom, MahadaTabBar.height)
-                .tag(Tab.locker)
+        // TabView(UIKit 탭 컨트롤러)는 바깥에서 건 안전영역 여백을 탭 안의 스크롤에 전해 주지 않아
+        // 마지막 줄이 하단 바에 가려졌다. 그래서 TabView 대신 다섯 스택을 겹쳐 두고 고른 것만 보여준다.
+        // 숨은 스택도 살아 있어 각 탭의 스크롤 위치·밀어 들어간 화면이 유지된다(TabView와 같은 동작).
+        ZStack {
+            stack(.diary) { DiaryView(newEntry: $newEntry) }
+            stack(.growth) { GrowthView() }
+            stack(.home) { HomeView(newEntry: $newEntry) }
+            stack(.explore) { ExploreView() }
+            stack(.locker) { LockerView() }
         }
-        .overlay(alignment: .bottom) { MahadaTabBar(selection: $tab) }
+        .safeAreaInset(edge: .bottom, spacing: 0) { MahadaTabBar(selection: $tab) }
         .confirmationDialog("무엇을 기록할까?", isPresented: $showingQuickMenu, titleVisibility: .visible) {
             Button("수업 기록") { newEntry = .session(.lesson) }
             Button("미니게임 리뷰") { newEntry = .session(.miniGame) }
@@ -88,6 +78,15 @@ struct RootView: View {
                 }
             }
         }
+    }
+
+    /// 탭 하나의 화면 스택. 고르지 않은 탭은 보이지도, 눌리지도, 접근성에 잡히지도 않는다.
+    private func stack<Content: View>(_ t: Tab, @ViewBuilder content: () -> Content) -> some View {
+        let on = tab == t
+        return NavigationStack { content().toolbar { plusButton } }
+            .opacity(on ? 1 : 0)
+            .allowsHitTesting(on)
+            .accessibilityHidden(!on)
     }
 
     @ToolbarContentBuilder
