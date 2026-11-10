@@ -57,7 +57,11 @@ struct RootView: View {
             stack(.explore) { ExploreView() }
             stack(.locker) { LockerView() }
         }
+        // 바는 안전영역 삽입으로 놓되, 스크롤 내용의 아래 여백은 contentMargins로 따로 준다.
+        // (iOS 26 시뮬레이터 측정: 안전영역 삽입만으로는 NavigationStack 안의 ScrollView·List 내용 여백이 늘지 않았다.)
         .safeAreaInset(edge: .bottom, spacing: 0) { MahadaTabBar(selection: $tab) }
+        .contentMargins(.bottom, MahadaTabBar.height, for: .scrollContent)
+        .contentMargins(.bottom, MahadaTabBar.height, for: .scrollIndicators)
         .confirmationDialog("무엇을 기록할까?", isPresented: $showingQuickMenu, titleVisibility: .visible) {
             Button("수업 기록") { newEntry = .session(.lesson) }
             Button("미니게임 리뷰") { newEntry = .session(.miniGame) }
