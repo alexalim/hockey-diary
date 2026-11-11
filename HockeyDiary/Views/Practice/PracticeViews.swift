@@ -320,17 +320,30 @@ struct DrillPickerView: View {
     @Environment(\.dismiss) private var dismiss
     var title: String
     var onPick: (Drill) -> Void
+    @State private var search = ""
+
+    /// 드릴 이름·기술 이름·하는 법에서 찾는다. 띄어쓰기는 무시.
+    private func matches(_ d: Drill) -> Bool {
+        let q = search.replacingOccurrences(of: " ", with: "")
+        guard !q.isEmpty else { return true }
+        return [d.title, d.skillName, d.howTo].contains { $0.replacingOccurrences(of: " ", with: "").localizedCaseInsensitiveContains(q) }
+    }
 
     private var groups: [(String, [Drill])] {
-        let on = Dictionary(grouping: DrillCatalog.onIce) { d in SkillGuide.entries.first { $0.name == d.skillName }?.category ?? "기타" }
-        let order = ["스케이팅", "퍽 컨트롤", "슈팅", "게임 운영"]
+        let on = Dictionary(grouping: DrillCatalog.onIce.filter(matches)) { d in SkillGuide.entries.first { $0.name == d.skillName }?.category ?? "기타" }
+        let order = ["스케이팅", "퍽 컨트롤", "슈팅", "게임 운영", "기타"]
         var out = order.compactMap { k in on[k].map { (k, $0) } }
-        out.append(("집에서 (오프아이스)", DrillCatalog.offIce))
+        let off = DrillCatalog.offIce.filter(matches)
+        if !off.isEmpty { out.append(("집에서 (오프아이스)", off)) }
         return out
     }
 
     var body: some View {
         List {
+            if groups.isEmpty {
+                Text("'\(search)'에 맞는 드릴이 없어. 기술 이름(예: 스톱, 크로스오버)으로 찾아봐.")
+                    .font(.subheadline).foregroundStyle(.secondary)
+            }
             ForEach(groups, id: \.0) { name, drills in
                 Section(name) {
                     ForEach(drills) { d in
@@ -349,6 +362,7 @@ struct DrillPickerView: View {
                 }
             }
         }
+        .searchable(text: $search, placement: .navigationBarDrawer(displayMode: .always), prompt: "드릴·기술 이름으로 찾기")
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { ToolbarItem(placement: .cancellationAction) { Button("닫기") { dismiss() } } }
