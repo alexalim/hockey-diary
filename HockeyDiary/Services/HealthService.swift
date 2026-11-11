@@ -145,7 +145,12 @@ final class HealthService {
         case .skatingSports: return "스케이팅"
         case .traditionalStrengthTraining, .functionalStrengthTraining: return "근력 운동"
         case .running: return "달리기"
+        case .walking: return "걷기"
         case .cycling: return "사이클"
+        case .highIntensityIntervalTraining: return "고강도 인터벌"
+        case .crossTraining: return "크로스 트레이닝"
+        case .yoga: return "요가"
+        case .swimming: return "수영"
         default: return "운동"
         }
     }

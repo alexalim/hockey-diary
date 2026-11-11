@@ -81,6 +81,8 @@ struct SessionEditorView: View {
     /// 새 기록은 핵심만 보이고 나머지는 '더 적기'에 접어 둔다. 고치기는 다 펼친다.
     @State private var expanded: Bool
     @State private var prefillNote: String?
+    /// 그날 건강 앱 운동(종류 상관없이). 직접 골라 시간을 채운다.
+    @State private var dayWorkouts: [HealthWorkout] = []
     @State private var userTouchedTime = false
     @State private var linkedEventID: UUID?
     @State private var saved: Session?
@@ -235,6 +237,7 @@ struct SessionEditorView: View {
             }
         }
         .onAppear(perform: prefill)
+        .task(id: Calendar.current.startOfDay(for: startsAt)) { await loadDayWorkouts() }
         .onChange(of: minutes) { _, new in if !iceMinutesEdited { iceMinutes = new } }
         .onChange(of: type) { _, new in if new.isGame && attempts.isEmpty { suggestSkills() } }
     }
@@ -248,6 +251,23 @@ struct SessionEditorView: View {
                           selection: $type, columns: 4, minHeight: 68)
             DatePicker("시작", selection: Binding(get: { startsAt }, set: { startsAt = $0; userTouchedTime = true }))
             Stepper("활동 시간 \(minutesText(minutes))", value: Binding(get: { minutes }, set: { minutes = $0; userTouchedTime = true }), in: 1...360, step: 5)
+            if !dayWorkouts.isEmpty {
+                Menu {
+                    ForEach(dayWorkouts) { w in
+                        Button {
+                            startsAt = w.start
+                            minutes = max(1, Int((w.end.timeIntervalSince(w.start) / 60).rounded()))
+                            if !iceMinutesEdited { iceMinutes = minutes }
+                            userTouchedTime = true
+                            prefillNote = "건강 앱 '\(w.activityName)' 운동 시간으로 채웠어."
+                        } label: {
+                            Text("\(w.activityName) · \(w.start.formatted(date: .omitted, time: .shortened))~\(w.end.formatted(date: .omitted, time: .shortened))\(w.kilocalories.map { " · \(Int($0))kcal" } ?? "")")
+                        }
+                    }
+                } label: {
+                    Label("건강 앱 운동에서 가져오기 (\(dayWorkouts.count))", systemImage: "heart.text.square")
+                }
+            }
         } footer: {
             if let prefillNote { Text(prefillNote) }
         }
@@ -568,6 +588,15 @@ struct SessionEditorView: View {
             runnerID = primary.currentRunner?.id
         }
         if type.isGame { suggestSkills() }
+    }
+
+    /// 고른 날의 건강 앱 운동을 종류 상관없이 모두 불러온다(직접 고르기용). 권한 창은 띄우지 않는다.
+    private func loadDayWorkouts() async {
+        guard UserDefaults.standard.bool(forKey: HealthPrefs.enabledKey), HealthService.shared.isAvailable else { return }
+        let day = Calendar.current.startOfDay(for: startsAt)
+        let end = Calendar.current.date(byAdding: .day, value: 1, to: day) ?? Date()
+        let ws = (try? await HealthService.shared.workouts(from: day, to: end)) ?? []
+        dayWorkouts = ws.sorted { $0.start > $1.start }
     }
 
     /// 아직 기록과 이어지지 않은 팀 일정.
