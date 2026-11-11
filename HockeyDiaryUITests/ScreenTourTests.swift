@@ -80,8 +80,25 @@ final class ScreenTourTests: XCTestCase {
         if tapText("연습하러 가기") {
             snap("04d-practice")
             if tapText("드릴 고르기") { snap("04e-drill-picker"); if tapText("라인 스톱") { sleep(1); snap("04f-drill-run"); tapButton("그만") } else { tapButton("닫기") } }
+            if app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "고치기")).firstMatch.exists {
+                app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "고치기")).firstMatch.tap(); sleep(1); snap("04m-routine-editor"); tapButton("닫기")
+            }
             back()
         }
+
+        // 하루 일기 편집기
+        tab("홈"); for _ in 0..<3 { app.swipeDown() }
+        if tapText("하루 일기") { sleep(1); snap("03b-journal-editor"); app.swipeUp(); snap("03c-journal-editor-bottom"); tapButton("닫기") }
+
+        // 성장: 시즌 리포트, AI 요약
+        tab("성장")
+        if tapText("시즌 리포트 만들기") { sleep(2); snap("04k-season-report"); back() }
+        tab("성장")
+        if tapText("AI로 돌아보기") { sleep(1); snap("04l-ai-summary"); back() }
+
+        // 설정 → Apple 건강
+        tab("홈")
+        if tapButton("설정") { if tapText("Apple 건강") { sleep(1); snap("01h-health-connect"); back() }; tapButton("닫기") }
 
         // 성장: 컨디션 흐름
         tab("성장"); for _ in 0..<3 { app.swipeDown() }
@@ -187,10 +204,14 @@ final class ScreenTourTests: XCTestCase {
         let bar = app.buttons["tab-홈"]
         // tab-홈 버튼의 프레임은 바 윗선 바로 아래에서 시작한다(솟은 원은 offset이라 프레임 밖).
         let limit = bar.exists && bar.isHittable ? bar.frame.minY - 4 : app.frame.height * 0.92
-        for _ in 0..<10 {
+        for _ in 0..<14 {
             for q in [app.buttons, app.cells, app.staticTexts] {
-                let el = q.matching(pred).firstMatch
-                if el.exists && el.isHittable && el.frame.midY < limit { el.tap(); return true }
+                // 숨은 탭(투명 스택)에도 같은 글자가 있을 수 있어 firstMatch만 보지 않고 보이는 것을 찾는다.
+                let all = q.matching(pred)
+                for i in 0..<min(all.count, 8) {
+                    let el = all.element(boundBy: i)
+                    if el.exists && el.isHittable && el.frame.midY < limit && el.frame.minY > 40 { el.tap(); return true }
+                }
             }
             nudgeUp()
         }
