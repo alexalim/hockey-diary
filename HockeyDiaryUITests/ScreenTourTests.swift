@@ -28,7 +28,7 @@ final class ScreenTourTests: XCTestCase {
         app.swipeDown()
         if tapText("수업 기록") {
             snap("02-lesson-editor")
-            if tapText("더 적기") { snap("02b-lesson-editor-mid"); app.swipeUp(); snap("02c-lesson-editor-bottom") }
+            if tapMore() { snap("02b-lesson-editor-mid"); app.swipeUp(); snap("02c-lesson-editor-bottom") }
             tapButton("닫기")
         }
 
@@ -64,7 +64,7 @@ final class ScreenTourTests: XCTestCase {
         // 미니게임 기록: 슛 차트
         if tapText("경기 리뷰") {
             snap("02d-game-editor")
-            if tapText("더 적기") {
+            if tapMore() {
                 // 펼치면 슛 차트가 지금 위치보다 위에 생긴다. 위로 올린 뒤 찾는다.
                 for _ in 0..<3 { app.swipeDown() }
                 if tapText("슛 차트") { snap("02e-shot-chart") }
@@ -174,6 +174,15 @@ final class ScreenTourTests: XCTestCase {
     }
 
     // MARK: - 도우미
+
+    /// 접힌 기록 편집기의 '더 적기'. Form은 화면 밖 줄을 늦게 만들어서 생길 때까지 내린다.
+    @discardableResult
+    private func tapMore() -> Bool {
+        let b = app.buttons["더 적기"]
+        for _ in 0..<8 where !(b.exists && b.isHittable) { app.swipeUp() }
+        guard b.exists && b.isHittable else { snap("miss-더 적기"); return false }
+        b.tap(); sleep(1); return true
+    }
 
     /// 화면을 조금만 위로 민다.
     private func nudgeUp() {
