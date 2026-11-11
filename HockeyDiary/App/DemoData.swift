@@ -65,6 +65,11 @@ enum DemoData {
         context.insert(pond)
         pond.surface = .pond; pond.rinkName = "동네 저수지"; pond.weatherMemo = "영하 6도, 바람 약함"; pond.moodAfter = 5
 
+        // 오늘 몸 상태(컨디션 흐름용)
+        for (ago, v) in [(0, 4), (1, 3), (2, 4), (3, 2), (5, 4), (6, 5), (8, 3)] {
+            context.insert(BodyCheck(day: daysAgo(ago, hour: 9), value: v))
+        }
+
         // 일기
         let j = DailyJournal(entryDate: Date())
         context.insert(j)

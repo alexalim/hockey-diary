@@ -869,3 +869,38 @@ final class HabitTests: XCTestCase {
         XCTAssertEqual(HomePrompt.pick(now: d(11, 10, 22), resting: true, events: [ev], loggedToday: false, journaledToday: false, goal: nil, calendar: cal), .resting)
     }
 }
+
+final class ConditionTests: XCTestCase {
+    var cal: Calendar = { var c = Calendar(identifier: .gregorian); c.timeZone = TimeZone(identifier: "Asia/Seoul")!; return c }()
+    func t(_ day: Int, _ h: Int, _ m: Int = 0) -> Date { cal.date(from: DateComponents(year: 2026, month: 11, day: day, hour: h, minute: m))! }
+    func day(_ offset: Int) -> Date { cal.date(byAdding: .day, value: offset, to: cal.startOfDay(for: t(11, 12)))! }
+
+    func testSleepGroupedByWakeDayWithOverlapOnce() {
+        // 10일 밤 23시~11일 7시(워치·다른 기기 겹침) + 11일 낮잠 30분
+        let segs = [SleepSegment(start: t(10, 23), end: t(11, 3)), SleepSegment(start: t(11, 2), end: t(11, 7)),
+                    SleepSegment(start: t(11, 14), end: t(11, 14, 30))]
+        let r = ConditionTrack.sleepByWakeDay(segs, calendar: cal)
+        XCTAssertEqual(r[cal.startOfDay(for: t(11, 0))], 8 * 60 + 30)
+    }
+
+    func testUnusualNeedsBaseline() {
+        let few = (0..<5).map { ConditionDay(day: day(-$0), sleepMinutes: 300) }
+        XCTAssertTrue(ConditionTrack.unusual(few, now: t(11, 12), calendar: cal).isEmpty)
+    }
+
+    func testUnusualSleepHeartAndFatigue() {
+        var days: [ConditionDay] = []
+        for o in 7...30 { days.append(ConditionDay(day: day(-o), sleepMinutes: 450, restingHR: 55, hrv: 60)) }
+        for o in 0...6 { days.append(ConditionDay(day: day(-o), sleepMinutes: o < 3 ? 330 : 450, restingHR: 62, hrv: 40, fatigue: o < 3 ? 5 : nil)) }
+        let lines = ConditionTrack.unusual(days, now: t(11, 12), calendar: cal)
+        XCTAssertEqual(lines, ["잠이 평소보다 1시간 넘게 적은 날이 최근 7일에 3번이야.",
+                               "안정 심박이 평소보다 7bpm 높아.",
+                               "심박 변이도가 평소보다 33% 낮아.",
+                               "최근 7일 '힘듦'이 높은 편이야(평균 5.0)."])
+    }
+
+    func testMetricText() {
+        XCTAssertEqual(ConditionMetric.sleep.text(450), "7시간 30분")
+        XCTAssertEqual(ConditionMetric.restingHR.text(54.6), "55bpm")
+    }
+}

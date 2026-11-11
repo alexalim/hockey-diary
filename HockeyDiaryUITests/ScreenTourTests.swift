@@ -83,6 +83,10 @@ final class ScreenTourTests: XCTestCase {
             back()
         }
 
+        // 성장: 컨디션 흐름
+        tab("성장"); for _ in 0..<3 { app.swipeDown() }
+        if tapText("컨디션 흐름") { sleep(2); snap("04i-condition"); app.swipeUp(); snap("04j-condition-list"); back() }
+
         // 성장: 기술 상세(내 최고)
         tab("성장")
         if tapText("하키 스톱") { sleep(1); snap("04g-skill-detail"); app.swipeUp(); snap("04h-skill-detail-bottom"); back() }

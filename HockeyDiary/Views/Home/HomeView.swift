@@ -13,6 +13,7 @@ struct HomeView: View {
     @Query private var skates: [Skate]
     @Query(sort: \TeamEvent.at) private var teamEvents: [TeamEvent]
     @Query private var teams: [Team]
+    @Query(sort: \BodyCheck.day, order: .reverse) private var checks: [BodyCheck]
 
     @State private var showingSettings = false
     @State private var showingEdit = false
@@ -43,6 +44,7 @@ struct HomeView: View {
                 promptCard
                 todayCard
                 quickButtons
+                bodyCard
                 ForEach(visibleBlocks) { b in block(b) }
                 Button { showingEdit = true } label: {
                     Label("홈 꾸미기", systemImage: "slider.horizontal.3").font(.footnote.weight(.semibold))
@@ -123,6 +125,26 @@ struct HomeView: View {
         }
     }
 
+    // MARK: - 오늘 몸 상태(하키 안 탄 날도)
+
+    private var todayCheck: BodyCheck? { checks.first { Calendar.current.isDateInToday($0.day) } }
+
+    @ViewBuilder
+    private var bodyCard: some View {
+        if ConditionPrefs.isOn(.body) {
+            Card {
+                HStack {
+                    Label("오늘 몸 상태", systemImage: "figure.stand").font(.headline).foregroundStyle(Theme.title)
+                    Spacer()
+                    NavigationLink { ConditionView() } label: {
+                        Text("흐름 보기").font(.caption.bold())
+                    }
+                }
+                BodyCheckRow(value: todayCheck?.value) { v in BodyCheckStore.set(v, context: context) }
+            }
+        }
+    }
+
     // MARK: - 오늘 카드의 원 3개
 
     private var weekCount: Int {
@@ -131,7 +153,7 @@ struct HomeView: View {
         return sessions.filter { w.contains($0.startsAt) }.count
     }
 
-    private var todayMood: Int? { todaySessions.compactMap(\.moodAfter).first ?? todayJournal?.mood }
+    private var todayMood: Int? { todaySessions.compactMap(\.moodAfter).first ?? todayJournal?.mood ?? todayCheck?.value }
 
     private var rings: some View {
         HStack(spacing: 4) {

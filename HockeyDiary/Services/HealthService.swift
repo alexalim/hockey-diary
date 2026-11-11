@@ -37,6 +37,8 @@ final class HealthService {
     static let sleepType = HKCategoryType(.sleepAnalysis)
     static let heartRateType = HKQuantityType(.heartRate)
     static let readTypes: Set<HKObjectType> = [sleepType, heartRateType, HKObjectType.workoutType()]
+    static let restingHRType = HKQuantityType(.restingHeartRate)
+    static let hrvType = HKQuantityType(.heartRateVariabilitySDNN)
 
     var isAvailable: Bool { HKHealthStore.isHealthDataAvailable() }
 
@@ -109,6 +111,36 @@ final class HealthService {
                              averageHeartRate: hr?.average, maxHeartRate: hr?.max, workouts: ws, samples: samples)
     }
 
+    // MARK: - 컨디션 흐름 (안정 심박·심박 변이도는 켤 때 따로 권한 요청)
+
+    func requestConditionAccess() async throws {
+        try await store.requestAuthorization(toShare: [], read: [Self.restingHRType, Self.hrvType])
+    }
+
+    /// 날마다 하나로 합친 값(평균). 키는 하루 시작 시각.
+    func dailyAverage(_ type: HKQuantityType, unit: HKUnit, from: Date, to: Date) async throws -> [Date: Double] {
+        let predicate = HKQuery.predicateForSamples(withStart: from, end: to)
+        let descriptor = HKSampleQueryDescriptor(predicates: [.quantitySample(type: type, predicate: predicate)], sortDescriptors: [])
+        let samples = try await descriptor.result(for: store)
+        let cal = Calendar.current
+        var sums: [Date: (Double, Int)] = [:]
+        for s in samples {
+            let d = cal.startOfDay(for: s.startDate)
+            let v = s.quantity.doubleValue(for: unit)
+            let cur = sums[d] ?? (0, 0)
+            sums[d] = (cur.0 + v, cur.1 + 1)
+        }
+        return sums.mapValues { $0.0 / Double($0.1) }
+    }
+
+    func dailyRestingHR(from: Date, to: Date) async throws -> [Date: Double] {
+        try await dailyAverage(Self.restingHRType, unit: HKUnit.count().unitDivided(by: .minute()), from: from, to: to)
+    }
+
+    func dailyHRV(from: Date, to: Date) async throws -> [Date: Double] {
+        try await dailyAverage(Self.hrvType, unit: .secondUnit(with: .milli), from: from, to: to)
+    }
+
     // MARK: - 생리 주기 (별도 동의, F-C04)
 
     static let menstrualType = HKCategoryType(.menstrualFlow)
@@ -157,6 +189,21 @@ final class HealthService {
 }
 
 /// 건강 연결 상태(사용자가 켠 것만 기억). 권한 자체는 iOS가 관리한다.
+/// 컨디션 흐름에서 보여줄 항목. 사용자가 항목마다 켜고 끈다. 기기에만 저장.
+enum ConditionPrefs {
+    static func key(_ m: ConditionMetric) -> String { "condition.\(m.rawValue)" }
+
+    /// 기본: 잔 시간·기분·힘듦·몸 상태는 켬. 안정 심박·심박 변이도는 권한이 더 필요해서 끔.
+    static func isOn(_ m: ConditionMetric) -> Bool {
+        let d = UserDefaults.standard
+        if d.object(forKey: key(m)) == nil { return ![.restingHR, .hrv].contains(m) }
+        return d.bool(forKey: key(m))
+    }
+
+    static func set(_ m: ConditionMetric, _ on: Bool) { UserDefaults.standard.set(on, forKey: key(m)) }
+    static var enabledMetrics: [ConditionMetric] { ConditionMetric.allCases.filter(isOn) }
+}
+
 enum HealthPrefs {
     static let enabledKey = "healthEnabled"
     static let cycleKey = "cycleEnabled"

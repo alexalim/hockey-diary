@@ -36,6 +36,14 @@ struct GrowthView: View {
                 shotsCard
                 goalieCard
                 skillsCard
+                NavigationLink { ConditionView() } label: {
+                    Card(tint: Theme.iceBlue) {
+                        CardHeader(title: "컨디션 흐름", systemImage: "waveform.path.ecg")
+                        Text("잔 시간, 안정 심박, 기분, 힘듦, 몸 상태를 날마다 이어서 봐. 볼 항목은 내가 골라.")
+                            .font(.subheadline).foregroundStyle(.secondary)
+                    }
+                }
+                .buttonStyle(.plain)
                 SleepGrowthCard(samples: samples, periodTitle: period.longTitle)
                 CycleGrowthCard(sessions: periodSessions.map { (at: $0.startsAt, fatigue: $0.fatigue) }, periodTitle: period.longTitle)
                 practiceCard

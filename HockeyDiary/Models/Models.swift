@@ -159,6 +159,22 @@ final class SkillAttempt {
     }
 }
 
+/// 하루 한 번 남기는 '오늘 몸 상태' 1~5. 하키 안 탄 날도 남긴다(컨디션 흐름용). 새 모델만 추가.
+@Model
+final class BodyCheck {
+    var id: UUID = UUID()
+    var day: Date = Date()
+    var value: Int = 3
+    var createdAt: Date = Date()
+
+    init(day: Date, value: Int) {
+        self.id = UUID()
+        self.day = Calendar.current.startOfDay(for: day)
+        self.value = value
+        self.createdAt = Date()
+    }
+}
+
 /// 하루 일기. 하키 없는 날도 만들 수 있고 기본 비공개다 (FR-05).
 @Model
 final class DailyJournal {
@@ -393,6 +409,7 @@ enum AppSchema {
         LockerProfile.self, StickerPlacement.self, EarnedSticker.self, GearItem.self,
         ShotMark.self, DrillLog.self, PracticeRoutine.self,
         Team.self, TeamMember.self, TeamEvent.self,
+        BodyCheck.self,
     ]
 
     static func container(inMemory: Bool = false) throws -> ModelContainer {
