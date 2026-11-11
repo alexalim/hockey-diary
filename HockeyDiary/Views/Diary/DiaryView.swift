@@ -26,7 +26,7 @@ struct DiaryView: View {
                 if search.isEmpty {
                     streakCard
                     calendarCard
-                    SectionHeader(title: "활동 기록", trailing: "+ 기록하기", action: { newEntry = .session(.lesson, Self.sameTime(on: selectedDay)) })
+                    SectionHeader(title: "활동 기록", trailing: "+ 기록하기", action: { newEntry = .session(.lesson, DayTimeline.sameTime(on: selectedDay)) })
                     Picker("보기", selection: $filter) { ForEach(Filter.allCases, id: \.self) { Text($0.rawValue).tag($0) } }
                         .pickerStyle(.segmented)
                     DayTimeline(day: selectedDay,
