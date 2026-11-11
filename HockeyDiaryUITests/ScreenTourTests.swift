@@ -75,15 +75,14 @@ final class ScreenTourTests: XCTestCase {
         tab("홈")
         if tapText("미니게임") { snap("02f-game-detail"); app.swipeUp(); snap("02g-game-detail-bottom"); back() }
 
-        // 연습: 홈 → (+) 메뉴 대신 성장 탭의 연습 카드로
-        tab("성장")
-        if tapText("연습하러 가기") {
+        // 연습 탭
+        tab("연습"); for _ in 0..<3 { app.swipeDown() }
+        do {
             snap("04d-practice")
             if tapText("드릴 고르기") { snap("04e-drill-picker"); if tapText("라인 스톱") { sleep(1); snap("04f-drill-run"); tapButton("그만") } else { tapButton("닫기") } }
             if app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "고치기")).firstMatch.exists {
                 app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "고치기")).firstMatch.tap(); sleep(1); snap("04m-routine-editor"); tapButton("닫기")
             }
-            back()
         }
 
         // 하루 일기 편집기
@@ -114,31 +113,35 @@ final class ScreenTourTests: XCTestCase {
         if tapButton("설정") { sleep(1); app.swipeUp(); snap("01g-settings"); tapButton("닫기") }
 
         // 다이어리
-        tab("다이어리"); snap("03-diary")
+        tab("기록"); snap("03-diary")
         // 성장
         tab("성장"); for _ in 0..<3 { app.swipeDown() }; snap("04-growth")
         app.swipeUp(); snap("04b-growth-mid")
         app.swipeUp(); snap("04c-growth-bottom")
 
-        // 룰: 목록, 반칙 그림, 링크 구조, 전술, 링크장 찾기
-        tab("룰"); snap("05-explore")
+        // 연습 → 하키 아카데미 → 규칙·전술: 목록, 반칙 그림, 링크 구조, 전술
+        tab("연습"); for _ in 0..<3 { app.swipeDown() }; snap("04n-practice-academy")
+        openRules(); snap("05-explore")
         if tapText("자주 나오는 반칙") { snap("05b-fouls"); app.swipeUp(); snap("05c-fouls-bottom"); back() }
         for (name, shot) in [("링크 구조", "05d-rink-rule"), ("선수 장비", "05d2-equipment"), ("주요 페널티", "05d3-penalties"),
                              ("경기 시간·연장", "05e-gametime"), ("골 무효", "05f-nogoal"), ("골키퍼가 반칙하면", "05f2-goalie"),
                              ("자주 듣는 말", "05f3-terms")] {
-            tab("룰")
+            openRules()
             if tapText(name) { snap(shot); back() }
         }
+        openRules()
         if tapText("1-2-1 포어체크") { sleep(3); snap("05g-tactic"); back() }
-        // 하단 바 가림 검사: 룰 목록 맨 아래 카드(링크장 찾기)가 끝까지 내렸을 때 바 위에 온전히 보여야 한다.
-        tab("룰")
+        // 하단 바 가림 검사: 연습 탭 맨 아래 카드가 끝까지 내렸을 때 바 위에 온전히 보여야 한다.
+        tab("연습")
         for _ in 0..<6 { app.swipeUp() }
         sleep(1); snap("05g2-explore-bottom")
         let lastCard = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "링크장 찾기")).firstMatch
-        let barTop = app.buttons["tab-룰"].frame.minY - 20   // 바 위 여백(6) + 홈 원이 솟은 높이(14)
-        XCTAssertTrue(lastCard.exists, "룰 맨 아래 카드가 없다")
+        let barTop = app.buttons["tab-연습"].frame.minY - 20   // 바 위 여백(6) + 홈 원이 솟은 높이(14)
+        XCTAssertTrue(lastCard.exists, "연습 맨 아래 카드가 없다")
         XCTAssertLessThanOrEqual(lastCard.frame.maxY, barTop + 1, "맨 아래 카드가 하단 바에 가려짐: 카드 끝 \(lastCard.frame.maxY) > 바 위 \(barTop)")
         if tapText("링크장 찾기") { sleep(4); snap("05h-rink-finder"); app.swipeUp(); snap("05i-rink-finder-list"); back() }
+        tab("연습"); for _ in 0..<3 { app.swipeDown() }
+        if tapText("기술 도감") { sleep(1); snap("04o-skill-guide"); back() }
 
         // 락커: 닫힌 문 → 문 열기 → 꾸미기 → 러너 → 연마 기록
         tab("락커"); sleep(2); snap("06-locker-closed")
@@ -174,6 +177,13 @@ final class ScreenTourTests: XCTestCase {
     }
 
     // MARK: - 도우미
+
+    /// 연습 탭 → 하키 아카데미의 '규칙·전술'을 연다.
+    private func openRules() {
+        tab("연습"); for _ in 0..<3 { app.swipeDown() }
+        if !tapText("규칙·전술") { XCTFail("규칙·전술 타일이 없다") }
+        sleep(1)
+    }
 
     /// 접힌 기록 편집기의 '더 적기'. Form은 화면 밖 줄을 늦게 만들어서 생길 때까지 내린다.
     @discardableResult

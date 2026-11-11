@@ -17,17 +17,18 @@ enum NewEntry: Identifiable, Hashable {
     }
 }
 
-/// 하단 탭 5개 (3.1). 홈이 가운데 큰 버튼이고 시작 화면도 홈이다. 어디서나 상단 (+)로 새 기록을 시작한다 (3.3).
+/// 하단 탭 5개: 기록 · 연습 · 홈(가운데 큰 버튼) · 성장 · 락커. 시작 화면은 홈.
+/// 규칙·전술·링크장은 연습 탭의 '하키 아카데미'에 있다. 어디서나 상단 (+)로 새 기록을 시작한다.
 struct RootView: View {
     enum Tab: Hashable, CaseIterable {
-        case diary, growth, home, explore, locker
+        case record, practice, home, growth, locker
 
         var title: String {
             switch self {
             case .home: return "홈"
-            case .diary: return "다이어리"
+            case .record: return "기록"
+            case .practice: return "연습"
             case .growth: return "성장"
-            case .explore: return "룰"
             case .locker: return "락커"
             }
         }
@@ -35,9 +36,9 @@ struct RootView: View {
         var symbol: String {
             switch self {
             case .home: return "house.fill"
-            case .diary: return "calendar"
-            case .growth: return "chart.line.uptrend.xyaxis"
-            case .explore: return "book.closed.fill"
+            case .record: return "calendar"
+            case .practice: return "figure.hockey"
+            case .growth: return "chart.bar.xaxis"
             case .locker: return "door.left.hand.closed"
             }
         }
@@ -54,10 +55,10 @@ struct RootView: View {
         // 마지막 줄이 하단 바에 가려졌다. 그래서 TabView 대신 다섯 스택을 겹쳐 두고 고른 것만 보여준다.
         // 숨은 스택도 살아 있어 각 탭의 스크롤 위치·밀어 들어간 화면이 유지된다(TabView와 같은 동작).
         ZStack {
-            stack(.diary) { DiaryView(newEntry: $newEntry) }
-            stack(.growth) { GrowthView() }
+            stack(.record) { DiaryView(newEntry: $newEntry) }
+            stack(.practice) { PracticeView() }
             stack(.home) { HomeView(newEntry: $newEntry) }
-            stack(.explore) { ExploreView() }
+            stack(.growth) { GrowthView() }
             stack(.locker) { LockerView() }
         }
         // 바는 안전영역 삽입으로 놓되, 스크롤 내용의 아래 여백은 contentMargins로 따로 준다.
@@ -148,9 +149,9 @@ struct MahadaTabBar: View {
         } label: {
             VStack(spacing: 3) {
                 Image(systemName: t.symbol).font(.system(size: 21, weight: on ? .semibold : .regular))
-                Text(t.title).font(.system(size: 10, weight: on ? .semibold : .regular))
+                Text(t.title).font(.system(size: 11, weight: on ? .semibold : .regular))
             }
-            .foregroundStyle(on ? Theme.accent : Color.secondary)
+            .foregroundStyle(on ? Theme.accent : Theme.inkSecondary)
             .frame(maxWidth: .infinity, minHeight: Self.itemHeight)
             .contentShape(Rectangle())
         }
@@ -177,8 +178,8 @@ struct MahadaTabBar: View {
                 }
                 .frame(width: 62, height: 62)
                 .offset(y: -Self.raise)
-                Text("홈").font(.system(size: 10, weight: .semibold))
-                    .foregroundStyle(on ? Theme.accent : Color.secondary)
+                Text("홈").font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(on ? Theme.accent : Theme.inkSecondary)
                     .offset(y: -12)
             }
             .frame(maxWidth: .infinity, minHeight: Self.itemHeight)

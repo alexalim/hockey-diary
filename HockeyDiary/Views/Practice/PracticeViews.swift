@@ -7,6 +7,7 @@ struct PracticeView: View {
     @Environment(\.modelContext) private var context
     @Query(sort: \PracticeRoutine.createdAt) private var routines: [PracticeRoutine]
     @Query(sort: \DrillLog.at, order: .reverse) private var logs: [DrillLog]
+    @Query(sort: \Session.startsAt, order: .reverse) private var sessions: [Session]
 
     @State private var running: RoutineRun?
     @State private var pickingDrill = false
@@ -16,13 +17,17 @@ struct PracticeView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
-                Card(tint: Theme.cobalt) {
-                    Text("연습").font(.title3.bold()).foregroundStyle(.white)
-                    Text("드릴을 하나씩 세면서 하면 수업에서 배운 기술이 몸에 붙어. 한 번에 한 가지만.")
-                        .font(.subheadline).foregroundStyle(.white.opacity(0.85))
+                ScreenHeader(eyebrow: "TRAINING STUDIO", title: "연습", subtitle: "한 번에 한 가지씩, 차근차근.") {
+                    NavigationLink { SkillGuideListView() } label: {
+                        Image(systemName: "book.pages").font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.title)
+                            .frame(width: 44, height: 44).background(Theme.card, in: Circle())
+                            .overlay(Circle().stroke(Theme.border, lineWidth: 1))
+                    }
+                    .buttonStyle(.plain).accessibilityLabel("기술 도감")
                 }
+                focusCard
+                SectionHeader(title: "나의 루틴", trailing: routines.isEmpty ? nil : "루틴 편집", action: routines.isEmpty ? nil : { editingRoutine = routines.first })
                 Card {
-                    CardHeader(title: "루틴", systemImage: "list.number")
                     ForEach(routines) { r in
                         HStack(spacing: 10) {
                             VStack(alignment: .leading, spacing: 2) {
@@ -47,6 +52,8 @@ struct PracticeView: View {
                     }
                     Button { creatingRoutine = true } label: { Label("새 루틴 만들기", systemImage: "plus") }
                 }
+                SectionHeader(title: "하키 아카데미")
+                AcademyGrid { pickingDrill = true }
                 Card {
                     CardHeader(title: "드릴 하나만", systemImage: "figure.hockey")
                     Text("루틴 없이 지금 하고 싶은 드릴만 골라서 세.").font(.subheadline).foregroundStyle(.secondary)
@@ -57,10 +64,10 @@ struct PracticeView: View {
                 }
                 recentCard
             }
-            .padding(16)
+            .padding(.horizontal, Theme.screenPadding).padding(.vertical, 12)
         }
         .screenBackground()
-        .navigationTitle("연습")
+        .navigationTitle("").navigationBarTitleDisplayMode(.inline)
         .onAppear { PracticeStore.seedRoutinesIfNeeded(context) }
         .fullScreenCover(item: $running) { run in
             NavigationStack { RoutineRunView(run: run) }
@@ -75,6 +82,27 @@ struct PracticeView: View {
         }
         .sheet(item: $editingRoutine) { r in NavigationStack { RoutineEditorView(routine: r) } }
         .sheet(isPresented: $creatingRoutine) { NavigationStack { RoutineEditorView(routine: nil) } }
+    }
+
+    /// 오늘의 집중: 마지막 기록의 '다음 목표'를 오늘 연습으로 잇는다. 목표가 없으면 첫 루틴을 권한다.
+    @ViewBuilder
+    private var focusCard: some View {
+        let goal = sessions.first { !$0.nextGoal.isEmpty }?.nextGoal
+        let first = routines.first { !$0.items.isEmpty }
+        Card(tint: Theme.cobalt) {
+            Text("TODAY'S FOCUS").font(.system(size: 12, weight: .semibold)).tracking(0.6).foregroundStyle(.white.opacity(0.75))
+            Text(goal ?? "오늘은 뭘 다듬을까?").font(.title3.bold()).foregroundStyle(.white)
+            Text(goal == nil ? "수업 기록에 '다음 목표'를 적으면 여기로 이어져." : "지난 수업의 다음 목표를 오늘의 연습으로 이어가자.")
+                .font(.subheadline).foregroundStyle(.white.opacity(0.85))
+            if let first {
+                Button { running = RoutineRun(routine: first) } label: {
+                    Text("오늘의 연습 시작").font(.headline).foregroundStyle(Theme.cobalt)
+                        .frame(maxWidth: .infinity, minHeight: Theme.touch)
+                        .background(.white, in: RoundedRectangle(cornerRadius: Theme.buttonCorner, style: .continuous))
+                }
+                .buttonStyle(.plain)
+            }
+        }
     }
 
     @ViewBuilder

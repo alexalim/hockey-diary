@@ -27,6 +27,9 @@ struct LockerView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
+                ScreenHeader(eyebrow: "EQUIPMENT & IDENTITY", title: "나의 락커", subtitle: "장비와 추억을 한곳에.") {
+                    RoundIconButton(systemImage: "pencil", label: "꾸미기") { editingProfile = LockerStore.profile(context) }
+                }
                 if !newStickers.isEmpty { earnedBanner }
                 GeometryReader { geo in
                     let progress = DoorSwing.progress(angle)
@@ -82,10 +85,10 @@ struct LockerView: View {
                     }
                 }
             }
-            .padding(16)
+            .padding(.horizontal, Theme.screenPadding).padding(.vertical, 12)
         }
         .screenBackground()
-        .navigationTitle("나의 락커")
+        .navigationTitle("").navigationBarTitleDisplayMode(.inline)
         .sheet(item: $editingProfile) { profile in
             NavigationStack { LockerCustomizeView(profile: profile) }
         }

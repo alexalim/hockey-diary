@@ -1,14 +1,14 @@
 import SwiftUI
 import HockeyCore
 
-/// 룰 탭. 규칙 도감, 전술 노트, 링크장 찾기.
+/// 하키 아카데미 → 규칙·전술. 규칙 도감과 전술 노트.
 struct ExploreView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
                 Card(tint: Theme.cobalt) {
-                    Text("하키 라이브러리").font(.title3.bold()).foregroundStyle(.white)
-                    Text("헷갈리는 규칙과 전술을 그림으로 익혀봐. 링크장도 찾을 수 있어.")
+                    Text("규칙·전술").font(.title3.bold()).foregroundStyle(.white)
+                    Text("헷갈리는 규칙과 전술을 그림으로 익혀봐. 경기에서 겪은 상황을 여기서 다시 봐.")
                         .font(.subheadline).foregroundStyle(.white.opacity(0.85))
                 }
                 Card {
@@ -55,18 +55,11 @@ struct ExploreView: View {
                         .buttonStyle(.plain)
                     }
                 }
-                NavigationLink { RinkFinderView() } label: {
-                    Card {
-                        CardHeader(title: "링크장 찾기", systemImage: "map.fill")
-                        Text("이름이나 동네로 찾아봐. 자주 가는 곳과 시설 정보를 모아둘 수 있어.")
-                            .font(.subheadline).foregroundStyle(.secondary)
-                    }
-                }
-                .buttonStyle(.plain)
             }
-            .padding(16)
+            .padding(.horizontal, Theme.screenPadding).padding(.vertical, 12)
         }
         .screenBackground()
-        .navigationTitle("룰")
+        .navigationTitle("규칙·전술")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }

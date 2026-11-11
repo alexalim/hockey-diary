@@ -25,6 +25,14 @@ struct GrowthView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
+                ScreenHeader(eyebrow: "YOUR PROGRESS", title: "성장", subtitle: "활동과 실력은 따로, 변화는 함께.") {
+                    NavigationLink { SeasonReportView() } label: {
+                        Image(systemName: "square.and.arrow.up").font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.title)
+                            .frame(width: 44, height: 44).background(Theme.card, in: Circle())
+                            .overlay(Circle().stroke(Theme.border, lineWidth: 1))
+                    }
+                    .buttonStyle(.plain).accessibilityLabel("시즌 리포트")
+                }
                 Picker("기간", selection: $period) {
                     ForEach(Period.allCases, id: \.self) { p in Text(p.title).tag(p) }
                 }
@@ -62,10 +70,10 @@ struct GrowthView: View {
                 }
                 .buttonStyle(.plain)
             }
-            .padding(16)
+            .padding(.horizontal, Theme.screenPadding).padding(.vertical, 12)
         }
         .screenBackground()
-        .navigationTitle("성장")
+        .navigationTitle("").navigationBarTitleDisplayMode(.inline)
     }
 
     // MARK: - 추세 (맨 위)

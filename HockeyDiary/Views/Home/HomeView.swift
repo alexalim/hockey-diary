@@ -40,9 +40,15 @@ struct HomeView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
+                ScreenHeader(eyebrow: Date().formatted(.dateTime.weekday(.wide).month().day()).uppercased(),
+                             title: "오늘도, 빙판 위에서.", subtitle: "작은 기록이 나의 플레이를 바꿔.") {
+                    RoundIconButton(systemImage: "gearshape.fill", label: "설정") { showingSettings = true }
+                }
                 if health.openFailed || health.lastSaveFailed { storeWarning }
                 promptCard
-                todayCard
+                nextGameHero
+                weekCard
+                SectionHeader(title: "빠른 시작")
                 quickButtons
                 bodyCard
                 ForEach(visibleBlocks) { b in block(b) }
@@ -52,18 +58,10 @@ struct HomeView: View {
                 }
                 .buttonStyle(.plain).foregroundStyle(Theme.accent)
             }
-            .padding(16)
+            .padding(.horizontal, Theme.screenPadding).padding(.vertical, 12)
         }
         .screenBackground()
-        .navigationTitle("오늘의 하키")
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button { showingSettings = true } label: {
-                    Image(systemName: "gearshape.fill").font(.title3).foregroundStyle(Theme.accent)
-                }
-                .accessibilityLabel("설정")
-            }
-        }
+        .navigationTitle("").navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showingSettings) { NavigationStack { SettingsView() } }
         .sheet(isPresented: $showingEdit) { NavigationStack { HomeEditView() } }
     }
@@ -174,6 +172,89 @@ struct HomeView: View {
         }
     }
 
+    /// 다음 경기(팀 일정) 히어로. 일정이 없으면 보이지 않는다.
+    @ViewBuilder
+    private var nextGameHero: some View {
+        if let team = teams.first, let next = teamEvents.first(where: { $0.at >= Calendar.current.startOfDay(for: Date()) }) {
+            let members = TeamStore.members(of: team, context: context)
+            let sheet = next.attendance
+            let going = sheet.count(.going, among: members.map(\.id)), maybe = sheet.count(.maybe, among: members.map(\.id))
+            let unanswered = members.filter { sheet[$0.id] == .unknown }.count
+            NavigationLink { TeamEventView(event: next, team: team) } label: {
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack {
+                        Text("NEXT GAME").font(.system(size: 11, weight: .bold)).tracking(0.6)
+                            .padding(.horizontal, 8).padding(.vertical, 4).background(.white.opacity(0.18), in: Capsule())
+                        Spacer()
+                        Text(next.at.formatted(.dateTime.month(.defaultDigits).day().weekday(.abbreviated).hour().minute())).font(.caption.bold())
+                    }
+                    .foregroundStyle(.white.opacity(0.9))
+                    Text(next.opponent.isEmpty ? next.title : "\(teams.first?.name ?? "우리 팀") vs \(next.opponent)")
+                        .font(.system(size: 22, weight: .bold)).foregroundStyle(.white)
+                    if !next.rinkName.isEmpty || !next.memo.isEmpty {
+                        Label([next.rinkName, next.memo].filter { !$0.isEmpty }.joined(separator: " · "), systemImage: "mappin")
+                            .font(.caption).foregroundStyle(.white.opacity(0.85)).lineLimit(1)
+                    }
+                    if !members.isEmpty {
+                        HStack(spacing: 6) {
+                            pill("참석 \(going)명"); pill("미정 \(maybe)명"); pill("미응답 \(unanswered)명")
+                        }
+                    }
+                    Text("경기 일정 · 출석 확인 ›").font(.subheadline.bold()).foregroundStyle(Theme.cobalt)
+                        .frame(maxWidth: .infinity, minHeight: Theme.touch)
+                        .background(.white, in: RoundedRectangle(cornerRadius: Theme.buttonCorner, style: .continuous))
+                }
+                .padding(16)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(LinearGradient(colors: [Theme.cobalt, Theme.deepNavy], startPoint: .topLeading, endPoint: .bottomTrailing),
+                            in: RoundedRectangle(cornerRadius: Theme.corner, style: .continuous))
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private func pill(_ text: String) -> some View {
+        Text(text).font(.caption2.bold()).foregroundStyle(.white)
+            .padding(.horizontal, 8).padding(.vertical, 4).background(.white.opacity(0.16), in: Capsule())
+    }
+
+    /// 이번 주 하키: 목표 2회 대비 진행 바. 오늘 기록이 있으면 아래에 줄로 보여준다.
+    private var weekCard: some View {
+        let goal = 2
+        return Card {
+            HStack {
+                Label("이번 주 하키", systemImage: "target").font(.headline).foregroundStyle(Theme.title)
+                Spacer()
+                Text("목표 \(goal)회").font(.caption.bold()).foregroundStyle(Theme.accent)
+                    .padding(.horizontal, 8).padding(.vertical, 4).background(Theme.cobaltSoft, in: Capsule())
+            }
+            HStack(alignment: .firstTextBaseline, spacing: 4) {
+                Text("\(weekCount)").font(.system(size: 30, weight: .bold)).foregroundStyle(Theme.title)
+                Text("/ \(goal)회").font(.subheadline).foregroundStyle(Theme.inkSecondary)
+                Spacer()
+                Text("\(min(100, weekCount * 100 / goal))% 달성").font(.caption).foregroundStyle(Theme.inkSecondary)
+            }
+            ProgressView(value: Double(min(weekCount, goal)), total: Double(goal)).tint(weekCount >= goal ? Theme.success : Theme.cobalt)
+            Text(weekCount >= goal ? "이번 주 목표 달성! 더 타면 보너스야." : (weekCount == goal - 1 ? "한 번만 더 타면 주간 목표를 달성해." : "하키는 매주 꾸준히가 제일 어려워. 한 번부터."))
+                .font(.caption).foregroundStyle(Theme.inkSecondary)
+            if !todaySessions.isEmpty {
+                Divider()
+                ForEach(todaySessions) { s in
+                    NavigationLink { SessionDetailView(session: s) } label: {
+                        HStack {
+                            Image(systemName: s.type.systemImage).foregroundStyle(Theme.accent)
+                            Text("오늘 \(s.startsAt.timeTitle) \(s.title)").font(.subheadline).foregroundStyle(Theme.title)
+                            Spacer()
+                            Image(systemName: "chevron.right").font(.caption).foregroundStyle(Theme.inkTertiary)
+                        }
+                        .frame(minHeight: 32)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+
     private var todayCard: some View {
         Card(tint: Theme.cobalt) {
             Text(Date().formatted(.dateTime.month().day().weekday(.wide)))
@@ -205,15 +286,16 @@ struct HomeView: View {
 
     private var quickButtons: some View {
         HStack(spacing: 8) {
-            quick("수업 기록", "graduationcap.fill") { newEntry = .session(.lesson) }
-            quick("경기 리뷰", "figure.hockey") { newEntry = .session(.miniGame) }
-            quick("하루 일기", "book.fill") {
+            QuickAction(title: "하키 기록", systemImage: "pencil") { newEntry = .session(.lesson) }
+            QuickAction(title: "경기 리뷰", systemImage: "figure.hockey") { newEntry = .session(.miniGame) }
+            QuickAction(title: "하루 일기", systemImage: "book.fill") {
                 if let todayJournal {
                     editingJournal = todayJournal
                 } else {
                     newEntry = .journal(Date())
                 }
             }
+            QuickAction(title: "연습 시작", systemImage: "bolt.fill") { newEntry = .practice }
         }
         .sheet(item: $editingJournal) { j in NavigationStack { JournalEditorView(journal: j) } }
     }

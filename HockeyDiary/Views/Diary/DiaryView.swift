@@ -14,26 +14,51 @@ struct DiaryView: View {
     @State private var selectedDay = Calendar.current.startOfDay(for: Date())
     @State private var search = ""
     @AppStorage(RestPrefs.key) private var restJSON = "[]"
+    private enum Filter: String, CaseIterable { case all = "전체", hockey = "하키", journal = "일기" }
+    @State private var filter: Filter = .all
 
     private let calendar = Calendar.current
 
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
+                ScreenHeader(eyebrow: "MY ICE LOG", title: "기록", subtitle: "나의 하키와 일상을 함께 남겨.")
                 if search.isEmpty {
                     streakCard
                     calendarCard
-                    DayTimeline(day: selectedDay, sessions: sessionsOn(selectedDay), journals: journalsOn(selectedDay),
+                    SectionHeader(title: "활동 기록", trailing: "+ 기록하기", action: { newEntry = .session(.lesson, Self.sameTime(on: selectedDay)) })
+                    Picker("보기", selection: $filter) { ForEach(Filter.allCases, id: \.self) { Text($0.rawValue).tag($0) } }
+                        .pickerStyle(.segmented)
+                    DayTimeline(day: selectedDay,
+                                sessions: filter == .journal ? [] : sessionsOn(selectedDay),
+                                journals: filter == .hockey ? [] : journalsOn(selectedDay),
                                 newEntry: $newEntry)
+                    SectionHeader(title: "나의 기록 도구")
+                    HStack(spacing: 10) {
+                        NavigationLink { ConditionView() } label: { tool("컨디션 흐름", "waveform.path.ecg") }.buttonStyle(.plain)
+                        Button { newEntry = .journal(selectedDay) } label: { tool("한 줄 일기", "square.and.pencil") }.buttonStyle(.plain)
+                    }
                 } else {
                     searchResults
                 }
             }
-            .padding(16)
+            .padding(.horizontal, Theme.screenPadding).padding(.vertical, 12)
         }
         .screenBackground()
-        .navigationTitle("다이어리")
+        .navigationTitle("").navigationBarTitleDisplayMode(.inline)
         .searchable(text: $search, prompt: "일기·메모·기술 찾기")
+    }
+
+    private func tool(_ title: String, _ symbol: String) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: symbol).foregroundStyle(Theme.accent)
+            Text(title).font(.subheadline.bold()).foregroundStyle(Theme.title)
+            Spacer()
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, minHeight: Theme.touch)
+        .background(Theme.card, in: RoundedRectangle(cornerRadius: Theme.compactCorner, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: Theme.compactCorner, style: .continuous).stroke(Theme.border, lineWidth: 1))
     }
 
     // MARK: - 주간 연속 기록
