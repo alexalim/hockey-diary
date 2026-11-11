@@ -221,6 +221,8 @@ final class StoreIntegrationTests: XCTestCase {
 
     // 연습: 루틴 저장·왕복, 드릴 기록이 기술별로 묶인다.
     func testRoutineAndDrillLogs() throws {
+        // 테스트 호스트 앱이 뜨면서 연습 탭이 실제 저장소에 먼저 시드하고 플래그를 켠다. 메모리 저장소엔 다시 시드되게 플래그를 지운다.
+        UserDefaults.standard.removeObject(forKey: "routinesSeeded")
         PracticeStore.seedRoutinesIfNeeded(context)
         let routines = try context.fetch(FetchDescriptor<PracticeRoutine>())
         XCTAssertGreaterThanOrEqual(routines.count, 2, "기본 루틴 2개")
