@@ -151,10 +151,24 @@ final class ScreenTourTests: XCTestCase {
         if !inRunners, tapButton("문 열기"), tapText("스케이트 1켤레") { snap("06d-skate-detail"); inRunners = true }
         if inRunners {
             snap("07-runners")
-            if tapText("A세트") {
+            // 스케이트 목록 → (신발 행) → 스케이트 상세 → A세트 행 → 러너 상세(제목 '러너'). 두 번까지 누른다.
+            for _ in 0..<3 where !app.navigationBars["러너"].exists {
+                if !tapText("A세트") { break }
+                sleep(1)
+            }
+            if app.navigationBars["러너"].exists {
                 snap("07b-runner-detail")
-                app.swipeUp(); snap("07c-runner-detail-bottom")
-                if tapText("연마 기록 추가") { sleep(1); snap("07d-sharpening-editor"); app.swipeUp(); snap("07e-sharpening-editor-mid"); tapButton("닫기") }
+                // Form은 화면 밖 줄을 늦게 만든다. 버튼이 생길 때까지 내린다.
+                let add = app.buttons["연마 기록 추가"]
+                for _ in 0..<8 where !(add.exists && add.isHittable) { app.swipeUp() }
+                snap("07c-runner-detail-bottom")
+                if add.exists && add.isHittable {
+                    add.tap(); sleep(1); snap("07d-sharpening-editor"); app.swipeUp(); snap("07e-sharpening-editor-mid"); tapButton("닫기")
+                } else {
+                    XCTContext.runActivity(named: "못 찾음: 연마 기록 추가") { _ in }; snap("miss-연마 기록 추가")
+                }
+            } else {
+                XCTContext.runActivity(named: "못 찾음: 러너 상세") { _ in }; snap("miss-러너 상세")
             }
         }
     }
