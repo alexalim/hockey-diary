@@ -22,13 +22,13 @@ struct DiaryView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
-                ScreenHeader(eyebrow: "MY ICE LOG", title: "기록", subtitle: "나의 하키와 일상을 함께 남겨.") {
-                    RoundIconButton(systemImage: "plus", tint: .white, fill: Theme.neonPink, label: "기록하기") { newEntry = .session(.lesson, DayTimeline.sameTime(on: selectedDay)) }
+                ScreenHeader(eyebrow: "MY ICE LOG", title: "기록", subtitle: "달력, 일기, 컨디션을 한눈에.") {
+                    RoundIconButton(systemImage: "plus", tint: .white, fill: Theme.neonPink, label: "일기 쓰기") { newEntry = .journal(selectedDay) }
                 }
                 if search.isEmpty {
                     streakCard
                     calendarCard
-                    SectionHeader(title: "활동 기록", trailing: "+ 기록하기", action: { newEntry = .session(.lesson, DayTimeline.sameTime(on: selectedDay)) })
+                    SectionHeader(title: "이날의 기록")
                     Picker("보기", selection: $filter) { ForEach(Filter.allCases, id: \.self) { Text($0.rawValue).tag($0) } }
                         .pickerStyle(.segmented)
                     DayTimeline(day: selectedDay,
@@ -225,7 +225,7 @@ struct DayTimeline: View {
         Card {
             CardHeader(title: day.dayTitle, systemImage: "list.bullet.below.rectangle")
             if sessions.isEmpty && journals.isEmpty {
-                EmptyHint(text: "이날은 비어 있어. 하키 없는 날도 한 줄 남길 수 있어.")
+                EmptyHint(text: "이날은 비어 있어. 하키는 훈련 탭에서, 한 줄 일기는 여기서 남겨.")
             }
             ForEach(journals) { j in JournalRow(journal: j) }
             ForEach(sessions) { s in
@@ -237,15 +237,9 @@ struct DayTimeline: View {
                     HStack { ForEach(photos) { p in PhotoThumb(data: p.imageData, size: 64) } }
                 }
             }
-            HStack(spacing: 8) {
-                if journals.isEmpty {
-                    Button { newEntry = .journal(day) } label: {
-                        Label("일기 쓰기", systemImage: "square.and.pencil").frame(maxWidth: .infinity, minHeight: Theme.touch)
-                    }
-                    .buttonStyle(.bordered)
-                }
-                Button { newEntry = .session(.lesson, Self.sameTime(on: day)) } label: {
-                    Label("하키 기록", systemImage: "plus").frame(maxWidth: .infinity, minHeight: Theme.touch)
+            if journals.isEmpty {
+                Button { newEntry = .journal(day) } label: {
+                    Label("일기 쓰기", systemImage: "square.and.pencil").frame(maxWidth: .infinity, minHeight: Theme.touch)
                 }
                 .buttonStyle(.bordered)
             }

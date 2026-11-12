@@ -2,8 +2,23 @@ import SwiftUI
 import SwiftData
 import HockeyCore
 
-/// 연습 홈: 루틴 시작, 드릴 하나 하기, 최근 연습.
+/// 드릴만 따로 여는 화면(홈 '드릴 시작', (+) 메뉴). 훈련 탭 안에서는 DrillSection을 바로 쓴다.
 struct PracticeView: View {
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 12) {
+                ScreenHeader(eyebrow: "TRAINING STUDIO", title: "드릴", subtitle: "루틴 하나, 드릴 하나.")
+                DrillSection()
+            }
+            .padding(.horizontal, Theme.screenPadding).padding(.vertical, 12)
+        }
+        .screenBackground()
+        .navigationTitle("").navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+/// 훈련 탭의 드릴 갈래: 오늘의 집중, 나의 루틴, 하키 아카데미, 드릴 하나, 최근 드릴.
+struct DrillSection: View {
     @Environment(\.modelContext) private var context
     @Query(sort: \PracticeRoutine.createdAt) private var routines: [PracticeRoutine]
     @Query(sort: \DrillLog.at, order: .reverse) private var logs: [DrillLog]
@@ -15,59 +30,46 @@ struct PracticeView: View {
     @State private var creatingRoutine = false
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 12) {
-                ScreenHeader(eyebrow: "TRAINING STUDIO", title: "연습", subtitle: "한 번에 한 가지씩, 차근차근.") {
-                    NavigationLink { SkillGuideListView() } label: {
-                        Image(systemName: "book.pages").font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.title)
-                            .frame(width: 44, height: 44).background(Theme.card, in: Circle())
-                            .overlay(Circle().stroke(Theme.border, lineWidth: 1))
-                    }
-                    .buttonStyle(.plain).accessibilityLabel("기술 도감")
-                }
-                focusCard
-                SectionHeader(title: "나의 루틴", trailing: routines.isEmpty ? nil : "루틴 편집", action: routines.isEmpty ? nil : { editingRoutine = routines.first })
-                Card {
-                    ForEach(routines) { r in
-                        HStack(spacing: 10) {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(r.name).font(.subheadline.bold()).foregroundStyle(Theme.title)
-                                Text("\(r.items.count)개 드릴 · 약 \(StarterRoutine.estimatedMinutes(r.items))분\(r.lastUsedAt.map { " · 마지막 \(ElapsedText.since($0))" } ?? "")")
-                                    .font(.caption).foregroundStyle(Theme.inkSecondary)
-                            }
-                            Spacer()
-                            Button { editingRoutine = r } label: { Image(systemName: "slider.horizontal.3") }
-                                .buttonStyle(.borderless).accessibilityLabel("\(r.name) 고치기")
-                            Button {
-                                running = RoutineRun(routine: r)
-                            } label: {
-                                Label("시작", systemImage: "play.fill").font(.footnote.bold())
-                                    .padding(.horizontal, 12).frame(minHeight: 36)
-                                    .background(Theme.neonPink, in: Capsule()).foregroundStyle(.white)
-                            }
-                            .buttonStyle(.plain)
-                            .disabled(r.items.isEmpty)
+        VStack(spacing: 12) {
+            focusCard
+            SectionHeader(title: "나의 루틴", trailing: routines.isEmpty ? nil : "루틴 편집", action: routines.isEmpty ? nil : { editingRoutine = routines.first })
+            Card {
+                ForEach(routines) { r in
+                    HStack(spacing: 10) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(r.name).font(.subheadline.bold()).foregroundStyle(Theme.title)
+                            Text("\(r.items.count)개 드릴 · 약 \(StarterRoutine.estimatedMinutes(r.items))분\(r.lastUsedAt.map { " · 마지막 \(ElapsedText.since($0))" } ?? "")")
+                                .font(.caption).foregroundStyle(Theme.inkSecondary)
                         }
-                        .frame(minHeight: Theme.touch)
+                        Spacer()
+                        Button { editingRoutine = r } label: { Image(systemName: "slider.horizontal.3") }
+                            .buttonStyle(.borderless).accessibilityLabel("\(r.name) 고치기")
+                        Button {
+                            running = RoutineRun(routine: r)
+                        } label: {
+                            Label("시작", systemImage: "play.fill").font(.footnote.bold())
+                                .padding(.horizontal, 12).frame(minHeight: 36)
+                                .background(Theme.neonPink, in: Capsule()).foregroundStyle(.white)
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(r.items.isEmpty)
                     }
-                    Button { creatingRoutine = true } label: { Label("새 루틴 만들기", systemImage: "plus") }
+                    .frame(minHeight: Theme.touch)
                 }
-                SectionHeader(title: "하키 아카데미")
-                AcademyGrid { pickingDrill = true }
-                Card {
-                    CardHeader(title: "드릴 하나만", systemImage: "figure.hockey")
-                    Text("루틴 없이 지금 하고 싶은 드릴만 골라서 세.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
-                    Button { pickingDrill = true } label: {
-                        Label("드릴 고르기", systemImage: "magnifyingglass").frame(maxWidth: .infinity, minHeight: Theme.touch)
-                    }
-                    .buttonStyle(.bordered)
-                }
-                recentCard
+                Button { creatingRoutine = true } label: { Label("새 루틴 만들기", systemImage: "plus") }
             }
-            .padding(.horizontal, Theme.screenPadding).padding(.vertical, 12)
+            SectionHeader(title: "하키 아카데미")
+            AcademyGrid { pickingDrill = true }
+            Card {
+                CardHeader(title: "드릴 하나만", systemImage: "figure.hockey")
+                Text("루틴 없이 지금 하고 싶은 드릴만 골라서 세.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
+                Button { pickingDrill = true } label: {
+                    Label("드릴 고르기", systemImage: "magnifyingglass").frame(maxWidth: .infinity, minHeight: Theme.touch)
+                }
+                .buttonStyle(.bordered)
+            }
+            recentCard
         }
-        .screenBackground()
-        .navigationTitle("").navigationBarTitleDisplayMode(.inline)
         .onAppear { PracticeStore.seedRoutinesIfNeeded(context) }
         .fullScreenCover(item: $running) { run in
             NavigationStack { RoutineRunView(run: run) }
@@ -92,11 +94,11 @@ struct PracticeView: View {
         Card(tint: Theme.cobalt) {
             Text("TODAY'S FOCUS").font(.system(size: 12, weight: .semibold)).tracking(0.6).foregroundStyle(.white.opacity(0.75))
             Text(goal ?? "오늘은 뭘 다듬을까?").font(.title3.bold()).foregroundStyle(.white)
-            Text(goal == nil ? "수업 기록에 '다음 목표'를 적으면 여기로 이어져." : "지난 수업의 다음 목표를 오늘의 연습으로 이어가자.")
+            Text(goal == nil ? "수업 기록에 '다음 목표'를 적으면 여기로 이어져." : "지난 수업의 다음 목표를 오늘의 드릴로 이어가자.")
                 .font(.subheadline).foregroundStyle(.white.opacity(0.85))
             if let first {
                 Button { running = RoutineRun(routine: first) } label: {
-                    Text("오늘의 연습 시작").font(.headline).foregroundStyle(Theme.cobalt)
+                    Text("오늘의 훈련 시작").font(.headline).foregroundStyle(Theme.cobalt)
                         .frame(maxWidth: .infinity, minHeight: Theme.touch)
                         .background(.white, in: RoundedRectangle(cornerRadius: Theme.buttonCorner, style: .continuous))
                 }
@@ -109,10 +111,10 @@ struct PracticeView: View {
     private var recentCard: some View {
         let recent = Array(logs.prefix(8))
         Card {
-            CardHeader(title: "최근 연습", systemImage: "clock.arrow.circlepath",
-                       trailing: logs.isEmpty ? nil : "연습한 날 \(DrillStats.practiceDays(logs.compactMap(\.entry)))일")
+            CardHeader(title: "최근 드릴", systemImage: "clock.arrow.circlepath",
+                       trailing: logs.isEmpty ? nil : "드릴 한 날 \(DrillStats.practiceDays(logs.compactMap(\.entry)))일")
             if recent.isEmpty {
-                EmptyHint(text: "아직 연습 기록이 없어. 위에서 루틴을 시작해봐.")
+                EmptyHint(text: "아직 드릴 기록이 없어. 위에서 루틴을 시작해봐.")
             }
             ForEach(recent) { log in
                 HStack {
@@ -300,7 +302,7 @@ struct RoutineRunView: View {
     private var summaryScreen: some View {
         VStack(spacing: 16) {
             Image(systemName: "checkmark.seal.fill").font(.system(size: 56)).foregroundStyle(Theme.neonPink)
-            Text("오늘 연습 끝!").font(.title.bold()).foregroundStyle(Theme.title)
+            Text("오늘 훈련 끝!").font(.title.bold()).foregroundStyle(Theme.title)
             if done.isEmpty {
                 Text("저장한 드릴이 없어.").foregroundStyle(Theme.inkSecondary)
             } else {
@@ -308,7 +310,7 @@ struct RoutineRunView: View {
                     ForEach(done, id: \.self) { Text("· \($0)").font(.subheadline) }
                 }
             }
-            Text("연습량은 성장 탭의 기술 성장에 쌓여.").font(.caption).foregroundStyle(Theme.inkSecondary)
+            Text("드릴 양은 성장 탭의 기술 성장에 쌓여.").font(.caption).foregroundStyle(Theme.inkSecondary)
             Spacer()
             Button { dismiss() } label: { Text("닫기").frame(maxWidth: .infinity, minHeight: Theme.touch) }
                 .buttonStyle(PinkButtonStyle())

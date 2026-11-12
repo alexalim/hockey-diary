@@ -17,8 +17,8 @@ enum NewEntry: Identifiable, Hashable {
     }
 }
 
-/// 하단 탭 5개: 기록 · 연습 · 홈(가운데 큰 버튼) · 성장 · 락커. 시작 화면은 홈.
-/// 규칙·전술·링크장은 연습 탭의 '하키 아카데미'에 있다. 어디서나 상단 (+)로 새 기록을 시작한다.
+/// 하단 탭 5개: 기록 · 훈련 · 홈(가운데 큰 버튼) · 성장 · 락커. 시작 화면은 홈.
+/// 훈련은 연습·경기·드릴 세 갈래. 규칙·전술·링크장은 드릴 갈래의 '하키 아카데미'에 있다. 어디서나 상단 (+)로 새 기록을 시작한다.
 struct RootView: View {
     enum Tab: Hashable, CaseIterable {
         case record, practice, home, growth, locker
@@ -27,7 +27,7 @@ struct RootView: View {
             switch self {
             case .home: return "홈"
             case .record: return "기록"
-            case .practice: return "연습"
+            case .practice: return "훈련"
             case .growth: return "성장"
             case .locker: return "락커"
             }
@@ -56,7 +56,7 @@ struct RootView: View {
         // 숨은 스택도 살아 있어 각 탭의 스크롤 위치·밀어 들어간 화면이 유지된다(TabView와 같은 동작).
         ZStack {
             stack(.record) { DiaryView(newEntry: $newEntry) }
-            stack(.practice) { PracticeView() }
+            stack(.practice) { TrainingView(newEntry: $newEntry) }
             stack(.home) { HomeView(newEntry: $newEntry) }
             stack(.growth) { GrowthView() }
             stack(.locker) { LockerView() }
@@ -70,11 +70,11 @@ struct RootView: View {
         .onChange(of: scenePhase) { _, p in if p == .active { Task { await TeamReminder.reschedule(context) } } }
         .confirmationDialog("무엇을 기록할까?", isPresented: $showingQuickMenu, titleVisibility: .visible) {
             Button("수업 기록") { newEntry = .session(.lesson) }
-            Button("미니게임 리뷰") { newEntry = .session(.miniGame) }
-            Button("정규게임 리뷰") { newEntry = .session(.regularGame) }
             Button("자유 연습") { newEntry = .session(.freePractice) }
+            Button("정규게임 리뷰") { newEntry = .session(.regularGame) }
+            Button("미니게임 리뷰") { newEntry = .session(.miniGame) }
+            Button("드릴 시작") { newEntry = .practice }
             Button("하루 일기") { newEntry = .journal(Date()) }
-            Button("연습 드릴") { newEntry = .practice }
         }
         .sheet(item: $newEntry) { entry in
             switch entry {

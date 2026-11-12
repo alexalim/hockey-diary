@@ -1,7 +1,7 @@
 import SwiftUI
 import HockeyCore
 
-/// 연습 탭의 '하키 아카데미' 진입 타일 4개: 드릴 찾기 · 기술 도감 · 규칙·전술 · 링크장 찾기.
+/// 훈련 탭 드릴 갈래의 '하키 아카데미' 진입 타일 4개: 드릴 찾기 · 기술 도감 · 규칙·전술 · 링크장 찾기.
 struct AcademyGrid: View {
     var onPickDrill: () -> Void
 

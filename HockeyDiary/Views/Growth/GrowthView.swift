@@ -110,7 +110,7 @@ struct GrowthView: View {
                 Text(period.longTitle).font(.subheadline).foregroundStyle(Theme.inkSecondary)
             }
             if t.total == 0 && (t.previousTotal ?? 0) == 0 {
-                EmptyHint(text: metric == .drills ? "이 기간엔 연습 기록이 없어. 성장 탭 연습에서 드릴을 세면 여기 쌓여." : "이 기간엔 기록이 없어.")
+                EmptyHint(text: metric == .drills ? "이 기간엔 드릴 기록이 없어. 훈련 탭 드릴에서 세면 여기 쌓여." : "이 기간엔 기록이 없어.")
             } else {
                 Chart {
                     ForEach(Array(t.buckets.enumerated()), id: \.offset) { i, b in

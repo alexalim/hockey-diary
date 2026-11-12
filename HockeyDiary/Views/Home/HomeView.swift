@@ -286,8 +286,8 @@ struct HomeView: View {
 
     private var quickButtons: some View {
         HStack(spacing: 8) {
-            QuickAction(title: "하키 기록", systemImage: "pencil") { newEntry = .session(.lesson) }
-            QuickAction(title: "경기 리뷰", systemImage: "figure.hockey") { newEntry = .session(.miniGame) }
+            QuickAction(title: "연습 기록", systemImage: "graduationcap.fill") { newEntry = .session(.lesson) }
+            QuickAction(title: "경기 리뷰", systemImage: "trophy.fill") { newEntry = .session(.regularGame) }
             QuickAction(title: "하루 일기", systemImage: "book.fill") {
                 if let todayJournal {
                     editingJournal = todayJournal
@@ -295,7 +295,7 @@ struct HomeView: View {
                     newEntry = .journal(Date())
                 }
             }
-            QuickAction(title: "연습 시작", systemImage: "bolt.fill") { newEntry = .practice }
+            QuickAction(title: "드릴 시작", systemImage: "bolt.fill") { newEntry = .practice }
         }
         .sheet(item: $editingJournal) { j in NavigationStack { JournalEditorView(journal: j) } }
     }
