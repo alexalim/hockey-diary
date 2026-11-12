@@ -86,7 +86,7 @@ struct TeamEventView: View {
                 .frame(minHeight: Theme.touch)
             }
             if !members.isEmpty {
-                Text("카톡 답을 보고 체크해. 한 번 더 누르면 '답 없음'으로 돌아가.").font(.caption2).foregroundStyle(.secondary)
+                Text("카톡 답을 보고 체크해. 한 번 더 누르면 '답 없음'으로 돌아가.").font(.caption2).foregroundStyle(Theme.inkSecondary)
             }
         }
     }
@@ -138,7 +138,7 @@ struct TeamEventView: View {
                 }
                 .buttonStyle(.bordered)
             }
-            Text("이미지에는 일정, 참석 인원, 라인업 이름이 들어가. 일기나 개인 기록은 안 들어가.").font(.caption2).foregroundStyle(.secondary)
+            Text("이미지에는 일정, 참석 인원, 라인업 이름이 들어가. 일기나 개인 기록은 안 들어가.").font(.caption2).foregroundStyle(Theme.inkSecondary)
         }
     }
 
@@ -162,9 +162,9 @@ struct TeamEventView: View {
         Card {
             CardHeader(title: "경기 기록", systemImage: "figure.hockey")
             if event.sessionID != nil {
-                Text("이 일정으로 만든 기록이 있어.").font(.subheadline).foregroundStyle(.secondary)
+                Text("이 일정으로 만든 기록이 있어.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
             } else {
-                Text("경기가 끝나면 이 일정으로 기록을 만들어. 상대·링크장·시간이 미리 채워져.").font(.subheadline).foregroundStyle(.secondary)
+                Text("경기가 끝나면 이 일정으로 기록을 만들어. 상대·링크장·시간이 미리 채워져.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
             }
             Button {
                 openSession = TeamStore.makeSession(for: event, context: context)
@@ -196,13 +196,13 @@ struct LineupBoard: View {
 
     private func row(_ label: String, _ slots: [LineupSlot]) -> some View {
         HStack(spacing: 6) {
-            Text(label).font(.caption.bold()).foregroundStyle(.secondary).frame(width: 52, alignment: .leading)
+            Text(label).font(.caption.bold()).foregroundStyle(Theme.inkSecondary).frame(width: 52, alignment: .leading)
             ForEach(slots, id: \.self) { s in
                 Text(lineup[s].flatMap { names[$0] } ?? "—")
                     .font(compact ? .caption : .subheadline.weight(.semibold))
                     .lineLimit(1).minimumScaleFactor(0.7)
                     .frame(maxWidth: .infinity, minHeight: compact ? 26 : 34)
-                    .foregroundStyle(lineup[s] == nil ? Color.secondary : Theme.title)
+                    .foregroundStyle(lineup[s] == nil ? Theme.inkTertiary : Theme.title)
                     .background(s.position == .goalie ? Theme.neonPink.opacity(0.15) : Theme.cobaltSoft, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
             }
         }
@@ -253,11 +253,11 @@ struct LineupEditor: View {
                                 picking = nil
                             } label: {
                                 HStack {
-                                    Text(m.position.short).font(.caption.bold()).foregroundStyle(.secondary).frame(width: 20)
+                                    Text(m.position.short).font(.caption.bold()).foregroundStyle(Theme.inkSecondary).frame(width: 20)
                                     Text(m.display).foregroundStyle(.primary)
                                     Spacer()
                                     if event.attendance[m.id] == .going { StatusTag(text: "참석", kind: .success) }
-                                    if lineup.assignedMembers.contains(m.id) { Text("배정됨").font(.caption2).foregroundStyle(.secondary) }
+                                    if lineup.assignedMembers.contains(m.id) { Text("배정됨").font(.caption2).foregroundStyle(Theme.inkSecondary) }
                                 }
                                 .frame(minHeight: Theme.touch)
                             }
@@ -289,14 +289,14 @@ struct LineupEditor: View {
                     ForEach(slots, id: \.self) { s in
                         Button { picking = s } label: {
                             VStack(spacing: 2) {
-                                Text(s.short).font(.caption2.bold()).foregroundStyle(.secondary)
+                                Text(s.short).font(.caption2.bold()).foregroundStyle(Theme.inkSecondary)
                                 Text(lineup[s].flatMap { names[$0] } ?? "비어 있음")
                                     .font(.subheadline.weight(.semibold)).lineLimit(1).minimumScaleFactor(0.7)
-                                    .foregroundStyle(lineup[s] == nil ? Color.secondary : Theme.title)
+                                    .foregroundStyle(lineup[s] == nil ? Theme.inkTertiary : Theme.title)
                             }
                             .frame(maxWidth: .infinity, minHeight: 56)
                             .background(lineup[s] == nil ? Theme.card : Theme.cobaltSoft, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-                            .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).stroke(Color.secondary.opacity(0.25), lineWidth: 1))
+                            .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).stroke(Theme.inkTertiary.opacity(0.25), lineWidth: 1))
                         }
                         .buttonStyle(.plain)
                     }
@@ -332,8 +332,8 @@ struct TeamShareCard: View {
             .font(.subheadline).foregroundStyle(.white)
             if total > 0 {
                 HStack(spacing: 8) {
-                    pill("참석 \(going)", Color(hex: 0x1B8F5A))
-                    pill("미정 \(maybe)", Color(hex: 0xFFB020))
+                    pill("참석 \(going)", Theme.success)
+                    pill("미정 \(maybe)", Theme.warningFill)
                     pill("\(total)명 중", Color.white.opacity(0.2))
                 }
             }
@@ -347,7 +347,7 @@ struct TeamShareCard: View {
             }
         }
         .padding(22)
-        .background(LinearGradient(colors: [Color(hex: 0x0047AB), Color(hex: 0x152B4F)], startPoint: .topLeading, endPoint: .bottomTrailing))
+        .background(Theme.heroGradient)
     }
 
     private func pill(_ t: String, _ c: Color) -> some View {

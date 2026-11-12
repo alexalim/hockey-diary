@@ -68,7 +68,7 @@ struct SeasonReportView: View {
                     .buttonStyle(PinkButtonStyle())
                 }
                 Text("리포트에는 횟수, 시간, 기술 이름이 들어가. 일기는 '리포트 공유'를 켠 것만 한 줄 들어가. 메모, 잠, 심박, 사진, 위치는 안 넣어.")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.caption).foregroundStyle(Theme.inkSecondary)
             }
             .padding(16)
         }
@@ -92,14 +92,14 @@ struct ReportCard: View {
 
     var body: some View {
         ZStack {
-            LinearGradient(colors: [Color(hex: 0x0047AB), Color(hex: 0x152B4F)], startPoint: .topLeading, endPoint: .bottomTrailing)
+            Theme.heroGradient
             VStack(alignment: .leading, spacing: 14) {
                 HStack {
                     Text("마하다").font(.system(.headline, design: .rounded).weight(.heavy))
                     Spacer()
                     Text(report.title).font(.caption.bold())
                         .padding(.horizontal, 10).padding(.vertical, 4)
-                        .background(Color(hex: 0xFF2D95), in: Capsule())
+                        .background(Theme.neonPink, in: Capsule())
                 }
                 Text(rangeText).font(.caption).opacity(0.8)
                 HStack(alignment: .firstTextBaseline, spacing: 6) {

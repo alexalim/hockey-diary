@@ -33,7 +33,7 @@ struct PracticeView: View {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(r.name).font(.subheadline.bold()).foregroundStyle(Theme.title)
                                 Text("\(r.items.count)개 드릴 · 약 \(StarterRoutine.estimatedMinutes(r.items))분\(r.lastUsedAt.map { " · 마지막 \(ElapsedText.since($0))" } ?? "")")
-                                    .font(.caption).foregroundStyle(.secondary)
+                                    .font(.caption).foregroundStyle(Theme.inkSecondary)
                             }
                             Spacer()
                             Button { editingRoutine = r } label: { Image(systemName: "slider.horizontal.3") }
@@ -56,7 +56,7 @@ struct PracticeView: View {
                 AcademyGrid { pickingDrill = true }
                 Card {
                     CardHeader(title: "드릴 하나만", systemImage: "figure.hockey")
-                    Text("루틴 없이 지금 하고 싶은 드릴만 골라서 세.").font(.subheadline).foregroundStyle(.secondary)
+                    Text("루틴 없이 지금 하고 싶은 드릴만 골라서 세.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     Button { pickingDrill = true } label: {
                         Label("드릴 고르기", systemImage: "magnifyingglass").frame(maxWidth: .infinity, minHeight: Theme.touch)
                     }
@@ -120,7 +120,7 @@ struct PracticeView: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(log.title).font(.subheadline.bold()).foregroundStyle(Theme.title)
                         Text("\(log.at.dayTitle) \(log.at.timeTitle)\(log.skillName.isEmpty ? "" : " · \(log.skillName)")")
-                            .font(.caption).foregroundStyle(.secondary)
+                            .font(.caption).foregroundStyle(Theme.inkSecondary)
                     }
                     Spacer()
                     Text(log.amountText).font(.subheadline.bold())
@@ -206,7 +206,7 @@ struct RoutineRunView: View {
         VStack(spacing: 16) {
             HStack {
                 if run.items.count > 1 {
-                    Text("\(run.index + 1) / \(run.items.count)").font(.caption.bold()).foregroundStyle(.secondary)
+                    Text("\(run.index + 1) / \(run.items.count)").font(.caption.bold()).foregroundStyle(Theme.inkSecondary)
                 }
                 Spacer()
                 Toggle(isOn: $voiceOn) { Label("소리로 세기", systemImage: voiceOn ? "speaker.wave.2.fill" : "speaker.slash") }
@@ -242,7 +242,7 @@ struct RoutineRunView: View {
             Text(String(format: "%d:%02d", secondsLeft / 60, secondsLeft % 60))
                 .font(.system(size: 72, weight: .black, design: .rounded)).monospacedDigit()
                 .foregroundStyle(secondsLeft == 0 ? Theme.success : Theme.title)
-            Text(secondsLeft == 0 ? "다 했어! 다음으로 넘어가." : "목표 \(item.target)분").font(.subheadline).foregroundStyle(.secondary)
+            Text(secondsLeft == 0 ? "다 했어! 다음으로 넘어가." : "목표 \(item.target)분").font(.subheadline).foregroundStyle(Theme.inkSecondary)
             HStack(spacing: 10) {
                 Button { timerOn.toggle() } label: {
                     Label(timerOn ? "잠깐" : (secondsLeft == item.target * 60 ? "시작" : "계속"), systemImage: timerOn ? "pause.fill" : "play.fill")
@@ -269,7 +269,7 @@ struct RoutineRunView: View {
                 .foregroundStyle(count >= item.target ? Theme.success : Theme.title)
                 .contentTransition(.numericText())
                 .accessibilityLabel(count >= item.target ? "\(count)번 했어" : "\(left)번 남았어")
-            Text(count >= item.target ? "목표 \(item.target)번 다 했어!" : "번 남았어 · 지금 \(count)번").font(.subheadline).foregroundStyle(.secondary)
+            Text(count >= item.target ? "목표 \(item.target)번 다 했어!" : "번 남았어 · 지금 \(count)번").font(.subheadline).foregroundStyle(Theme.inkSecondary)
             HStack(spacing: 10) {
                 Button { if count > 0 { count -= 1 } } label: { Image(systemName: "minus").frame(width: 64, height: 64) }
                     .buttonStyle(.bordered).accessibilityLabel("하나 빼기")
@@ -302,13 +302,13 @@ struct RoutineRunView: View {
             Image(systemName: "checkmark.seal.fill").font(.system(size: 56)).foregroundStyle(Theme.neonPink)
             Text("오늘 연습 끝!").font(.title.bold()).foregroundStyle(Theme.title)
             if done.isEmpty {
-                Text("저장한 드릴이 없어.").foregroundStyle(.secondary)
+                Text("저장한 드릴이 없어.").foregroundStyle(Theme.inkSecondary)
             } else {
                 Card {
                     ForEach(done, id: \.self) { Text("· \($0)").font(.subheadline) }
                 }
             }
-            Text("연습량은 성장 탭의 기술 성장에 쌓여.").font(.caption).foregroundStyle(.secondary)
+            Text("연습량은 성장 탭의 기술 성장에 쌓여.").font(.caption).foregroundStyle(Theme.inkSecondary)
             Spacer()
             Button { dismiss() } label: { Text("닫기").frame(maxWidth: .infinity, minHeight: Theme.touch) }
                 .buttonStyle(PinkButtonStyle())
@@ -370,7 +370,7 @@ struct DrillPickerView: View {
         List {
             if groups.isEmpty {
                 Text("'\(search)'에 맞는 드릴이 없어. 기술 이름(예: 스톱, 크로스오버)으로 찾아봐.")
-                    .font(.subheadline).foregroundStyle(.secondary)
+                    .font(.subheadline).foregroundStyle(Theme.inkSecondary)
             }
             ForEach(groups, id: \.0) { name, drills in
                 Section(name) {
@@ -382,7 +382,7 @@ struct DrillPickerView: View {
                                     Spacer()
                                     Text(d.targetText()).font(.caption.bold()).foregroundStyle(Theme.accent)
                                 }
-                                Text("\(d.skillName) · \(d.howTo)").font(.caption).foregroundStyle(.secondary).lineLimit(2)
+                                Text("\(d.skillName) · \(d.howTo)").font(.caption).foregroundStyle(Theme.inkSecondary).lineLimit(2)
                             }
                             .frame(minHeight: Theme.touch)
                         }
@@ -418,7 +418,7 @@ struct RoutineEditorView: View {
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(d.title).font(.subheadline.bold())
-                                Text(d.skillName).font(.caption).foregroundStyle(.secondary)
+                                Text(d.skillName).font(.caption).foregroundStyle(Theme.inkSecondary)
                             }
                             Spacer()
                             Stepper(d.targetText(it.target), value: Binding(

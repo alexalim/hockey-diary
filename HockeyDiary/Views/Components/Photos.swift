@@ -38,7 +38,7 @@ struct PhotoPickerRow: View {
                 }
             }
             Text("앱에 복사해 둬. 여기서 지워도 사진 앱 원본은 그대로야.")
-                .font(.caption2).foregroundStyle(.secondary)
+                .font(.caption2).foregroundStyle(Theme.inkSecondary)
         }
         .onChange(of: items) { _, newItems in
             guard !newItems.isEmpty else { return }
@@ -80,7 +80,7 @@ struct PhotoThumb: View {
             if let image = UIImage(data: data) {
                 Image(uiImage: image).resizable().scaledToFill()
             } else {
-                Color.secondary.opacity(0.2)
+                Theme.inkTertiary.opacity(0.2)
             }
         }
         .frame(width: size, height: size)

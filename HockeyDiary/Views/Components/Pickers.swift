@@ -9,9 +9,9 @@ struct MoodPicker: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
-                Text(title).font(.subheadline).foregroundStyle(.secondary)
+                Text(title).font(.subheadline).foregroundStyle(Theme.inkSecondary)
                 Spacer()
-                Text(value.map(Mood.label) ?? "선택 안 함").font(.caption).foregroundStyle(.secondary)
+                Text(value.map(Mood.label) ?? "선택 안 함").font(.caption).foregroundStyle(Theme.inkSecondary)
             }
             HStack(spacing: 6) {
                 ForEach(Array(Mood.range), id: \.self) { v in
@@ -25,7 +25,7 @@ struct MoodPicker: View {
                             .background(selected ? Theme.neonPink.opacity(0.15) : Color.clear,
                                         in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                             .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .stroke(selected ? Theme.neonPink : Color.secondary.opacity(0.2), lineWidth: selected ? 2 : 1))
+                                .stroke(selected ? Theme.neonPink : Theme.inkTertiary.opacity(0.2), lineWidth: selected ? 2 : 1))
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("\(title) \(Mood.label(v))")
@@ -47,9 +47,9 @@ struct ScalePicker: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
-                Text(title).font(.subheadline).foregroundStyle(.secondary)
+                Text(title).font(.subheadline).foregroundStyle(Theme.inkSecondary)
                 Spacer()
-                Text("\(low) ← → \(high)").font(.caption2).foregroundStyle(.secondary)
+                Text("\(low) ← → \(high)").font(.caption2).foregroundStyle(Theme.inkSecondary)
             }
             HStack(spacing: 6) {
                 ForEach(1...5, id: \.self) { v in
@@ -83,7 +83,7 @@ struct EffortPicker: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
-                Text("얼마나 힘들었어?").font(.subheadline).foregroundStyle(.secondary)
+                Text("얼마나 힘들었어?").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                 Spacer()
                 if let v = value { Text(Self.words[v - 1]).font(.subheadline.bold()).foregroundStyle(Theme.title) }
             }
@@ -108,7 +108,7 @@ struct EffortPicker: View {
             HStack {
                 Text(Self.words[0]); Spacer(); Text(Self.words[4])
             }
-            .font(.caption2).foregroundStyle(.secondary)
+            .font(.caption2).foregroundStyle(Theme.inkSecondary)
         }
         .padding(.vertical, 4)
     }
@@ -153,7 +153,7 @@ struct SurfacePicker: View {
                     small(s)
                 }
             }
-            Text(value.detail).font(.caption).foregroundStyle(.secondary)
+            Text(value.detail).font(.caption).foregroundStyle(Theme.inkSecondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.vertical, 4)
@@ -316,7 +316,7 @@ struct ChoiceCards<T: Hashable>: View {
                         Text(o.title).font(.footnote.weight(.semibold))
                             .multilineTextAlignment(.center).lineLimit(2).minimumScaleFactor(0.8)
                         if let s = o.subtitle {
-                            Text(s).font(.caption2).foregroundStyle(.secondary).lineLimit(1)
+                            Text(s).font(.caption2).foregroundStyle(Theme.inkSecondary).lineLimit(1)
                         }
                     }
                     .padding(.horizontal, 4).padding(.vertical, 8)
@@ -324,7 +324,7 @@ struct ChoiceCards<T: Hashable>: View {
                     .foregroundStyle(Theme.title)
                     .background(selected ? Theme.cobaltSoft : Theme.card, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                     .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .stroke(selected ? Theme.neonPink : Color.secondary.opacity(0.25), lineWidth: selected ? 2.5 : 1))
+                        .stroke(selected ? Theme.neonPink : Theme.inkTertiary.opacity(0.25), lineWidth: selected ? 2.5 : 1))
                     .overlay(alignment: .topTrailing) {
                         if selected { Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.neonPink).padding(4) }
                     }
@@ -358,7 +358,7 @@ struct LabeledChoice<T: Hashable>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(title).font(.subheadline).foregroundStyle(.secondary)
+            Text(title).font(.subheadline).foregroundStyle(Theme.inkSecondary)
             ChoiceCards(options: options, selection: $selection, columns: columns, minHeight: minHeight)
         }
     }

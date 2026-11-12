@@ -12,7 +12,7 @@ struct RunnerListView: View {
         List {
             if runners.isEmpty {
                 Text("아직 러너(날)가 없어. 스케이트 화면에서 추가하면 바로 달려.")
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Theme.inkSecondary)
             }
             ForEach(runners.filter { $0.retiredAt == nil }) { r in
                 NavigationLink { RunnerDetailView(runner: r) } label: {
@@ -55,7 +55,7 @@ struct RunnerRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(runner.name).font(.subheadline.bold())
                 Text("RoH \(runner.currentHollow.map { "\($0)\"" } ?? "미확인") · \(DiaryStore.sharpeningSummary(runner, context: context))")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.caption).foregroundStyle(Theme.inkSecondary)
             }
             Spacer()
             if let badge {
@@ -206,7 +206,7 @@ struct RunnerDetailView: View {
                         Text(runner.name).font(.title3.bold())
                         Text("현재 RoH \(runner.currentHollow.map { "\($0)\"" } ?? "미확인")\(runner.currentHollow.flatMap(Hollow.init(label:))?.nickname.map { " · \($0)" } ?? "")").font(.subheadline)
                         Text(runner.installedSkate.map { "\($0.name)에 장착 중" } ?? "보관 중")
-                            .font(.caption).foregroundStyle(.secondary)
+                            .font(.caption).foregroundStyle(Theme.inkSecondary)
                     }
                 }
                 HStack {
@@ -215,7 +215,7 @@ struct RunnerDetailView: View {
                     if let last = runner.lastSharpening {
                         Text("\(ElapsedText.since(last.at)) · \(last.at.formatted(.dateTime.month().day()))").bold()
                     } else {
-                        Text("기록 없음").foregroundStyle(.secondary)
+                        Text("기록 없음").foregroundStyle(Theme.inkSecondary)
                     }
                 }
                 HStack {
@@ -250,7 +250,7 @@ struct RunnerDetailView: View {
                     ProgressTrack(value: Double(used), total: Double(m), label: "\(m)개월 쓰면 교체 표시", trailing: "\(used)개월")
                 }
                 if let retired = runner.retiredAt {
-                    Text("\(retired.formatted(date: .abbreviated, time: .omitted))에 교체했어.").foregroundStyle(.secondary)
+                    Text("\(retired.formatted(date: .abbreviated, time: .omitted))에 교체했어.").foregroundStyle(Theme.inkSecondary)
                 } else {
                     Button("이 날 교체했어") { confirmingRetire = true }
                 }
@@ -273,8 +273,8 @@ struct RunnerDetailView: View {
                         }
                         let feels = [("그립", log.grip), ("활주", log.glide), ("스톱", log.stop), ("턴", log.turn)]
                             .compactMap { n, v in v.map { "\(n) \($0)" } }
-                        if !feels.isEmpty { Text(feels.joined(separator: " · ")).font(.caption).foregroundStyle(.secondary) }
-                        if !log.shop.isEmpty { Text(log.shop).font(.caption).foregroundStyle(.secondary) }
+                        if !feels.isEmpty { Text(feels.joined(separator: " · ")).font(.caption).foregroundStyle(Theme.inkSecondary) }
+                        if !log.shop.isEmpty { Text(log.shop).font(.caption).foregroundStyle(Theme.inkSecondary) }
                         if !log.memo.isEmpty { Text(log.memo).font(.caption) }
                     }
                 }
@@ -330,7 +330,7 @@ struct SharpeningEditorView: View {
                 HStack {
                     Text("작은 숫자 · 깊은 홈").font(.caption.bold()).foregroundStyle(Theme.warning)
                     Spacer()
-                    Image(systemName: "arrow.left.and.right").font(.caption).foregroundStyle(.secondary)
+                    Image(systemName: "arrow.left.and.right").font(.caption).foregroundStyle(Theme.inkSecondary)
                     Spacer()
                     Text("큰 숫자 · 얕은 홈").font(.caption.bold()).foregroundStyle(Theme.accent)
                 }
@@ -403,14 +403,14 @@ struct HollowCard: View {
                         .lineLimit(1).minimumScaleFactor(0.7)
                 }
                 Text(hollow.feel).font(.caption2.bold())
-                    .foregroundStyle(hollow.feel == "깊은 홈" ? Theme.warning : (hollow.feel == "얕은 홈" ? Theme.accent : .secondary))
+                    .foregroundStyle(hollow.feel == "깊은 홈" ? Theme.warning : (hollow.feel == "얕은 홈" ? Theme.accent : Theme.inkTertiary))
             }
             .padding(.vertical, 6)
             .frame(maxWidth: .infinity, minHeight: 128)
             .foregroundStyle(Theme.title)
             .background(selected ? Theme.cobaltSoft : Theme.card, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .stroke(selected ? Theme.neonPink : Color.secondary.opacity(0.25), lineWidth: selected ? 2.5 : 1))
+                .stroke(selected ? Theme.neonPink : Theme.inkTertiary.opacity(0.25), lineWidth: selected ? 2.5 : 1))
             .overlay(alignment: .topTrailing) {
                 if selected { Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.neonPink).padding(4) }
             }
@@ -427,7 +427,7 @@ struct HollowGlyph: View {
 
     var body: some View {
         BladeSection(relativeDepth: hollow.relativeDepth)
-            .fill(LinearGradient(colors: [Color(light: 0xB8C4D6, dark: 0x8A97AA), Color(light: 0x6D7B91, dark: 0x5B6779)],
+            .fill(LinearGradient(colors: Theme.steel,
                                  startPoint: .top, endPoint: .bottom))
             .overlay(BladeSection(relativeDepth: hollow.relativeDepth).stroke(Theme.deepNavy.opacity(0.6), lineWidth: 1))
             .aspectRatio(0.9, contentMode: .fit)

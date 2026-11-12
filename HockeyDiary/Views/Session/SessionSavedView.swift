@@ -18,7 +18,7 @@ struct SessionSavedView: View {
                         .font(.system(size: 56)).foregroundStyle(Theme.success)
                         .symbolEffect(.bounce, value: true)
                     Text("저장했어").font(.title2.bold()).foregroundStyle(Theme.title)
-                    Text("다이어리와 성장에 바로 들어갔어.").font(.subheadline).foregroundStyle(.secondary)
+                    Text("다이어리와 성장에 바로 들어갔어.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                 }
                 .padding(.top, 12)
                 .accessibilityElement(children: .combine)
@@ -36,7 +36,7 @@ struct SessionSavedView: View {
                                 Text(b.title).font(.subheadline.bold()).foregroundStyle(Theme.title)
                                 Spacer()
                                 Text("\(b.value)").font(.headline).foregroundStyle(Theme.neonPink)
-                                Text("전엔 \(b.previous)").font(.caption).foregroundStyle(.secondary)
+                                Text("전엔 \(b.previous)").font(.caption).foregroundStyle(Theme.inkSecondary)
                             }
                             .frame(minHeight: 32)
                         }
@@ -53,7 +53,7 @@ struct SessionSavedView: View {
                 Button { onClose() } label: { Text("닫기") }
                     .buttonStyle(PinkButtonStyle())
                 Text("공유 이미지엔 종류, 날짜, 시간, 기술 수, 골·슛 수만 들어가. 메모·장소·사진은 안 넣어.")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.caption).foregroundStyle(Theme.inkSecondary)
             }
             .padding(16)
         }
@@ -114,13 +114,13 @@ struct SessionShareCard: View {
                 Label("새 기록 · \(b.title) \(b.value)", systemImage: "rosette")
                     .font(.footnote.bold())
                     .padding(.horizontal, 10).padding(.vertical, 6)
-                    .background(Color(hex: 0xFF2D8A), in: Capsule())
+                    .background(Theme.neonPink, in: Capsule())
                     .foregroundStyle(.white)
             }
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(LinearGradient(colors: [Color(hex: 0x0047AB), Color(hex: 0x152B4F)], startPoint: .topLeading, endPoint: .bottomTrailing))
+        .background(Theme.heroGradient)
     }
 
     private func stat(_ value: String, _ label: String) -> some View {

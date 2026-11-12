@@ -168,7 +168,7 @@ struct LockerView: View {
             Text(newStickers.compactMap { StickerCatalog.def($0)?.title }.joined(separator: " · "))
                 .font(.subheadline)
             Text("내 기록으로 받은 스티커야. 꾸미기에서 문에 붙여봐.")
-                .font(.caption).foregroundStyle(.secondary)
+                .font(.caption).foregroundStyle(Theme.inkSecondary)
         }
     }
 
@@ -176,8 +176,8 @@ struct LockerView: View {
         HStack {
             Label(title, systemImage: icon).foregroundStyle(Theme.title)
             Spacer()
-            if let trailing { Text(trailing).font(.caption).foregroundStyle(.secondary) }
-            Image(systemName: "chevron.right").font(.caption).foregroundStyle(.secondary)
+            if let trailing { Text(trailing).font(.caption).foregroundStyle(Theme.inkSecondary) }
+            Image(systemName: "chevron.right").font(.caption).foregroundStyle(Theme.inkSecondary)
         }
         .frame(minHeight: Theme.touch)
     }
@@ -193,9 +193,9 @@ extension LockerTheme {
     var colors: [Color] {
         switch self {
         case .cobalt: return [Theme.cobalt, Theme.deepNavy]
-        case .navy: return [Theme.deepNavy, Color(hex: 0x0A1428)]
-        case .neonPink: return [Theme.neonPink, Color(hex: 0x9E0F57)]
-        case .iceBlue: return [Color(hex: 0xA9D8F2), Color(hex: 0x5D9CC4)]
+        case .navy: return Theme.navyDoor
+        case .neonPink: return Theme.pinkDoor
+        case .iceBlue: return Theme.iceDoor
         }
     }
 }
@@ -286,7 +286,7 @@ struct StickerView: View {
                 .overlay(Circle().stroke(.white, lineWidth: 3))
                 .shadow(radius: 2, y: 1)
         } else {
-            Circle().fill(.gray.opacity(0.4)).frame(width: side, height: side)
+            Circle().fill(Theme.inkTertiary.opacity(0.4)).frame(width: side, height: side)
         }
     }
 
@@ -294,8 +294,8 @@ struct StickerView: View {
         switch palette {
         case 0: return (.white, Theme.neonPink)
         case 1: return (.white, Theme.cobalt)
-        case 3: return (Theme.deepNavy, Color(hex: 0xFFC83D))
-        default: return (Theme.cobalt, Color(hex: 0xE9F6FB))
+        case 3: return (Theme.deepNavy, Theme.gold)
+        default: return (Theme.cobalt, Theme.cobaltSoft)
         }
     }
 }
@@ -401,7 +401,7 @@ struct LockerCustomizeView: View {
                         set: { profile.nameplate = String($0.prefix(14)); context.saveOrReport() }))
                         .multilineTextAlignment(.trailing)
                 }
-                Text("꾸미기용 번호야. 링크장 사물함 예약과는 상관없어.").font(.caption).foregroundStyle(.secondary)
+                Text("꾸미기용 번호야. 링크장 사물함 예약과는 상관없어.").font(.caption).foregroundStyle(Theme.inkSecondary)
             }
 
             Section("문 색") {
@@ -617,7 +617,7 @@ struct StickerLibraryView: View {
                 }
             }
             Text("첫 수업, 첫 경기, 첫 골처럼 기록을 남기면 받아. 잠긴 건 기록이 쌓이면 열려.")
-                .font(.caption).foregroundStyle(.secondary)
+                .font(.caption).foregroundStyle(Theme.inkSecondary)
         }
     }
 
@@ -625,7 +625,7 @@ struct StickerLibraryView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("내 사진 스티커").font(.headline).foregroundStyle(Theme.title)
             Text("다른 사람 얼굴이나 팀 로고는 허락받은 것만 붙여줘. 사진 스티커는 이 아이폰에만 있어.")
-                .font(.caption).foregroundStyle(.secondary)
+                .font(.caption).foregroundStyle(Theme.inkSecondary)
             PhotosPicker(selection: $photoItem, matching: .images) {
                 Label("사진 고르기", systemImage: "photo.badge.plus").frame(maxWidth: .infinity, minHeight: Theme.touch)
             }
@@ -641,7 +641,7 @@ struct StickerLibraryView: View {
             VStack(spacing: 4) {
                 StickerView(key: d.key, photo: nil, side: 54)
                     .opacity(locked ? 0.25 : 1)
-                    .overlay { if locked { Image(systemName: "lock.fill").foregroundStyle(.secondary) } }
+                    .overlay { if locked { Image(systemName: "lock.fill").foregroundStyle(Theme.inkSecondary) } }
                 Text(d.title).font(.caption2).lineLimit(1)
             }
         }
@@ -663,7 +663,7 @@ struct GearListView: View {
                 Section(kind.title) {
                     let items = all.filter { $0.kind == kind }
                     if items.isEmpty {
-                        Text("아직 없어.").foregroundStyle(.secondary)
+                        Text("아직 없어.").foregroundStyle(Theme.inkSecondary)
                     }
                     ForEach(items) { g in
                         NavigationLink { GearEditorView(kind: kind, item: g) } label: {
@@ -673,7 +673,7 @@ struct GearListView: View {
                                 VStack(alignment: .leading) {
                                     Text(g.name).font(.subheadline.bold())
                                     Text([g.size.isEmpty ? nil : g.size, g.status.title].compactMap { $0 }.joined(separator: " · "))
-                                        .font(.caption).foregroundStyle(.secondary)
+                                        .font(.caption).foregroundStyle(Theme.inkSecondary)
                                 }
                             }
                         }
@@ -724,7 +724,7 @@ struct GearEditorView: View {
             }
             Section("메모") { TextField("메모", text: $memo, axis: .vertical) }
             if item != nil {
-                Section { Text("지우지 말고 '사용 종료'로 바꿔두면 기록이 남아.").font(.caption).foregroundStyle(.secondary) }
+                Section { Text("지우지 말고 '사용 종료'로 바꿔두면 기록이 남아.").font(.caption).foregroundStyle(Theme.inkSecondary) }
             }
         }
         .navigationTitle(item == nil ? "\(kind.title) 추가" : kind.title)

@@ -39,7 +39,7 @@ struct AISummaryView: View {
                             .frame(maxWidth: .infinity, minHeight: Theme.touch)
                     }
                     .disabled(working || facts.isEmpty)
-                    if facts.isEmpty { Text("이 기간엔 하키 기록이 없어.").font(.footnote).foregroundStyle(.secondary) }
+                    if facts.isEmpty { Text("이 기간엔 하키 기록이 없어.").font(.footnote).foregroundStyle(Theme.inkSecondary) }
                 }
                 if let summary {
                     Section {

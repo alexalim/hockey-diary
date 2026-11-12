@@ -35,7 +35,7 @@ struct TacticDetailView: View {
                     Text(topic.practice).font(.subheadline)
                 }
                 Text("전술은 정답이 없어. 팀마다 다르게 쓰니까 코치님 방식이 먼저야.")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.caption).foregroundStyle(Theme.inkSecondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(16)
@@ -145,7 +145,7 @@ struct TacticPlayCard: View {
         HStack(spacing: 4) {
             Capsule().stroke(Theme.accent, style: StrokeStyle(lineWidth: 2, dash: dash ? [4, 3] : []))
                 .frame(width: 22, height: 2)
-            Text(title).font(.caption2).foregroundStyle(.secondary)
+            Text(title).font(.caption2).foregroundStyle(Theme.inkSecondary)
         }
     }
 
@@ -168,7 +168,7 @@ struct TacticRink: View, Animatable {
             let p: (CGPoint) -> CGPoint = { CGPoint(x: $0.x * w, y: $0.y * h) }
             ZStack {
                 RoundedRectangle(cornerRadius: h * 0.28).fill(Theme.ice)
-                RoundedRectangle(cornerRadius: h * 0.28).stroke(Color.secondary.opacity(0.4), lineWidth: 1.5)
+                RoundedRectangle(cornerRadius: h * 0.28).stroke(Theme.inkTertiary.opacity(0.4), lineWidth: 1.5)
                 ForEach([0.06, 0.94], id: \.self) { x in
                     Rectangle().fill(Theme.rinkRed.opacity(0.6)).frame(width: 1.5, height: h * 0.8).position(x: x * w, y: h / 2)
                 }
@@ -177,7 +177,7 @@ struct TacticRink: View, Animatable {
                 }
                 Rectangle().fill(Theme.rinkRed).frame(width: 4, height: h).position(x: w / 2, y: h / 2)
                 ForEach([0.035, 0.965], id: \.self) { x in
-                    RoundedRectangle(cornerRadius: 2).stroke(Color.secondary, lineWidth: 1.5)
+                    RoundedRectangle(cornerRadius: 2).stroke(Theme.inkTertiary, lineWidth: 1.5)
                         .frame(width: w * 0.025, height: h * 0.14).position(x: x * w, y: h / 2)
                 }
                 // 경로(진행도만큼 그린다)
@@ -190,7 +190,7 @@ struct TacticRink: View, Animatable {
                     let pt = p(CGPoint(x: pl.from.x + (pl.to.x - pl.from.x) * progress, y: pl.from.y + (pl.to.y - pl.from.y) * progress))
                     ZStack {
                         Circle().fill(pl.side == .us ? Theme.cobalt : Color.white)
-                        Circle().stroke(pl.side == .us ? Color.white : Color.secondary, lineWidth: 1.5)
+                        Circle().stroke(pl.side == .us ? Color.white : Theme.inkTertiary, lineWidth: 1.5)
                         Text(pl.label).font(.system(size: 9, weight: .bold)).foregroundStyle(.white)
                     }
                     .frame(width: 22, height: 22)

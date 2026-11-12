@@ -17,7 +17,7 @@ struct ShotChartCanvas: View {
                 UnevenRoundedRectangle(topLeadingRadius: w * 0.28, bottomLeadingRadius: 6, bottomTrailingRadius: 6, topTrailingRadius: w * 0.28)
                     .fill(Theme.ice)
                 UnevenRoundedRectangle(topLeadingRadius: w * 0.28, bottomLeadingRadius: 6, bottomTrailingRadius: 6, topTrailingRadius: w * 0.28)
-                    .stroke(Color.secondary.opacity(0.4), lineWidth: 1.5)
+                    .stroke(Theme.inkTertiary.opacity(0.4), lineWidth: 1.5)
                 // 골라인·크리스·골대
                 Rectangle().fill(Theme.rinkRed.opacity(0.75)).frame(width: w * 0.86, height: 1.5).position(x: w / 2, y: h * goalLineY)
                 Circle().trim(from: 0, to: 0.5).stroke(Theme.rinkBlue.opacity(0.6), lineWidth: 1.5)
@@ -62,7 +62,7 @@ struct ShotChartCanvas: View {
         case .saved:
             Circle().fill(Theme.cobalt).frame(width: 14, height: 14).overlay(Circle().stroke(.white, lineWidth: 1.5))
         case .missed:
-            Image(systemName: "xmark").font(.system(size: 11, weight: .heavy)).foregroundStyle(Color.secondary)
+            Image(systemName: "xmark").font(.system(size: 11, weight: .heavy)).foregroundStyle(Theme.inkTertiary)
         case .blocked:
             RoundedRectangle(cornerRadius: 2).fill(Theme.warningFill).frame(width: 11, height: 11)
         }
@@ -75,7 +75,7 @@ struct ShotLegend: View {
         Legend(items: [
             .init(color: Theme.neonPink, title: "골"),
             .init(color: Theme.cobalt, title: "막힘"),
-            .init(color: .secondary, title: "빗나감", systemImage: "xmark"),
+            .init(color: Theme.shotMiss, title: "빗나감", systemImage: "xmark"),
             .init(color: Theme.warningFill, title: "블록", systemImage: "square.fill"),
         ])
     }

@@ -282,7 +282,7 @@ struct SessionEditorView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("더 적기").font(.headline).foregroundStyle(Theme.accent)
-                        Text(moreSummary).font(.caption).foregroundStyle(.secondary).lineLimit(2)
+                        Text(moreSummary).font(.caption).foregroundStyle(Theme.inkSecondary).lineLimit(2)
                     }
                     Spacer()
                     Image(systemName: "chevron.down").foregroundStyle(Theme.accent)
@@ -354,7 +354,7 @@ struct SessionEditorView: View {
                             .buttonStyle(.borderless)
                             .accessibilityLabel("\(draft.name) 빼기")
                     }
-                    Text("시합에서 실제 써봤어?").font(.subheadline).foregroundStyle(.secondary)
+                    Text("시합에서 실제 써봤어?").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     ChoiceCards(options: [
                         ChoiceOption(value: Optional(false), title: "못 써봄", subtitle: "기회가 없었어", art: .symbol("moon.zzz")),
                         ChoiceOption(value: Optional(true), title: "써봤어", subtitle: "시도했어", art: .symbol("figure.hockey")),
@@ -373,7 +373,7 @@ struct SessionEditorView: View {
                         TextField("어떤 상황이었어?", text: $draft.notes, axis: .vertical)
                     } else if draft.tried == false {
                         Text("괜찮아. 기회가 없었던 날도 기록이야. 실패로 세지 않아.")
-                            .font(.caption).foregroundStyle(.secondary)
+                            .font(.caption).foregroundStyle(Theme.inkSecondary)
                     }
                 }
                 .padding(.vertical, 4)
@@ -469,7 +469,7 @@ struct SessionEditorView: View {
         Section {
             if skates.isEmpty {
                 Text("락커 탭에 스케이트를 넣으면 연마하고 탄 시간이 저절로 쌓여.")
-                    .font(.footnote).foregroundStyle(.secondary)
+                    .font(.footnote).foregroundStyle(Theme.inkSecondary)
             } else {
                 LabeledChoice(title: "스케이트",
                               options: [ChoiceOption(value: UUID?.none, title: "안 고름", art: .symbol("minus"))]

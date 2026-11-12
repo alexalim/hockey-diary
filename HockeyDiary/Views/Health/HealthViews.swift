@@ -22,7 +22,7 @@ struct HealthConnectView: View {
                         Image(systemName: icon).foregroundStyle(Theme.accent).frame(width: 28)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(title).font(.headline)
-                            Text(why).font(.subheadline).foregroundStyle(.secondary)
+                            Text(why).font(.subheadline).foregroundStyle(Theme.inkSecondary)
                         }
                     }
                     .padding(.vertical, 4)
@@ -35,7 +35,7 @@ struct HealthConnectView: View {
 
             Section {
                 if !HealthService.shared.isAvailable {
-                    Text("이 기기에서는 Apple 건강을 쓸 수 없어.").foregroundStyle(.secondary)
+                    Text("이 기기에서는 Apple 건강을 쓸 수 없어.").foregroundStyle(Theme.inkSecondary)
                 } else if enabled {
                     Label("연결됨", systemImage: "checkmark.circle.fill").foregroundStyle(Theme.accent)
                     Button("건강 데이터 그만 보기", role: .destructive) { enabled = false }
@@ -71,7 +71,7 @@ struct HealthConnectView: View {
 
             Section("가민을 쓰고 있다면") {
                 Text("Garmin Connect 앱 → 설정 → 연결된 앱 → Apple 건강에서 동기화를 켜줘. 그러면 가민의 수면·심박·운동이 여기로 들어와. 기기에 따라 일부만 올 수 있어. 가민 앱이 동기화한 뒤에 보여.")
-                    .font(.subheadline).foregroundStyle(.secondary)
+                    .font(.subheadline).foregroundStyle(Theme.inkSecondary)
             }
         }
         .navigationTitle("Apple 건강")
@@ -122,7 +122,7 @@ struct SessionHealthCard: View {
                     }
                     if h.workouts.count > 1 {
                         Text("같은 활동을 \(h.workouts.count)개 기기가 쟀어. 시간은 한 번만 세서 \(minutesText(h.mergedWorkoutMinutes))야.")
-                            .font(.caption).foregroundStyle(.secondary)
+                            .font(.caption).foregroundStyle(Theme.inkSecondary)
                     }
                     if h.samples.count >= 6 {
                         HeartZoneBar(seconds: HeartZones.seconds(h.samples, maxHR: Double(maxHR)), maxHR: maxHR)
@@ -131,7 +131,7 @@ struct SessionHealthCard: View {
                             row("arrow.left.arrow.right", "심박으로 짐작한 쉬프트 (실험)",
                                 "\(spans.count)번", "얼음 위 약 \(minutesText(ShiftDetector.onIceSeconds(spans) / 60))")
                             Text("심박이 높게 이어진 구간을 얼음 위로 본 거야. 워치에서 직접 누른 쉬프트가 더 정확해.")
-                                .font(.caption2).foregroundStyle(.secondary)
+                                .font(.caption2).foregroundStyle(Theme.inkSecondary)
                         }
                     }
                 } else {
@@ -167,7 +167,7 @@ struct SleepGrowthCard: View {
             CardHeader(title: "수면·컨디션", systemImage: "bed.double.fill")
             if !enabled {
                 Text("Apple 건강을 연결하면 전날 밤 잠과 운동 후 기분을 같이 볼 수 있어.")
-                    .font(.subheadline).foregroundStyle(.secondary)
+                    .font(.subheadline).foregroundStyle(Theme.inkSecondary)
                 NavigationLink { HealthConnectView() } label: {
                     Label("Apple 건강 연결", systemImage: "heart.text.square").frame(minHeight: Theme.touch)
                 }
@@ -184,12 +184,12 @@ struct SleepGrowthCard: View {
                         Text(s).font(.subheadline)
                     } else {
                         Text("7시간 넘게 잔 날과 덜 잔 날이 3번씩 쌓이면 비교해줄게.")
-                            .font(.subheadline).foregroundStyle(.secondary)
+                            .font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     }
-                    Text("기록을 나란히 놓은 거야. 잠 때문이라고 말하는 건 아니야.").font(.caption).foregroundStyle(.secondary)
+                    Text("기록을 나란히 놓은 거야. 잠 때문이라고 말하는 건 아니야.").font(.caption).foregroundStyle(Theme.inkSecondary)
                 }
                 Text(Insights.footnote(periodTitle: periodTitle, count: pairs.count, source: "잠: Apple 건강 · 기분: 직접 입력"))
-                    .font(.caption2).foregroundStyle(.secondary)
+                    .font(.caption2).foregroundStyle(Theme.inkSecondary)
             }
         }
         .task(id: "\(enabled)-\(samples.map(\.sessionID))") { loaded = false; await load() }
@@ -248,11 +248,11 @@ struct CycleGrowthCard: View {
                         Text(s).font(.subheadline)
                     } else {
                         Text("생리 기간과 다른 날의 피로도 기록이 3번씩 쌓이면 비교해줄게.")
-                            .font(.subheadline).foregroundStyle(.secondary)
+                            .font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     }
-                    Text("피로도는 내가 직접 고른 값이야. 운동 강도를 정해주지는 않아.").font(.caption).foregroundStyle(.secondary)
+                    Text("피로도는 내가 직접 고른 값이야. 운동 강도를 정해주지는 않아.").font(.caption).foregroundStyle(Theme.inkSecondary)
                     Text(Insights.footnote(periodTitle: periodTitle, count: c.periodCount + c.otherCount, source: "생리: Apple 건강 · 피로도: 직접 입력"))
-                        .font(.caption2).foregroundStyle(.secondary)
+                        .font(.caption2).foregroundStyle(Theme.inkSecondary)
                 } else {
                     ProgressView().frame(maxWidth: .infinity)
                 }
@@ -284,7 +284,7 @@ struct HeartZoneBar: View {
                 Image(systemName: "waveform.path.ecg").foregroundStyle(Theme.danger).frame(width: 24)
                 Text("심박 구간").font(.subheadline)
                 Spacer()
-                Text("최고 \(maxHR) 기준").font(.caption2).foregroundStyle(.secondary)
+                Text("최고 \(maxHR) 기준").font(.caption2).foregroundStyle(Theme.inkSecondary)
             }
             GeometryReader { g in
                 HStack(spacing: 2) {
@@ -302,7 +302,7 @@ struct HeartZoneBar: View {
                     if seconds[i] >= 60 {
                         HStack(spacing: 3) {
                             Circle().fill(colors[i]).frame(width: 7, height: 7)
-                            Text("\(HeartZones.titles[i]) \(seconds[i] / 60)분").font(.caption2).foregroundStyle(.secondary)
+                            Text("\(HeartZones.titles[i]) \(seconds[i] / 60)분").font(.caption2).foregroundStyle(Theme.inkSecondary)
                         }
                     }
                 }

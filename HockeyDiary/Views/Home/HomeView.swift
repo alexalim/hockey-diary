@@ -93,11 +93,11 @@ struct HomeView: View {
                 switch p {
                 case .resting:
                     Label("쉬는 중이야", systemImage: "moon.zzz.fill").font(.headline).foregroundStyle(Theme.title)
-                    Text("연속 기록과 목표는 그대로 둘게. 돌아오면 이어서 세.").font(.subheadline).foregroundStyle(.secondary)
+                    Text("연속 기록과 목표는 그대로 둘게. 돌아오면 이어서 세.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     Button("다시 탈래") { restJSON = RestPrefs.toggled(restJSON) }.buttonStyle(.bordered)
                 case .logEvent(let title):
                     Label("\(title) 끝났지? 바로 남기자", systemImage: "pencil.and.list.clipboard").font(.headline).foregroundStyle(Theme.title)
-                    Text("시간이랑 장소는 팀 일정으로 채워둘게.").font(.subheadline).foregroundStyle(.secondary)
+                    Text("시간이랑 장소는 팀 일정으로 채워둘게.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     Button {
                         let kind = teamEvents.first { $0.title == title && $0.sessionID == nil }.flatMap { ActivityType(rawValue: $0.kindRaw) } ?? .regularGame
                         newEntry = .session(kind)
@@ -108,14 +108,14 @@ struct HomeView: View {
                     if let g = lastWithGoal?.nextGoal, !g.isEmpty {
                         Text("오늘 목표: \(g)").font(.subheadline).foregroundStyle(Theme.title)
                     } else {
-                        Text("오늘 해볼 거 하나 정해두면 좋아.").font(.subheadline).foregroundStyle(.secondary)
+                        Text("오늘 해볼 거 하나 정해두면 좋아.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     }
                 case .morningGoal(let goal):
                     Label("오늘 해볼 거", systemImage: "target").font(.headline).foregroundStyle(Theme.title)
                     Text(goal).font(.subheadline).foregroundStyle(Theme.title)
                 case .eveningJournal:
                     Label("오늘 어땠어?", systemImage: "book.fill").font(.headline).foregroundStyle(Theme.title)
-                    Text("한 줄이면 돼. 내일의 나한테 남기는 거야.").font(.subheadline).foregroundStyle(.secondary)
+                    Text("한 줄이면 돼. 내일의 나한테 남기는 거야.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     Button { newEntry = .journal(Date()) } label: { Text("일기 쓰기").frame(maxWidth: .infinity, minHeight: Theme.touch) }
                         .buttonStyle(PinkButtonStyle())
                 }
@@ -156,8 +156,8 @@ struct HomeView: View {
     private var rings: some View {
         HStack(spacing: 4) {
             HomeRing(value: todaySessions.isEmpty ? 0 : 1, center: "\(todaySessions.count)", label: "오늘 기록", color: Theme.neonPink)
-            HomeRing(value: Double(weekCount) / 2, center: "\(weekCount)/2", label: "이번 주", color: Color(hex: 0x4CC38A))
-            HomeRing(value: Double(todayMood ?? 0) / 5, center: todayMood.map(Mood.face) ?? "–", label: "컨디션", color: Color(hex: 0xFFC04D))
+            HomeRing(value: Double(weekCount) / 2, center: "\(weekCount)/2", label: "이번 주", color: Theme.success)
+            HomeRing(value: Double(todayMood ?? 0) / 5, center: todayMood.map(Mood.face) ?? "–", label: "컨디션", color: Theme.warningFill)
         }
         .padding(.top, 4)
     }
@@ -206,7 +206,7 @@ struct HomeView: View {
                 }
                 .padding(16)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(LinearGradient(colors: [Theme.cobalt, Theme.deepNavy], startPoint: .topLeading, endPoint: .bottomTrailing),
+                .background(Theme.heroGradient,
                             in: RoundedRectangle(cornerRadius: Theme.corner, style: .continuous))
             }
             .buttonStyle(.plain)
@@ -329,7 +329,7 @@ struct HomeView: View {
                 Button { restJSON = RestPrefs.toggled(restJSON) } label: {
                     Label("한동안 쉬어 (비시즌·부상)", systemImage: "moon.zzz").font(.caption)
                 }
-                .buttonStyle(.borderless).foregroundStyle(.secondary)
+                .buttonStyle(.borderless).foregroundStyle(Theme.inkSecondary)
             }
         }
     }
@@ -341,7 +341,7 @@ struct HomeView: View {
                 CardHeader(title: "최근 피드백", systemImage: "quote.bubble", trailing: lesson.startsAt.dayTitle)
                 if !lesson.coachNotes.isEmpty { Text(lesson.coachNotes).font(.subheadline) }
                 ForEach(lesson.learnings.filter { !$0.feedback.isEmpty }) { l in
-                    Text("• \(l.skill?.name ?? ""): \(l.feedback)").font(.subheadline).foregroundStyle(.secondary)
+                    Text("• \(l.skill?.name ?? ""): \(l.feedback)").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                 }
             }
         }
@@ -355,7 +355,7 @@ struct HomeView: View {
             Card(tint: Theme.iceBlue) {
                 CardHeader(title: "장비 점검", systemImage: "shoeprints.fill")
                 Text("락커에 스케이트를 넣으면 연마하고 얼마나 탔는지 세어줄게.")
-                    .font(.subheadline).foregroundStyle(.secondary)
+                    .font(.subheadline).foregroundStyle(Theme.inkSecondary)
             }
         } else if !due.isEmpty || !worn.isEmpty {
             Card(tint: Theme.iceBlue) {
@@ -368,7 +368,7 @@ struct HomeView: View {
                         .font(.subheadline)
                 }
                 Text("엣지가 밀리지 않으면 더 타도 돼. 기준은 락커에서 바꿀 수 있어.")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.caption).foregroundStyle(Theme.inkSecondary)
             }
         }
     }
@@ -385,9 +385,9 @@ struct HomeView: View {
                     Text("\(next.title) · \(next.at.formatted(.dateTime.hour().minute()))\(next.rinkName.isEmpty ? "" : " · \(next.rinkName)")")
                         .font(.subheadline).foregroundStyle(Theme.title)
                 } else if teams.isEmpty {
-                    Text("팀 일정·참석·라인업을 정리하고 카톡에 올려봐.").font(.subheadline).foregroundStyle(.secondary)
+                    Text("팀 일정·참석·라인업을 정리하고 카톡에 올려봐.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                 } else {
-                    Text("다음 일정이 없어. 하나 넣어볼까?").font(.subheadline).foregroundStyle(.secondary)
+                    Text("다음 일정이 없어. 하나 넣어볼까?").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                 }
             }
         }
@@ -448,10 +448,10 @@ struct SettingsView: View {
                     Text("버전")
                     Spacer()
                     Text(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "-")
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Theme.inkSecondary)
                 }
                 Text("분석은 내 기록이 어땠는지만 보여줘. 의료 조언이나 실력 예측은 하지 않아.")
-                    .font(.footnote).foregroundStyle(.secondary)
+                    .font(.footnote).foregroundStyle(Theme.inkSecondary)
             }
         }
         .navigationTitle("설정")

@@ -101,7 +101,7 @@ struct JournalEditorView: View {
                      : "켜면 시즌 리포트 이미지에 이 일기 한 줄이 들어갈 수 있어. AI 요약에는 안 넣어.")
             }
             if !canSave {
-                Section { Text("기분을 고르거나 한 줄만 써도 저장돼.").font(.footnote).foregroundStyle(.secondary) }
+                Section { Text("기분을 고르거나 한 줄만 써도 저장돼.").font(.footnote).foregroundStyle(Theme.inkSecondary) }
             }
             if journal != nil {
                 Section {

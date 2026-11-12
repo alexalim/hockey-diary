@@ -22,7 +22,9 @@ struct DiaryView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
-                ScreenHeader(eyebrow: "MY ICE LOG", title: "기록", subtitle: "나의 하키와 일상을 함께 남겨.")
+                ScreenHeader(eyebrow: "MY ICE LOG", title: "기록", subtitle: "나의 하키와 일상을 함께 남겨.") {
+                    RoundIconButton(systemImage: "plus", tint: .white, fill: Theme.neonPink, label: "기록하기") { newEntry = .session(.lesson, DayTimeline.sameTime(on: selectedDay)) }
+                }
                 if search.isEmpty {
                     streakCard
                     calendarCard
@@ -69,11 +71,11 @@ struct DiaryView: View {
         if st.best > 0 {
             Card {
                 HStack(spacing: 12) {
-                    Image(systemName: "flame.fill").font(.title).foregroundStyle(st.current > 0 ? Theme.neonPink : Color.secondary)
+                    Image(systemName: "flame.fill").font(.title).foregroundStyle(st.current > 0 ? Theme.neonPink : Theme.inkTertiary)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(st.current > 0 ? "\(st.current)주 연속 탔어" : "이번 주 한 번 타면 다시 시작해")
                             .font(.headline).foregroundStyle(Theme.title)
-                        Text(streakSubtitle(st)).font(.caption).foregroundStyle(.secondary)
+                        Text(streakSubtitle(st)).font(.caption).foregroundStyle(Theme.inkSecondary)
                     }
                     Spacer()
                     if let m = st.milestone {
@@ -111,7 +113,7 @@ struct DiaryView: View {
             let shifted = Array(symbols[(calendar.firstWeekday - 1)...] + symbols[..<(calendar.firstWeekday - 1)])
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: 7), spacing: 6) {
                 ForEach(Array(shifted.enumerated()), id: \.offset) { _, s in
-                    Text(s).font(.caption2).foregroundStyle(.secondary)
+                    Text(s).font(.caption2).foregroundStyle(Theme.inkSecondary)
                 }
                 ForEach(Array(gridDays.enumerated()), id: \.offset) { _, day in
                     if let day { dayCell(day) } else { Color.clear.frame(height: 48) }
@@ -273,9 +275,9 @@ struct JournalRow: View {
                     .background(Theme.iceBlue, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 6) {
-                        Text(journal.entryDate.dayTitle).font(.caption).foregroundStyle(.secondary)
+                        Text(journal.entryDate.dayTitle).font(.caption).foregroundStyle(Theme.inkSecondary)
                         if !journal.isPrivate {
-                            Image(systemName: "square.and.arrow.up").font(.caption2).foregroundStyle(.secondary)
+                            Image(systemName: "square.and.arrow.up").font(.caption2).foregroundStyle(Theme.inkSecondary)
                                 .accessibilityLabel("리포트 공유")
                         }
                     }

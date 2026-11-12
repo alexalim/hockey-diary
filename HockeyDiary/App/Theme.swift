@@ -59,6 +59,19 @@ enum Theme {
 
     /// 심박 구간 5단계: 가볍게 → 전력.
     static let heartZones: [Color] = [Color(light: 0x9FB7D9, dark: 0x5E6F8A), accent, success, warningFill, danger]
+
+    // MARK: 그라데이션 — 히어로 카드(다음 경기·오늘의 집중·저장 완료·시즌 리포트)는 전부 이 하나를 쓴다.
+    static let heroGradient = LinearGradient(colors: [cobalt, deepNavy], startPoint: .topLeading, endPoint: .bottomTrailing)
+    /// 성장 막대: 위는 밝은 코발트, 아래는 코발트(컨셉 시안의 막대).
+    static let barGradient = LinearGradient(colors: [Color(light: 0x7AA7FF, dark: 0x9BBCFF), cobalt], startPoint: .top, endPoint: .bottom)
+
+    // MARK: 락커 전용 — 문 색(사용자가 고르는 스킨)과 스티커 금색. 토큰 밖 색은 여기에만 둔다.
+    static let gold = Color(hex: 0xFFD447)
+    static let navyDoor: [Color] = [deepNavy, Color(hex: 0x0A1428)]
+    static let pinkDoor: [Color] = [neonPink, Color(hex: 0x9E0F57)]
+    static let iceDoor: [Color] = [Color(hex: 0xA9D8F2), Color(hex: 0x5D9CC4)]
+    /// 러너(날) 쇠 느낌.
+    static let steel: [Color] = [Color(light: 0xB8C4D6, dark: 0x8A97AA), Color(light: 0x6D7B91, dark: 0x5B6779)]
 }
 
 extension ActivityType {
@@ -80,7 +93,7 @@ extension SurfaceType {
         case .indoorRink: return Theme.cobalt
         case .outdoorRink: return Color(light: 0x2E8FD6, dark: 0x5DB4F0)
         case .pond: return Color(light: 0x2BAE8E, dark: 0x4FD1B0)
-        case .other, .unknown: return Color.secondary
+        case .other, .unknown: return Theme.inkTertiary
         }
     }
 }
@@ -102,7 +115,7 @@ extension Attendance {
         case .going: return Theme.success
         case .maybe: return Theme.warningFill
         case .notGoing: return Theme.danger
-        case .unknown: return Color.secondary
+        case .unknown: return Theme.inkTertiary
         }
     }
 }
@@ -153,7 +166,7 @@ struct CardHeader: View {
                 .foregroundStyle(Theme.title)
             Spacer()
             if let trailing {
-                Text(trailing).font(.caption).foregroundStyle(.secondary)
+                Text(trailing).font(.caption).foregroundStyle(Theme.inkSecondary)
             }
         }
     }
@@ -167,7 +180,7 @@ struct EmptyHint: View {
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: systemImage).foregroundStyle(Theme.accent)
-            Text(text).font(.subheadline).foregroundStyle(.secondary)
+            Text(text).font(.subheadline).foregroundStyle(Theme.inkSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)

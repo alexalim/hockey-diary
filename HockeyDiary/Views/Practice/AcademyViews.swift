@@ -58,7 +58,7 @@ struct SkillGuideListView: View {
                 }
             }
             if groups.isEmpty {
-                Text("'\(search)'에 맞는 기술이 없어.").foregroundStyle(.secondary)
+                Text("'\(search)'에 맞는 기술이 없어.").foregroundStyle(Theme.inkSecondary)
             }
         }
         .searchable(text: $search, placement: .navigationBarDrawer(displayMode: .always), prompt: "기술 이름으로 찾기")

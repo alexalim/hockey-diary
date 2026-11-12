@@ -34,7 +34,7 @@ struct ExploreView: View {
                         }
                     }
                     Text("\(RuleGuide.source)을 보고 쉽게 풀어 썼어. 대회나 동호회마다 다를 수 있으니 꼭 확인해줘.")
-                        .font(.caption).foregroundStyle(.secondary)
+                        .font(.caption).foregroundStyle(Theme.inkSecondary)
                 }
                 Card {
                     CardHeader(title: "전술 노트", systemImage: "point.topleft.down.to.point.bottomright.curvepath")
@@ -44,10 +44,10 @@ struct ExploreView: View {
                                 StatusTag(text: t.tag)
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(t.title).font(.subheadline.bold()).foregroundStyle(Theme.title)
-                                    Text(t.summary).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                                    Text(t.summary).font(.caption).foregroundStyle(Theme.inkSecondary).lineLimit(1)
                                 }
                                 Spacer()
-                                Image(systemName: "chevron.right").font(.caption).foregroundStyle(.secondary)
+                                Image(systemName: "chevron.right").font(.caption).foregroundStyle(Theme.inkSecondary)
                             }
                             .frame(minHeight: Theme.touch)
                             .contentShape(Rectangle())

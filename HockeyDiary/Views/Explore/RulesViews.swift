@@ -22,7 +22,7 @@ struct RuleDetailView: View {
                         RuleArt(id: topic.id)
                             .frame(height: RuleArt.detailHeight(topic.id))
                             .accessibilityHidden(true)
-                        Text("그림은 이해를 돕는 도식이야.").font(.caption2).foregroundStyle(.secondary)
+                        Text("그림은 이해를 돕는 도식이야.").font(.caption2).foregroundStyle(Theme.inkSecondary)
                     }
                 }
                 if topic.id == "fouls" {
@@ -40,7 +40,7 @@ struct RuleDetailView: View {
                 }
                 quizCard
                 Text("\(RuleGuide.source)의 \(topic.reference) 내용을 보고 쉽게 풀어 썼어. 대회나 동호회마다 다를 수 있으니 꼭 확인해줘.")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.caption).foregroundStyle(Theme.inkSecondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(16)
@@ -176,7 +176,7 @@ struct RuleSceneCard: View {
             if !reduceMotion {
                 Button { play() } label: { Label("다시 보기", systemImage: "play.circle") }.font(.footnote)
             }
-            Text("그림은 이해를 돕는 도식이야.").font(.caption2).foregroundStyle(.secondary)
+            Text("그림은 이해를 돕는 도식이야.").font(.caption2).foregroundStyle(Theme.inkSecondary)
         }
         .onAppear(perform: play)
         .onChange(of: index) { _, _ in play() }
@@ -204,12 +204,12 @@ struct RinkSketch: View, Animatable {
             let w = geo.size.width, h = geo.size.height
             ZStack {
                 RoundedRectangle(cornerRadius: 16).fill(Theme.ice)
-                RoundedRectangle(cornerRadius: 16).stroke(Color.secondary.opacity(0.3), lineWidth: 1)
+                RoundedRectangle(cornerRadius: 16).stroke(Theme.inkTertiary.opacity(0.3), lineWidth: 1)
                 if scene.bench {
-                    RoundedRectangle(cornerRadius: 6).fill(Color.secondary.opacity(0.25))
+                    RoundedRectangle(cornerRadius: 6).fill(Theme.inkTertiary.opacity(0.25))
                         .frame(width: w * 0.5, height: h * 0.16)
                         .position(x: w * 0.4, y: h * 0.08)
-                    Text("벤치").font(.caption2).foregroundStyle(.secondary).position(x: w * 0.4, y: h * 0.08)
+                    Text("벤치").font(.caption2).foregroundStyle(Theme.inkSecondary).position(x: w * 0.4, y: h * 0.08)
                 }
                 ForEach(Array(scene.lines.enumerated()), id: \.offset) { _, line in
                     Rectangle().fill(line.color).frame(width: 5, height: h)
@@ -342,8 +342,8 @@ struct FoulSketchView: View {
             ZStack {
                 RoundedRectangle(cornerRadius: 12).fill(Theme.ice)
                 if sketch.boards {
-                    Rectangle().fill(Color.secondary.opacity(0.5)).frame(width: 6, height: h * 0.9).position(x: w * 0.93, y: h / 2)
-                    Text("보드").font(.system(size: 9)).foregroundStyle(.secondary).position(x: w * 0.93, y: h * 0.06)
+                    Rectangle().fill(Theme.inkTertiary.opacity(0.5)).frame(width: 6, height: h * 0.9).position(x: w * 0.93, y: h / 2)
+                    Text("보드").font(.system(size: 9)).foregroundStyle(Theme.inkSecondary).position(x: w * 0.93, y: h * 0.06)
                 }
                 if sketch.speedLines {
                     ForEach(0..<3, id: \.self) { i in
@@ -377,7 +377,7 @@ struct FoulSketchView: View {
                     Circle().fill(Color.black).frame(width: 9, height: 9).position(p(puck))
                 }
                 if let bang = sketch.bang {
-                    Image(systemName: "burst.fill").font(.system(size: 18)).foregroundStyle(.orange).position(p(bang))
+                    Image(systemName: "burst.fill").font(.system(size: 18)).foregroundStyle(Theme.warningFill).position(p(bang))
                 }
             }
         }
@@ -406,13 +406,13 @@ struct FoulCards: View {
                     VStack(alignment: .leading, spacing: 6) {
                         if let s = FoulSketch.named(name) { FoulSketchView(sketch: s).frame(height: 88) }
                         Text(name).font(.subheadline.bold()).foregroundStyle(Theme.title)
-                        Text(desc).font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                        Text(desc).font(.caption).foregroundStyle(Theme.inkSecondary).fixedSize(horizontal: false, vertical: true)
                     }
                     .frame(maxWidth: .infinity, alignment: .topLeading)
                     .accessibilityElement(children: .combine)
                 }
             }
-            ForEach(rest, id: \.self) { Text($0).font(.caption).foregroundStyle(.secondary) }
+            ForEach(rest, id: \.self) { Text($0).font(.caption).foregroundStyle(Theme.inkSecondary) }
         }
     }
 
@@ -434,7 +434,7 @@ struct FoulCards: View {
     private func legend(_ c: Color, _ t: String) -> some View {
         HStack(spacing: 4) {
             Image(systemName: "figure.hockey").foregroundStyle(c)
-            Text(t).font(.caption2).foregroundStyle(.secondary)
+            Text(t).font(.caption2).foregroundStyle(Theme.inkSecondary)
         }
     }
 }

@@ -40,7 +40,7 @@ struct RinkNameField: View {
                 }
                 if !text.isEmpty && search.results.isEmpty && localMatches.isEmpty {
                     Text(search.failed ? "지금은 지도 검색이 안 돼. 이름만 적어도 저장돼." : "찾는 중이거나 결과가 없어. 그냥 적어도 저장돼.")
-                        .font(.caption).foregroundStyle(.secondary)
+                        .font(.caption).foregroundStyle(Theme.inkSecondary)
                 }
             }
         }
@@ -52,7 +52,7 @@ struct RinkNameField: View {
                 Image(systemName: icon).foregroundStyle(Theme.accent).frame(width: 20)
                 VStack(alignment: .leading, spacing: 1) {
                     Text(title).font(.subheadline).foregroundStyle(.primary)
-                    if !subtitle.isEmpty { Text(subtitle).font(.caption2).foregroundStyle(.secondary).lineLimit(1) }
+                    if !subtitle.isEmpty { Text(subtitle).font(.caption2).foregroundStyle(Theme.inkSecondary).lineLimit(1) }
                 }
                 Spacer()
             }
@@ -122,11 +122,11 @@ struct RinkFinderView: View {
             if !query.isEmpty {
                 Section {
                     if finding && found.isEmpty {
-                        HStack { ProgressView(); Text("찾는 중…").foregroundStyle(.secondary) }
+                        HStack { ProgressView(); Text("찾는 중…").foregroundStyle(Theme.inkSecondary) }
                     } else if found.isEmpty {
                         Text(search.failed ? "앱에 담긴 목록엔 없고, 지금은 지도 검색도 안 돼. 인터넷 연결을 확인해줘."
                              : "'\(query)'로는 못 찾았어. 링크장 이름이나 구·동 이름으로 다시 찾아보거나 직접 추가해봐.")
-                            .font(.subheadline).foregroundStyle(.secondary)
+                            .font(.subheadline).foregroundStyle(Theme.inkSecondary)
                         otherMapLinks(for: query)
                         Button { addManually = true } label: { Label("링크장 직접 추가", systemImage: "plus.circle") }
                     }
@@ -161,10 +161,10 @@ struct RinkFinderView: View {
             if query.isEmpty {
                 Section {
                     if browsing && browse.isEmpty {
-                        HStack { ProgressView(); Text("찾는 중…").foregroundStyle(.secondary) }
+                        HStack { ProgressView(); Text("찾는 중…").foregroundStyle(Theme.inkSecondary) }
                     } else if browse.isEmpty {
                         Text(search.failed ? "지금은 지도 검색이 안 돼. 인터넷 연결을 확인해줘." : "여기서는 찾은 곳이 없어. 위 검색창에 이름이나 동네를 적어봐.")
-                            .font(.subheadline).foregroundStyle(.secondary)
+                            .font(.subheadline).foregroundStyle(Theme.inkSecondary)
                         otherMapLinks(for: browseQuery)
                     }
                     ForEach(browse) { p in
@@ -181,7 +181,7 @@ struct RinkFinderView: View {
 
             Section {
                 Text("앱에 담긴 전국 링크장 목록에서 먼저 찾고, 없으면 Apple 지도에 검색어를 보내. 내 위치는 쓰지 않아. 운영 시간과 대관은 자주 바뀌니 공식 안내를 확인해줘.")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.caption).foregroundStyle(Theme.inkSecondary)
             }
         }
         .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: "링크장 이름이나 동네")
@@ -235,7 +235,7 @@ struct RinkFinderView: View {
             Image(systemName: "figure.hockey").foregroundStyle(Theme.accent).frame(width: 28)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title).foregroundStyle(.primary)
-                if !subtitle.isEmpty { Text(subtitle).font(.caption).foregroundStyle(.secondary).lineLimit(1) }
+                if !subtitle.isEmpty { Text(subtitle).font(.caption).foregroundStyle(Theme.inkSecondary).lineLimit(1) }
                 if needsCheck { Text("운영 중인지 가기 전에 확인해줘").font(.caption2).foregroundStyle(Theme.warning) }
             }
             Spacer()
@@ -281,7 +281,7 @@ struct RinkRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(rink.name).font(.subheadline.bold())
-            if !rink.address.isEmpty { Text(rink.address).font(.caption).foregroundStyle(.secondary) }
+            if !rink.address.isEmpty { Text(rink.address).font(.caption).foregroundStyle(Theme.inkSecondary) }
         }
         .frame(minHeight: Theme.touch, alignment: .leading)
     }
@@ -298,7 +298,7 @@ struct RinkDetailView: View {
         Form {
             Section {
                 TextField("링크장 이름", text: $rink.name).font(.title3.bold())
-                TextField("주소", text: $rink.address).foregroundStyle(.secondary)
+                TextField("주소", text: $rink.address).foregroundStyle(Theme.inkSecondary)
                 Toggle("즐겨찾기", isOn: $rink.isFavorite)
                 Button { rink.openInMaps() } label: { Label("지도에서 보기", systemImage: "map") }
                 if let url = URL(string: rink.officialURL), !rink.officialURL.isEmpty, url.scheme?.hasPrefix("http") == true {

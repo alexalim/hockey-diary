@@ -108,7 +108,7 @@ struct SessionDetailView: View {
                 }
             }
             if session.distanceMeters != nil {
-                Text("거리는 야외·폰드에서 GPS로 잰 총거리야. 어디를 지났는지는 남기지 않았어.").font(.caption2).foregroundStyle(.secondary)
+                Text("거리는 야외·폰드에서 GPS로 잰 총거리야. 어디를 지났는지는 남기지 않았어.").font(.caption2).foregroundStyle(Theme.inkSecondary)
             }
         }
     }
@@ -141,9 +141,9 @@ struct SessionDetailView: View {
                     HStack {
                         Text(l.skill?.name ?? "알 수 없는 기술").font(.subheadline.bold())
                         Spacer()
-                        if let d = l.difficulty { Text("난도 \(d)").font(.caption).foregroundStyle(.secondary) }
+                        if let d = l.difficulty { Text("난도 \(d)").font(.caption).foregroundStyle(Theme.inkSecondary) }
                     }
-                    if !l.feedback.isEmpty { Text(l.feedback).font(.subheadline).foregroundStyle(.secondary) }
+                    if !l.feedback.isEmpty { Text(l.feedback).font(.subheadline).foregroundStyle(Theme.inkSecondary) }
                 }
             }
         }
@@ -160,10 +160,10 @@ struct SessionDetailView: View {
                         Text(a.tried ? (a.outcome?.title ?? "써봤어") : "못 써봄")
                             .font(.caption.bold())
                             .padding(.horizontal, 8).padding(.vertical, 3)
-                            .background(a.tried ? Theme.cobaltSoft : Color.secondary.opacity(0.12), in: Capsule())
+                            .background(a.tried ? Theme.cobaltSoft : Theme.inkTertiary.opacity(0.12), in: Capsule())
                     }
-                    if let c = a.count { Text("시도 \(c)번").font(.caption).foregroundStyle(.secondary) }
-                    if !a.notes.isEmpty { Text(a.notes).font(.subheadline).foregroundStyle(.secondary) }
+                    if let c = a.count { Text("시도 \(c)번").font(.caption).foregroundStyle(Theme.inkSecondary) }
+                    if !a.notes.isEmpty { Text(a.notes).font(.subheadline).foregroundStyle(Theme.inkSecondary) }
                 }
             }
         }
@@ -174,11 +174,11 @@ struct SessionDetailView: View {
             CardHeader(title: "기분·컨디션", systemImage: "face.smiling")
             HStack(spacing: 20) {
                 moodItem("운동 전", session.moodBefore)
-                Image(systemName: "arrow.right").foregroundStyle(.secondary)
+                Image(systemName: "arrow.right").foregroundStyle(Theme.inkSecondary)
                 moodItem("운동 후", session.moodAfter)
                 Spacer()
                 if let f = session.fatigue {
-                    VStack { Text("\(f)").font(.title2.bold()); Text("피로도").font(.caption).foregroundStyle(.secondary) }
+                    VStack { Text("\(f)").font(.title2.bold()); Text("피로도").font(.caption).foregroundStyle(Theme.inkSecondary) }
                 }
             }
         }
@@ -187,7 +187,7 @@ struct SessionDetailView: View {
     private func moodItem(_ title: String, _ value: Int?) -> some View {
         VStack {
             Text(value.map(Mood.face) ?? "–").font(.title)
-            Text(title).font(.caption).foregroundStyle(.secondary)
+            Text(title).font(.caption).foregroundStyle(Theme.inkSecondary)
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(title) \(value.map(Mood.label) ?? "기록 없음")")
@@ -218,7 +218,7 @@ struct SessionDetailView: View {
     private func labeled(_ title: String, _ text: String) -> some View {
         if !text.isEmpty {
             VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.caption).foregroundStyle(.secondary)
+                Text(title).font(.caption).foregroundStyle(Theme.inkSecondary)
                 Text(text).font(.subheadline)
             }
         }
@@ -232,8 +232,8 @@ struct SessionDetailView: View {
                 Spacer()
             }
             Text(session.surface.title + (session.rinkName.isEmpty ? "" : " · \(session.rinkName)")).font(.subheadline)
-            if let feel = session.iceFeel { Text("체감 빙질: \(feel.title)").font(.caption).foregroundStyle(.secondary) }
-            if !session.weatherMemo.isEmpty { Text(session.weatherMemo).font(.caption).foregroundStyle(.secondary) }
+            if let feel = session.iceFeel { Text("체감 빙질: \(feel.title)").font(.caption).foregroundStyle(Theme.inkSecondary) }
+            if !session.weatherMemo.isEmpty { Text(session.weatherMemo).font(.caption).foregroundStyle(Theme.inkSecondary) }
         }
     }
 
@@ -244,7 +244,7 @@ struct SessionDetailView: View {
             let runner = runners.first { $0.id == usage.runnerID }
             Text([skate?.name, runner.map { "러너 \($0.name)" }].compactMap { $0 }.joined(separator: " · "))
                 .font(.subheadline)
-            Text("탄 시간 \(minutesText(usage.iceMinutes))").font(.caption).foregroundStyle(.secondary)
+            Text("탄 시간 \(minutesText(usage.iceMinutes))").font(.caption).foregroundStyle(Theme.inkSecondary)
         }
     }
 
@@ -286,7 +286,7 @@ struct SessionRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(session.title).font(.subheadline.bold()).foregroundStyle(Theme.title)
                 Text("\(session.startsAt.dayTitle) · \(minutesText(session.minutes)) · \(session.surface.title)")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.caption).foregroundStyle(Theme.inkSecondary)
             }
             Spacer()
             if let after = session.moodAfter { Text(Mood.face(after)).font(.title3) }

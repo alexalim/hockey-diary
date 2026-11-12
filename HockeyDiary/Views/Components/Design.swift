@@ -47,7 +47,7 @@ struct StatTile: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 3) {
             Text(value).font(.title3.bold()).foregroundStyle(tint).lineLimit(1).minimumScaleFactor(0.7)
-            Text(title).font(.caption).foregroundStyle(.secondary)
+            Text(title).font(.caption).foregroundStyle(Theme.inkSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
@@ -71,7 +71,7 @@ struct MetricRow: View {
             Spacer()
             VStack(alignment: .trailing, spacing: 0) {
                 Text(value).font(.subheadline.bold())
-                if let detail { Text(detail).font(.caption2).foregroundStyle(.secondary) }
+                if let detail { Text(detail).font(.caption2).foregroundStyle(Theme.inkSecondary) }
             }
         }
         .frame(minHeight: 32)
@@ -98,7 +98,7 @@ struct Legend: View {
                     } else {
                         Circle().fill(it.color).frame(width: 9, height: 9)
                     }
-                    Text(it.title).font(.caption2).foregroundStyle(.secondary)
+                    Text(it.title).font(.caption2).foregroundStyle(Theme.inkSecondary)
                 }
             }
         }
@@ -120,13 +120,13 @@ struct ProgressTrack: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
-                Text(label).font(.caption).foregroundStyle(.secondary)
+                Text(label).font(.caption).foregroundStyle(Theme.inkSecondary)
                 Spacer()
                 if let trailing { Text(trailing).font(.caption.bold()).foregroundStyle(tint) }
             }
             GeometryReader { g in
                 ZStack(alignment: .leading) {
-                    Capsule().fill(Color.secondary.opacity(0.15))
+                    Capsule().fill(Theme.inkTertiary.opacity(0.15))
                     Capsule().fill(tint).frame(width: max(ratio > 0 ? 6 : 0, g.size.width * ratio))
                 }
             }

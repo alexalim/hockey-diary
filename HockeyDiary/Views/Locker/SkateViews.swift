@@ -14,7 +14,7 @@ struct SkateListView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("아직 스케이트가 없어.").font(.headline)
                         Text("사진 없이도 등록돼. 여러 켤레를 넣고 주력 하나를 정해봐.")
-                            .font(.subheadline).foregroundStyle(.secondary)
+                            .font(.subheadline).foregroundStyle(Theme.inkSecondary)
                         Button("첫 스케이트 등록") { adding = true }
                             .buttonStyle(PinkButtonStyle())
                     }
@@ -67,7 +67,7 @@ struct SkateRow: View {
                 Text([skate.size.isEmpty ? nil : "사이즈 \(skate.size)", skate.status.title,
                       skate.currentRunner.map { "러너 \($0.name)\($0.currentHollow.map { " · \($0)\"" } ?? "")" }]
                     .compactMap { $0 }.joined(separator: " · "))
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.caption).foregroundStyle(Theme.inkSecondary)
             }
         }
         .frame(minHeight: Theme.touch)
@@ -180,7 +180,7 @@ struct SkateDetailView: View {
                     }
                     Text([skate.size.isEmpty ? nil : "사이즈 \(skate.size)", skate.fit.isEmpty ? nil : skate.fit, skate.status.title]
                         .compactMap { $0 }.joined(separator: " · "))
-                        .font(.subheadline).foregroundStyle(.secondary)
+                        .font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     Text("지금까지 탄 시간 \(minutesText(EquipmentMath.iceMinutes(skateID: skate.id, usages: DiaryStore.usageRecords(context))))")
                         .font(.subheadline)
                 }
@@ -202,7 +202,7 @@ struct SkateDetailView: View {
                     }
                     Button("러너 떼기", role: .destructive) { DiaryStore.uninstall(current, context: context) }
                 } else {
-                    Text("장착된 러너가 없어.").foregroundStyle(.secondary)
+                    Text("장착된 러너가 없어.").foregroundStyle(Theme.inkSecondary)
                 }
                 ForEach(swappable) { r in
                     Button {
@@ -228,7 +228,7 @@ struct SkateDetailView: View {
                             Text(inst.runner?.name ?? "-")
                             Spacer()
                             Text("\(inst.installedAt.formatted(date: .numeric, time: .omitted)) ~ \(inst.removedAt?.formatted(date: .numeric, time: .omitted) ?? "지금")")
-                                .font(.caption).foregroundStyle(.secondary)
+                                .font(.caption).foregroundStyle(Theme.inkSecondary)
                         }
                     }
                 }

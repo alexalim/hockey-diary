@@ -83,7 +83,7 @@ struct TeamView: View {
                                 Text(m.display).foregroundStyle(Theme.title)
                                 if m.isGuest { StatusTag(text: "용병") }
                                 Spacer()
-                                Image(systemName: "chevron.right").font(.caption).foregroundStyle(.secondary)
+                                Image(systemName: "chevron.right").font(.caption).foregroundStyle(Theme.inkSecondary)
                             }
                             .frame(minHeight: 40)
                         }
@@ -100,7 +100,7 @@ struct TeamView: View {
                     }
                 }
                 Text("팀 데이터는 이 아이폰에만 있어. 공유는 일정 화면에서 이미지나 글로 해.")
-                    .font(.caption).foregroundStyle(.secondary).frame(maxWidth: .infinity, alignment: .leading)
+                    .font(.caption).foregroundStyle(Theme.inkSecondary).frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(16)
         }
@@ -120,18 +120,18 @@ struct TeamView: View {
         return HStack(spacing: 12) {
             VStack(spacing: 0) {
                 Text(e.at.formatted(.dateTime.day())).font(.title3.bold()).foregroundStyle(Theme.title)
-                Text(e.at.formatted(.dateTime.weekday(.abbreviated))).font(.caption2).foregroundStyle(.secondary)
+                Text(e.at.formatted(.dateTime.weekday(.abbreviated))).font(.caption2).foregroundStyle(Theme.inkSecondary)
             }
             .frame(width: 40)
             VStack(alignment: .leading, spacing: 2) {
                 Text(e.title).font(.subheadline.bold()).foregroundStyle(Theme.title)
-                Text("\(e.at.formatted(.dateTime.month().hour().minute()))\(e.rinkName.isEmpty ? "" : " · \(e.rinkName)")").font(.caption).foregroundStyle(.secondary)
+                Text("\(e.at.formatted(.dateTime.month().hour().minute()))\(e.rinkName.isEmpty ? "" : " · \(e.rinkName)")").font(.caption).foregroundStyle(Theme.inkSecondary)
             }
             Spacer()
             if !members.isEmpty {
                 StatusTag(text: "참석 \(going)", kind: going >= 10 ? .success : .neutral)
             }
-            Image(systemName: "chevron.right").font(.caption).foregroundStyle(.secondary)
+            Image(systemName: "chevron.right").font(.caption).foregroundStyle(Theme.inkSecondary)
         }
         .frame(minHeight: Theme.touch)
     }

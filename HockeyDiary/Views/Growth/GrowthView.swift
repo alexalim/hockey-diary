@@ -48,7 +48,7 @@ struct GrowthView: View {
                     Card(tint: Theme.iceBlue) {
                         CardHeader(title: "컨디션 흐름", systemImage: "waveform.path.ecg")
                         Text("잔 시간, 안정 심박, 기분, 힘듦, 몸 상태를 날마다 이어서 봐. 볼 항목은 내가 골라.")
-                            .font(.subheadline).foregroundStyle(.secondary)
+                            .font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     }
                 }
                 .buttonStyle(.plain)
@@ -58,7 +58,7 @@ struct GrowthView: View {
                 NavigationLink { AISummaryView() } label: {
                     Card {
                         Label("AI로 돌아보기", systemImage: "sparkles").font(.headline).foregroundStyle(Theme.title)
-                        Text("켜야만 동작해. 아이폰 안에서 하키 기록만 요약해.").font(.subheadline).foregroundStyle(.secondary)
+                        Text("켜야만 동작해. 아이폰 안에서 하키 기록만 요약해.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     }
                 }
                 .buttonStyle(.plain)
@@ -107,7 +107,7 @@ struct GrowthView: View {
             HStack(alignment: .firstTextBaseline, spacing: 6) {
                 Text(metric == .minutes ? minutesText(t.total) : "\(t.total)\(metric.unit)")
                     .font(.largeTitle.bold()).foregroundStyle(Theme.title)
-                Text(period.longTitle).font(.subheadline).foregroundStyle(.secondary)
+                Text(period.longTitle).font(.subheadline).foregroundStyle(Theme.inkSecondary)
             }
             if t.total == 0 && (t.previousTotal ?? 0) == 0 {
                 EmptyHint(text: metric == .drills ? "이 기간엔 연습 기록이 없어. 성장 탭 연습에서 드릴을 세면 여기 쌓여." : "이 기간엔 기록이 없어.")
@@ -116,11 +116,11 @@ struct GrowthView: View {
                     ForEach(Array(t.buckets.enumerated()), id: \.offset) { i, b in
                         if let p = b.previous {
                             BarMark(x: .value("칸", bucketLabel(b.start)), y: .value("값", p), width: .ratio(0.7))
-                                .foregroundStyle(Color.secondary.opacity(0.25))
+                                .foregroundStyle(Theme.inkTertiary.opacity(0.25))
                                 .position(by: .value("기간", "앞선 기간"))
                         }
                         BarMark(x: .value("칸", bucketLabel(b.start)), y: .value("값", b.current), width: .ratio(0.7))
-                            .foregroundStyle(Theme.cobalt)
+                            .foregroundStyle(Theme.barGradient)
                             .position(by: .value("기간", "이번 기간"))
                     }
                 }
@@ -130,7 +130,7 @@ struct GrowthView: View {
                 .accessibilityLabel("\(period.longTitle) \(metric.title) 합계 \(t.total)\(metric.unit)")
                 HStack {
                     if t.previousTotal != nil {
-                        Legend(items: [.init(color: Theme.cobalt, title: "이번 기간"), .init(color: Color.secondary.opacity(0.35), title: "앞선 기간")])
+                        Legend(items: [.init(color: Theme.cobalt, title: "이번 기간"), .init(color: Theme.inkTertiary.opacity(0.35), title: "앞선 기간")])
                     }
                     Spacer()
                 }
@@ -154,13 +154,13 @@ struct GrowthView: View {
             } else {
                 HStack(alignment: .firstTextBaseline) {
                     Text("\(samples.count)회").font(.largeTitle.bold()).foregroundStyle(Theme.title)
-                    Text(minutesText(total)).font(.headline).foregroundStyle(.secondary)
+                    Text(minutesText(total)).font(.headline).foregroundStyle(Theme.inkSecondary)
                 }
                 Chart(rows, id: \.0) { row in
                     BarMark(x: .value("횟수", row.1.count), y: .value("종류", row.0.title))
                         .foregroundStyle(row.0.color)
                         .annotation(position: .trailing) {
-                            Text("\(row.1.count)").font(.caption2).foregroundStyle(.secondary)
+                            Text("\(row.1.count)").font(.caption2).foregroundStyle(Theme.inkSecondary)
                         }
                 }
                 .chartXAxis(.hidden)
@@ -186,7 +186,7 @@ struct GrowthView: View {
                     StatTile(title: "낮아짐", value: "\(change.worse)", tint: Theme.danger)
                 }
                 Text("기분은 내가 고른 값이야. 운동 덕분이라고 말하는 건 아니야.")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.caption).foregroundStyle(Theme.inkSecondary)
             } else {
                 EmptyHint(text: change.sufficiency == .empty
                           ? "운동 전후 기분을 둘 다 남긴 기록이 아직 없어."
@@ -210,19 +210,19 @@ struct GrowthView: View {
                     if v.count > 0 {
                         HStack {
                             Label {
-                                Text(s.isUnspecified ? "미입력" : s.title).foregroundStyle(s.isUnspecified ? .secondary : Theme.title)
+                                Text(s.isUnspecified ? "미입력" : s.title).foregroundStyle(s.isUnspecified ? Theme.inkTertiary : Theme.title)
                             } icon: {
                                 Image(systemName: s.systemImage).foregroundStyle(s.color)
                             }
                             .font(.subheadline)
                             Spacer()
-                            Text("\(v.count)회 · \(minutesText(v.minutes))").font(.subheadline).foregroundStyle(.secondary)
+                            Text("\(v.count)회 · \(minutesText(v.minutes))").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                         }
                         .frame(minHeight: 32)
                     }
                 }
                 Text("어디서 탔는지만 보여줘. 장소로 잘하고 못한 걸 따지지 않아.")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.caption).foregroundStyle(Theme.inkSecondary)
             }
             footnote(samples.count)
         }
@@ -252,7 +252,7 @@ struct GrowthView: View {
                 if let s = st.sentence() {
                     Text(s).font(.subheadline).foregroundStyle(Theme.title)
                 } else {
-                    Text(Sufficiency(count: shots.count).message).font(.subheadline).foregroundStyle(.secondary)
+                    Text(Sufficiency(count: shots.count).message).font(.subheadline).foregroundStyle(Theme.inkSecondary)
                 }
                 if shots.count >= 3 {
                     ForEach(ShotZone.allCases, id: \.self) { z in
@@ -261,7 +261,7 @@ struct GrowthView: View {
                                 Text(z.title).font(.caption)
                                 Spacer()
                                 Text(line.shots >= 3 ? "\(line.goals)/\(line.shots) · \(Int(((line.rate ?? 0) * 100).rounded()))%" : "\(line.goals)/\(line.shots) · 더 모아보자")
-                                    .font(.caption).foregroundStyle(.secondary)
+                                    .font(.caption).foregroundStyle(Theme.inkSecondary)
                             }
                         }
                     }
@@ -269,7 +269,7 @@ struct GrowthView: View {
                 let byGame = Dictionary(grouping: allShots, by: \.sessionID)
                 let games = periodSessions.filter { byGame[$0.id] != nil }.prefix(5)
                 if !games.isEmpty {
-                    Text("어느 경기였어?").font(.caption.bold()).foregroundStyle(.secondary).padding(.top, 4)
+                    Text("어느 경기였어?").font(.caption.bold()).foregroundStyle(Theme.inkSecondary).padding(.top, 4)
                     ForEach(Array(games), id: \.id) { g in
                         let marks = byGame[g.id] ?? []
                         NavigationLink { SessionDetailView(session: g) } label: {
@@ -277,14 +277,14 @@ struct GrowthView: View {
                                 Text(g.title).font(.subheadline).foregroundStyle(Theme.title).lineLimit(1)
                                 Spacer()
                                 Text("슛 \(marks.count) · 골 \(marks.filter { $0.point.outcome == .goal }.count)").font(.caption.bold()).foregroundStyle(Theme.accent)
-                                Image(systemName: "chevron.right").font(.caption).foregroundStyle(.secondary)
+                                Image(systemName: "chevron.right").font(.caption).foregroundStyle(Theme.inkSecondary)
                             }
                             .frame(minHeight: 36)
                         }
                         .buttonStyle(.plain)
                     }
                 }
-                Text("골로 찍은 표시만 세. 성공률은 골 ÷ 전체 슛이야.").font(.caption2).foregroundStyle(.secondary)
+                Text("골로 찍은 표시만 세. 성공률은 골 ÷ 전체 슛이야.").font(.caption2).foregroundStyle(Theme.inkSecondary)
             }
             footnote(shots.count)
         }
@@ -303,7 +303,7 @@ struct GrowthView: View {
                     StatTile(title: "세이브율", value: total.savePctText)
                 }
                 if games.count < 3 {
-                    Text("3경기부터 흐름을 보여줄게.").font(.caption).foregroundStyle(.secondary)
+                    Text("3경기부터 흐름을 보여줄게.").font(.caption).foregroundStyle(Theme.inkSecondary)
                 }
                 footnote(games.count, note: "골리로 뛴 경기만")
             }
@@ -331,7 +331,7 @@ struct GrowthView: View {
                         HStack {
                             Text(name).font(.subheadline).foregroundStyle(Theme.title)
                             Spacer()
-                            Text(line.text).font(.subheadline).foregroundStyle(.secondary)
+                            Text(line.text).font(.subheadline).foregroundStyle(Theme.inkSecondary)
                         }
                         .frame(minHeight: 28)
                     }
@@ -360,14 +360,14 @@ struct GrowthView: View {
                     .buttonStyle(.plain)
             }
             if !used.isEmpty {
-                Text("전체 기간 · 직접 남긴 기록").font(.caption2).foregroundStyle(.secondary)
+                Text("전체 기간 · 직접 남긴 기록").font(.caption2).foregroundStyle(Theme.inkSecondary)
             }
         }
     }
 
     private func footnote(_ count: Int, note: String? = nil) -> some View {
         Text(Insights.footnote(periodTitle: period.longTitle, count: count) + (note.map { " · \($0)" } ?? ""))
-            .font(.caption2).foregroundStyle(.secondary)
+            .font(.caption2).foregroundStyle(Theme.inkSecondary)
     }
 }
 
@@ -381,13 +381,13 @@ struct SkillRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(skill.name).font(.subheadline.bold()).foregroundStyle(Theme.title)
                 Text("수업 \(st.lessonCount) · 써봄 \(st.triedEvents) · 못 써봄 \(st.untriedEvents)\(practiceCount > 0 ? " · 연습 \(practiceCount)" : "")")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.caption).foregroundStyle(Theme.inkSecondary)
             }
             Spacer()
             if st.evaluated > 0 {
                 Text("성공 \(st.successes)/\(st.evaluated)").font(.caption.bold()).foregroundStyle(Theme.accent)
             }
-            Image(systemName: "chevron.right").font(.caption).foregroundStyle(.secondary)
+            Image(systemName: "chevron.right").font(.caption).foregroundStyle(Theme.inkSecondary)
         }
         .frame(minHeight: Theme.touch)
         .accessibilityElement(children: .combine)
@@ -447,12 +447,12 @@ struct SkillDetailView: View {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(s.title).font(.subheadline.bold()).foregroundStyle(Theme.title)
                                     Text("\(s.startsAt.formatted(date: .abbreviated, time: .omitted))\(Calendar.current.component(.year, from: s.startsAt) == year ? " · 올해" : "")")
-                                        .font(.caption).foregroundStyle(.secondary)
+                                        .font(.caption).foregroundStyle(Theme.inkSecondary)
                                 }
                                 Spacer()
                                 Text([a.outcome?.title, a.count.map { "\($0)번 시도" }].compactMap { $0 }.joined(separator: " · "))
                                     .font(.caption.bold()).foregroundStyle(Theme.accent)
-                                Image(systemName: "chevron.right").font(.caption).foregroundStyle(.secondary)
+                                Image(systemName: "chevron.right").font(.caption).foregroundStyle(Theme.inkSecondary)
                             }
                             .frame(minHeight: Theme.touch)
                         }
@@ -460,7 +460,7 @@ struct SkillDetailView: View {
                     }
                 }
                 if !days.isEmpty {
-                    Text("연습 많이 한 날").font(.caption.bold()).foregroundStyle(.secondary).padding(.top, 4)
+                    Text("연습 많이 한 날").font(.caption.bold()).foregroundStyle(Theme.inkSecondary).padding(.top, 4)
                     ForEach(Array(days.enumerated()), id: \.offset) { i, d in
                         HStack {
                             Text("\(i + 1)").font(.headline).foregroundStyle(Theme.neonPink).frame(width: 20)
@@ -471,7 +471,7 @@ struct SkillDetailView: View {
                         .frame(minHeight: 32)
                     }
                 }
-                Text("경기는 성공한 날이 앞, 그다음 시도 횟수 순이야.").font(.caption2).foregroundStyle(.secondary)
+                Text("경기는 성공한 날이 앞, 그다음 시도 횟수 순이야.").font(.caption2).foregroundStyle(Theme.inkSecondary)
             }
         }
     }
@@ -506,7 +506,7 @@ struct SkillDetailView: View {
                         Text("일부 성공 \(st.partials) · 어려움 \(st.difficulties) · 시도 횟수 합 \(st.attemptTotal)")
                             .font(.subheadline)
                         Text("내가 매긴 결과야. 실제 슛 성공률과는 달라.")
-                            .font(.caption).foregroundStyle(.secondary)
+                            .font(.caption).foregroundStyle(Theme.inkSecondary)
                     }
                 }
                 bestsCard
@@ -533,15 +533,15 @@ struct SkillDetailView: View {
                 Image(systemName: "graduationcap.fill").foregroundStyle(ActivityType.lesson.color).frame(width: 24)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("\(s.startsAt.dayTitle) 수업에서 배움").font(.subheadline.bold())
-                    if !l.feedback.isEmpty { Text(l.feedback).font(.caption).foregroundStyle(.secondary) }
-                    if let d = l.difficulty { Text("체감 난도 \(d)").font(.caption2).foregroundStyle(.secondary) }
+                    if !l.feedback.isEmpty { Text(l.feedback).font(.caption).foregroundStyle(Theme.inkSecondary) }
+                    if let d = l.difficulty { Text("체감 난도 \(d)").font(.caption2).foregroundStyle(Theme.inkSecondary) }
                 }
             case .attempted(let a, let s):
                 Image(systemName: "figure.hockey").foregroundStyle(Theme.accent).frame(width: 24)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("\(s.startsAt.dayTitle) \(s.type.title) · \(a.tried ? (a.outcome?.title ?? "써봤어") : "못 써봄")")
                         .font(.subheadline.bold())
-                    if !a.notes.isEmpty { Text(a.notes).font(.caption).foregroundStyle(.secondary) }
+                    if !a.notes.isEmpty { Text(a.notes).font(.caption).foregroundStyle(Theme.inkSecondary) }
                 }
             }
             Spacer()

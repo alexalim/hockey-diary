@@ -38,7 +38,7 @@ struct ConditionView: View {
                 listCard
                 settingsCard
                 Text("여기 값은 내 기록이 어땠는지만 보여줘. 몸 상태를 진단하거나 운동을 하라·말라 하지 않아. 건강 값은 저장하지 않고, 리포트·공유·AI 요약에도 안 넣어.")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.caption).foregroundStyle(Theme.inkSecondary)
             }
             .padding(16)
         }
@@ -68,7 +68,7 @@ struct ConditionView: View {
                     ForEach(enabledMetrics, id: \.self) { Text($0.title).tag($0) }
                 }
                 .pickerStyle(.segmented)
-                Text(metric.help).font(.caption).foregroundStyle(.secondary)
+                Text(metric.help).font(.caption).foregroundStyle(Theme.inkSecondary)
                 if points.isEmpty {
                     EmptyHint(text: loading ? "불러오는 중…" : emptyReason)
                 } else {
@@ -149,7 +149,7 @@ struct ConditionView: View {
             Card(tint: Theme.warningSoft) {
                 CardHeader(title: "평소와 다른 점", systemImage: "exclamationmark.bubble")
                 ForEach(lines, id: \.self) { Text("• \($0)").font(.subheadline).foregroundStyle(Theme.title) }
-                Text("최근 7일을 그 앞 4주와 견준 거야. 왜 그런지는 내가 제일 잘 알아.").font(.caption).foregroundStyle(.secondary)
+                Text("최근 7일을 그 앞 4주와 견준 거야. 왜 그런지는 내가 제일 잘 알아.").font(.caption).foregroundStyle(Theme.inkSecondary)
             }
         }
     }
@@ -166,7 +166,7 @@ struct ConditionView: View {
                 BodyCheckRow(value: todayCheck?.value) { v in
                     BodyCheckStore.set(v, context: context)
                 }
-                Text("하키 안 탄 날도 남겨. 1은 많이 처짐, 5는 아주 좋음.").font(.caption).foregroundStyle(.secondary)
+                Text("하키 안 탄 날도 남겨. 1은 많이 처짐, 5는 아주 좋음.").font(.caption).foregroundStyle(Theme.inkSecondary)
             }
         }
     }
@@ -192,7 +192,7 @@ struct ConditionView: View {
                         ForEach(enabledMetrics, id: \.self) { m in
                             if let v = m.value(d) {
                                 VStack(alignment: .leading, spacing: 0) {
-                                    Text(m.title).font(.caption2).foregroundStyle(.secondary)
+                                    Text(m.title).font(.caption2).foregroundStyle(Theme.inkSecondary)
                                     Text(m == .mood ? Mood.face(Int(v)) : (m == .body ? BodyWords.short(Int(v)) : (m == .fatigue ? "\(Int(v))/5" : m.text(v))))
                                         .font(.caption.bold()).foregroundStyle(Theme.title)
                                 }
@@ -215,7 +215,7 @@ struct ConditionView: View {
                 Toggle(isOn: Binding(get: { ConditionPrefs.isOn(m) }, set: { on in toggle(m, on) })) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(m.title).font(.subheadline)
-                        Text(m.help).font(.caption2).foregroundStyle(.secondary)
+                        Text(m.help).font(.caption2).foregroundStyle(Theme.inkSecondary)
                     }
                 }
             }
@@ -352,7 +352,7 @@ struct CycleConsentToggle: View {
         })) {
             VStack(alignment: .leading, spacing: 2) {
                 Text("생리 기간 같이 보기").font(.subheadline)
-                Text("그래프에 옅은 띠로만 표시해. 리포트·공유·AI 요약엔 절대 안 넣어.").font(.caption2).foregroundStyle(.secondary)
+                Text("그래프에 옅은 띠로만 표시해. 리포트·공유·AI 요약엔 절대 안 넣어.").font(.caption2).foregroundStyle(Theme.inkSecondary)
             }
         }
         if let errorText { Text(errorText).font(.footnote).foregroundStyle(Theme.danger) }
