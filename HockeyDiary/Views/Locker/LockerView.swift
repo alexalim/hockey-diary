@@ -93,7 +93,7 @@ struct LockerView: View {
             NavigationStack { LockerCustomizeView(profile: profile) }
         }
         .onAppear {
-            let fresh = LockerStore.awardMilestones(context)
+            let fresh = LockerStore.awardMilestones(context) + QuestStore.awardBadges(context)
             if !fresh.isEmpty { newStickers = fresh }
             angle = isOpen ? DoorSwing.openAngle : 0
             hint()
@@ -615,8 +615,11 @@ struct StickerLibraryView: View {
                 ForEach(StickerCatalog.all.filter { $0.kind == .achievement }, id: \.key) { d in
                     pickButton(d, locked: !have.contains(d.key))
                 }
+                ForEach(earned.filter { $0.stickerKey.hasPrefix("badge-") }.sorted { $0.stickerKey > $1.stickerKey }, id: \.stickerKey) { e in
+                    if let d = StickerCatalog.def(e.stickerKey) { pickButton(d, locked: false) }
+                }
             }
-            Text("첫 수업, 첫 경기, 첫 골처럼 기록을 남기면 받아. 잠긴 건 기록이 쌓이면 열려.")
+            Text("첫 수업, 첫 경기, 첫 골처럼 기록을 남기면 받아. 잠긴 건 기록이 쌓이면 열려. 이달 퀘스트를 채우면 그달 배지도 생겨.")
                 .font(.caption).foregroundStyle(Theme.inkSecondary)
         }
     }

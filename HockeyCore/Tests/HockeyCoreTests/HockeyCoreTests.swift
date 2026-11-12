@@ -925,3 +925,73 @@ final class RecordModeTests: XCTestCase {
         XCTAssertEqual(detailed.defaultMinutes(for: .lesson), 60)
     }
 }
+
+final class QuestTests: XCTestCase {
+    private let cal: Calendar = {
+        var c = Calendar(identifier: .gregorian)
+        c.timeZone = TimeZone(identifier: "Asia/Seoul")!
+        return c
+    }()
+    private func d(_ y: Int, _ m: Int, _ day: Int, _ h: Int = 10) -> Date {
+        cal.date(from: DateComponents(year: y, month: m, day: day, hour: h))!
+    }
+
+    func testWeeklyIsStableDistinctAndMondayBased() {
+        let w = Quest.week(containing: d(2026, 11, 12), calendar: cal)
+        XCTAssertEqual(cal.component(.weekday, from: w.start), 2)
+        XCTAssertEqual(cal.component(.day, from: w.start), 9)
+        let a = Quest.weekly(weekStart: w.start, level: nil)
+        XCTAssertEqual(a, Quest.weekly(weekStart: w.start, level: nil))
+        XCTAssertEqual(Set(a.map(\.kind)).count, 3)
+        XCTAssertNotEqual(a.map(\.kind), Quest.weekly(weekStart: w.end, level: nil).map(\.kind))
+    }
+
+    func testTargetsByLevel() {
+        XCTAssertEqual(Quest.monthlyTarget(level: nil), 4)
+        XCTAssertEqual(Quest.monthlyTarget(level: .growing), 6)
+        XCTAssertEqual(Quest.monthlyTarget(level: .seasoned), 8)
+        var low: [QuestKind: Int] = [:], high: [QuestKind: Int] = [:]
+        var w = Quest.week(containing: d(2026, 11, 2), calendar: cal)
+        for _ in 0..<5 {
+            for q in Quest.weekly(weekStart: w.start, level: .starter) { low[q.kind] = q.target }
+            for q in Quest.weekly(weekStart: w.start, level: .seasoned) { high[q.kind] = q.target }
+            w = DateInterval(start: w.end, duration: w.duration)
+        }
+        XCTAssertEqual(low[.minutes], 60); XCTAssertEqual(high[.minutes], 120)
+        XCTAssertEqual(low[.sessions], 1); XCTAssertEqual(high[.sessions], 2)
+        XCTAssertEqual(low[.conditions], 3); XCTAssertEqual(high[.conditions], 3)
+    }
+
+    func testDoneCountsOnlyThisWeek() {
+        let week = Quest.week(containing: d(2026, 11, 12), calendar: cal)   // 11/9 ~ 11/15
+        let facts = QuestFacts(
+            sessions: [.init(date: d(2026, 11, 10), minutes: 60), .init(date: d(2026, 11, 14), minutes: 90), .init(date: d(2026, 11, 16), minutes: 60)],
+            drillDates: [d(2026, 11, 11, 9), d(2026, 11, 11, 20)],
+            conditionDays: [d(2026, 11, 10, 8), d(2026, 11, 10, 21), d(2026, 11, 12)],
+            journalDates: [d(2026, 11, 8)])
+        func done(_ k: QuestKind) -> Int { Quest.done(WeeklyQuest(kind: k, target: 1), facts: facts, week: week, calendar: cal) }
+        XCTAssertEqual(done(.sessions), 2)
+        XCTAssertEqual(done(.minutes), 150)
+        XCTAssertEqual(done(.drills), 2)
+        XCTAssertEqual(done(.conditions), 2)
+        XCTAssertEqual(done(.journals), 0)
+    }
+
+    func testMonthDoneAndPoints() {
+        let now = d(2026, 11, 12)
+        // 11/2 주: 전부 넉넉히 → 그 주 퀘스트 3개 전부 달성. 10/26 주(10월 시작)에도 넉넉히 → 11월 포인트엔 안 들어감.
+        var facts = QuestFacts()
+        for day in [2, 3, 4] { facts.sessions.append(.init(date: d(2026, 11, day), minutes: 200)); facts.drillDates += [d(2026, 11, day), d(2026, 11, day, 20)]; facts.conditionDays.append(d(2026, 11, day)); facts.journalDates += [d(2026, 11, day), d(2026, 11, day, 21)] }
+        for day in [27, 28, 29] { facts.sessions.append(.init(date: d(2026, 10, day), minutes: 200)); facts.drillDates += [d(2026, 10, day), d(2026, 10, day, 20)]; facts.conditionDays.append(d(2026, 10, day)); facts.journalDates += [d(2026, 10, day), d(2026, 10, day, 21)] }
+        XCTAssertEqual(Quest.monthDone(facts: facts, month: Quest.month(containing: now, calendar: cal)), 3)
+        XCTAssertEqual(Quest.monthPoints(now: now, facts: facts, level: nil, calendar: cal), 3 * Quest.pointsPerQuest)
+        XCTAssertEqual(Quest.weeklyProgress(now: now, facts: facts, level: nil, calendar: cal).filter(\.isDone).count, 0)
+    }
+
+    func testBadgeKeys() {
+        XCTAssertEqual(Quest.badgeKey(month: d(2026, 11, 1), calendar: cal), "badge-2026-11")
+        XCTAssertEqual(Quest.badgeTitle("badge-2026-11"), "11월 배지")
+        XCTAssertNil(Quest.badgeMonth("first-goal"))
+        XCTAssertEqual(StickerCatalog.def("badge-2026-03")?.title, "3월 배지")
+    }
+}

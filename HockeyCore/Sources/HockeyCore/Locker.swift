@@ -100,7 +100,14 @@ public enum StickerCatalog {
         StickerDef(key: "first-sharpening", title: "첫 연마 기록", symbol: "wrench.and.screwdriver.fill", kind: .achievement, palette: 1),
     ]
 
-    public static func def(_ key: String) -> StickerDef? { all.first { $0.key == key } }
+    /// 사전에 있는 스티커, 또는 달 배지("badge-YYYY-MM", 이달 퀘스트 달성으로 받음).
+    public static func def(_ key: String) -> StickerDef? {
+        if let d = all.first(where: { $0.key == key }) { return d }
+        if let title = Quest.badgeTitle(key) {
+            return StickerDef(key: key, title: title, symbol: "medal.fill", kind: .achievement, palette: 3)
+        }
+        return nil
+    }
 }
 
 /// 성취 스티커 판정에 쓰는 기록 요약.

@@ -22,11 +22,12 @@ enum RestPrefs {
 
 /// 홈에서 순서를 바꾸고 숨길 수 있는 블록. 맨 위 오늘 카드와 바로가기는 고정.
 enum HomeBlock: String, CaseIterable, Identifiable {
-    case goal, feedback, sharpening, team, recent
+    case quest, goal, feedback, sharpening, team, recent
     var id: String { rawValue }
 
     var title: String {
         switch self {
+        case .quest: return "이달의 퀘스트"
         case .goal: return "다음 목표"
         case .feedback: return "최근 피드백"
         case .sharpening: return "연마 점검"
@@ -37,6 +38,7 @@ enum HomeBlock: String, CaseIterable, Identifiable {
 
     var systemImage: String {
         switch self {
+        case .quest: return "flag.checkered"
         case .goal: return "target"
         case .feedback: return "quote.bubble"
         case .sharpening: return "wrench.and.screwdriver.fill"
@@ -45,12 +47,15 @@ enum HomeBlock: String, CaseIterable, Identifiable {
         }
     }
 
-    static let defaultOrder = "goal,feedback,sharpening,team,recent"
+    static let defaultOrder = "quest,goal,feedback,sharpening,team,recent"
 
     /// 저장된 순서를 읽는다. 새로 생긴 블록은 끝에 붙인다.
     static func order(_ raw: String) -> [HomeBlock] {
         var list = raw.split(separator: ",").compactMap { HomeBlock(rawValue: String($0)) }
-        for b in allCases where !list.contains(b) { list.append(b) }
+        for b in allCases where !list.contains(b) {
+            // 퀘스트는 새로 생긴 블록이지만 맨 위가 제자리다. 나머지 새 블록은 끝에.
+            if b == .quest { list.insert(b, at: 0) } else { list.append(b) }
+        }
         return list
     }
 }

@@ -96,6 +96,7 @@ struct HomeView: View {
     @ViewBuilder
     private func block(_ b: HomeBlock) -> some View {
         switch b {
+        case .quest: QuestCard()
         case .goal: goalCard
         case .feedback: feedbackCard
         case .sharpening: sharpeningCard
