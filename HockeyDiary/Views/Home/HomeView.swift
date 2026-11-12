@@ -418,14 +418,14 @@ struct SettingsView: View {
 
     var body: some View {
         List {
-            Section("내 기록은 어디에 있어?") {
-                Label("기록은 모두 이 아이폰에만 저장돼.", systemImage: "iphone")
-                Label("서버나 iCloud로 안 보내. 링크장 검색어만 Apple 지도로 가.", systemImage: "icloud.slash")
-                Label("Apple 건강은 연결했을 때만 읽어. 읽은 값은 따로 저장하지 않아.", systemImage: "heart.text.square")
-                Label("AI 요약은 켰을 때만 써. 아이폰 안에서 하키 기록만 봐.", systemImage: "sparkles")
-                Label("Apple Watch로 잰 운동은 건강 앱에도 저장돼.", systemImage: "applewatch")
-                Label("일기는 '리포트 공유'를 켠 것만 시즌 리포트에 한 줄 들어가. 내용을 따로 분석하지 않아.", systemImage: "lock.fill")
-                Label("사진은 고른 것만 복사해 둬. 위치 정보는 지워.", systemImage: "photo")
+            Section("내 기록 보관") {
+                Label("기록은 모두 이 아이폰에만 저장됩니다.", systemImage: "iphone")
+                Label("서버나 iCloud로 보내지 않습니다. 링크장 검색어만 Apple 지도로 전달됩니다.", systemImage: "icloud.slash")
+                Label("Apple 건강은 연결했을 때만 읽습니다. 읽은 값은 따로 저장하지 않습니다.", systemImage: "heart.text.square")
+                Label("AI 요약은 켰을 때만 동작하며, 아이폰 안에서 하키 기록만 사용합니다.", systemImage: "sparkles")
+                Label("Apple Watch로 잰 운동은 건강 앱에도 저장됩니다.", systemImage: "applewatch")
+                Label("일기는 '리포트 공유'를 켠 것만 시즌 리포트에 한 줄 들어갑니다. 내용을 따로 분석하지 않습니다.", systemImage: "lock.fill")
+                Label("사진은 고른 것만 복사해 두며, 위치 정보는 지웁니다.", systemImage: "photo")
             }
             Section("연결") {
                 NavigationLink { HealthConnectView() } label: { Label("Apple 건강", systemImage: "heart.text.square.fill") }
@@ -441,7 +441,7 @@ struct SettingsView: View {
                     }
                 })) { Label("팀 경기 이틀 전 알림", systemImage: "bell.badge") }
             } footer: {
-                Text("쉬는 동안엔 주간 연속 기록이 안 끊겨. 팀 알림은 아직 참석을 안 정한 사람이 있을 때만 이 폰에서 울려.")
+                Text("쉬는 동안에는 주간 연속 기록이 끊기지 않습니다. 팀 알림은 아직 참석을 정하지 않은 사람이 있을 때만 이 아이폰에서 울립니다.")
             }
             Section("앱 정보") {
                 HStack {
@@ -450,7 +450,7 @@ struct SettingsView: View {
                     Text(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "-")
                         .foregroundStyle(Theme.inkSecondary)
                 }
-                Text("분석은 내 기록이 어땠는지만 보여줘. 의료 조언이나 실력 예측은 하지 않아.")
+                Text("분석은 내 기록의 흐름만 보여 줍니다. 의료 조언이나 실력 예측은 하지 않습니다.")
                     .font(.footnote).foregroundStyle(Theme.inkSecondary)
             }
         }
