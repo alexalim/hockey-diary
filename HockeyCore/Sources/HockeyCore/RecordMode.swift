@@ -1,26 +1,27 @@
 import Foundation
 
-/// 구력. 기록 입력 방식의 기본값을 정한다.
+/// 실력 레벨(초급·중급·고급). 기록 입력 방식의 기본값을 정한다. 구력은 고르기 쉽게 붙이는 힌트.
 public enum PlayerLevel: String, CaseIterable, Codable, Sendable {
     case starter, growing, seasoned
 
     public var title: String {
         switch self {
-        case .starter: return "입문"
+        case .starter: return "초급"
         case .growing: return "중급"
-        case .seasoned: return "숙련"
+        case .seasoned: return "고급"
         }
     }
 
+    /// 레벨을 고를 때 참고하는 구력 힌트.
     public var yearsText: String {
         switch self {
-        case .starter: return "1년 미만"
-        case .growing: return "1~3년"
-        case .seasoned: return "3년 넘게"
+        case .starter: return "구력 1년 미만"
+        case .growing: return "구력 1~3년"
+        case .seasoned: return "구력 3년 넘게"
         }
     }
 
-    /// 구력에 맞춘 입력 방식. 입문은 간단, 중급은 보통, 숙련은 자세히.
+    /// 레벨에 맞춘 입력 방식. 초급은 간단, 중급은 보통, 고급은 자세히.
     public var defaultMode: RecordMode {
         switch self {
         case .starter: return .simple
@@ -30,13 +31,13 @@ public enum PlayerLevel: String, CaseIterable, Codable, Sendable {
     }
 }
 
-/// 기록 입력 방식. auto는 구력을 따르고, 구력을 안 정했으면 보통.
+/// 기록 입력 방식. auto는 실력 레벨을 따르고, 레벨을 안 정했으면 보통.
 public enum RecordMode: String, CaseIterable, Codable, Sendable {
     case auto, simple, normal, detailed
 
     public var title: String {
         switch self {
-        case .auto: return "구력에 맞춤"
+        case .auto: return "레벨에 맞춤"
         case .simple: return "간단"
         case .normal: return "보통"
         case .detailed: return "자세히"

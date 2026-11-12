@@ -80,7 +80,7 @@ struct SessionEditorView: View {
     @State private var didPrefill = false
     /// 새 기록은 핵심만 보이고 나머지는 '더 적기'에 접어 둔다. 고치기는 다 펼친다.
     @State private var expanded: Bool
-    /// 구력·입력 방식에 따라 무엇을 처음부터 보여 줄지(설정 > 기록 방식).
+    /// 실력 레벨·입력 방식에 따라 무엇을 처음부터 보여 줄지(설정 > 기록 방식).
     private let preset: RecordPreset
     @State private var prefillNote: String?
     /// 그날 건강 앱 운동(종류 상관없이). 직접 골라 시간을 채운다.

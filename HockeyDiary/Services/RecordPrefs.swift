@@ -1,7 +1,7 @@
 import Foundation
 import HockeyCore
 
-/// 구력·입력 방식 설정. 값은 UserDefaults에만 둔다(기록 데이터와 무관).
+/// 실력 레벨·입력 방식 설정. 값은 UserDefaults에만 둔다(기록 데이터와 무관).
 enum RecordPrefs {
     static let levelKey = "player.level"
     static let modeKey = "record.mode"
@@ -37,7 +37,7 @@ enum RecordPrefs {
         case .detailed: what = "장소, 장비, 사진, 슛 차트, 경기 정보까지 처음부터 펼쳐 보여 줍니다."
         case .normal, .auto: what = "기본 항목을 보여 주고, 나머지는 '더 적기'로 펼칩니다."
         }
-        let from = mode(defaults) == .auto ? (level(defaults) == nil ? "구력을 정하지 않아 보통으로 적용 중입니다. " : "구력에 맞춰 적용 중입니다. ") : ""
+        let from = mode(defaults) == .auto ? (level(defaults) == nil ? "실력 레벨을 정하지 않아 보통으로 적용 중입니다. " : "실력 레벨에 맞춰 적용 중입니다. ") : ""
         return "\(from)지금 방식은 '\(m.title)'입니다. \(what)"
     }
 }

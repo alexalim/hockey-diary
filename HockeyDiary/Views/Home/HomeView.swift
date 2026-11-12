@@ -67,26 +67,26 @@ struct HomeView: View {
         .sheet(isPresented: $showingEdit) { NavigationStack { HomeEditView() } }
     }
 
-    /// 구력을 아직 안 정했을 때 한 번 묻는다. 고르면 기록 입력 방식이 거기에 맞춰진다.
+    /// 실력 레벨을 아직 안 정했을 때 한 번 묻는다. 고르면 기록 입력 방식이 거기에 맞춰진다.
     @AppStorage(RecordPrefs.levelKey) private var levelRaw = ""
     @ViewBuilder
     private var levelCard: some View {
         if levelRaw.isEmpty {
             Card {
-                CardHeader(title: "하키 구력이 어떻게 돼?", systemImage: "person.crop.circle.badge.questionmark")
-                Text("구력에 맞춰 기록 입력을 간단하게, 또는 자세하게 맞춰줄게. 설정에서 언제든 바꿔.")
+                CardHeader(title: "내 하키 실력은 어느 정도야?", systemImage: "person.crop.circle.badge.questionmark")
+                Text("레벨에 맞춰 기록 입력을 간단하게, 또는 자세하게 맞춰줄게. 구력은 참고만 해. 설정에서 언제든 바꿔.")
                     .font(.subheadline).foregroundStyle(Theme.inkSecondary)
                 HStack(spacing: 8) {
                     ForEach(PlayerLevel.allCases, id: \.rawValue) { l in
                         Button { levelRaw = l.rawValue } label: {
                             VStack(spacing: 2) {
-                                Text(l.yearsText).font(.subheadline.bold())
-                                Text(l.title).font(.caption)
+                                Text(l.title).font(.subheadline.bold())
+                                Text(l.yearsText).font(.caption)
                             }
                             .frame(maxWidth: .infinity, minHeight: 56)
                         }
                         .buttonStyle(.bordered).tint(Theme.cobalt)
-                        .accessibilityLabel("구력 \(l.yearsText)")
+                        .accessibilityLabel("실력 \(l.title)")
                     }
                 }
             }
@@ -448,7 +448,7 @@ struct SettingsView: View {
     var body: some View {
         List {
             Section {
-                Picker("구력", selection: $levelRaw) {
+                Picker("실력 레벨", selection: $levelRaw) {
                     Text("정하지 않음").tag("")
                     ForEach(PlayerLevel.allCases, id: \.rawValue) { l in Text("\(l.title) · \(l.yearsText)").tag(l.rawValue) }
                 }
