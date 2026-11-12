@@ -6,6 +6,8 @@
 #   tools/signing.sh p12  ~/Downloads/distribution.cer   # 2) Apple에서 받은 .cer → .p12
 #   tools/signing.sh secrets <프로파일.mobileprovision> <AuthKey_XXXX.p8> <ASC_ISSUER_ID>
 #                                            # 3) GitHub Secrets 등록 (gh CLI 필요)
+#   tools/signing.sh extension watch|widget <프로파일.mobileprovision>
+#                                            # 4) 워치·위젯 확장 프로파일 Secrets 2개 (WATCH_/WIDGET_PROFILE_*)
 set -euo pipefail
 
 DIR="${SIGNING_DIR:-$HOME/.shotsort-signing}"
@@ -74,8 +76,33 @@ case "$cmd" in
     gh secret set ASC_ISSUER_ID --body "$issuer"
     base64 -w0 "$p8" | gh secret set ASC_KEY_P8_BASE64
     echo "✅ Secrets 8개 등록 완료. GitHub → Actions → 'Release to TestFlight' → Run workflow"
+    echo "   워치·위젯 확장 프로파일은 다음으로:  tools/signing.sh extension watch|widget <프로파일>"
+    ;;
+
+  extension)
+    # 확장 타깃은 앱과 별도 App Store 프로파일로 서명하므로 이름과 내용을 따로 넣습니다.
+    # 번들 ID: watch = ...hockeydiary.watchkitapp, widget = ...hockeydiary.widgets
+    kind="${1:?watch 또는 widget}"; profile="${2:?.mobileprovision 경로}"
+    case "$kind" in
+      watch)  prefix=WATCH;  suffix=".watchkitapp" ;;
+      widget) prefix=WIDGET; suffix=".widgets" ;;
+      *) echo "watch 또는 widget 중 하나를 넣어 주세요."; exit 1 ;;
+    esac
+    command -v gh >/dev/null || { echo "gh CLI가 필요해요: https://cli.github.com"; exit 1; }
+    [ -s "$profile" ] || { echo "프로파일 파일이 없어요: $profile"; exit 1; }
+    plist=$(openssl smime -inform der -verify -noverify -in "$profile" 2>/dev/null)
+    pname=$(python3 -c 'import plistlib,sys; print(plistlib.loads(sys.stdin.buffer.read())["Name"])' <<<"$plist")
+    appid=$(python3 -c 'import plistlib,sys; print(plistlib.loads(sys.stdin.buffer.read())["Entitlements"]["application-identifier"])' <<<"$plist")
+    case "$appid" in
+      *"$suffix") ;;
+      *) echo "이 프로파일은 $kind 용이 아니에요: $appid (끝이 $suffix 여야 함)"; exit 1 ;;
+    esac
+    echo "프로파일: $pname / 앱: $appid → ${prefix}_PROFILE_NAME, ${prefix}_PROFILE_BASE64"
+    gh secret set "${prefix}_PROFILE_NAME" --body "$pname"
+    base64 -w0 "$profile" | gh secret set "${prefix}_PROFILE_BASE64"
+    echo "✅ ${prefix}_PROFILE_* 등록 완료"
     ;;
 
   *)
-    sed -n '2,9p' "$0"; exit 1 ;;
+    sed -n '2,11p' "$0"; exit 1 ;;
 esac
