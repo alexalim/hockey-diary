@@ -904,3 +904,24 @@ final class ConditionTests: XCTestCase {
         XCTAssertEqual(ConditionMetric.restingHR.text(54.6), "55bpm")
     }
 }
+
+final class RecordModeTests: XCTestCase {
+    func testAutoFollowsLevelAndExplicitWins() {
+        XCTAssertEqual(RecordMode.resolve(.auto, level: nil), .normal)
+        XCTAssertEqual(RecordMode.resolve(.auto, level: .starter), .simple)
+        XCTAssertEqual(RecordMode.resolve(.auto, level: .growing), .normal)
+        XCTAssertEqual(RecordMode.resolve(.auto, level: .seasoned), .detailed)
+        XCTAssertEqual(RecordMode.resolve(.simple, level: .seasoned), .simple)
+    }
+
+    func testPresets() {
+        let simple = RecordMode.simple.preset, normal = RecordMode.normal.preset, detailed = RecordMode.detailed.preset
+        XCTAssertFalse(simple.expandedByDefault); XCTAssertFalse(simple.showsGameStats); XCTAssertFalse(simple.showsSkillDetail)
+        XCTAssertFalse(normal.expandedByDefault); XCTAssertTrue(normal.showsGameStats)
+        XCTAssertTrue(detailed.expandedByDefault); XCTAssertTrue(detailed.gameDetailsOpen)
+        XCTAssertEqual(RecordMode.auto.preset, normal)
+        XCTAssertEqual(simple.defaultMinutes(for: .miniGame), 60)
+        XCTAssertEqual(normal.defaultMinutes(for: .miniGame), 90)
+        XCTAssertEqual(detailed.defaultMinutes(for: .lesson), 60)
+    }
+}

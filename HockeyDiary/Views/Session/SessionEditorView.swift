@@ -80,6 +80,8 @@ struct SessionEditorView: View {
     @State private var didPrefill = false
     /// 새 기록은 핵심만 보이고 나머지는 '더 적기'에 접어 둔다. 고치기는 다 펼친다.
     @State private var expanded: Bool
+    /// 구력·입력 방식에 따라 무엇을 처음부터 보여 줄지(설정 > 기록 방식).
+    private let preset: RecordPreset
     @State private var prefillNote: String?
     /// 그날 건강 앱 운동(종류 상관없이). 직접 골라 시간을 채운다.
     @State private var dayWorkouts: [HealthWorkout] = []
@@ -91,10 +93,13 @@ struct SessionEditorView: View {
     init(newType: ActivityType, startsAt: Date = Date(), fromNow: Bool = false) {
         session = nil
         self.fromNow = fromNow
-        _expanded = State(initialValue: false)
+        let preset = RecordPrefs.preset()
+        self.preset = preset
+        _expanded = State(initialValue: preset.expandedByDefault)
+        _showingMore = State(initialValue: preset.gameDetailsOpen)
         _type = State(initialValue: newType)
         _startsAt = State(initialValue: startsAt)
-        _minutes = State(initialValue: newType.isGame ? 90 : 60)
+        _minutes = State(initialValue: preset.defaultMinutes(for: newType))
         _surface = State(initialValue: .unknown)
         _rinkName = State(initialValue: "")
         _iceFeel = State(initialValue: nil)
@@ -117,13 +122,14 @@ struct SessionEditorView: View {
         _attempts = State(initialValue: [])
         _skateID = State(initialValue: nil)
         _runnerID = State(initialValue: nil)
-        _iceMinutes = State(initialValue: newType.isGame ? 90 : 60)
+        _iceMinutes = State(initialValue: preset.defaultMinutes(for: newType))
         _iceMinutesEdited = State(initialValue: false)
     }
 
     init(session: Session) {
         self.session = session
         self.fromNow = false
+        self.preset = RecordPrefs.preset()
         _expanded = State(initialValue: true)
         _type = State(initialValue: session.type)
         _startsAt = State(initialValue: session.startsAt)
@@ -269,7 +275,10 @@ struct SessionEditorView: View {
                 }
             }
         } footer: {
-            if let prefillNote { Text(prefillNote) }
+            VStack(alignment: .leading, spacing: 4) {
+                if let prefillNote { Text(prefillNote) }
+                if isNew, let note = RecordPrefs.editorNote() { Text(note) }
+            }
         }
     }
 
@@ -324,7 +333,9 @@ struct SessionEditorView: View {
                             .accessibilityLabel("\(draft.name) 빼기")
                     }
                     TextField("코치 피드백·느낀 점", text: $draft.feedback, axis: .vertical)
-                    ScalePicker(title: "체감 난도", low: "쉬움", high: "어려움", value: $draft.difficulty)
+                    if preset.showsSkillDetail {
+                        ScalePicker(title: "체감 난도", low: "쉬움", high: "어려움", value: $draft.difficulty)
+                    }
                 }
                 .padding(.vertical, 4)
             }
@@ -369,7 +380,7 @@ struct SessionEditorView: View {
                                                      art: .symbol(o == .success ? "checkmark.seal.fill" : (o == .partial ? "circle.lefthalf.filled" : "tortoise.fill")))
                                     },
                                     selection: $draft.outcome, columns: 4, minHeight: 60)
-                        OptionalNumberField(title: "시도 횟수", value: $draft.count)
+                        if preset.showsSkillDetail { OptionalNumberField(title: "시도 횟수", value: $draft.count) }
                         TextField("어떤 상황이었어?", text: $draft.notes, axis: .vertical)
                     } else if draft.tried == false {
                         Text("괜찮아. 기회가 없었던 날도 기록이야. 실패로 세지 않아.")
@@ -402,14 +413,14 @@ struct SessionEditorView: View {
         Section {
             TextField("오늘의 배움 한 줄", text: $learnedToday, axis: .vertical)
             if expanded && type == .lesson {
-                TextField("코치 메모", text: $coachNotes, axis: .vertical)
+                if preset.showsCoachNotes { TextField("코치 메모", text: $coachNotes, axis: .vertical) }
                 TextField("다음 목표", text: $nextGoal, axis: .vertical)
-                ScalePicker(title: "오늘 내 평가", low: "아쉬움", high: "만족", value: $selfRating)
+                if preset.showsCoachNotes { ScalePicker(title: "오늘 내 평가", low: "아쉬움", high: "만족", value: $selfRating) }
             }
             if expanded && type.isGame {
                 DisclosureGroup("경기 정보 더 기록하기", isExpanded: $showingMore) {
                     TextField("상대 팀", text: $opponent)
-                    if type.showsGameStats {
+                    if type.showsGameStats && preset.showsGameStats {
                         OptionalNumberField(title: "우리 팀 점수", value: $scoreFor)
                         OptionalNumberField(title: "상대 팀 점수", value: $scoreAgainst)
                         TextField("포지션", text: $position)

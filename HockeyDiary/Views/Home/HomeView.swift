@@ -46,6 +46,7 @@ struct HomeView: View {
                 }
                 if health.openFailed || health.lastSaveFailed { storeWarning }
                 promptCard
+                levelCard
                 nextGameHero
                 weekCard
                 SectionHeader(title: "빠른 시작")
@@ -64,6 +65,32 @@ struct HomeView: View {
         .navigationTitle("").navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showingSettings) { NavigationStack { SettingsView() } }
         .sheet(isPresented: $showingEdit) { NavigationStack { HomeEditView() } }
+    }
+
+    /// 구력을 아직 안 정했을 때 한 번 묻는다. 고르면 기록 입력 방식이 거기에 맞춰진다.
+    @AppStorage(RecordPrefs.levelKey) private var levelRaw = ""
+    @ViewBuilder
+    private var levelCard: some View {
+        if levelRaw.isEmpty {
+            Card {
+                CardHeader(title: "하키 구력이 어떻게 돼?", systemImage: "person.crop.circle.badge.questionmark")
+                Text("구력에 맞춰 기록 입력을 간단하게, 또는 자세하게 맞춰줄게. 설정에서 언제든 바꿔.")
+                    .font(.subheadline).foregroundStyle(Theme.inkSecondary)
+                HStack(spacing: 8) {
+                    ForEach(PlayerLevel.allCases, id: \.rawValue) { l in
+                        Button { levelRaw = l.rawValue } label: {
+                            VStack(spacing: 2) {
+                                Text(l.yearsText).font(.subheadline.bold())
+                                Text(l.title).font(.caption)
+                            }
+                            .frame(maxWidth: .infinity, minHeight: 56)
+                        }
+                        .buttonStyle(.bordered).tint(Theme.cobalt)
+                        .accessibilityLabel("구력 \(l.yearsText)")
+                    }
+                }
+            }
+        }
     }
 
     @ViewBuilder
@@ -414,10 +441,25 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @AppStorage(RestPrefs.key) private var restJSON = "[]"
     @AppStorage(TeamReminder.enabledKey) private var teamReminder = false
+    @AppStorage(RecordPrefs.levelKey) private var levelRaw = ""
+    @AppStorage(RecordPrefs.modeKey) private var modeRaw = RecordMode.auto.rawValue
     @Environment(\.modelContext) private var context
 
     var body: some View {
         List {
+            Section {
+                Picker("구력", selection: $levelRaw) {
+                    Text("정하지 않음").tag("")
+                    ForEach(PlayerLevel.allCases, id: \.rawValue) { l in Text("\(l.title) · \(l.yearsText)").tag(l.rawValue) }
+                }
+                Picker("입력 방식", selection: $modeRaw) {
+                    ForEach(RecordMode.allCases, id: \.rawValue) { m in Text(m.title).tag(m.rawValue) }
+                }
+            } header: {
+                Text("기록 방식")
+            } footer: {
+                Text(RecordPrefs.settingsSummary())
+            }
             Section("내 기록 보관") {
                 Label("기록은 모두 이 아이폰에만 저장됩니다.", systemImage: "iphone")
                 Label("서버나 iCloud로 보내지 않습니다. 링크장 검색어만 Apple 지도로 전달됩니다.", systemImage: "icloud.slash")
