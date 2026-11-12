@@ -66,8 +66,10 @@ struct RootView: View {
         .safeAreaInset(edge: .bottom, spacing: 0) { MahadaTabBar(selection: $tab) }
         .contentMargins(.bottom, MahadaTabBar.height, for: .scrollContent)
         .contentMargins(.bottom, MahadaTabBar.height, for: .scrollIndicators)
-        .task { await TeamReminder.reschedule(context) }
-        .onChange(of: scenePhase) { _, p in if p == .active { Task { await TeamReminder.reschedule(context) } } }
+        .task { await TeamReminder.reschedule(context); WidgetBridge.refresh(context) }
+        .onChange(of: scenePhase) { _, p in if p == .active { Task { await TeamReminder.reschedule(context) }; WidgetBridge.refresh(context) } }
+        // 기록 시트를 닫으면 위젯 숫자를 바로 맞춘다.
+        .onChange(of: newEntry == nil) { _, closed in if closed { WidgetBridge.refresh(context) } }
         .confirmationDialog("무엇을 기록할까?", isPresented: $showingQuickMenu, titleVisibility: .visible) {
             Button("수업 기록") { newEntry = .session(.lesson) }
             Button("자유 연습") { newEntry = .session(.freePractice) }

@@ -201,7 +201,26 @@ struct RoutineRunView: View {
         .sensoryFeedback(.selection, trigger: repTick)
         // 다음 드릴로 넘어갈 땐 +1과 다른 묵직한 진동.
         .sensoryFeedback(.impact(weight: .heavy), trigger: run.index)
-        .onAppear(perform: resetForCurrent)
+        .onAppear {
+            resetForCurrent()
+            if let state = activityState { RoutineActivity.shared.start(routineName: run.routine?.name ?? "드릴", state: state) }
+        }
+        .onChange(of: run.index) { _, _ in pushActivity() }
+        .onChange(of: timerOn) { _, _ in pushActivity() }
+        .onChange(of: count) { _, _ in pushActivity() }
+        .onDisappear { RoutineActivity.shared.end() }
+    }
+
+    /// 잠금 화면·다이내믹 아일랜드에 보여 줄 지금 상태. 드릴이 끝났으면 nil.
+    private var activityState: RoutineActivityAttributes.ContentState? {
+        guard let (drill, item) = run.current else { return nil }
+        return .init(drillTitle: drill.title, skillName: drill.skillName, index: run.index + 1, total: run.items.count,
+                     endDate: timerOn && secondsLeft > 0 ? Date().addingTimeInterval(TimeInterval(secondsLeft)) : nil,
+                     secondsLeft: secondsLeft, count: count, target: item.target, isMinutes: drill.unit == .minutes)
+    }
+
+    private func pushActivity() {
+        if let state = activityState { RoutineActivity.shared.update(state) } else { RoutineActivity.shared.end() }
     }
 
     private func drillScreen(_ drill: Drill, _ item: RoutineItem) -> some View {

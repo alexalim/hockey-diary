@@ -56,6 +56,7 @@ jobs:
           echo "앱: $app"
           ls "$app/Watch" 2>/dev/null || echo "(Watch 없음)"
           test -d "$app/Watch/HockeyDiaryWatch.app" || { echo "::error::워치 앱이 앱 안에 없습니다"; exit 1; }
+          test -d "$app/PlugIns/HockeyDiaryWidgets.appex" || { echo "::error::위젯이 앱 안에 없습니다"; exit 1; }
 
       - name: 앱 저장소 통합 테스트 (Integration, 시뮬레이터)
         run: |

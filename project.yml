@@ -26,14 +26,18 @@ targets:
     platform: iOS
     sources:
       - path: HockeyDiary
+      - path: Shared
     dependencies:
       - package: HockeyCore
       - target: HockeyDiaryWatch
+      - target: HockeyDiaryWidgets
     entitlements:
       path: HockeyDiary/HockeyDiary.entitlements
       properties:
         com.apple.developer.healthkit: true
         com.apple.developer.healthkit.access: []
+        # 위젯과 숫자를 나누는 키체인 그룹(앱 그룹 대신, 포털 설정 없이 됨).
+        keychain-access-groups: ["$(AppIdentifierPrefix)com.aspynlim.hockeydiary.shared"]
     info:
       path: HockeyDiary/Info.plist
       properties:
@@ -44,6 +48,8 @@ targets:
           UIColorName: LaunchBackground
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         ITSAppUsesNonExemptEncryption: false
+        # 루틴 러너를 잠금 화면·다이내믹 아일랜드에 띄운다.
+        NSSupportsLiveActivities: true
         # 시즌 리포트 이미지를 공유 시트에서 '이미지 저장'할 때 필요(없으면 저장 순간 앱이 꺼진다).
         NSPhotoLibraryAddUsageDescription: "시즌 리포트 이미지를 사진첩에 저장할 때 써. 다른 사진은 보지 않아."
         NSHealthShareUsageDescription: "하키 전날 잠, 수업·경기 중 심박, 워치·가민이 잰 운동을 내 기록 옆에 보여줄게. 읽기만 하고 어디에도 안 보내."
@@ -109,6 +115,39 @@ targets:
           CODE_SIGN_STYLE: Manual
           CODE_SIGN_IDENTITY: "Apple Distribution"
           PROVISIONING_PROFILE_SPECIFIER: "${WATCH_PROFILE_NAME}"
+
+  # 홈·잠금 화면 위젯 + 루틴 실시간 활동. 앱이 키체인 공유 그룹에 둔 숫자만 읽는다.
+  HockeyDiaryWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: HockeyDiaryWidgets
+      - path: Shared
+    entitlements:
+      path: HockeyDiaryWidgets/HockeyDiaryWidgets.entitlements
+      properties:
+        keychain-access-groups: ["$(AppIdentifierPrefix)com.aspynlim.hockeydiary.shared"]
+    info:
+      path: HockeyDiaryWidgets/Info.plist
+      properties:
+        CFBundleDisplayName: 마하다
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.aspynlim.hockeydiary.widgets
+        PRODUCT_NAME: HockeyDiaryWidgets
+        GENERATE_INFOPLIST_FILE: NO
+        SKIP_INSTALL: YES
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Automatic
+      configs:
+        Release:
+          CODE_SIGN_STYLE: Manual
+          CODE_SIGN_IDENTITY: "Apple Distribution"
+          PROVISIONING_PROFILE_SPECIFIER: "${WIDGET_PROFILE_NAME}"
 
   # 앱 저장소 통합 테스트(메모리 SwiftData). build-check에서 시뮬레이터로 실행한다.
   HockeyDiaryTests:
