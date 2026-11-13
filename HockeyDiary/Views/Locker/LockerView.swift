@@ -40,7 +40,7 @@ struct LockerView: View {
                             .allowsHitTesting(angle >= DoorSwing.openAngle - 1)
                         LockerDoor(profile: profiles.first, placements: placements)
                             // 문이 돌수록 빛을 덜 받아 어두워진다.
-                            .overlay(Color.black.opacity(0.4 * progress).clipShape(RoundedRectangle(cornerRadius: 14)))
+                            .overlay(Color.black.opacity(0.4 * progress).clipShape(RoundedRectangle(cornerRadius: LockerDoorBase.corner, style: .continuous)))
                             .rotation3DEffect(.degrees(-angle), axis: (x: 0, y: 1, z: 0), anchor: .leading, perspective: 0.45)
                             .shadow(color: .black.opacity(0.35 * progress), radius: 18 * progress, x: -10 * progress)
                             .opacity(angle > 88 ? 0 : 1)
@@ -219,38 +219,57 @@ extension LockerTheme {
 /// 락커 문 바탕(번호판·이름표·통풍구·손잡이).
 struct LockerDoorBase: View {
     var profile: LockerProfile?
+    /// 문·안쪽·스윙 그림자가 같이 쓰는 모서리. 하나만 바꾸면 문이 돌 때 귀퉁이가 어긋난다.
+    static let corner: CGFloat = 22
 
     var body: some View {
         let theme = profile?.theme ?? .cobalt
-        RoundedRectangle(cornerRadius: 14, style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: Self.corner, style: .continuous)
+        shape
             .fill(LinearGradient(colors: theme.colors, startPoint: .top, endPoint: .bottom))
-            .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(.white.opacity(0.25), lineWidth: 2))
+            // 가장자리 바느질 선
+            .overlay(shape.inset(by: 7).stroke(.white.opacity(0.35), style: StrokeStyle(lineWidth: 2, lineCap: .round, dash: [6, 6])))
             .overlay(alignment: .top) {
-                VStack(spacing: 14) {
+                VStack(spacing: 18) {
+                    // 이름표: 테이프로 붙인 종이 쪽지
                     Text((profile?.nameplate.isEmpty == false ? profile!.nameplate : "MY LOCKER"))
                         .font(.system(.headline, design: .rounded).weight(.heavy))
-                        .foregroundStyle(Theme.deepNavy)
+                        .foregroundStyle(Theme.paperInk)
                         .lineLimit(1)
-                        .padding(.horizontal, 18).padding(.vertical, 8)
-                        .background(.white, in: RoundedRectangle(cornerRadius: 6))
+                        .padding(.horizontal, 20).padding(.vertical, 10)
+                        .background(Theme.paper, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                        .overlay(alignment: .top) { WashiTape(color: Theme.tapePink, angle: -5, width: 56).offset(y: -9) }
+                        .rotationEffect(.degrees(-2))
+                        .shadow(color: .black.opacity(0.18), radius: 3, y: 2)
+                    // 번호: 동그란 스티커
                     if let n = profile?.numberText, !n.isEmpty {
                         Text(n)
-                            .font(.system(size: 34, weight: .black, design: .rounded))
+                            .font(.system(size: 28, weight: .black, design: .rounded))
                             .monospacedDigit()
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 14).padding(.vertical, 2)
-                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(.white.opacity(0.8), lineWidth: 2))
+                            .foregroundStyle(Theme.paperInk)
+                            .padding(.horizontal, 10)
+                            .frame(minWidth: 70, minHeight: 70)
+                            .background(Theme.stickers[1], in: Capsule())
+                            .overlay(Capsule().stroke(.white, lineWidth: 4))
+                            .rotationEffect(.degrees(6))
+                            .shadow(color: .black.opacity(0.18), radius: 3, y: 2)
                     }
-                    VStack(spacing: 7) {
+                    // 통풍구: 말랑한 캡슐
+                    VStack(spacing: 8) {
                         ForEach(0..<5, id: \.self) { _ in
-                            Capsule().fill(.black.opacity(0.3)).frame(width: 140, height: 6)
+                            Capsule().fill(.white.opacity(0.22)).frame(width: 128, height: 8)
                         }
                     }
                 }
-                .padding(.top, 30)
+                .padding(.top, 34)
             }
             .overlay(alignment: .trailing) {
-                Capsule().fill(.white.opacity(0.85)).frame(width: 12, height: 70).padding(.trailing, 22)
+                // 손잡이: 파스텔 사탕
+                Capsule().fill(Theme.stickers[0])
+                    .frame(width: 16, height: 72)
+                    .overlay(Capsule().stroke(.white, lineWidth: 3))
+                    .shadow(color: .black.opacity(0.2), radius: 2, y: 1)
+                    .padding(.trailing, 22)
             }
     }
 }
@@ -290,16 +309,16 @@ struct StickerView: View {
             Image(uiImage: image).resizable().scaledToFill()
                 .frame(width: side, height: side)
                 .clipShape(Circle())
-                .overlay(Circle().stroke(.white, lineWidth: 3))
-                .shadow(radius: 2, y: 1)
+                .overlay(Circle().stroke(.white, lineWidth: max(3, side * 0.07)))
+                .shadow(color: Theme.deepNavy.opacity(0.18), radius: 3, y: 2)
         } else if let def = StickerCatalog.def(key) {
             let (fg, bg) = Self.colors(def.palette)
             AppIcon(def.symbol, size: side * 0.5)
                 .foregroundStyle(fg)
                 .frame(width: side, height: side)
                 .background(bg, in: Circle())
-                .overlay(Circle().stroke(.white, lineWidth: 3))
-                .shadow(radius: 2, y: 1)
+                .overlay(Circle().stroke(.white, lineWidth: max(3, side * 0.07)))
+                .shadow(color: Theme.deepNavy.opacity(0.18), radius: 3, y: 2)
         } else {
             Circle().fill(Theme.inkTertiary.opacity(0.4)).frame(width: side, height: side)
         }
@@ -307,10 +326,10 @@ struct StickerView: View {
 
     static func colors(_ palette: Int) -> (Color, Color) {
         switch palette {
-        case 0: return (.white, Theme.neonPink)
-        case 1: return (.white, Theme.cobalt)
-        case 3: return (Theme.deepNavy, Theme.gold)
-        default: return (Theme.cobalt, Theme.cobaltSoft)
+        case 0: return (Theme.paperInk, Theme.stickers[0])   // 분홍
+        case 1: return (Theme.paperInk, Theme.stickers[3])   // 하늘
+        case 3: return (Theme.deepNavy, Theme.gold)          // 배지는 금색 그대로
+        default: return (Theme.paperInk, Theme.stickers[2])  // 민트
         }
     }
 }
@@ -319,42 +338,53 @@ struct StickerView: View {
 struct LockerInside: View {
     var skateCount: Int
     var gear: [GearItem]
+    private let tapes = [Theme.tapePink, Theme.tapeMint, Theme.tapeYellow]
 
     var body: some View {
-        VStack(spacing: 8) {
-            zoneLink(.top)
-            zoneLink(.middle)
+        let shape = RoundedRectangle(cornerRadius: LockerDoorBase.corner, style: .continuous)
+        VStack(spacing: 12) {
+            zoneLink(.top, 0)
+            zoneLink(.middle, 1)
             NavigationLink { SkateListView() } label: {
-                zoneLabel(skateCount == 0 ? "스케이트 · 첫 장비 등록" : "스케이트 \(skateCount)켤레", "shoeprints.fill")
+                // UI 테스트가 "스케이트 1켤레"를 글자 하나로 찾는다. 나누지 말 것.
+                zoneLabel(skateCount == 0 ? "스케이트 · 첫 장비 등록" : "스케이트 \(skateCount)켤레", "shoeprints.fill", 2)
             }
             .buttonStyle(.plain)
-            zoneLink(.side)
+            zoneLink(.side, 3)
         }
-        .padding(12)
-        .background(Theme.deepNavy.opacity(0.92), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .padding(.horizontal, 12).padding(.vertical, 14)
+        .background { ZStack { shape.fill(Theme.paper); DotGrid().clipShape(shape) } }
+        .overlay(shape.stroke(Theme.paperDot, lineWidth: 1))
     }
 
-    private func zoneLink(_ zone: GearKind.Zone) -> some View {
+    private func zoneLink(_ zone: GearKind.Zone, _ i: Int) -> some View {
         let count = gear.filter { zone.kinds.contains($0.kind) }.count
         return NavigationLink { GearListView(zone: zone) } label: {
-            zoneLabel(count == 0 ? "\(zone.title) · 첫 장비 등록" : "\(zone.title) \(count)개", zone.symbol)
+            zoneLabel(count == 0 ? "\(zone.title) · 첫 장비 등록" : "\(zone.title) \(count)개", zone.symbol, i)
         }
         .buttonStyle(.plain)
     }
 
-    private func zoneLabel(_ title: String, _ icon: String) -> some View {
-        HStack {
-            AppIcon(icon).font(.title2).frame(width: 40)
-            Text(title).font(.headline)
+    private func zoneLabel(_ title: String, _ icon: String, _ i: Int) -> some View {
+        HStack(spacing: 12) {
+            AppIcon(icon, size: 24)
+                .foregroundStyle(Theme.paperInk)
+                .frame(width: 48, height: 48)
+                .background(Theme.stickers[i % Theme.stickers.count], in: Circle())
+            Text(title).font(.system(.headline, design: .rounded)).foregroundStyle(Theme.paperInk)
             Spacer()
-            Text("열기").font(.caption.bold())
-                .padding(.horizontal, 8).padding(.vertical, 4)
+            Text("열기").font(.system(.caption, design: .rounded).bold())
+                .foregroundStyle(.white)
+                .padding(.horizontal, 10).padding(.vertical, 5)
                 .background(Theme.neonPink, in: Capsule())
         }
-        .foregroundStyle(.white)
-        .frame(maxWidth: .infinity, minHeight: 90)
+        .frame(maxWidth: .infinity, minHeight: 84)
         .padding(.horizontal, 14)
-        .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .background(Theme.card, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(alignment: .topLeading) {
+            WashiTape(color: tapes[i % tapes.count], angle: i.isMultiple(of: 2) ? -6 : 5, width: 44).offset(x: 16, y: -8)
+        }
+        .shadow(color: Theme.deepNavy.opacity(0.07), radius: 4, y: 2)
     }
 }
 
@@ -389,15 +419,23 @@ struct LockerCustomizeView: View {
                 }
                 .frame(height: 380)
                 .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
+                .listRowBackground(Theme.paper)
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel("락커 문 미리보기, 스티커 \(placements.count)개. 아래 목록에서도 고칠 수 있어요.")
-                if let item = selectedItem { selectionTools(item) }
-                Button { showingLibrary = true } label: { Label("스티커 붙이기", icon: "plus.circle.fill") }
+                if let item = selectedItem { selectionTools(item).listRowBackground(Theme.paper) }
+                Button { showingLibrary = true } label: {
+                    Label("스티커 붙이기", icon: "plus.circle.fill")
+                        .font(.system(.headline, design: .rounded))
+                        .frame(maxWidth: .infinity, minHeight: Theme.touch)
+                }
+                .buttonStyle(.borderedProminent).tint(Theme.neonPink).buttonBorderShape(.capsule)
+                .listRowBackground(Theme.paper)
             } footer: {
                 Text("스티커를 끌어서 옮겨 보세요. 두 손가락으로 키우고 돌릴 수도 있어요. 바꾸면 바로 저장돼요.")
+                    .foregroundStyle(Theme.paperInkSoft)
             }
 
-            Section("번호판·이름표") {
+            Section {
                 HStack {
                     Text("락커 번호")
                     Spacer()
@@ -416,10 +454,13 @@ struct LockerCustomizeView: View {
                         set: { profile.nameplate = String($0.prefix(14)); context.saveOrReport() }))
                         .multilineTextAlignment(.trailing)
                 }
-                Text("꾸미기용 번호예요. 링크장 사물함 예약과는 상관없어요.").font(.caption).foregroundStyle(Theme.inkSecondary)
+                Text("꾸미기용 번호예요. 링크장 사물함 예약과는 상관없어요.").font(.caption).foregroundStyle(Theme.paperInkSoft)
+            } header: {
+                paperHeader("번호판·이름표", "pencil", Theme.tapeYellow)
             }
+            .listRowBackground(Theme.paper)
 
-            Section("문 색") {
+            Section {
                 HStack(spacing: 10) {
                     ForEach(LockerTheme.allCases, id: \.self) { t in
                         Button {
@@ -428,9 +469,12 @@ struct LockerCustomizeView: View {
                         } label: {
                             VStack(spacing: 4) {
                                 Circle().fill(LinearGradient(colors: t.colors, startPoint: .top, endPoint: .bottom))
-                                    .frame(width: 40, height: 40)
-                                    .overlay(Circle().stroke(profile.theme == t ? Theme.neonPink : .clear, lineWidth: 3))
-                                Text(t.title).font(.caption2)
+                                    .frame(width: 42, height: 42)
+                                    .overlay(Circle().stroke(.white, lineWidth: 3))
+                                    .overlay(Circle().stroke(profile.theme == t ? Theme.neonPink : .clear, lineWidth: 3).padding(-4))
+                                    .shadow(color: Theme.deepNavy.opacity(0.15), radius: 2, y: 1)
+                                    .scaleEffect(profile.theme == t ? 1.08 : 1)
+                                Text(t.title).font(.system(.caption2, design: .rounded)).foregroundStyle(Theme.paperInk)
                             }
                             .frame(maxWidth: .infinity, minHeight: Theme.touch)
                         }
@@ -439,7 +483,11 @@ struct LockerCustomizeView: View {
                         .accessibilityAddTraits(profile.theme == t ? .isSelected : [])
                     }
                 }
+                .animation(.spring(response: 0.3, dampingFraction: 0.6), value: profile.theme)
+            } header: {
+                paperHeader("문 색", "paintbrush.fill", Theme.tapeMint)
             }
+            .listRowBackground(Theme.paper)
 
             if !placements.isEmpty {
                 Section {
@@ -461,12 +509,19 @@ struct LockerCustomizeView: View {
                     }
                     Button("모든 스티커 떼기", role: .destructive) { confirmingReset = true }
                 } header: {
-                    Text("붙인 스티커 (위가 맨 앞)")
+                    paperHeader("붙인 스티커 (위가 맨 앞)", "seal", Theme.tapePink)
                 } footer: {
                     Text("목록에서 고른 뒤 위 버튼으로 순서·크기·각도를 바꿔도 돼요. 왼쪽으로 밀면 떼져요.")
+                        .foregroundStyle(Theme.paperInkSoft)
                 }
+                .listRowBackground(Theme.paper)
             }
         }
+        .fontDesign(.rounded)
+        .foregroundStyle(Theme.paperInk)
+        .scrollContentBackground(.hidden)
+        .listRowSeparatorTint(Theme.paperDot)
+        .screenBackground()
         .navigationTitle("락커 꾸미기")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { ToolbarItem(placement: .confirmationAction) { Button("완료") { context.saveOrReport(); dismiss() } } }
@@ -482,6 +537,14 @@ struct LockerCustomizeView: View {
         } message: {
             Text("받은 스티커는 그대로 남아요. 다시 붙일 수 있어요.")
         }
+    }
+
+    /// 섹션 제목: 테이프 한 조각 + 둥근 글꼴.
+    private func paperHeader(_ text: String, _ icon: String, _ tape: Color) -> some View {
+        PaperTitle(text: text, systemImage: icon)
+            .textCase(nil)
+            .padding(.top, 10)
+            .overlay(alignment: .topLeading) { WashiTape(color: tape, angle: -4, width: 40).offset(x: -6, y: -2) }
     }
 
     private func selectionTools(_ item: StickerPlacement) -> some View {
@@ -503,7 +566,11 @@ struct LockerCustomizeView: View {
 
     private func tool(_ icon: String, _ label: String, role: ButtonRole? = nil, action: @escaping () -> Void) -> some View {
         Button(role: role, action: action) {
-            AppIcon(icon).frame(maxWidth: .infinity, minHeight: Theme.touch)
+            AppIcon(icon)
+                .foregroundStyle(role == .destructive ? Theme.danger : Theme.paperInk)
+                .frame(width: 40, height: 40)
+                .background(role == .destructive ? Theme.dangerSoft : Theme.stickers[3], in: Circle())
+                .frame(maxWidth: .infinity, minHeight: Theme.touch)
         }
         .accessibilityLabel(label)
     }
@@ -587,15 +654,16 @@ struct StickerLibraryView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                group("기본", .basic)
-                group("하키", .hockey)
-                group("꾸미기", .deco)
+            VStack(alignment: .leading, spacing: 22) {
+                group("기본", .basic, Theme.tapePink)
+                group("하키", .hockey, Theme.tapeMint)
+                group("꾸미기", .deco, Theme.tapeYellow)
                 achievements
                 photoSection
             }
-            .padding(16)
+            .padding(.horizontal, Theme.screenPadding).padding(.vertical, 16)
         }
+        .screenBackground()
         .navigationTitle("스티커")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { ToolbarItem(placement: .cancellationAction) { Button("닫기") { dismiss() } } }
@@ -611,9 +679,9 @@ struct StickerLibraryView: View {
         }
     }
 
-    private func group(_ title: String, _ kind: StickerDef.Kind) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(title).font(.headline).foregroundStyle(Theme.title)
+    private func group(_ title: String, _ kind: StickerDef.Kind, _ tape: Color) -> some View {
+        PaperCard(tape: tape, tapeAngle: -4, dotted: true) {
+            PaperTitle(text: title, systemImage: "seal")
             LazyVGrid(columns: columns, spacing: 12) {
                 ForEach(StickerCatalog.all.filter { $0.kind == kind }, id: \.key) { d in
                     pickButton(d, locked: false)
@@ -624,8 +692,8 @@ struct StickerLibraryView: View {
 
     private var achievements: some View {
         let have = Set(earned.map(\.stickerKey))
-        return VStack(alignment: .leading, spacing: 10) {
-            Text("성취 스티커").font(.headline).foregroundStyle(Theme.title)
+        return PaperCard(tape: Theme.tapeYellow, tapeAngle: 4, dotted: true) {
+            PaperTitle(text: "성취 스티커", systemImage: "medal.fill")
             LazyVGrid(columns: columns, spacing: 12) {
                 ForEach(StickerCatalog.all.filter { $0.kind == .achievement }, id: \.key) { d in
                     pickButton(d, locked: !have.contains(d.key))
@@ -635,19 +703,21 @@ struct StickerLibraryView: View {
                 }
             }
             Text("첫 수업, 첫 경기, 첫 골처럼 기록을 남기면 받아요. 잠긴 건 기록이 쌓이면 열려요. 이달 퀘스트를 채우면 그달 배지도 생겨요.")
-                .font(.caption).foregroundStyle(Theme.inkSecondary)
+                .font(.system(.caption, design: .rounded)).foregroundStyle(Theme.paperInkSoft)
         }
     }
 
     private var photoSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("내 사진 스티커").font(.headline).foregroundStyle(Theme.title)
+        PaperCard(tape: Theme.tapeMint, tapeAngle: 3) {
+            PaperTitle(text: "내 사진 스티커", systemImage: "camera")
             Text("다른 사람 얼굴이나 팀 로고는 허락받은 것만 붙여 주세요. 사진 스티커는 이 아이폰에만 있어요.")
-                .font(.caption).foregroundStyle(Theme.inkSecondary)
+                .font(.system(.caption, design: .rounded)).foregroundStyle(Theme.paperInkSoft)
             PhotosPicker(selection: $photoItem, matching: .images) {
-                Label("사진 고르기", icon: "photo.badge.plus").frame(maxWidth: .infinity, minHeight: Theme.touch)
+                Label("사진 고르기", icon: "photo.badge.plus")
+                    .font(.system(.headline, design: .rounded))
+                    .frame(maxWidth: .infinity, minHeight: Theme.touch)
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(.borderedProminent).tint(Theme.neonPink).buttonBorderShape(.capsule)
         }
     }
 
@@ -659,8 +729,8 @@ struct StickerLibraryView: View {
             VStack(spacing: 4) {
                 StickerView(key: d.key, photo: nil, side: 54)
                     .opacity(locked ? 0.25 : 1)
-                    .overlay { if locked { AppIcon("lock.fill").foregroundStyle(Theme.inkSecondary) } }
-                Text(d.title).font(.caption2).lineLimit(1)
+                    .overlay { if locked { AppIcon("lock.fill").foregroundStyle(Theme.paperInkSoft) } }
+                Text(d.title).font(.system(.caption2, design: .rounded)).foregroundStyle(Theme.paperInk).lineLimit(1)
             }
         }
         .buttonStyle(.plain)
