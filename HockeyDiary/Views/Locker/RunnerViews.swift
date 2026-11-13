@@ -33,7 +33,7 @@ struct RunnerListView: View {
         .navigationTitle(focusSharpening ? "연마" : "러너(날)")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button { adding = true } label: { Image(systemName: "plus") }.accessibilityLabel("러너 추가")
+                Button { adding = true } label: { AppIcon("plus") }.accessibilityLabel("러너 추가")
             }
         }
         .sheet(isPresented: $adding) { NavigationStack { RunnerEditorView(runner: nil, installOn: nil) } }
@@ -50,7 +50,7 @@ struct RunnerRow: View {
             if let h = runner.currentHollow.flatMap(Hollow.init(label:)) {
                 HollowGlyph(hollow: h).frame(width: 34, height: 34)
             } else {
-                Image(systemName: "minus").frame(width: 34, height: 34).foregroundStyle(Theme.accent)
+                AppIcon("minus").frame(width: 34, height: 34).foregroundStyle(Theme.accent)
             }
             VStack(alignment: .leading, spacing: 2) {
                 Text(runner.name).font(.subheadline.bold())
@@ -263,7 +263,7 @@ struct RunnerDetailView: View {
             Section { SharpeningGuideCard() }
 
             Section {
-                Button { addingSharpening = true } label: { Label("연마 기록 추가", systemImage: "plus") }
+                Button { addingSharpening = true } label: { Label("연마 기록 추가", icon: "plus") }
                 ForEach(runner.sharpenings.sorted { $0.at > $1.at }) { log in
                     VStack(alignment: .leading, spacing: 4) {
                         HStack {
@@ -330,7 +330,7 @@ struct SharpeningEditorView: View {
                 HStack {
                     Text("작은 숫자 · 깊은 홈").font(.caption.bold()).foregroundStyle(Theme.warning)
                     Spacer()
-                    Image(systemName: "arrow.left.and.right").font(.caption).foregroundStyle(Theme.inkSecondary)
+                    AppIcon("arrow.left.and.right").font(.caption).foregroundStyle(Theme.inkSecondary)
                     Spacer()
                     Text("큰 숫자 · 얕은 홈").font(.caption.bold()).foregroundStyle(Theme.accent)
                 }
@@ -412,7 +412,7 @@ struct HollowCard: View {
             .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
                 .stroke(selected ? Theme.neonPink : Theme.inkTertiary.opacity(0.25), lineWidth: selected ? 2.5 : 1))
             .overlay(alignment: .topTrailing) {
-                if selected { Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.neonPink).padding(4) }
+                if selected { AppIcon("checkmark.circle.fill").foregroundStyle(Theme.neonPink).padding(4) }
             }
         }
         .buttonStyle(.plain)
@@ -460,7 +460,7 @@ struct SharpeningGuideCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Label("날 관리 메모", systemImage: "lightbulb").font(.headline).foregroundStyle(Theme.title)
+            Label("날 관리 메모", icon: "lightbulb").font(.headline).foregroundStyle(Theme.title)
             ChoiceCards(options: SharpeningGuide.sections.indices.map { i in
                 ChoiceOption(value: i, title: SharpeningGuide.sections[i].title,
                              art: .symbol(["eye", "figure.skating", "wrench.and.screwdriver", "bag"][i]))

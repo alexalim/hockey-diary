@@ -64,7 +64,7 @@ struct StartView: View {
                 Button {
                     Task { await model.start() }
                 } label: {
-                    Label("시작", systemImage: "play.fill").frame(maxWidth: .infinity, minHeight: 44)
+                    Label("시작", icon: "play.fill").frame(maxWidth: .infinity, minHeight: 44)
                 }
                 .tint(cobalt)
             }
@@ -87,7 +87,7 @@ struct RunningView: View {
             }
             HStack(spacing: 8) {
                 if let hr = model.heartRate {
-                    Label("\(Int(hr.rounded()))", systemImage: "heart.fill").foregroundStyle(pink)
+                    Label("\(Int(hr.rounded()))", icon: "heart.fill").foregroundStyle(pink)
                 } else {
                     Text(model.usingHealth ? "심박 재는 중" : "타이머로 재는 중").font(.caption2).foregroundStyle(.secondary)
                 }
@@ -113,7 +113,7 @@ struct RunningView: View {
             Button {
                 Task { await model.stop() }
             } label: {
-                Label("끝내기", systemImage: "stop.fill").frame(maxWidth: .infinity, minHeight: 40)
+                Label("끝내기", icon: "stop.fill").frame(maxWidth: .infinity, minHeight: 40)
             }
             .tint(pink)
         }
@@ -137,7 +137,7 @@ struct FinishView: View {
                 Button {
                     model.send()
                 } label: {
-                    Label("아이폰에 저장", systemImage: "iphone").frame(maxWidth: .infinity, minHeight: 44)
+                    Label("아이폰에 저장", icon: "iphone").frame(maxWidth: .infinity, minHeight: 44)
                 }
                 .tint(cobalt)
                 Text("기술·메모는 아이폰에서 더 적을 수 있어요.").font(.caption2).foregroundStyle(.secondary)
@@ -151,7 +151,7 @@ struct SentView: View {
 
     var body: some View {
         VStack(spacing: 10) {
-            Image(systemName: "checkmark.circle.fill").font(.largeTitle).foregroundStyle(pink)
+            AppIcon("checkmark.circle.fill").font(.largeTitle).foregroundStyle(pink)
             Text("아이폰으로 보냈어요").font(.headline)
             Text("아이폰 앱을 열면 기록에서 볼 수 있어요.").font(.caption2).foregroundStyle(.secondary).multilineTextAlignment(.center)
             Button("처음으로") { model.reset() }

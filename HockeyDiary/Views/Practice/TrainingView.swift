@@ -27,7 +27,7 @@ struct TrainingView: View {
             VStack(spacing: 12) {
                 ScreenHeader(eyebrow: "TRAINING STUDIO", title: "훈련", subtitle: "연습, 경기, 드릴을 한곳에서.") {
                     NavigationLink { SkillGuideListView() } label: {
-                        Image(systemName: "book.pages").font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.title)
+                        AppIcon("book.pages", size: 19.55).foregroundStyle(Theme.title)
                             .frame(width: 44, height: 44).background(Theme.card, in: Circle())
                             .overlay(Circle().stroke(Theme.border, lineWidth: 1))
                     }
@@ -120,7 +120,7 @@ struct GameBranch: View {
                                 .font(.caption).foregroundStyle(Theme.inkSecondary)
                         }
                         Spacer()
-                        Image(systemName: "chevron.right").font(.caption.bold()).foregroundStyle(Theme.inkTertiary)
+                        AppIcon("chevron.right").font(.caption.bold()).foregroundStyle(Theme.inkTertiary)
                     }
                     .frame(minHeight: Theme.touch)
                 }
@@ -130,7 +130,7 @@ struct GameBranch: View {
                           link: teams.isEmpty ? EmptyLink("팀 만들기") { TeamView() } : nil)
             }
             NavigationLink { TeamView() } label: {
-                Label("팀 일정 전체", systemImage: "person.3.fill").frame(maxWidth: .infinity, minHeight: Theme.touch)
+                Label("팀 일정 전체", icon: "person.3.fill").frame(maxWidth: .infinity, minHeight: Theme.touch)
             }
             .buttonStyle(.bordered)
         }
@@ -147,7 +147,7 @@ struct HeroButton: View {
 
     var body: some View {
         Button(action: action) {
-            Label(title, systemImage: systemImage).font(.subheadline.bold()).foregroundStyle(Theme.cobalt)
+            Label(title, icon: systemImage).font(.subheadline.bold()).foregroundStyle(Theme.cobalt)
                 .frame(maxWidth: .infinity, minHeight: Theme.touch)
                 .background(.white, in: RoundedRectangle(cornerRadius: Theme.buttonCorner, style: .continuous))
         }

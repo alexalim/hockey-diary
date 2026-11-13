@@ -103,7 +103,7 @@ struct TeamEventView: View {
                 LineupBoard(lineup: event.lineup, names: names)
             }
             Button { editingLineup = true } label: {
-                Label(text.isEmpty ? "라인업 짜기" : "라인업 고치기", systemImage: "pencil").frame(maxWidth: .infinity, minHeight: Theme.touch)
+                Label(text.isEmpty ? "라인업 짜기" : "라인업 고치기", icon: "pencil").frame(maxWidth: .infinity, minHeight: Theme.touch)
             }
             .buttonStyle(.bordered)
             .disabled(members.filter(\.isActive).isEmpty)
@@ -126,7 +126,7 @@ struct TeamEventView: View {
             HStack(spacing: 10) {
                 if let image = renderImage() {
                     ShareLink(item: image, preview: SharePreview("\(team.name) \(event.title)", image: image)) {
-                        Label("이미지로", systemImage: "photo").frame(maxWidth: .infinity, minHeight: Theme.touch)
+                        Label("이미지로", icon: "photo").frame(maxWidth: .infinity, minHeight: Theme.touch)
                     }
                     .buttonStyle(.borderedProminent).tint(Theme.cobalt)
                 }
@@ -134,7 +134,7 @@ struct TeamEventView: View {
                     UIPasteboard.general.string = shareText
                     toast = "글을 복사했어요. 카톡에 붙여 넣으세요."
                 } label: {
-                    Label("글로 복사", systemImage: "doc.on.doc").frame(maxWidth: .infinity, minHeight: Theme.touch)
+                    Label("글로 복사", icon: "doc.on.doc").frame(maxWidth: .infinity, minHeight: Theme.touch)
                 }
                 .buttonStyle(.bordered)
             }
@@ -169,7 +169,7 @@ struct TeamEventView: View {
             Button {
                 openSession = TeamStore.makeSession(for: event, context: context)
             } label: {
-                Label(event.sessionID == nil ? "이 일정으로 기록 만들기" : "기록 보기", systemImage: "square.and.pencil").frame(maxWidth: .infinity, minHeight: Theme.touch)
+                Label(event.sessionID == nil ? "이 일정으로 기록 만들기" : "기록 보기", icon: "square.and.pencil").frame(maxWidth: .infinity, minHeight: Theme.touch)
             }
             .buttonStyle(.bordered)
         }
@@ -324,10 +324,10 @@ struct TeamShareCard: View {
             }
             Text(title).font(.title.bold()).foregroundStyle(.white)
             VStack(alignment: .leading, spacing: 4) {
-                Label(when, systemImage: "clock")
-                if !rink.isEmpty { Label(rink, systemImage: "mappin") }
-                if !opponent.isEmpty { Label("vs \(opponent)", systemImage: "flag") }
-                if !memo.isEmpty { Label(memo, systemImage: "note.text") }
+                Label(when, icon: "clock")
+                if !rink.isEmpty { Label(rink, icon: "mappin") }
+                if !opponent.isEmpty { Label("vs \(opponent)", icon: "flag") }
+                if !memo.isEmpty { Label(memo, icon: "note.text") }
             }
             .font(.subheadline).foregroundStyle(.white)
             if total > 0 {

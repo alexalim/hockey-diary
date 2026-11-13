@@ -58,7 +58,7 @@ struct WeekView: View {
         switch family {
         case .accessoryCircular:
             Gauge(value: Double(min(snap.monthDone, snap.monthTarget)), in: 0...Double(max(snap.monthTarget, 1))) {
-                Image(systemName: "figure.hockey")
+                AppIcon("figure.hockey")
             } currentValueLabel: {
                 Text("\(snap.monthDone)")
             }
@@ -104,7 +104,7 @@ struct WeekView: View {
 
     private var header: some View {
         HStack(spacing: 4) {
-            Image(systemName: "flame.fill").foregroundStyle(snap.streakWeeks > 0 ? WColor.pink : WColor.inkSecondary)
+            AppIcon("flame.fill").foregroundStyle(snap.streakWeeks > 0 ? WColor.pink : WColor.inkSecondary)
             Text(snap.streakWeeks > 0 ? "\(snap.streakWeeks)주 연속" : "이번 주 하키").font(.headline).foregroundStyle(WColor.deepNavy)
             Spacer(minLength: 0)
         }
@@ -126,7 +126,7 @@ struct WeekView: View {
                     ZStack {
                         Circle().fill(on ? WColor.cobalt : WColor.ice)
                             .overlay(Circle().stroke(today ? WColor.cobalt : .clear, lineWidth: 1.5))
-                        if on { Image(systemName: "checkmark").font(.system(size: size * 0.5, weight: .bold)).foregroundStyle(.white) }
+                        if on { AppIcon("checkmark").font(.system(size: size * 0.5, weight: .bold)).foregroundStyle(.white) }
                     }
                     .frame(width: size, height: size)
                 }
@@ -147,7 +147,7 @@ struct RoutineLiveActivity: Widget {
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    Label(context.attributes.routineName, systemImage: "figure.hockey").font(.caption).foregroundStyle(.white)
+                    Label(context.attributes.routineName, icon: "figure.hockey").font(.caption).foregroundStyle(.white)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
                     Text("\(context.state.index)/\(context.state.total)").font(.caption.bold()).foregroundStyle(.white)
@@ -159,11 +159,11 @@ struct RoutineLiveActivity: Widget {
                     big(context.state).font(.system(size: 34, weight: .black, design: .rounded)).foregroundStyle(WColor.pink)
                 }
             } compactLeading: {
-                Image(systemName: "figure.hockey").foregroundStyle(WColor.pink)
+                AppIcon("figure.hockey").foregroundStyle(WColor.pink)
             } compactTrailing: {
                 big(context.state).font(.caption.bold().monospacedDigit()).foregroundStyle(.white).frame(maxWidth: 52)
             } minimal: {
-                Image(systemName: "figure.hockey").foregroundStyle(WColor.pink)
+                AppIcon("figure.hockey").foregroundStyle(WColor.pink)
             }
         }
     }

@@ -21,11 +21,11 @@ struct QuestCard: View {
         NavigationLink { QuestView() } label: {
             Card {
                 HStack {
-                    Label("이달의 퀘스트", systemImage: "flag.checkered").font(.headline).foregroundStyle(Theme.title)
+                    Label("이달의 퀘스트", icon: "flag.checkered").font(.headline).foregroundStyle(Theme.title)
                     Spacer()
                     Text("\(s.points)점").font(.caption.bold()).foregroundStyle(Theme.accentText)
                         .padding(.horizontal, 8).padding(.vertical, 4).background(Theme.achievementSoft, in: Capsule())
-                    Image(systemName: "chevron.right").font(.caption).foregroundStyle(Theme.inkTertiary)
+                    AppIcon("chevron.right").font(.caption).foregroundStyle(Theme.inkTertiary)
                 }
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
                     Text("\(s.monthDone)").font(.system(size: 30, weight: .bold)).foregroundStyle(Theme.title)
@@ -65,8 +65,7 @@ struct StampRow: View {
                         Circle()
                             .stroke(filled ? Color.clear : (onDark ? Color.white.opacity(0.5) : Theme.paperDot), style: StrokeStyle(lineWidth: 1.5, dash: [3, 3]))
                         if filled {
-                            Image(systemName: "figure.hockey")
-                                .font(.system(size: 13, weight: .bold))
+                            AppIcon("figure.hockey", size: 16)
                                 .foregroundStyle(onDark ? Theme.cobalt : Theme.paperInk)
                         }
                     }
@@ -94,9 +93,9 @@ struct QuestRow: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            Image(systemName: progress.isDone ? "checkmark.circle.fill" : "circle")
+            AppIcon(progress.isDone ? "checkmark.circle.fill" : "circle")
                 .font(.title3).foregroundStyle(progress.isDone ? Theme.success : Theme.inkTertiary)
-            Image(systemName: progress.quest.kind.symbol).font(.subheadline).foregroundStyle(Theme.accent).frame(width: 22)
+            AppIcon(progress.quest.kind.symbol).font(.subheadline).foregroundStyle(Theme.accent).frame(width: 22)
             Text(progress.quest.title).font(compact ? .subheadline : .subheadline.bold())
                 .foregroundStyle(progress.isDone ? Theme.inkSecondary : Theme.title)
                 .strikethrough(progress.isDone, color: Theme.inkTertiary)

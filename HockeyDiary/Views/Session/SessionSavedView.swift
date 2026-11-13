@@ -17,7 +17,7 @@ struct SessionSavedView: View {
                 VStack(spacing: 10) {
                     ZStack {
                         ConfettiBurst()
-                        Image(systemName: "checkmark")
+                        AppIcon("checkmark")
                             .font(.system(size: 30, weight: .black))
                             .foregroundStyle(.white)
                             .frame(width: 72, height: 72)
@@ -61,7 +61,7 @@ struct SessionSavedView: View {
 
                 if let shareImage {
                     ShareLink(item: shareImage, preview: SharePreview("마하다 \(session.type.title) 기록", image: shareImage)) {
-                        Label("이미지로 공유", systemImage: "square.and.arrow.up")
+                        Label("이미지로 공유", icon: "square.and.arrow.up")
                             .frame(maxWidth: .infinity, minHeight: Theme.touch)
                     }
                     .buttonStyle(.bordered)
@@ -132,7 +132,7 @@ struct SessionShareCard: View {
             }
             .foregroundStyle(.white.opacity(0.9))
             HStack(spacing: 10) {
-                Image(systemName: session.type.systemImage).font(.title2)
+                AppIcon(session.type.systemImage).font(.title2)
                 Text(session.type.title).font(.title.bold())
             }
             .foregroundStyle(.white)
@@ -153,7 +153,7 @@ struct SessionShareCard: View {
                 if let m = session.moodAfter { moodStat(m) }
             }
             if let b = bests.first {
-                Label("새 기록 · \(b.title) \(b.value)", systemImage: "rosette")
+                Label("새 기록 · \(b.title) \(b.value)", icon: "rosette")
                     .font(.footnote.bold())
                     .padding(.horizontal, 10).padding(.vertical, 6)
                     .background(Theme.neonPink, in: Capsule())

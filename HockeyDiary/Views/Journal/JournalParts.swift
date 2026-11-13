@@ -148,7 +148,7 @@ struct Sticker: View {
                 .stroke(on ? Theme.neonPink : Theme.paper, lineWidth: on ? 2 : 2.5))
             .overlay(alignment: .topTrailing) {
                 if on && !small {
-                    Image(systemName: "checkmark.circle.fill")
+                    AppIcon("checkmark.circle.fill")
                         .font(.caption).foregroundStyle(.white, Theme.neonPink)
                         .offset(x: 6, y: -6)
                 }
@@ -181,7 +181,7 @@ struct PaperTitle: View {
     var systemImage: String
 
     var body: some View {
-        Label(text, systemImage: systemImage)
+        Label(text, icon: systemImage)
             .font(.system(.headline, design: .rounded))
             .foregroundStyle(Theme.paperInk)
     }
@@ -198,7 +198,7 @@ struct JournalNote: View {
                     if let mood = journal.mood {
                         MoodFace(level: mood, size: 46)
                     } else {
-                        Image(systemName: "pencil.line").font(.system(size: 20, weight: .bold)).foregroundStyle(Theme.paperInk)
+                        AppIcon("pencil.line", size: 23).foregroundStyle(Theme.paperInk)
                             .frame(width: 46, height: 46).background(Theme.tapePink, in: Circle())
                     }
                 }
@@ -212,7 +212,7 @@ struct JournalNote: View {
                             Text(Mood.label(mood)).font(.system(.caption, design: .rounded)).foregroundStyle(Theme.paperInkSoft)
                         }
                         if !journal.isPrivate {
-                            Image(systemName: "square.and.arrow.up").font(.caption2).foregroundStyle(Theme.paperInkSoft)
+                            AppIcon("square.and.arrow.up").font(.caption2).foregroundStyle(Theme.paperInkSoft)
                                 .accessibilityLabel("리포트 공유")
                         }
                     }

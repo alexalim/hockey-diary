@@ -28,7 +28,7 @@ struct GrowthView: View {
             VStack(spacing: 12) {
                 ScreenHeader(eyebrow: "YOUR PROGRESS", title: "성장", subtitle: "활동과 실력은 따로, 변화는 함께.") {
                     NavigationLink { SeasonReportView() } label: {
-                        Image(systemName: "square.and.arrow.up").font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.title)
+                        AppIcon("square.and.arrow.up", size: 19.55).foregroundStyle(Theme.title)
                             .frame(width: 44, height: 44).background(Theme.card, in: Circle())
                             .overlay(Circle().stroke(Theme.border, lineWidth: 1))
                     }
@@ -58,14 +58,14 @@ struct GrowthView: View {
                 practiceCard
                 NavigationLink { AISummaryView() } label: {
                     Card {
-                        Label("AI로 돌아보기", systemImage: "sparkles").font(.headline).foregroundStyle(Theme.title)
+                        Label("AI로 돌아보기", icon: "sparkles").font(.headline).foregroundStyle(Theme.title)
                         Text("켜야만 동작해요. 아이폰 안에서 하키 기록만 요약해요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     }
                 }
                 .buttonStyle(.plain)
                 NavigationLink { SeasonReportView() } label: {
                     Card(tint: Theme.cobalt) {
-                        Label("시즌 리포트 만들기", systemImage: "photo.on.rectangle.angled").font(.headline).foregroundStyle(.white)
+                        Label("시즌 리포트 만들기", icon: "photo.on.rectangle.angled").font(.headline).foregroundStyle(.white)
                         Text("횟수와 기술만 담은 이미지를 만들어 저장하고 공유해요.").font(.subheadline).foregroundStyle(.white.opacity(0.85))
                     }
                 }
@@ -214,7 +214,7 @@ struct GrowthView: View {
                             Label {
                                 Text(s.isUnspecified ? "미입력" : s.title).foregroundStyle(s.isUnspecified ? Theme.inkTertiary : Theme.title)
                             } icon: {
-                                Image(systemName: s.systemImage).foregroundStyle(s.color)
+                                AppIcon(s.systemImage).foregroundStyle(s.color)
                             }
                             .font(.subheadline)
                             Spacer()
@@ -280,7 +280,7 @@ struct GrowthView: View {
                                 Text(g.title).font(.subheadline).foregroundStyle(Theme.title).lineLimit(1)
                                 Spacer()
                                 Text("슛 \(marks.count) · 골 \(marks.filter { $0.point.outcome == .goal }.count)").font(.caption.bold()).foregroundStyle(Theme.accent)
-                                Image(systemName: "chevron.right").font(.caption).foregroundStyle(Theme.inkSecondary)
+                                AppIcon("chevron.right").font(.caption).foregroundStyle(Theme.inkSecondary)
                             }
                             .frame(minHeight: 36)
                         }
@@ -342,7 +342,7 @@ struct GrowthView: View {
                 }
             }
             NavigationLink { PracticeView() } label: {
-                Label("연습하러 가기", systemImage: "play.fill").frame(maxWidth: .infinity, minHeight: Theme.touch)
+                Label("연습하러 가기", icon: "play.fill").frame(maxWidth: .infinity, minHeight: Theme.touch)
             }
             .buttonStyle(.bordered)
             footnote(logs.count, note: "드릴 기록")
@@ -392,7 +392,7 @@ struct SkillRow: View {
             if st.evaluated > 0 {
                 Text("성공 \(st.successes)/\(st.evaluated)").font(.caption.bold()).foregroundStyle(Theme.accent)
             }
-            Image(systemName: "chevron.right").font(.caption).foregroundStyle(Theme.inkSecondary)
+            AppIcon("chevron.right").font(.caption).foregroundStyle(Theme.inkSecondary)
         }
         .frame(minHeight: Theme.touch)
         .accessibilityElement(children: .combine)
@@ -457,7 +457,7 @@ struct SkillDetailView: View {
                                 Spacer()
                                 Text([a.outcome?.title, a.count.map { "\($0)번 시도" }].compactMap { $0 }.joined(separator: " · "))
                                     .font(.caption.bold()).foregroundStyle(Theme.accent)
-                                Image(systemName: "chevron.right").font(.caption).foregroundStyle(Theme.inkSecondary)
+                                AppIcon("chevron.right").font(.caption).foregroundStyle(Theme.inkSecondary)
                             }
                             .frame(minHeight: Theme.touch)
                         }
@@ -535,14 +535,14 @@ struct SkillDetailView: View {
         HStack(alignment: .top, spacing: 10) {
             switch e {
             case .learned(let l, let s):
-                Image(systemName: "graduationcap.fill").foregroundStyle(ActivityType.lesson.color).frame(width: 24)
+                AppIcon("graduationcap.fill").foregroundStyle(ActivityType.lesson.color).frame(width: 24)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("\(s.startsAt.dayTitle) 수업에서 배움").font(.subheadline.bold())
                     if !l.feedback.isEmpty { Text(l.feedback).font(.caption).foregroundStyle(Theme.inkSecondary) }
                     if let d = l.difficulty { Text("체감 난도 \(d)").font(.caption2).foregroundStyle(Theme.inkSecondary) }
                 }
             case .attempted(let a, let s):
-                Image(systemName: "figure.hockey").foregroundStyle(Theme.accent).frame(width: 24)
+                AppIcon("figure.hockey").foregroundStyle(Theme.accent).frame(width: 24)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("\(s.startsAt.dayTitle) \(s.type.title) · \(a.tried ? (a.outcome?.title ?? "써봤어요") : "못 써봄")")
                         .font(.subheadline.bold())

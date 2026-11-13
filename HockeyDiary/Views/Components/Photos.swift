@@ -27,7 +27,7 @@ struct PhotoPickerRow: View {
                     }
                     PhotosPicker(selection: $items, maxSelectionCount: 6, matching: .images) {
                         VStack(spacing: 4) {
-                            Image(systemName: loading ? "hourglass" : "photo.badge.plus").font(.title3)
+                            AppIcon(loading ? "hourglass" : "photo.badge.plus").font(.title3)
                             Text("사진").font(.caption)
                         }
                         .frame(width: 72, height: 72)
@@ -60,7 +60,7 @@ struct PhotoPickerRow: View {
         ZStack(alignment: .topTrailing) {
             PhotoThumb(data: data, size: 72)
             Button(action: remove) {
-                Image(systemName: "xmark.circle.fill")
+                AppIcon("xmark.circle.fill")
                     .symbolRenderingMode(.palette)
                     .foregroundStyle(.white, .black.opacity(0.6))
             }

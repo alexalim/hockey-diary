@@ -32,7 +32,7 @@ struct SkateListView: View {
         .navigationTitle("스케이트")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button { adding = true } label: { Image(systemName: "plus") }.accessibilityLabel("스케이트 추가")
+                Button { adding = true } label: { AppIcon("plus") }.accessibilityLabel("스케이트 추가")
             }
         }
         .sheet(isPresented: $adding) { NavigationStack { SkateEditorView(skate: nil) } }
@@ -54,14 +54,14 @@ struct SkateRow: View {
             if let data = skate.coverPhoto {
                 PhotoThumb(data: data, size: 48)
             } else {
-                Image(systemName: "shoeprints.fill")
+                AppIcon("shoeprints.fill")
                     .foregroundStyle(.white)
                     .frame(width: 48, height: 48)
                     .background(Theme.cobalt, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 4) {
-                    if skate.isPrimary { Image(systemName: "star.fill").foregroundStyle(Theme.warningFill).font(.caption) }
+                    if skate.isPrimary { AppIcon("star.fill").foregroundStyle(Theme.warningFill).font(.caption) }
                     Text(skate.name).font(.subheadline.bold())
                 }
                 Text([skate.size.isEmpty ? nil : "사이즈 \(skate.size)", skate.status.title,
@@ -176,7 +176,7 @@ struct SkateDetailView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
                         Text(skate.name).font(.title3.bold())
-                        if skate.isPrimary { Image(systemName: "star.fill").foregroundStyle(Theme.warningFill) }
+                        if skate.isPrimary { AppIcon("star.fill").foregroundStyle(Theme.warningFill) }
                     }
                     Text([skate.size.isEmpty ? nil : "사이즈 \(skate.size)", skate.fit.isEmpty ? nil : skate.fit, skate.status.title]
                         .compactMap { $0 }.joined(separator: " · "))
@@ -214,7 +214,7 @@ struct SkateDetailView: View {
                               systemImage: "arrow.triangle.2.circlepath")
                     }
                 }
-                Button { addingRunner = true } label: { Label("새 러너(날) 추가", systemImage: "plus") }
+                Button { addingRunner = true } label: { Label("새 러너(날) 추가", icon: "plus") }
             } header: {
                 Text("러너(날)")
             } footer: {

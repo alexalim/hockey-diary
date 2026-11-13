@@ -272,7 +272,7 @@ struct SessionEditorView: View {
                         }
                     }
                 } label: {
-                    Label("건강 앱 운동에서 가져오기 (\(dayWorkouts.count))", systemImage: "heart.text.square")
+                    Label("건강 앱 운동에서 가져오기 (\(dayWorkouts.count))", icon: "heart.text.square")
                 }
             }
         } footer: {
@@ -298,7 +298,7 @@ struct SessionEditorView: View {
                         Text(moreSummary).font(.caption).foregroundStyle(Theme.inkSecondary).lineLimit(2)
                     }
                     Spacer()
-                    Image(systemName: "chevron.down").foregroundStyle(Theme.accent)
+                    AppIcon("chevron.down").foregroundStyle(Theme.accent)
                 }
                 .frame(minHeight: Theme.touch)
                 .contentShape(Rectangle())
@@ -332,7 +332,7 @@ struct SessionEditorView: View {
                         Spacer()
                         Button(role: .destructive) {
                             learnings.removeAll { $0.skillID == draft.skillID }
-                        } label: { Image(systemName: "minus.circle") }
+                        } label: { AppIcon("minus.circle") }
                             .buttonStyle(.borderless)
                             .accessibilityLabel("\(draft.name) 빼기")
                     }
@@ -346,7 +346,7 @@ struct SessionEditorView: View {
             Button {
                 showingSkillPicker = true
             } label: {
-                Label(learnings.isEmpty ? "오늘 배운 기술 고르기" : "기술 더 고르기", systemImage: "plus")
+                Label(learnings.isEmpty ? "오늘 배운 기술 고르기" : "기술 더 고르기", icon: "plus")
             }
         } header: {
             Text("오늘 배운 기술")
@@ -365,7 +365,7 @@ struct SessionEditorView: View {
                         Spacer()
                         Button(role: .destructive) {
                             attempts.removeAll { $0.skillID == draft.skillID }
-                        } label: { Image(systemName: "minus.circle") }
+                        } label: { AppIcon("minus.circle") }
                             .buttonStyle(.borderless)
                             .accessibilityLabel("\(draft.name) 빼기")
                     }
@@ -396,7 +396,7 @@ struct SessionEditorView: View {
             Button {
                 showingSkillPicker = true
             } label: {
-                Label("기술 추가", systemImage: "plus")
+                Label("기술 추가", icon: "plus")
             }
         } header: {
             Text("배운 기술, 써봤어요?")
@@ -559,7 +559,7 @@ struct SessionEditorView: View {
                 ShotLegend()
                 Spacer()
                 if !shots.isEmpty {
-                    Button { withAnimation { _ = shots.popLast() } } label: { Label("되돌리기", systemImage: "arrow.uturn.backward") }
+                    Button { withAnimation { _ = shots.popLast() } } label: { Label("되돌리기", icon: "arrow.uturn.backward") }
                         .buttonStyle(.borderless).font(.footnote)
                 }
             }
@@ -826,7 +826,7 @@ struct SkillPickerView: View {
                                     Text(skill.name).foregroundStyle(.primary)
                                     Spacer()
                                     if selected.contains(skill.id) {
-                                        Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.neonPink)
+                                        AppIcon("checkmark.circle.fill").foregroundStyle(Theme.neonPink)
                                     }
                                 }
                                 .frame(minHeight: Theme.touch)

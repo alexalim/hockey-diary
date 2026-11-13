@@ -16,7 +16,7 @@ struct AcademyGrid: View {
 
     private func tile(_ title: String, _ subtitle: String, _ symbol: String) -> some View {
         HStack(spacing: 12) {
-            Image(systemName: symbol).font(.system(size: 18, weight: .semibold)).foregroundStyle(Theme.accent)
+            AppIcon(symbol, size: 20.7).foregroundStyle(Theme.accent)
                 .frame(width: 40, height: 40).background(Theme.cobaltSoft, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             VStack(alignment: .leading, spacing: 2) {
                 Text(title).font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.title)

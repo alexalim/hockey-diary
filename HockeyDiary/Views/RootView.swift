@@ -129,7 +129,7 @@ struct RootView: View {
             Button {
                 showingQuickMenu = true
             } label: {
-                Image(systemName: "plus.circle.fill")
+                AppIcon("plus.circle.fill")
                     .font(.title2)
                     .foregroundStyle(Theme.neonPink)
             }
@@ -172,7 +172,7 @@ struct MahadaTabBar: View {
             selection = t
         } label: {
             VStack(spacing: 3) {
-                Image(systemName: t.symbol).font(.system(size: 21, weight: on ? .semibold : .regular))
+                AppIcon(t.symbol, size: 25)
                 Text(t.title).font(.system(size: 11, weight: on ? .semibold : .regular))
             }
             .foregroundStyle(on ? Theme.accent : Theme.inkSecondary)
@@ -196,8 +196,7 @@ struct MahadaTabBar: View {
                     Circle().fill(on ? Theme.cobalt : Theme.card)
                         .overlay(Circle().stroke(Theme.cobalt, lineWidth: on ? 0 : 2))
                         .shadow(color: Theme.cobalt.opacity(on ? 0.35 : 0.15), radius: 10, y: 4)
-                    Image(systemName: "house.fill")
-                        .font(.system(size: 26, weight: .bold))
+                    AppIcon("house.fill", size: 30)
                         .foregroundStyle(on ? .white : Theme.accent)
                 }
                 .frame(width: 62, height: 62)

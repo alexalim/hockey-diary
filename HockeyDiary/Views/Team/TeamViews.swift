@@ -68,7 +68,7 @@ struct TeamView: View {
                     ForEach(upcoming) { e in
                         NavigationLink { TeamEventView(event: e, team: team) } label: { eventRow(e) }.buttonStyle(.plain)
                     }
-                    Button { addingEvent = true } label: { Label("일정 추가", systemImage: "plus") }
+                    Button { addingEvent = true } label: { Label("일정 추가", icon: "plus") }
                 }
                 Card {
                     CardHeader(title: "명단", systemImage: "person.3.fill", trailing: "\(members.count)명")
@@ -83,13 +83,13 @@ struct TeamView: View {
                                 Text(m.display).foregroundStyle(Theme.title)
                                 if m.isGuest { StatusTag(text: "용병") }
                                 Spacer()
-                                Image(systemName: "chevron.right").font(.caption).foregroundStyle(Theme.inkSecondary)
+                                AppIcon("chevron.right").font(.caption).foregroundStyle(Theme.inkSecondary)
                             }
                             .frame(minHeight: 40)
                         }
                         .buttonStyle(.plain)
                     }
-                    Button { addingMember = true } label: { Label("팀원 추가", systemImage: "person.badge.plus") }
+                    Button { addingMember = true } label: { Label("팀원 추가", icon: "person.badge.plus") }
                 }
                 if !past.isEmpty {
                     Card {
@@ -131,7 +131,7 @@ struct TeamView: View {
             if !members.isEmpty {
                 StatusTag(text: "참석 \(going)", kind: going >= 10 ? .success : .neutral)
             }
-            Image(systemName: "chevron.right").font(.caption).foregroundStyle(Theme.inkSecondary)
+            AppIcon("chevron.right").font(.caption).foregroundStyle(Theme.inkSecondary)
         }
         .frame(minHeight: Theme.touch)
     }

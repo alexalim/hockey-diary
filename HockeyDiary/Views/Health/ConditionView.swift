@@ -184,8 +184,8 @@ struct ConditionView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 6) {
                         Text(d.day.formatted(.dateTime.month(.defaultDigits).day().weekday(.abbreviated))).font(.subheadline.bold()).foregroundStyle(Theme.title)
-                        if d.skated { Image(systemName: "figure.hockey").font(.caption).foregroundStyle(Theme.neonPink) }
-                        if cycleOn && d.period { Image(systemName: "drop.fill").font(.caption2).foregroundStyle(Theme.neonPink.opacity(0.6)) }
+                        if d.skated { AppIcon("figure.hockey").font(.caption).foregroundStyle(Theme.neonPink) }
+                        if cycleOn && d.period { AppIcon("drop.fill").font(.caption2).foregroundStyle(Theme.neonPink.opacity(0.6)) }
                         Spacer()
                     }
                     HStack(spacing: 10) {
@@ -225,7 +225,7 @@ struct ConditionView: View {
             }
             if !healthOn {
                 NavigationLink { HealthConnectView() } label: {
-                    Label("Apple 건강 연결하기 (잔 시간·심박용)", systemImage: "heart.text.square.fill")
+                    Label("Apple 건강 연결하기 (잔 시간·심박용)", icon: "heart.text.square.fill")
                 }
             } else {
                 CycleConsentToggle()

@@ -130,7 +130,7 @@ struct EquipmentArt: View {
             let w = geo.size.width, h = geo.size.height
             ZStack {
                 RoundedRectangle(cornerRadius: 14).fill(iceFill)
-                Image(systemName: "figure.stand")
+                AppIcon("figure.stand")
                     .resizable().scaledToFit()
                     .frame(height: h * 0.9)
                     .foregroundStyle(Theme.cobalt.opacity(0.85))
@@ -177,7 +177,7 @@ struct PenaltyBarsArt: View {
                             Capsule().fill(Theme.inkTertiary.opacity(0.12))
                             Capsule().fill(color).frame(width: g.size.width * minutes / 12)
                             if minutes >= 12 {
-                                Image(systemName: "arrow.right").font(.caption2.bold()).foregroundStyle(.white)
+                                AppIcon("arrow.right").font(.caption2.bold()).foregroundStyle(.white)
                                     .padding(.trailing, 6).frame(maxWidth: .infinity, alignment: .trailing)
                             }
                         }
@@ -188,7 +188,7 @@ struct PenaltyBarsArt: View {
             }
             if !compact {
                 HStack(spacing: 6) {
-                    Image(systemName: "person.fill").foregroundStyle(Theme.accent)
+                    AppIcon("person.fill").foregroundStyle(Theme.accent)
                     Text("마이너는 상대가 골을 넣으면 바로 끝나요. 메이저는 끝까지 채워야 해요.").font(.caption2).foregroundStyle(Theme.inkSecondary)
                 }
             }
@@ -213,9 +213,9 @@ struct GameClockArt: View {
                 block("3P", "20분", Theme.cobalt, 3)
             }
             HStack(spacing: compact ? 2 : 4) {
-                Image(systemName: "equal.circle.fill").foregroundStyle(Theme.inkSecondary).font(compact ? .caption2 : .body)
+                AppIcon("equal.circle.fill").foregroundStyle(Theme.inkSecondary).font(compact ? .caption2 : .body)
                 block("연장", "최대 5분 · 3대3", Theme.warningFill, 4)
-                Image(systemName: "arrow.right").foregroundStyle(Theme.inkSecondary).font(compact ? .caption2 : .body)
+                AppIcon("arrow.right").foregroundStyle(Theme.inkSecondary).font(compact ? .caption2 : .body)
                 block("슛아웃", "5명씩", Theme.danger, 3)
             }
             if !compact {
@@ -257,8 +257,8 @@ struct NoGoalArt: View {
                 VStack(spacing: 4) {
                     ZStack {
                         goalFrame
-                        Image(systemName: icon).font(compact ? .caption : .title3).foregroundStyle(Theme.cobalt)
-                        Image(systemName: "xmark").font(compact ? .caption2.bold() : .title2.bold())
+                        AppIcon(icon).font(compact ? .caption : .title3).foregroundStyle(Theme.cobalt)
+                        AppIcon("xmark").font(compact ? .caption2.bold() : .title2.bold())
                             .foregroundStyle(Theme.danger.opacity(0.9))
                             .offset(x: compact ? 8 : 18, y: compact ? -6 : -14)
                     }
@@ -308,19 +308,19 @@ struct GoalieArt: View {
                 // 골대와 골키퍼(그대로 남음)
                 RoundedRectangle(cornerRadius: 3).stroke(redLine, lineWidth: 2)
                     .frame(width: w * 0.08, height: h * 0.3).position(x: w * 0.08, y: h * 0.5)
-                Image(systemName: "figure.hockey").font(.system(size: compact ? 18 : 34)).foregroundStyle(Theme.cobalt)
+                AppIcon("figure.hockey", size: (compact ? 18 : 34) * 1.15).foregroundStyle(Theme.cobalt)
                     .scaleEffect(x: -1, y: 1).position(x: w * 0.2, y: h * 0.5)
                 if !compact { Text("골키퍼는 그대로").font(.caption2.bold()).foregroundStyle(Theme.title).position(x: w * 0.2, y: h * 0.8) }
                 // 페널티 박스
                 RoundedRectangle(cornerRadius: 6).stroke(Theme.inkTertiary, style: StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
                     .frame(width: w * 0.26, height: h * 0.42).position(x: w * 0.82, y: h * 0.42)
                 if !compact { Text("페널티 박스").font(.caption2).foregroundStyle(Theme.inkSecondary).position(x: w * 0.82, y: h * 0.14) }
-                Image(systemName: "figure.hockey").font(.system(size: compact ? 16 : 28)).foregroundStyle(Theme.danger)
+                AppIcon("figure.hockey", size: (compact ? 16 : 28) * 1.15).foregroundStyle(Theme.danger)
                     .position(x: w * 0.82, y: h * 0.44)
                 // 다른 선수가 대신 감
                 Path { p in p.move(to: CGPoint(x: w * 0.38, y: h * 0.6)); p.addLine(to: CGPoint(x: w * 0.66, y: h * 0.48)) }
                     .stroke(Theme.danger, style: StrokeStyle(lineWidth: 2, dash: [5, 3]))
-                Image(systemName: "arrowtriangle.right.fill").font(.system(size: 9)).foregroundStyle(Theme.danger)
+                AppIcon("arrowtriangle.right.fill", size: 10.35).foregroundStyle(Theme.danger)
                     .position(x: w * 0.66, y: h * 0.48)
                 if !compact { Text("다른 선수가 대신").font(.caption2.bold()).foregroundStyle(Theme.danger).position(x: w * 0.52, y: h * 0.75) }
             }
@@ -345,7 +345,7 @@ struct PowerPlayArt: View {
                 HStack(spacing: compact ? 3 : 6) {
                     RoundedRectangle(cornerRadius: 3).stroke(redLine, lineWidth: compact ? 1.5 : 2)
                         .frame(width: compact ? 10 : 18, height: compact ? 16 : 30)
-                        .overlay(Image(systemName: "questionmark").font(.system(size: compact ? 7 : 11)).foregroundStyle(Theme.inkSecondary))
+                        .overlay(AppIcon("questionmark", size: (compact ? 7 : 11) * 1.15).foregroundStyle(Theme.inkSecondary))
                     VStack(spacing: 2) {
                         dots(5, Theme.accent)
                         Text("+1").font(.system(size: compact ? 8 : 12, weight: .heavy)).foregroundStyle(Theme.accent)

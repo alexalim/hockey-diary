@@ -53,7 +53,7 @@ struct DiaryView: View {
 
     private func tool(_ title: String, _ symbol: String) -> some View {
         HStack(spacing: 10) {
-            Image(systemName: symbol).foregroundStyle(Theme.accent)
+            AppIcon(symbol).foregroundStyle(Theme.accent)
             Text(title).font(.subheadline.bold()).foregroundStyle(Theme.title)
             Spacer()
         }
@@ -71,7 +71,7 @@ struct DiaryView: View {
         if st.best > 0 {
             Card {
                 HStack(spacing: 12) {
-                    Image(systemName: "flame.fill").font(.title).foregroundStyle(st.current > 0 ? Theme.neonPink : Theme.inkTertiary)
+                    AppIcon("flame.fill").font(.title).foregroundStyle(st.current > 0 ? Theme.neonPink : Theme.inkTertiary)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(st.current > 0 ? "\(st.current)주 연속 탔어요" : "이번 주 한 번 타면 다시 시작해요")
                             .font(.headline).foregroundStyle(Theme.title)
@@ -101,12 +101,12 @@ struct DiaryView: View {
     private var calendarCard: some View {
         Card {
             HStack {
-                Button { shiftMonth(-1) } label: { Image(systemName: "chevron.left").frame(width: Theme.touch, height: Theme.touch) }
+                Button { shiftMonth(-1) } label: { AppIcon("chevron.left").frame(width: Theme.touch, height: Theme.touch) }
                     .accessibilityLabel("이전 달")
                 Spacer()
                 Text(month.formatted(.dateTime.year().month(.wide))).font(.headline).foregroundStyle(Theme.title)
                 Spacer()
-                Button { shiftMonth(1) } label: { Image(systemName: "chevron.right").frame(width: Theme.touch, height: Theme.touch) }
+                Button { shiftMonth(1) } label: { AppIcon("chevron.right").frame(width: Theme.touch, height: Theme.touch) }
                     .accessibilityLabel("다음 달")
             }
             let symbols = calendar.veryShortWeekdaySymbols
@@ -244,7 +244,7 @@ struct DayTimeline: View {
             }
             if journals.isEmpty {
                 Button { newEntry = .journal(day) } label: {
-                    Label("일기 쓰기", systemImage: "pencil.and.scribble")
+                    Label("일기 쓰기", icon: "pencil.and.scribble")
                         .font(.system(.subheadline, design: .rounded).bold())
                         .foregroundStyle(Theme.paperInk)
                         .frame(maxWidth: .infinity, minHeight: Theme.touch)

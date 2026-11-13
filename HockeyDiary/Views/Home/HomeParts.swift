@@ -80,7 +80,7 @@ struct HomeEditView: View {
                             if on { h.remove(b.rawValue) } else { h.insert(b.rawValue) }
                             hiddenRaw = h.sorted().joined(separator: ",")
                         })) {
-                        Label(b.title, systemImage: b.systemImage)
+                        Label(b.title, icon: b.systemImage)
                     }
                 }
                 .onMove { from, to in

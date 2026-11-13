@@ -69,12 +69,12 @@ struct JournalEditorView: View {
                 }
                 shareCard
                 if !canSave {
-                    Label("기분 하나만 골라도, 한 줄만 써도 저장돼요.", systemImage: "sparkles")
+                    Label("기분 하나만 골라도, 한 줄만 써도 저장돼요.", icon: "sparkles")
                         .font(.system(.footnote, design: .rounded)).foregroundStyle(Theme.inkSecondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 Button(action: save) {
-                    Label(journal == nil ? "오늘 일기 붙이기" : "고친 일기 붙이기", systemImage: "heart.fill")
+                    Label(journal == nil ? "오늘 일기 붙이기" : "고친 일기 붙이기", icon: "heart.fill")
                         .font(.system(.headline, design: .rounded))
                         .frame(maxWidth: .infinity, minHeight: 52)
                 }
@@ -140,7 +140,7 @@ struct JournalEditorView: View {
                 .padding(10)
                 .background(Theme.card.opacity(0.55), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             if let linked = linkedSessionID, let s = sameDaySessions.first(where: { $0.id == linked }) {
-                Label("\(s.title)랑 이어 붙였어요", systemImage: "link")
+                Label("\(s.title)랑 이어 붙였어요", icon: "link")
                     .font(.system(.caption, design: .rounded)).foregroundStyle(Theme.paperInkSoft)
             }
         }

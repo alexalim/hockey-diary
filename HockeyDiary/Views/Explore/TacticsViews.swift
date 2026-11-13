@@ -134,7 +134,7 @@ struct TacticPlayCard: View {
                 legend(dash: true, "패스")
                 Spacer()
                 if !reduceMotion {
-                    Button { replay() } label: { Label("다시 보기", systemImage: "play.circle") }.font(.footnote)
+                    Button { replay() } label: { Label("다시 보기", icon: "play.circle") }.font(.footnote)
                 }
             }
         }

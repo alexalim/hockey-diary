@@ -56,13 +56,13 @@ struct ShotChartCanvas: View {
         case .goal:
             ZStack {
                 Circle().fill(Theme.neonPink)
-                Image(systemName: "star.fill").font(.system(size: 9, weight: .bold)).foregroundStyle(.white)
+                AppIcon("star.fill", size: 10.35).foregroundStyle(.white)
             }
             .frame(width: 18, height: 18).overlay(Circle().stroke(.white, lineWidth: 1.5))
         case .saved:
             Circle().fill(Theme.cobalt).frame(width: 14, height: 14).overlay(Circle().stroke(.white, lineWidth: 1.5))
         case .missed:
-            Image(systemName: "xmark").font(.system(size: 11, weight: .heavy)).foregroundStyle(Theme.inkTertiary)
+            AppIcon("xmark", size: 12.65).foregroundStyle(Theme.inkTertiary)
         case .blocked:
             RoundedRectangle(cornerRadius: 2).fill(Theme.warningFill).frame(width: 11, height: 11)
         }

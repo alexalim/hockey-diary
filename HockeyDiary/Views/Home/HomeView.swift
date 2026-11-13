@@ -55,7 +55,7 @@ struct HomeView: View {
                 bodyCard
                 ForEach(visibleBlocks) { b in block(b) }
                 Button { showingEdit = true } label: {
-                    Label("홈 꾸미기", systemImage: "slider.horizontal.3").font(.footnote.weight(.semibold))
+                    Label("홈 꾸미기", icon: "slider.horizontal.3").font(.footnote.weight(.semibold))
                         .frame(maxWidth: .infinity, minHeight: Theme.touch)
                 }
                 .buttonStyle(.plain).foregroundStyle(Theme.accent)
@@ -122,11 +122,11 @@ struct HomeView: View {
             Card(tint: p == .resting ? Theme.iceBlue : Theme.neonPink.opacity(0.12)) {
                 switch p {
                 case .resting:
-                    Label("쉬는 중이에요", systemImage: "moon.zzz.fill").font(.headline).foregroundStyle(Theme.title)
+                    Label("쉬는 중이에요", icon: "moon.zzz.fill").font(.headline).foregroundStyle(Theme.title)
                     Text("연속 기록과 목표는 멈춰 있어요. 돌아오면 이어서 세요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     Button("다시 탈래요") { restJSON = RestPrefs.toggled(restJSON) }.buttonStyle(.bordered)
                 case .logEvent(let title):
-                    Label("\(title) 끝났죠? 바로 남겨요", systemImage: "pencil.and.list.clipboard").font(.headline).foregroundStyle(Theme.title)
+                    Label("\(title) 끝났죠? 바로 남겨요", icon: "pencil.and.list.clipboard").font(.headline).foregroundStyle(Theme.title)
                     Text("시간과 장소는 팀 일정에서 가져와 미리 채워져요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     Button {
                         let kind = teamEvents.first { $0.title == title && $0.sessionID == nil }.flatMap { ActivityType(rawValue: $0.kindRaw) } ?? .regularGame
@@ -134,17 +134,17 @@ struct HomeView: View {
                     } label: { Text("기록하기").frame(maxWidth: .infinity, minHeight: Theme.touch) }
                     .buttonStyle(PinkButtonStyle())
                 case .beforeEvent(let title, let at):
-                    Label("오늘 \(at.formatted(date: .omitted, time: .shortened)) \(title)", systemImage: "calendar.badge.clock").font(.headline).foregroundStyle(Theme.title)
+                    Label("오늘 \(at.formatted(date: .omitted, time: .shortened)) \(title)", icon: "calendar.badge.clock").font(.headline).foregroundStyle(Theme.title)
                     if let g = lastWithGoal?.nextGoal, !g.isEmpty {
                         Text("오늘 목표: \(g)").font(.subheadline).foregroundStyle(Theme.title)
                     } else {
                         Text("오늘 해볼 거 하나 정해 두면 좋아요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     }
                 case .morningGoal(let goal):
-                    Label("오늘 해볼 거", systemImage: "target").font(.headline).foregroundStyle(Theme.title)
+                    Label("오늘 해볼 거", icon: "target").font(.headline).foregroundStyle(Theme.title)
                     Text(goal).font(.subheadline).foregroundStyle(Theme.title)
                 case .eveningJournal:
-                    Label("오늘 어땠어요?", systemImage: "book.fill").font(.headline).foregroundStyle(Theme.title)
+                    Label("오늘 어땠어요?", icon: "book.fill").font(.headline).foregroundStyle(Theme.title)
                     Text("한 줄이면 돼요. 내일의 나한테 남기는 거예요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     Button { newEntry = .journal(Date()) } label: { Text("일기 쓰기").frame(maxWidth: .infinity, minHeight: Theme.touch) }
                         .buttonStyle(PinkButtonStyle())
@@ -162,7 +162,7 @@ struct HomeView: View {
         if ConditionPrefs.isOn(.body) {
             Card {
                 HStack {
-                    Label("오늘 몸 상태", systemImage: "figure.stand").font(.headline).foregroundStyle(Theme.title)
+                    Label("오늘 몸 상태", icon: "figure.stand").font(.headline).foregroundStyle(Theme.title)
                     Spacer()
                     NavigationLink { ConditionView() } label: {
                         Text("흐름 보기").font(.caption.bold())
@@ -222,7 +222,7 @@ struct HomeView: View {
                     Text(next.opponent.isEmpty ? next.title : "\(teams.first?.name ?? "우리 팀") vs \(next.opponent)")
                         .font(.system(size: 22, weight: .bold)).foregroundStyle(.white)
                     if !next.rinkName.isEmpty || !next.memo.isEmpty {
-                        Label([next.rinkName, next.memo].filter { !$0.isEmpty }.joined(separator: " · "), systemImage: "mappin")
+                        Label([next.rinkName, next.memo].filter { !$0.isEmpty }.joined(separator: " · "), icon: "mappin")
                             .font(.caption).foregroundStyle(.white.opacity(0.85)).lineLimit(1)
                     }
                     if !members.isEmpty {
@@ -253,7 +253,7 @@ struct HomeView: View {
         let goal = 2
         return Card {
             HStack {
-                Label("이번 주 하키", systemImage: "target").font(.headline).foregroundStyle(Theme.title)
+                Label("이번 주 하키", icon: "target").font(.headline).foregroundStyle(Theme.title)
                 Spacer()
                 Text("목표 \(goal)회").font(.caption.bold()).foregroundStyle(Theme.accent)
                     .padding(.horizontal, 8).padding(.vertical, 4).background(Theme.cobaltSoft, in: Capsule())
@@ -272,10 +272,10 @@ struct HomeView: View {
                 ForEach(todaySessions) { s in
                     NavigationLink { SessionDetailView(session: s) } label: {
                         HStack {
-                            Image(systemName: s.type.systemImage).foregroundStyle(Theme.accent)
+                            AppIcon(s.type.systemImage).foregroundStyle(Theme.accent)
                             Text("오늘 \(s.startsAt.timeTitle) \(s.title)").font(.subheadline).foregroundStyle(Theme.title)
                             Spacer()
-                            Image(systemName: "chevron.right").font(.caption).foregroundStyle(Theme.inkTertiary)
+                            AppIcon("chevron.right").font(.caption).foregroundStyle(Theme.inkTertiary)
                         }
                         .frame(minHeight: 32)
                     }
@@ -299,10 +299,10 @@ struct HomeView: View {
                 ForEach(todaySessions) { s in
                     NavigationLink { SessionDetailView(session: s) } label: {
                         HStack {
-                            Image(systemName: s.type.systemImage)
+                            AppIcon(s.type.systemImage)
                             Text("\(s.startsAt.timeTitle) \(s.title)")
                             Spacer()
-                            Image(systemName: "chevron.right").font(.caption)
+                            AppIcon("chevron.right").font(.caption)
                         }
                         .foregroundStyle(.white)
                         .frame(minHeight: 32)
@@ -335,7 +335,7 @@ struct HomeView: View {
     private func quick(_ title: String, _ icon: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             VStack(spacing: 6) {
-                Image(systemName: icon).font(.title2)
+                AppIcon(icon).font(.title2)
                 Text(title).font(.footnote.weight(.semibold))
             }
             .frame(maxWidth: .infinity, minHeight: 78)
@@ -357,7 +357,7 @@ struct HomeView: View {
                 CardHeader(title: "다음 목표", systemImage: "target", trailing: s.startsAt.dayTitle)
                 Text(s.nextGoal).font(.body).foregroundStyle(Theme.title)
                 Button { restJSON = RestPrefs.toggled(restJSON) } label: {
-                    Label("한동안 쉬어요 (비시즌·부상)", systemImage: "moon.zzz").font(.caption)
+                    Label("한동안 쉬어요 (비시즌·부상)", icon: "moon.zzz").font(.caption)
                 }
                 .buttonStyle(.borderless).foregroundStyle(Theme.inkSecondary)
             }
@@ -387,7 +387,7 @@ struct HomeView: View {
                 Text("락커에 스케이트를 넣어 두면 연마한 뒤 얼마나 탔는지 알 수 있어요.")
                     .font(.subheadline).foregroundStyle(Theme.inkSecondary)
                 Button { jumper?.go(.tab(.locker)) } label: {
-                    Label("락커로 가기", systemImage: "arrow.right").font(.subheadline.bold())
+                    Label("락커로 가기", icon: "arrow.right").font(.subheadline.bold())
                 }
                 .buttonStyle(.bordered).tint(Theme.cobalt)
             }
@@ -404,7 +404,7 @@ struct HomeView: View {
                 Text("엣지가 밀리지 않으면 더 타도 돼요. 기준은 락커에서 바꿀 수 있어요.")
                     .font(.caption).foregroundStyle(Theme.inkSecondary)
                 Button { jumper?.go(.tab(.locker)) } label: {
-                    Label("락커에서 보기", systemImage: "arrow.right").font(.subheadline.bold())
+                    Label("락커에서 보기", icon: "arrow.right").font(.subheadline.bold())
                 }
                 .buttonStyle(.bordered).tint(Theme.cobalt)
             }
@@ -472,27 +472,27 @@ struct SettingsView: View {
                 Text(RecordPrefs.settingsSummary())
             }
             Section("내 기록 보관") {
-                Label("기록은 모두 이 아이폰에만 저장됩니다.", systemImage: "iphone")
-                Label("서버나 iCloud로 보내지 않습니다. 링크장 검색어만 Apple 지도로 전달됩니다.", systemImage: "icloud.slash")
-                Label("Apple 건강은 연결했을 때만 읽습니다. 읽은 값은 따로 저장하지 않습니다.", systemImage: "heart.text.square")
-                Label("AI 요약은 켰을 때만 동작하며, 아이폰 안에서 하키 기록만 사용합니다.", systemImage: "sparkles")
-                Label("Apple Watch로 잰 운동은 건강 앱에도 저장됩니다.", systemImage: "applewatch")
-                Label("일기는 '리포트 공유'를 켠 것만 시즌 리포트에 한 줄 들어갑니다. 내용을 따로 분석하지 않습니다.", systemImage: "lock.fill")
-                Label("사진은 고른 것만 복사해 두며, 위치 정보는 지웁니다.", systemImage: "photo")
+                Label("기록은 모두 이 아이폰에만 저장됩니다.", icon: "iphone")
+                Label("서버나 iCloud로 보내지 않습니다. 링크장 검색어만 Apple 지도로 전달됩니다.", icon: "icloud.slash")
+                Label("Apple 건강은 연결했을 때만 읽습니다. 읽은 값은 따로 저장하지 않습니다.", icon: "heart.text.square")
+                Label("AI 요약은 켰을 때만 동작하며, 아이폰 안에서 하키 기록만 사용합니다.", icon: "sparkles")
+                Label("Apple Watch로 잰 운동은 건강 앱에도 저장됩니다.", icon: "applewatch")
+                Label("일기는 '리포트 공유'를 켠 것만 시즌 리포트에 한 줄 들어갑니다. 내용을 따로 분석하지 않습니다.", icon: "lock.fill")
+                Label("사진은 고른 것만 복사해 두며, 위치 정보는 지웁니다.", icon: "photo")
             }
             Section("연결") {
-                NavigationLink { HealthConnectView() } label: { Label("Apple 건강", systemImage: "heart.text.square.fill") }
+                NavigationLink { HealthConnectView() } label: { Label("Apple 건강", icon: "heart.text.square.fill") }
             }
             Section {
                 Toggle(isOn: Binding(get: { RestPrefs.isResting(restJSON) }, set: { _ in restJSON = RestPrefs.toggled(restJSON) })) {
-                    Label("쉬는 중", systemImage: "moon.zzz.fill")
+                    Label("쉬는 중", icon: "moon.zzz.fill")
                 }
                 Toggle(isOn: Binding(get: { teamReminder }, set: { on in
                     Task { @MainActor in
                         teamReminder = on ? await TeamReminder.requestPermission() : false
                         await TeamReminder.reschedule(context)
                     }
-                })) { Label("팀 경기 이틀 전 알림", systemImage: "bell.badge") }
+                })) { Label("팀 경기 이틀 전 알림", icon: "bell.badge") }
             } footer: {
                 Text("쉬는 동안에는 주간 연속 기록이 끊기지 않습니다. 팀 알림은 아직 참석을 정하지 않은 사람이 있을 때만 이 아이폰에서 울립니다.")
             }

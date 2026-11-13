@@ -68,7 +68,7 @@ struct LockerView: View {
                     BigToggle(isOn: isOpen, onTitle: "문 닫기", offTitle: "문 열기", onImage: "door.left.hand.open", offImage: "door.left.hand.closed", action: toggle)
                         .frame(maxWidth: 160)
                     Spacer()
-                    Button { editingProfile = LockerStore.profile(context) } label: { Label("꾸미기", systemImage: "paintbrush.fill") }
+                    Button { editingProfile = LockerStore.profile(context) } label: { Label("꾸미기", icon: "paintbrush.fill") }
                         .buttonStyle(.borderedProminent)
                         .tint(Theme.neonPink)
                 }
@@ -164,7 +164,7 @@ struct LockerView: View {
 
     private var earnedBanner: some View {
         Card(tint: Theme.successSoft) {
-            Label("새 스티커를 받았어요!", systemImage: "gift.fill").font(.headline).foregroundStyle(Theme.title)
+            Label("새 스티커를 받았어요!", icon: "gift.fill").font(.headline).foregroundStyle(Theme.title)
             Text(newStickers.compactMap { StickerCatalog.def($0)?.title }.joined(separator: " · "))
                 .font(.subheadline)
             Text("내 기록으로 받은 스티커예요. 꾸미기에서 문에 붙여 보세요.")
@@ -174,10 +174,10 @@ struct LockerView: View {
 
     private func shortcut(_ title: String, _ icon: String, _ trailing: String?) -> some View {
         HStack {
-            Label(title, systemImage: icon).foregroundStyle(Theme.title)
+            Label(title, icon: icon).foregroundStyle(Theme.title)
             Spacer()
             if let trailing { Text(trailing).font(.caption).foregroundStyle(Theme.inkSecondary) }
-            Image(systemName: "chevron.right").font(.caption).foregroundStyle(Theme.inkSecondary)
+            AppIcon("chevron.right").font(.caption).foregroundStyle(Theme.inkSecondary)
         }
         .frame(minHeight: Theme.touch)
     }
@@ -258,7 +258,7 @@ struct LockerDoor: View {
             }
         }
         .overlay(alignment: .bottom) {
-            Label("손잡이를 밀어서 열기", systemImage: "chevron.left.2").font(.caption).foregroundStyle(.white.opacity(0.8)).padding(.bottom, 16)
+            Label("손잡이를 밀어서 열기", icon: "chevron.left.2").font(.caption).foregroundStyle(.white.opacity(0.8)).padding(.bottom, 16)
         }
     }
 }
@@ -278,8 +278,7 @@ struct StickerView: View {
                 .shadow(radius: 2, y: 1)
         } else if let def = StickerCatalog.def(key) {
             let (fg, bg) = Self.colors(def.palette)
-            Image(systemName: def.symbol)
-                .font(.system(size: side * 0.45, weight: .bold))
+            AppIcon(def.symbol, size: side * 0.5)
                 .foregroundStyle(fg)
                 .frame(width: side, height: side)
                 .background(bg, in: Circle())
@@ -329,7 +328,7 @@ struct LockerInside: View {
 
     private func zoneLabel(_ title: String, _ icon: String) -> some View {
         HStack {
-            Image(systemName: icon).font(.title2).frame(width: 40)
+            AppIcon(icon).font(.title2).frame(width: 40)
             Text(title).font(.headline)
             Spacer()
             Text("열기").font(.caption.bold())
@@ -377,7 +376,7 @@ struct LockerCustomizeView: View {
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel("락커 문 미리보기, 스티커 \(placements.count)개. 아래 목록에서도 고칠 수 있어요.")
                 if let item = selectedItem { selectionTools(item) }
-                Button { showingLibrary = true } label: { Label("스티커 붙이기", systemImage: "plus.circle.fill") }
+                Button { showingLibrary = true } label: { Label("스티커 붙이기", icon: "plus.circle.fill") }
             } footer: {
                 Text("스티커를 끌어서 옮겨 보세요. 두 손가락으로 키우고 돌릴 수도 있어요. 바꾸면 바로 저장돼요.")
             }
@@ -433,7 +432,7 @@ struct LockerCustomizeView: View {
                             StickerView(key: p.stickerKey, photo: p.photoData, side: 32)
                             Text(p.stickerKey == "photo" ? "사진 스티커" : (StickerCatalog.def(p.stickerKey)?.title ?? "스티커"))
                             Spacer()
-                            if p.id == selected { Image(systemName: "checkmark").foregroundStyle(Theme.neonPink) }
+                            if p.id == selected { AppIcon("checkmark").foregroundStyle(Theme.neonPink) }
                         }
                         .contentShape(Rectangle())
                         .onTapGesture { selected = p.id }
@@ -488,7 +487,7 @@ struct LockerCustomizeView: View {
 
     private func tool(_ icon: String, _ label: String, role: ButtonRole? = nil, action: @escaping () -> Void) -> some View {
         Button(role: role, action: action) {
-            Image(systemName: icon).frame(maxWidth: .infinity, minHeight: Theme.touch)
+            AppIcon(icon).frame(maxWidth: .infinity, minHeight: Theme.touch)
         }
         .accessibilityLabel(label)
     }
@@ -630,7 +629,7 @@ struct StickerLibraryView: View {
             Text("다른 사람 얼굴이나 팀 로고는 허락받은 것만 붙여 주세요. 사진 스티커는 이 아이폰에만 있어요.")
                 .font(.caption).foregroundStyle(Theme.inkSecondary)
             PhotosPicker(selection: $photoItem, matching: .images) {
-                Label("사진 고르기", systemImage: "photo.badge.plus").frame(maxWidth: .infinity, minHeight: Theme.touch)
+                Label("사진 고르기", icon: "photo.badge.plus").frame(maxWidth: .infinity, minHeight: Theme.touch)
             }
             .buttonStyle(.bordered)
         }
@@ -644,7 +643,7 @@ struct StickerLibraryView: View {
             VStack(spacing: 4) {
                 StickerView(key: d.key, photo: nil, side: 54)
                     .opacity(locked ? 0.25 : 1)
-                    .overlay { if locked { Image(systemName: "lock.fill").foregroundStyle(Theme.inkSecondary) } }
+                    .overlay { if locked { AppIcon("lock.fill").foregroundStyle(Theme.inkSecondary) } }
                 Text(d.title).font(.caption2).lineLimit(1)
             }
         }
@@ -672,7 +671,7 @@ struct GearListView: View {
                         NavigationLink { GearEditorView(kind: kind, item: g) } label: {
                             HStack {
                                 if let data = g.photo { PhotoThumb(data: data, size: 40) }
-                                else { Image(systemName: kind.symbol).frame(width: 40, height: 40).foregroundStyle(Theme.accent) }
+                                else { AppIcon(kind.symbol).frame(width: 40, height: 40).foregroundStyle(Theme.accent) }
                                 VStack(alignment: .leading) {
                                     Text(g.name).font(.subheadline.bold())
                                     Text([g.size.isEmpty ? nil : g.size, g.status.title].compactMap { $0 }.joined(separator: " · "))
@@ -681,7 +680,7 @@ struct GearListView: View {
                             }
                         }
                     }
-                    Button { adding = kind } label: { Label("\(kind.title) 추가", systemImage: "plus") }
+                    Button { adding = kind } label: { Label("\(kind.title) 추가", icon: "plus") }
                 }
             }
         }

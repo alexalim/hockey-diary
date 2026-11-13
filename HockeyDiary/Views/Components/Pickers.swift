@@ -162,7 +162,7 @@ struct SurfacePicker: View {
         let selected = value == s
         return Button { value = s } label: {
             VStack(spacing: 6) {
-                Image(systemName: s.systemImage).font(.title2)
+                AppIcon(s.systemImage).font(.title2)
                 Text(s.title).font(.footnote.weight(.semibold))
             }
             .frame(maxWidth: .infinity, minHeight: 76)
@@ -170,7 +170,7 @@ struct SurfacePicker: View {
             .background(selected ? s.color : Theme.iceBlue, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay(alignment: .topTrailing) {
                 if selected {
-                    Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.neonPink).padding(6)
+                    AppIcon("checkmark.circle.fill").foregroundStyle(Theme.neonPink).padding(6)
                 }
             }
         }
@@ -182,7 +182,7 @@ struct SurfacePicker: View {
     private func small(_ s: SurfaceType) -> some View {
         let selected = value == s
         return Button { value = s } label: {
-            Label(s.title, systemImage: s.systemImage)
+            Label(s.title, icon: s.systemImage)
                 .font(.footnote)
                 .frame(maxWidth: .infinity, minHeight: Theme.touch)
                 .foregroundStyle(selected ? .white : Theme.title)
@@ -325,7 +325,7 @@ struct ChoiceCards<T: Hashable>: View {
                     .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
                         .stroke(selected ? Theme.neonPink : Theme.inkTertiary.opacity(0.25), lineWidth: selected ? 2.5 : 1))
                     .overlay(alignment: .topTrailing) {
-                        if selected { Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.neonPink).padding(4) }
+                        if selected { AppIcon("checkmark.circle.fill").foregroundStyle(Theme.neonPink).padding(4) }
                     }
                 }
                 .buttonStyle(.plain)
@@ -340,7 +340,7 @@ struct ChoiceCards<T: Hashable>: View {
     private func art(_ a: ChoiceOption<T>.Art) -> some View {
         switch a {
         case .none: EmptyView()
-        case .symbol(let name): Image(systemName: name).font(.title3).foregroundStyle(Theme.accent)
+        case .symbol(let name): AppIcon(name).font(.title3).foregroundStyle(Theme.accent)
         case .photo(let data): PhotoThumb(data: data, size: 40)
         case .hollow(let h): HollowGlyph(hollow: h).frame(height: 36)
         }

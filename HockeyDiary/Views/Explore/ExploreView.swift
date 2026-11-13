@@ -21,7 +21,7 @@ struct ExploreView: View {
                                         .frame(height: 64)
                                         .allowsHitTesting(false)
                                         .accessibilityHidden(true)
-                                    Label(topic.title, systemImage: topic.symbol)
+                                    Label(topic.title, icon: topic.symbol)
                                         .font(.subheadline.weight(.semibold))
                                         .lineLimit(1).minimumScaleFactor(0.8)
                                         .foregroundStyle(Theme.title)
@@ -47,7 +47,7 @@ struct ExploreView: View {
                                     Text(t.summary).font(.caption).foregroundStyle(Theme.inkSecondary).lineLimit(1)
                                 }
                                 Spacer()
-                                Image(systemName: "chevron.right").font(.caption).foregroundStyle(Theme.inkSecondary)
+                                AppIcon("chevron.right").font(.caption).foregroundStyle(Theme.inkSecondary)
                             }
                             .frame(minHeight: Theme.touch)
                             .contentShape(Rectangle())

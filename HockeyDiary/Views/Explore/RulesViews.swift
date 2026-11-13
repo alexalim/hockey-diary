@@ -10,7 +10,7 @@ struct RuleDetailView: View {
         ScrollView {
             VStack(spacing: 12) {
                 Card(tint: Theme.cobalt) {
-                    Label(topic.title, systemImage: topic.symbol).font(.title3.bold()).foregroundStyle(.white)
+                    Label(topic.title, icon: topic.symbol).font(.title3.bold()).foregroundStyle(.white)
                     Text(topic.summary).font(.body).foregroundStyle(.white)
                 }
                 if let scenes = RuleScene.scenes[topic.id] {
@@ -63,8 +63,8 @@ struct RuleDetailView: View {
                     HStack {
                         Text(option)
                         Spacer()
-                        if picked != nil && isAnswer { Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.success) }
-                        if chosen && !isAnswer { Image(systemName: "xmark.circle.fill").foregroundStyle(Theme.danger) }
+                        if picked != nil && isAnswer { AppIcon("checkmark.circle.fill").foregroundStyle(Theme.success) }
+                        if chosen && !isAnswer { AppIcon("xmark.circle.fill").foregroundStyle(Theme.danger) }
                     }
                     .padding(.horizontal, 14)
                     .frame(maxWidth: .infinity, minHeight: Theme.touch)
@@ -169,12 +169,12 @@ struct RuleSceneCard: View {
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(scene.caption)
             HStack(spacing: 6) {
-                Image(systemName: scene.ok ? "checkmark.circle.fill" : "xmark.octagon.fill")
+                AppIcon(scene.ok ? "checkmark.circle.fill" : "xmark.octagon.fill")
                     .foregroundStyle(scene.ok ? Theme.success : Theme.danger)
                 Text(scene.caption).font(.subheadline)
             }
             if !reduceMotion {
-                Button { play() } label: { Label("다시 보기", systemImage: "play.circle") }.font(.footnote)
+                Button { play() } label: { Label("다시 보기", icon: "play.circle") }.font(.footnote)
             }
             Text("그림은 이해를 돕는 도식이에요.").font(.caption2).foregroundStyle(Theme.inkSecondary)
         }
@@ -234,9 +234,9 @@ struct RinkSketch: View, Animatable {
             Ellipse().fill(Color.black).frame(width: 18, height: 10)
                 .overlay(Ellipse().stroke(.white.opacity(0.7), lineWidth: 1))
         case .attacker:
-            Image(systemName: "figure.hockey").font(.title2).foregroundStyle(Theme.danger)
+            AppIcon("figure.hockey").font(.title2).foregroundStyle(Theme.danger)
         case .defender:
-            Image(systemName: "figure.hockey").font(.title2).foregroundStyle(Theme.accent)
+            AppIcon("figure.hockey").font(.title2).foregroundStyle(Theme.accent)
                 .scaleEffect(x: -1, y: 1)
         }
     }
@@ -355,7 +355,7 @@ struct FoulSketchView: View {
                 if let path = sketch.blockedPath {
                     Path { pp in pp.move(to: p(path.0)); pp.addLine(to: p(path.1)) }
                         .stroke(Theme.accent.opacity(0.6), style: StrokeStyle(lineWidth: 2, dash: [5, 4]))
-                    Image(systemName: "xmark.circle.fill").foregroundStyle(Theme.danger)
+                    AppIcon("xmark.circle.fill").foregroundStyle(Theme.danger)
                         .position(p(CGPoint(x: (path.0.x + path.1.x) / 2, y: path.0.y)))
                 }
                 if let s = sketch.stick {
@@ -365,19 +365,19 @@ struct FoulSketchView: View {
                 if let ar = sketch.arrow {
                     Path { pp in pp.move(to: p(ar.0)); pp.addLine(to: p(ar.1)) }
                         .stroke(Theme.danger, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
-                    Image(systemName: ar.1.x >= ar.0.x ? "arrowtriangle.right.fill" : "arrowtriangle.left.fill")
+                    AppIcon(ar.1.x >= ar.0.x ? "arrowtriangle.right.fill" : "arrowtriangle.left.fill")
                         .font(.system(size: 10)).foregroundStyle(Theme.danger).position(p(ar.1))
                 }
                 player(color: Theme.danger, mirrored: false).position(p(sketch.a))
                 player(color: Theme.cobalt, mirrored: true).rotationEffect(.degrees(sketch.bTilt)).position(p(sketch.b))
                 if let hand = sketch.hand {
-                    Image(systemName: "hand.raised.fill").font(.system(size: 16)).foregroundStyle(Theme.danger).position(p(hand))
+                    AppIcon("hand.raised.fill", size: 18.4).foregroundStyle(Theme.danger).position(p(hand))
                 }
                 if let puck = sketch.puck {
                     Circle().fill(Color.black).frame(width: 9, height: 9).position(p(puck))
                 }
                 if let bang = sketch.bang {
-                    Image(systemName: "burst.fill").font(.system(size: 18)).foregroundStyle(Theme.warningFill).position(p(bang))
+                    AppIcon("burst.fill", size: 20.7).foregroundStyle(Theme.warningFill).position(p(bang))
                 }
             }
         }
@@ -385,7 +385,7 @@ struct FoulSketchView: View {
     }
 
     private func player(color: Color, mirrored: Bool) -> some View {
-        Image(systemName: "figure.hockey").font(.system(size: 30)).foregroundStyle(color)
+        AppIcon("figure.hockey", size: 34.5).foregroundStyle(color)
             .scaleEffect(x: mirrored ? -1 : 1, y: 1)
     }
 }
@@ -433,7 +433,7 @@ struct FoulCards: View {
 
     private func legend(_ c: Color, _ t: String) -> some View {
         HStack(spacing: 4) {
-            Image(systemName: "figure.hockey").foregroundStyle(c)
+            AppIcon("figure.hockey").foregroundStyle(c)
             Text(t).font(.caption2).foregroundStyle(Theme.inkSecondary)
         }
     }

@@ -63,7 +63,7 @@ struct SeasonReportView: View {
                     EmptyHint(text: "이 기간엔 활동 기록이 없어요. 활동을 남기면 리포트가 채워져요.")
                 } else if let image = render(r) {
                     ShareLink(item: image, preview: SharePreview("마하다 \(r.title) 리포트", image: image)) {
-                        Label("이미지 저장·공유", systemImage: "square.and.arrow.up")
+                        Label("이미지 저장·공유", icon: "square.and.arrow.up")
                     }
                     .buttonStyle(PinkButtonStyle())
                 }
@@ -130,10 +130,10 @@ struct ReportCard: View {
                 }
                 Spacer(minLength: 0)
                 HStack {
-                    if (report.bySurface[.pond] ?? 0) > 0 { Label("폰드 \(report.bySurface[.pond]!)번", systemImage: "water.waves").font(.caption) }
-                    if report.bestDays > 0 { Label("최고의 날 \(report.bestDays)번", systemImage: "heart.fill").font(.caption) }
+                    if (report.bySurface[.pond] ?? 0) > 0 { Label("폰드 \(report.bySurface[.pond]!)번", icon: "water.waves").font(.caption) }
+                    if report.bestDays > 0 { Label("최고의 날 \(report.bestDays)번", icon: "heart.fill").font(.caption) }
                     Spacer()
-                    Image(systemName: "hockey.puck.fill").opacity(0.6)
+                    AppIcon("hockey.puck.fill").opacity(0.6)
                 }
             }
             .foregroundStyle(.white)

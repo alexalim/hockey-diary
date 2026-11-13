@@ -35,7 +35,7 @@ struct AISummaryView: View {
                     Button {
                         run()
                     } label: {
-                        Label(working ? "요약하는 중…" : "돌아보기 만들기", systemImage: "sparkles")
+                        Label(working ? "요약하는 중…" : "돌아보기 만들기", icon: "sparkles")
                             .frame(maxWidth: .infinity, minHeight: Theme.touch)
                     }
                     .disabled(working || facts.isEmpty)

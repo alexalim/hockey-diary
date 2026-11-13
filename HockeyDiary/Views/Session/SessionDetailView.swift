@@ -42,7 +42,7 @@ struct SessionDetailView: View {
                 Button(role: .destructive) {
                     confirmingDelete = true
                 } label: {
-                    Label("이 기록 지우기", systemImage: "trash").frame(maxWidth: .infinity, minHeight: Theme.touch)
+                    Label("이 기록 지우기", icon: "trash").frame(maxWidth: .infinity, minHeight: Theme.touch)
                 }
                 .padding(.top, 8)
             }
@@ -122,7 +122,7 @@ struct SessionDetailView: View {
     private var header: some View {
         Card(tint: session.type.color) {
             HStack {
-                Image(systemName: session.type.systemImage).font(.title)
+                AppIcon(session.type.systemImage).font(.title)
                 VStack(alignment: .leading) {
                     Text(session.title).font(.title3.bold())
                     Text("\(session.startsAt.dayTitle) \(session.startsAt.timeTitle) · \(minutesText(session.minutes))")
@@ -174,7 +174,7 @@ struct SessionDetailView: View {
             CardHeader(title: "기분·컨디션", systemImage: "face.smiling")
             HStack(spacing: 20) {
                 moodItem("운동 전", session.moodBefore)
-                Image(systemName: "arrow.right").foregroundStyle(Theme.inkSecondary)
+                AppIcon("arrow.right").foregroundStyle(Theme.inkSecondary)
                 moodItem("운동 후", session.moodAfter)
                 Spacer()
                 if let f = session.fatigue {
@@ -231,7 +231,7 @@ struct SessionDetailView: View {
     private var placeCard: some View {
         Card(tint: Theme.iceBlue) {
             HStack {
-                Label(title: { Text("장소") }, icon: { Image(systemName: session.surface.systemImage).foregroundStyle(session.surface.color) })
+                Label(title: { Text("장소") }, icon: { AppIcon(session.surface.systemImage).foregroundStyle(session.surface.color) })
                     .font(.headline).foregroundStyle(Theme.title)
                 Spacer()
             }
@@ -282,7 +282,7 @@ struct SessionRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: session.type.systemImage)
+            AppIcon(session.type.systemImage)
                 .font(.title3)
                 .foregroundStyle(.white)
                 .frame(width: 40, height: 40)

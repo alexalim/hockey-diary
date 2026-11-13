@@ -19,7 +19,7 @@ struct HealthConnectView: View {
             Section {
                 ForEach(items, id: \.1) { icon, title, why in
                     HStack(alignment: .top, spacing: 12) {
-                        Image(systemName: icon).foregroundStyle(Theme.accent).frame(width: 28)
+                        AppIcon(icon).foregroundStyle(Theme.accent).frame(width: 28)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(title).font(.headline)
                             Text(why).font(.subheadline).foregroundStyle(Theme.inkSecondary)
@@ -37,13 +37,13 @@ struct HealthConnectView: View {
                 if !HealthService.shared.isAvailable {
                     Text("이 기기에서는 Apple 건강을 쓸 수 없어요.").foregroundStyle(Theme.inkSecondary)
                 } else if enabled {
-                    Label("연결됨", systemImage: "checkmark.circle.fill").foregroundStyle(Theme.accent)
+                    Label("연결됨", icon: "checkmark.circle.fill").foregroundStyle(Theme.accent)
                     Button("건강 데이터 그만 보기", role: .destructive) { enabled = false }
                 } else {
                     Button {
                         connect()
                     } label: {
-                        Label(requesting ? "여는 중…" : "Apple 건강 연결하기", systemImage: "heart.text.square.fill")
+                        Label(requesting ? "여는 중…" : "Apple 건강 연결하기", icon: "heart.text.square.fill")
                             .frame(maxWidth: .infinity, minHeight: Theme.touch)
                     }
                     .buttonStyle(PinkButtonStyle())
@@ -169,7 +169,7 @@ struct SleepGrowthCard: View {
                 Text("Apple 건강을 연결하면 전날 밤 잠과 운동 후 기분을 같이 볼 수 있어요.")
                     .font(.subheadline).foregroundStyle(Theme.inkSecondary)
                 NavigationLink { HealthConnectView() } label: {
-                    Label("Apple 건강 연결", systemImage: "heart.text.square").frame(minHeight: Theme.touch)
+                    Label("Apple 건강 연결", icon: "heart.text.square").frame(minHeight: Theme.touch)
                 }
             } else if !loaded {
                 ProgressView().frame(maxWidth: .infinity)
@@ -281,7 +281,7 @@ struct HeartZoneBar: View {
         let total = max(seconds.reduce(0, +), 1)
         VStack(alignment: .leading, spacing: 6) {
             HStack {
-                Image(systemName: "waveform.path.ecg").foregroundStyle(Theme.danger).frame(width: 24)
+                AppIcon("waveform.path.ecg").foregroundStyle(Theme.danger).frame(width: 24)
                 Text("심박 구간").font(.subheadline)
                 Spacer()
                 Text("최고 \(maxHR) 기준").font(.caption2).foregroundStyle(Theme.inkSecondary)

@@ -42,12 +42,12 @@ struct DrillSection: View {
                                 .font(.caption).foregroundStyle(Theme.inkSecondary)
                         }
                         Spacer()
-                        Button { editingRoutine = r } label: { Image(systemName: "slider.horizontal.3") }
+                        Button { editingRoutine = r } label: { AppIcon("slider.horizontal.3") }
                             .buttonStyle(.borderless).accessibilityLabel("\(r.name) 고치기")
                         Button {
                             running = RoutineRun(routine: r)
                         } label: {
-                            Label("시작", systemImage: "play.fill").font(.footnote.bold())
+                            Label("시작", icon: "play.fill").font(.footnote.bold())
                                 .padding(.horizontal, 12).frame(minHeight: 36)
                                 .background(Theme.neonPink, in: Capsule()).foregroundStyle(.white)
                         }
@@ -56,7 +56,7 @@ struct DrillSection: View {
                     }
                     .frame(minHeight: Theme.touch)
                 }
-                Button { creatingRoutine = true } label: { Label("새 루틴 만들기", systemImage: "plus") }
+                Button { creatingRoutine = true } label: { Label("새 루틴 만들기", icon: "plus") }
             }
             SectionHeader(title: "하키 아카데미")
             AcademyGrid { pickingDrill = true }
@@ -64,7 +64,7 @@ struct DrillSection: View {
                 CardHeader(title: "드릴 하나만", systemImage: "figure.hockey")
                 Text("루틴 없이 지금 하고 싶은 드릴만 골라서 세요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                 Button { pickingDrill = true } label: {
-                    Label("드릴 고르기", systemImage: "magnifyingglass").frame(maxWidth: .infinity, minHeight: Theme.touch)
+                    Label("드릴 고르기", icon: "magnifyingglass").frame(maxWidth: .infinity, minHeight: Theme.touch)
                 }
                 .buttonStyle(.bordered)
             }
@@ -118,7 +118,7 @@ struct DrillSection: View {
             }
             ForEach(recent) { log in
                 HStack {
-                    Image(systemName: log.offIce ? "house.fill" : "snowflake").foregroundStyle(Theme.accent).frame(width: 24)
+                    AppIcon(log.offIce ? "house.fill" : "snowflake").foregroundStyle(Theme.accent).frame(width: 24)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(log.title).font(.subheadline.bold()).foregroundStyle(Theme.title)
                         Text("\(log.at.dayTitle) \(log.at.timeTitle)\(log.skillName.isEmpty ? "" : " · \(log.skillName)")")
@@ -231,7 +231,7 @@ struct RoutineRunView: View {
                     Text("\(run.index + 1) / \(run.items.count)").font(.caption.bold()).foregroundStyle(Theme.inkSecondary)
                 }
                 Spacer()
-                Toggle(isOn: $voiceOn) { Label("소리로 세기", systemImage: voiceOn ? "speaker.wave.2.fill" : "speaker.slash") }
+                Toggle(isOn: $voiceOn) { Label("소리로 세기", icon: voiceOn ? "speaker.wave.2.fill" : "speaker.slash") }
                     .toggleStyle(.button).font(.caption.bold()).tint(Theme.cobalt)
             }
             Card(tint: Theme.cobalt) {
@@ -267,12 +267,12 @@ struct RoutineRunView: View {
             Text(secondsLeft == 0 ? "다 했어요! 다음으로 넘어가요." : "목표 \(item.target)분").font(.subheadline).foregroundStyle(Theme.inkSecondary)
             HStack(spacing: 10) {
                 Button { timerOn.toggle() } label: {
-                    Label(timerOn ? "잠깐" : (secondsLeft == item.target * 60 ? "시작" : "계속"), systemImage: timerOn ? "pause.fill" : "play.fill")
+                    Label(timerOn ? "잠깐" : (secondsLeft == item.target * 60 ? "시작" : "계속"), icon: timerOn ? "pause.fill" : "play.fill")
                         .frame(maxWidth: .infinity, minHeight: 56)
                 }
                 .buttonStyle(.borderedProminent).tint(Theme.cobalt).disabled(secondsLeft == 0)
                 Button { timerOn = false; secondsLeft = item.target * 60 } label: {
-                    Image(systemName: "arrow.counterclockwise").frame(width: 56, height: 56)
+                    AppIcon("arrow.counterclockwise").frame(width: 56, height: 56)
                 }
                 .buttonStyle(.bordered).accessibilityLabel("처음부터")
             }
@@ -293,7 +293,7 @@ struct RoutineRunView: View {
                 .accessibilityLabel(count >= item.target ? "\(count)번 했어요" : "\(left)번 남았어요")
             Text(count >= item.target ? "목표 \(item.target)번 다 했어요!" : "번 남았어요 · 지금 \(count)번").font(.subheadline).foregroundStyle(Theme.inkSecondary)
             HStack(spacing: 10) {
-                Button { if count > 0 { count -= 1 } } label: { Image(systemName: "minus").frame(width: 64, height: 64) }
+                Button { if count > 0 { count -= 1 } } label: { AppIcon("minus").frame(width: 64, height: 64) }
                     .buttonStyle(.bordered).accessibilityLabel("하나 빼기")
                 Button {
                     withAnimation(.snappy) { count += 1 }
@@ -321,7 +321,7 @@ struct RoutineRunView: View {
 
     private var summaryScreen: some View {
         VStack(spacing: 16) {
-            Image(systemName: "checkmark.seal.fill").font(.system(size: 56)).foregroundStyle(Theme.neonPink)
+            AppIcon("checkmark.seal.fill", size: 64.4).foregroundStyle(Theme.neonPink)
             Text("오늘 훈련 끝!").font(.title.bold()).foregroundStyle(Theme.title)
             if done.isEmpty {
                 Text("저장한 드릴이 없어요.").foregroundStyle(Theme.inkSecondary)
@@ -456,7 +456,7 @@ struct RoutineEditorView: View {
                 }
                 .onMove { items.move(fromOffsets: $0, toOffset: $1) }
                 .onDelete { items.remove(atOffsets: $0) }
-                Button { adding = true } label: { Label("드릴 추가", systemImage: "plus") }
+                Button { adding = true } label: { Label("드릴 추가", icon: "plus") }
             } header: {
                 Text("드릴 순서 · 약 \(StarterRoutine.estimatedMinutes(items))분")
             } footer: {

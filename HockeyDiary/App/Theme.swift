@@ -178,7 +178,7 @@ struct CardHeader: View {
 
     var body: some View {
         HStack {
-            Label(title, systemImage: systemImage)
+            Label(title, icon: systemImage)
                 .font(.headline)
                 .foregroundStyle(Theme.title)
             Spacer()
@@ -215,8 +215,7 @@ struct EmptyHint: View {
     /// 빈 상태는 종이 쪽지 한 장. 아이콘은 파스텔 동그라미, 왼쪽 위에 테이프, 필요하면 아래에 바로 가기.
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            Image(systemName: systemImage)
-                .font(.system(size: 15, weight: .semibold))
+            AppIcon(systemImage, size: 17)
                 .foregroundStyle(Theme.accent)
                 .frame(width: 34, height: 34)
                 .background(Theme.stickers[3], in: Circle())
@@ -247,7 +246,7 @@ struct EmptyHint: View {
     private func jumpLabel(_ title: String) -> some View {
         HStack(spacing: 4) {
             Text(title)
-            Image(systemName: "arrow.right")
+            AppIcon("arrow.right")
         }
         .font(.system(.footnote, design: .rounded).bold())
         .foregroundStyle(.white)
@@ -267,7 +266,7 @@ struct SkillInfoButton: View {
             Button {
                 showing = true
             } label: {
-                Image(systemName: "questionmark.circle")
+                AppIcon("questionmark.circle")
                     .font(.body)
                     .foregroundStyle(tint)
                     .frame(width: 32, height: 32)
@@ -348,7 +347,7 @@ struct RoundIconButton: View {
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: systemImage).font(.system(size: 17, weight: .semibold)).foregroundStyle(tint)
+            AppIcon(systemImage, size: 19.55).foregroundStyle(tint)
                 .frame(width: 44, height: 44)
                 .background(fill, in: Circle())
                 .overlay(Circle().stroke(Theme.border, lineWidth: fill == Theme.card ? 1 : 0))
@@ -370,7 +369,7 @@ struct QuickAction: View {
     var body: some View {
         Button(action: action) {
             VStack(spacing: 8) {
-                Image(systemName: systemImage).font(.system(size: 20, weight: .semibold)).foregroundStyle(tint)
+                AppIcon(systemImage, size: 23).foregroundStyle(tint)
                     .frame(width: 44, height: 44).background(bubble, in: Circle())
                 Text(title).font(.system(size: 13, weight: .semibold)).foregroundStyle(Theme.title)
             }

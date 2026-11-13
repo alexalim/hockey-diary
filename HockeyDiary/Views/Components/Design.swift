@@ -29,7 +29,7 @@ struct StatusTag: View {
 
     var body: some View {
         HStack(spacing: 3) {
-            if let systemImage { Image(systemName: systemImage).font(.system(size: 9, weight: .bold)) }
+            if let systemImage { AppIcon(systemImage, size: 10.35) }
             Text(text).font(.caption2.bold())
         }
         .foregroundStyle(fg)
@@ -66,7 +66,7 @@ struct MetricRow: View {
 
     var body: some View {
         HStack {
-            Image(systemName: systemImage).foregroundStyle(tint).frame(width: 24)
+            AppIcon(systemImage).foregroundStyle(tint).frame(width: 24)
             Text(title).font(.subheadline)
             Spacer()
             VStack(alignment: .trailing, spacing: 0) {
@@ -94,7 +94,7 @@ struct Legend: View {
             ForEach(items) { it in
                 HStack(spacing: 4) {
                     if let s = it.systemImage {
-                        Image(systemName: s).font(.caption2.weight(.heavy)).foregroundStyle(it.color)
+                        AppIcon(s).font(.caption2.weight(.heavy)).foregroundStyle(it.color)
                     } else {
                         Circle().fill(it.color).frame(width: 9, height: 9)
                     }
@@ -148,7 +148,7 @@ struct BigToggle: View {
 
     var body: some View {
         Button(action: action) {
-            Label(isOn ? onTitle : offTitle, systemImage: isOn ? onImage : offImage)
+            Label(isOn ? onTitle : offTitle, icon: isOn ? onImage : offImage)
                 .font(.headline)
                 .frame(maxWidth: .infinity, minHeight: 50)
                 .foregroundStyle(isOn ? .white : Theme.accent)
@@ -167,7 +167,7 @@ struct ToastModifier: ViewModifier {
     func body(content: Content) -> some View {
         content.overlay(alignment: .bottom) {
             if let message {
-                Label(message, systemImage: "checkmark.circle.fill")
+                Label(message, icon: "checkmark.circle.fill")
                     .font(.subheadline.bold())
                     .foregroundStyle(.white)
                     .padding(.horizontal, 16).padding(.vertical, 10)

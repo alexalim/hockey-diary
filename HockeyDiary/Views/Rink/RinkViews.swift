@@ -49,7 +49,7 @@ struct RinkNameField: View {
     private func suggestion(_ title: String, _ subtitle: String, icon: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 10) {
-                Image(systemName: icon).foregroundStyle(Theme.accent).frame(width: 20)
+                AppIcon(icon).foregroundStyle(Theme.accent).frame(width: 20)
                 VStack(alignment: .leading, spacing: 1) {
                     Text(title).font(.subheadline).foregroundStyle(.primary)
                     if !subtitle.isEmpty { Text(subtitle).font(.caption2).foregroundStyle(Theme.inkSecondary).lineLimit(1) }
@@ -128,7 +128,7 @@ struct RinkFinderView: View {
                              : "'\(query)'로는 못 찾았어요. 링크장 이름이나 구·동 이름으로 다시 찾아보거나 직접 추가해 보세요.")
                             .font(.subheadline).foregroundStyle(Theme.inkSecondary)
                         otherMapLinks(for: query)
-                        Button { addManually = true } label: { Label("링크장 직접 추가", systemImage: "plus.circle") }
+                        Button { addManually = true } label: { Label("링크장 직접 추가", icon: "plus.circle") }
                     }
                     ForEach(found) { p in
                         Button {
@@ -225,21 +225,21 @@ struct RinkFinderView: View {
                 Button(role: .destructive) {
                     context.delete(r)
                     context.saveOrReport()
-                } label: { Label("빼기", systemImage: "trash") }
+                } label: { Label("빼기", icon: "trash") }
                 .tint(Theme.danger)   // 앱 전체 tint(파랑)가 이기지 않게 빨강을 못 박는다.
             }
     }
 
     private func placeRow(_ title: String, _ subtitle: String, saved: Bool, needsCheck: Bool = false) -> some View {
         HStack {
-            Image(systemName: "figure.hockey").foregroundStyle(Theme.accent).frame(width: 28)
+            AppIcon("figure.hockey").foregroundStyle(Theme.accent).frame(width: 28)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title).foregroundStyle(.primary)
                 if !subtitle.isEmpty { Text(subtitle).font(.caption).foregroundStyle(Theme.inkSecondary).lineLimit(1) }
                 if needsCheck { Text("운영 중인지 가기 전에 확인해 주세요").font(.caption2).foregroundStyle(Theme.warning) }
             }
             Spacer()
-            Image(systemName: saved ? "checkmark.circle.fill" : "plus.circle").foregroundStyle(saved ? Theme.neonPink : Theme.accent)
+            AppIcon(saved ? "checkmark.circle.fill" : "plus.circle").foregroundStyle(saved ? Theme.neonPink : Theme.accent)
         }
         .frame(minHeight: Theme.touch)
     }
@@ -250,10 +250,10 @@ struct RinkFinderView: View {
         let enc = term.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         return Group {
             if let u = URL(string: "https://map.naver.com/p/search/\(enc)") {
-                Link(destination: u) { Label("네이버 지도에서 '\(term)' 찾기", systemImage: "map") }
+                Link(destination: u) { Label("네이버 지도에서 '\(term)' 찾기", icon: "map") }
             }
             if let u = URL(string: "https://map.kakao.com/?q=\(enc)") {
-                Link(destination: u) { Label("카카오맵에서 찾기", systemImage: "map") }
+                Link(destination: u) { Label("카카오맵에서 찾기", icon: "map") }
             }
         }
     }
@@ -300,9 +300,9 @@ struct RinkDetailView: View {
                 TextField("링크장 이름", text: $rink.name).font(.title3.bold())
                 TextField("주소", text: $rink.address).foregroundStyle(Theme.inkSecondary)
                 Toggle("즐겨찾기", isOn: $rink.isFavorite)
-                Button { rink.openInMaps() } label: { Label("지도에서 보기", systemImage: "map") }
+                Button { rink.openInMaps() } label: { Label("지도에서 보기", icon: "map") }
                 if let url = URL(string: rink.officialURL), !rink.officialURL.isEmpty, url.scheme?.hasPrefix("http") == true {
-                    Link(destination: url) { Label("공식 안내", systemImage: "safari") }
+                    Link(destination: url) { Label("공식 안내", icon: "safari") }
                 }
             }
             Section {
@@ -320,7 +320,7 @@ struct RinkDetailView: View {
             }
             Section {
                 Button(role: .destructive) { confirmRemove = true } label: {
-                    Label("내 링크장에서 빼기", systemImage: "trash").foregroundStyle(Theme.danger)
+                    Label("내 링크장에서 빼기", icon: "trash").foregroundStyle(Theme.danger)
                 }
             } footer: {
                 Text("기록에 적힌 링크장 이름은 그대로 남아요. 다시 찾아서 담을 수 있어요.")
