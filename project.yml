@@ -85,6 +85,7 @@ targets:
       - path: HockeyDiaryWatch
       - path: Shared/MoodFace.swift
       - path: Shared/MahadaIcons.swift
+      - path: Shared/MahadaIconData.swift
     dependencies:
       - package: HockeyCore
     entitlements:
