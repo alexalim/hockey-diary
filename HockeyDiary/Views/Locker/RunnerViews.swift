@@ -2,6 +2,56 @@ import SwiftUI
 import SwiftData
 import HockeyCore
 
+// 러너·연마 화면 — 일기처럼 다이어리 속지 톤(종이 카드·테이프·스티커, JournalParts.swift). 저장 값은 그대로.
+
+/// 카드마다 돌려 쓰는 테이프 색과 각도.
+private enum RunnerPaper {
+    static let tapes: [Color] = [Theme.tapePink, Theme.tapeMint, Theme.tapeYellow]
+    static let angles: [Double] = [-4, 3, -2, 5, -5]
+    static func tape(_ i: Int) -> Color { tapes[i % tapes.count] }
+    static func angle(_ i: Int) -> Double { angles[i % angles.count] }
+}
+
+/// 종이 카드 안의 "이름 · 값" 한 줄.
+private struct RunnerValueRow: View {
+    var title: String
+    var value: String
+    var soft = false
+
+    var body: some View {
+        HStack {
+            Text(title).font(.system(.subheadline, design: .rounded)).foregroundStyle(Theme.paperInk)
+            Spacer()
+            Text(value)
+                .font(.system(.subheadline, design: .rounded).weight(soft ? .regular : .bold))
+                .foregroundStyle(soft ? Theme.paperInkSoft : Theme.paperInk)
+        }
+    }
+}
+
+/// 종이 카드 아래 작은 설명 글.
+private struct RunnerNote: View {
+    var text: String
+
+    var body: some View {
+        Text(text)
+            .font(.system(.caption, design: .rounded)).foregroundStyle(Theme.paperInkSoft)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
+/// 종이 위 입력 칸 바탕.
+private extension View {
+    func runnerField() -> some View {
+        self
+            .font(.system(.body, design: .rounded))
+            .foregroundStyle(Theme.paperInk)
+            .tint(Theme.accentText)
+            .padding(10)
+            .background(Theme.card.opacity(0.55), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+}
+
 /// 모든 러너 세트.
 struct RunnerListView: View {
     @Query(sort: \RunnerSet.createdAt) private var runners: [RunnerSet]
@@ -9,27 +59,28 @@ struct RunnerListView: View {
     @State private var adding = false
 
     var body: some View {
-        List {
-            if runners.isEmpty {
-                Text("아직 러너(날)가 없어요. 스케이트 화면에서 추가하면 바로 달려요.")
-                    .foregroundStyle(Theme.inkSecondary)
-            }
-            ForEach(runners.filter { $0.retiredAt == nil }) { r in
-                NavigationLink { RunnerDetailView(runner: r) } label: {
-                    RunnerRow(runner: r, badge: r.needsReplacement ? "교체 시기" : r.installedSkate.map { "\($0.name)에 장착" })
+        let active = runners.filter { $0.retiredAt == nil }
+        let retired = runners.filter { $0.retiredAt != nil }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                if runners.isEmpty {
+                    EmptyHint(text: "아직 러너(날)가 없어요. 스케이트 화면에서 추가하면 바로 달려요.", systemImage: "skateblade",
+                              link: EmptyLink("스케이트로") { SkateListView() })
                 }
-            }
-            let retired = runners.filter { $0.retiredAt != nil }
-            if !retired.isEmpty {
-                Section("교체한 날") {
-                    ForEach(retired) { r in
-                        NavigationLink { RunnerDetailView(runner: r) } label: {
-                            RunnerRow(runner: r, badge: r.retiredAt.map { "\($0.formatted(.dateTime.year().month())) 교체" })
-                        }
+                ForEach(Array(active.enumerated()), id: \.element.id) { i, r in
+                    runnerCard(r, index: i, badge: r.needsReplacement ? "교체 시기" : r.installedSkate.map { "\($0.name)에 장착" })
+                }
+                if !retired.isEmpty {
+                    PaperTitle(text: "교체한 날", systemImage: "archivebox")
+                        .padding(.top, 8)
+                    ForEach(Array(retired.enumerated()), id: \.element.id) { i, r in
+                        runnerCard(r, index: active.count + i, badge: r.retiredAt.map { "\($0.formatted(.dateTime.year().month())) 교체" })
                     }
                 }
             }
+            .padding(.horizontal, Theme.screenPadding).padding(.vertical, 12)
         }
+        .screenBackground()
         .navigationTitle(focusSharpening ? "연마" : "러너(날)")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -38,29 +89,54 @@ struct RunnerListView: View {
         }
         .sheet(isPresented: $adding) { NavigationStack { RunnerEditorView(runner: nil, installOn: nil) } }
     }
+
+    private func runnerCard(_ r: RunnerSet, index i: Int, badge: String?) -> some View {
+        NavigationLink { RunnerDetailView(runner: r) } label: {
+            PaperCard(tape: RunnerPaper.tape(i), tapeAngle: RunnerPaper.angle(i)) {
+                HStack(spacing: 8) {
+                    RunnerRow(runner: r, badge: badge, iconIndex: i)
+                    AppIcon("chevron.right").font(.caption.bold()).foregroundStyle(Theme.paperInkSoft)
+                }
+            }
+        }
+        .buttonStyle(.plain)
+    }
 }
 
 struct RunnerRow: View {
     @Environment(\.modelContext) private var context
     let runner: RunnerSet
     var badge: String?
+    /// 파스텔 동그라미 색 순번.
+    var iconIndex = 0
+
+    /// 교체 시기는 분홍 테두리로 눈에 띄게, 교체한 날은 보라, 장착은 민트.
+    private var badgeIndex: Int {
+        guard let badge else { return 0 }
+        if badge == "교체 시기" { return 0 }
+        return badge.hasSuffix("교체") ? 4 : 2
+    }
 
     var body: some View {
-        HStack {
-            if let h = runner.currentHollow.flatMap(Hollow.init(label:)) {
-                HollowGlyph(hollow: h).frame(width: 34, height: 34)
-            } else {
-                AppIcon("minus").frame(width: 34, height: 34).foregroundStyle(Theme.accent)
+        HStack(spacing: 12) {
+            AppIcon("skateblade", size: 22)
+                .foregroundStyle(Theme.paperInk)
+                .frame(width: 46, height: 46)
+                .background(Theme.stickers[iconIndex % 5], in: Circle())
+                .overlay(Circle().stroke(Theme.paper, lineWidth: 2))
+            VStack(alignment: .leading, spacing: 6) {
+                Text(runner.name)
+                    .font(.system(.headline, design: .rounded)).foregroundStyle(Theme.paperInk)
+                FlowLayout(spacing: 6) {
+                    Sticker(text: "RoH \(runner.currentHollow.map { "\($0)\"" } ?? "미확인")", index: 1, on: false, small: true)
+                    if let badge {
+                        Sticker(text: badge, index: badgeIndex, on: badge == "교체 시기", small: true)
+                    }
+                }
+                Text(DiaryStore.sharpeningSummary(runner, context: context))
+                    .font(.system(.caption, design: .rounded)).foregroundStyle(Theme.paperInkSoft)
             }
-            VStack(alignment: .leading, spacing: 2) {
-                Text(runner.name).font(.subheadline.bold())
-                Text("RoH \(runner.currentHollow.map { "\($0)\"" } ?? "미확인") · \(DiaryStore.sharpeningSummary(runner, context: context))")
-                    .font(.caption).foregroundStyle(Theme.inkSecondary)
-            }
-            Spacer()
-            if let badge {
-                StatusTag(text: badge, kind: badge == "교체 시기" ? .danger : (badge.hasSuffix("교체") ? .neutral : .success))
-            }
+            Spacer(minLength: 0)
         }
         .frame(minHeight: Theme.touch)
         .accessibilityElement(children: .combine)
@@ -94,54 +170,77 @@ struct RunnerEditorView: View {
     @State private var replaceMonths = 12
     @State private var loaded = false
 
+    private var canSave: Bool { !name.trimmingCharacters(in: .whitespaces).isEmpty }
+
     var body: some View {
-        Form {
-            Section {
-                TextField("이름 (예: A세트, 스텔스)", text: $name)
-                TextField("모델 (예: Step Blacksteel)", text: $model)
-            } header: {
-                Text("러너(날)")
-            } footer: {
-                Text("러너는 부츠에 끼우는 날이에요. 연마는 이 날을 가는 거예요. 그래서 연마 기록과 알림도 날마다 따로 세요.")
-            }
-            Section {
-                Toggle("연마 점검 표시하기", isOn: $useThreshold)
-                if useThreshold {
-                    ChoiceCards(options: [
-                        ChoiceOption(value: CheckBy.sessions, title: "탄 횟수", art: .symbol("number")),
-                        ChoiceOption(value: CheckBy.hours, title: "탄 시간", art: .symbol("clock")),
-                    ], selection: $checkBy, columns: 2, minHeight: 60)
-                    if checkBy == .hours {
-                        Stepper("연마하고 \(thresholdHours)시간 타면 표시", value: $thresholdHours, in: 1...100)
-                    } else {
-                        Stepper("연마하고 \(thresholdSessions)번 타면 표시", value: $thresholdSessions, in: 1...60)
-                    }
+        ScrollView {
+            VStack(spacing: 16) {
+                PaperCard(tape: Theme.tapePink, tapeAngle: -4) {
+                    PaperTitle(text: "러너(날)", systemImage: "skateblade")
+                    TextField("이름 (예: A세트, 스텔스)", text: $name).runnerField()
+                    TextField("모델 (예: Step Blacksteel)", text: $model).runnerField()
+                    RunnerNote(text: "러너는 부츠에 끼우는 날이에요. 연마는 이 날을 가는 거예요. 그래서 연마 기록과 알림도 날마다 따로 세요.")
                 }
-            } header: {
-                Text("연마 점검")
-            } footer: {
-                Text("이 날로 정해둔 만큼 타면 홈 화면에 갈 때가 됐다고 띄워 줘요. 휴대폰 알림은 아직 안 보내요. 정해진 주기는 없으니 내 느낌대로 정하면 돼요.")
-            }
-            Section {
-                Toggle("날 교체 시기 표시하기", isOn: $useReplace)
-                if useReplace {
-                    ChoiceCards(options: [
-                        ChoiceOption(value: ReplaceBy.sharpenings, title: "연마 횟수", art: .symbol("wrench.and.screwdriver")),
-                        ChoiceOption(value: ReplaceBy.months, title: "쓴 기간", art: .symbol("calendar")),
-                    ], selection: $replaceBy, columns: 2, minHeight: 60)
-                    if replaceBy == .sharpenings {
-                        Stepper("연마 \(replaceSharpenings)번 하면 표시", value: $replaceSharpenings, in: 5...100)
-                    } else {
-                        Stepper("\(replaceMonths)개월 쓰면 표시", value: $replaceMonths, in: 1...48)
+                PaperCard(tape: Theme.tapeMint, tapeAngle: 3) {
+                    PaperTitle(text: "연마 점검", systemImage: "wrench.and.screwdriver")
+                    Toggle("연마 점검 표시하기", isOn: $useThreshold)
+                        .font(.system(.subheadline, design: .rounded)).foregroundStyle(Theme.paperInk)
+                        .tint(Theme.neonPink)
+                    if useThreshold {
+                        ChoiceCards(options: [
+                            ChoiceOption(value: CheckBy.sessions, title: "탄 횟수", art: .symbol("number")),
+                            ChoiceOption(value: CheckBy.hours, title: "탄 시간", art: .symbol("clock")),
+                        ], selection: $checkBy, columns: 2, minHeight: 60)
+                        Group {
+                            if checkBy == .hours {
+                                Stepper("연마하고 \(thresholdHours)시간 타면 표시", value: $thresholdHours, in: 1...100)
+                            } else {
+                                Stepper("연마하고 \(thresholdSessions)번 타면 표시", value: $thresholdSessions, in: 1...60)
+                            }
+                        }
+                        .font(.system(.subheadline, design: .rounded)).foregroundStyle(Theme.paperInk)
                     }
+                    RunnerNote(text: "이 날로 정해둔 만큼 타면 홈 화면에 갈 때가 됐다고 띄워 줘요. 휴대폰 알림은 아직 안 보내요. 정해진 주기는 없으니 내 느낌대로 정하면 돼요.")
                 }
-            } header: {
-                Text("날 교체 시기")
-            } footer: {
-                Text("날은 갈수록 깎여요. 얼마나 쓰면 바꿀지는 사람마다 달라요. 내 기준으로 정해 주세요.")
+                PaperCard(tape: Theme.tapeYellow, tapeAngle: -2) {
+                    PaperTitle(text: "날 교체 시기", systemImage: "calendar")
+                    Toggle("날 교체 시기 표시하기", isOn: $useReplace)
+                        .font(.system(.subheadline, design: .rounded)).foregroundStyle(Theme.paperInk)
+                        .tint(Theme.neonPink)
+                    if useReplace {
+                        ChoiceCards(options: [
+                            ChoiceOption(value: ReplaceBy.sharpenings, title: "연마 횟수", art: .symbol("wrench.and.screwdriver")),
+                            ChoiceOption(value: ReplaceBy.months, title: "쓴 기간", art: .symbol("calendar")),
+                        ], selection: $replaceBy, columns: 2, minHeight: 60)
+                        Group {
+                            if replaceBy == .sharpenings {
+                                Stepper("연마 \(replaceSharpenings)번 하면 표시", value: $replaceSharpenings, in: 5...100)
+                            } else {
+                                Stepper("\(replaceMonths)개월 쓰면 표시", value: $replaceMonths, in: 1...48)
+                            }
+                        }
+                        .font(.system(.subheadline, design: .rounded)).foregroundStyle(Theme.paperInk)
+                    }
+                    RunnerNote(text: "날은 갈수록 깎여요. 얼마나 쓰면 바꿀지는 사람마다 달라요. 내 기준으로 정해 주세요.")
+                }
+                PaperCard(tape: Theme.tapePink, tapeAngle: 4, dotted: true) {
+                    PaperTitle(text: "메모", systemImage: "pencil.line")
+                    TextField("메모", text: $memo, axis: .vertical)
+                        .lineLimit(2...8)
+                        .runnerField()
+                }
+                Button(action: save) {
+                    Label("저장하기", icon: "heart.fill")
+                        .font(.system(.headline, design: .rounded))
+                        .frame(maxWidth: .infinity, minHeight: 52)
+                }
+                .buttonStyle(.borderedProminent).tint(Theme.neonPink).buttonBorderShape(.capsule)
+                .disabled(!canSave)
             }
-            Section("메모") { TextField("메모", text: $memo, axis: .vertical) }
+            .padding(.horizontal, Theme.screenPadding).padding(.vertical, 12)
         }
+        .screenBackground()
+        .scrollDismissesKeyboard(.interactively)
         .navigationTitle(runner == nil ? "러너(날) 추가" : "러너(날) 고치기")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -196,92 +295,76 @@ struct RunnerDetailView: View {
     var body: some View {
         let since = DiaryStore.minutesSinceSharpening(runner, context: context)
         let rides = DiaryStore.sessionsSinceSharpening(runner, context: context)
-        List {
-            Section {
-                HStack(spacing: 16) {
-                    if let h = runner.currentHollow.flatMap(Hollow.init(label:)) {
-                        HollowGlyph(hollow: h).frame(width: 70, height: 70)
-                    }
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(runner.name).font(.title3.bold())
-                        Text("현재 RoH \(runner.currentHollow.map { "\($0)\"" } ?? "미확인")\(runner.currentHollow.flatMap(Hollow.init(label:))?.nickname.map { " · \($0)" } ?? "")").font(.subheadline)
-                        Text(runner.installedSkate.map { "\($0.name)에 장착 중" } ?? "보관 중")
-                            .font(.caption).foregroundStyle(Theme.inkSecondary)
-                    }
-                }
-                HStack {
-                    Text("마지막 연마")
-                    Spacer()
-                    if let last = runner.lastSharpening {
-                        Text("\(ElapsedText.since(last.at)) · \(last.at.formatted(.dateTime.month().day()))").bold()
-                    } else {
-                        Text("기록 없음").foregroundStyle(Theme.inkSecondary)
-                    }
-                }
-                HStack {
-                    Text("그 뒤로 탄 횟수")
-                    Spacer()
-                    Text(rides == 0 ? "아직 안 탔어요" : "\(rides)번").bold()
-                }
-                HStack {
-                    Text("그 뒤로 탄 시간")
-                    Spacer()
-                    Text(minutesText(since)).bold()
-                }
-                if let n = runner.checkThresholdSessions {
-                    ProgressTrack(value: Double(rides), total: Double(n), label: "\(n)번 타면 홈에 표시", trailing: "\(rides)/\(n)")
-                } else if let t = runner.checkThresholdMinutes {
-                    ProgressTrack(value: Double(since), total: Double(t), label: "\(minutesText(t)) 타면 홈에 표시", trailing: minutesText(since))
-                }
-            } footer: {
-                Text("기록할 때 이 러너를 고른 활동만 세요. 시간은 '실제로 탄 시간'으로 더해요.")
-            }
-
-            Section {
-                HStack {
-                    Text("날 상태")
-                    Spacer()
-                    Text(runner.lifeSummary).bold()
-                }
-                if let n = runner.replaceAfterSharpenings {
-                    ProgressTrack(value: Double(runner.sharpenings.count), total: Double(n), label: "연마 \(n)번 하면 교체 표시", trailing: "\(runner.sharpenings.count)/\(n)")
-                } else if let m = runner.replaceAfterMonths {
-                    let used = RunnerLife.monthsUsed(since: runner.firstUsedAt)
-                    ProgressTrack(value: Double(used), total: Double(m), label: "\(m)개월 쓰면 교체 표시", trailing: "\(used)개월")
-                }
-                if let retired = runner.retiredAt {
-                    Text("\(retired.formatted(date: .abbreviated, time: .omitted))에 교체했어요.").foregroundStyle(Theme.inkSecondary)
-                } else {
-                    Button("이 날 교체했어요") { confirmingRetire = true }
-                }
-            } header: {
-                Text("날 교체")
-            } footer: {
-                Text("교체했다고 하면 이 러너는 '교체한 날'로 옮겨져요. 지난 기록은 그대로 남아요.")
-            }
-
-            Section { SharpeningGuideCard() }
-
-            Section {
-                Button { addingSharpening = true } label: { Label("연마 기록 추가", icon: "plus") }
-                ForEach(runner.sharpenings.sorted { $0.at > $1.at }) { log in
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack {
-                            Text(log.at.formatted(date: .abbreviated, time: .omitted)).font(.subheadline.bold())
-                            Spacer()
-                            Text(log.hollow.isEmpty ? "RoH 미확인" : "\(log.hollow)\"").font(.subheadline)
+        ScrollView {
+            VStack(spacing: 16) {
+                PaperCard(tape: Theme.tapePink, tapeAngle: -4, dotted: true) {
+                    HStack(spacing: 16) {
+                        if let h = runner.currentHollow.flatMap(Hollow.init(label:)) {
+                            HollowGlyph(hollow: h).frame(width: 70, height: 70)
                         }
-                        let feels = [("그립", log.grip), ("활주", log.glide), ("스톱", log.stop), ("턴", log.turn)]
-                            .compactMap { n, v in v.map { "\(n) \($0)" } }
-                        if !feels.isEmpty { Text(feels.joined(separator: " · ")).font(.caption).foregroundStyle(Theme.inkSecondary) }
-                        if !log.shop.isEmpty { Text(log.shop).font(.caption).foregroundStyle(Theme.inkSecondary) }
-                        if !log.memo.isEmpty { Text(log.memo).font(.caption) }
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(runner.name)
+                                .font(.system(.title3, design: .rounded).bold()).foregroundStyle(Theme.paperInk)
+                            Text("현재 RoH \(runner.currentHollow.map { "\($0)\"" } ?? "미확인")\(runner.currentHollow.flatMap(Hollow.init(label:))?.nickname.map { " · \($0)" } ?? "")")
+                                .font(.system(.subheadline, design: .rounded)).foregroundStyle(Theme.paperInk)
+                            Sticker(text: runner.installedSkate.map { "\($0.name)에 장착 중" } ?? "보관 중",
+                                    index: runner.installedSkate == nil ? 3 : 2, on: false, small: true)
+                        }
+                        Spacer(minLength: 0)
+                    }
+                    if let last = runner.lastSharpening {
+                        RunnerValueRow(title: "마지막 연마", value: "\(ElapsedText.since(last.at)) · \(last.at.formatted(.dateTime.month().day()))")
+                    } else {
+                        RunnerValueRow(title: "마지막 연마", value: "기록 없음", soft: true)
+                    }
+                    RunnerValueRow(title: "그 뒤로 탄 횟수", value: rides == 0 ? "아직 안 탔어요" : "\(rides)번")
+                    RunnerValueRow(title: "그 뒤로 탄 시간", value: minutesText(since))
+                    if let n = runner.checkThresholdSessions {
+                        ProgressTrack(value: Double(rides), total: Double(n), label: "\(n)번 타면 홈에 표시", trailing: "\(rides)/\(n)")
+                    } else if let t = runner.checkThresholdMinutes {
+                        ProgressTrack(value: Double(since), total: Double(t), label: "\(minutesText(t)) 타면 홈에 표시", trailing: minutesText(since))
+                    }
+                    RunnerNote(text: "기록할 때 이 러너를 고른 활동만 세요. 시간은 '실제로 탄 시간'으로 더해요.")
+                }
+
+                PaperCard(tape: Theme.tapeMint, tapeAngle: 3) {
+                    PaperTitle(text: "날 교체", systemImage: "arrow.triangle.2.circlepath")
+                    RunnerValueRow(title: "날 상태", value: runner.lifeSummary)
+                    if let n = runner.replaceAfterSharpenings {
+                        ProgressTrack(value: Double(runner.sharpenings.count), total: Double(n), label: "연마 \(n)번 하면 교체 표시", trailing: "\(runner.sharpenings.count)/\(n)")
+                    } else if let m = runner.replaceAfterMonths {
+                        let used = RunnerLife.monthsUsed(since: runner.firstUsedAt)
+                        ProgressTrack(value: Double(used), total: Double(m), label: "\(m)개월 쓰면 교체 표시", trailing: "\(used)개월")
+                    }
+                    if let retired = runner.retiredAt {
+                        Text("\(retired.formatted(date: .abbreviated, time: .omitted))에 교체했어요.")
+                            .font(.system(.subheadline, design: .rounded)).foregroundStyle(Theme.paperInkSoft)
+                    } else {
+                        Button("이 날 교체했어요") { confirmingRetire = true }
+                            .font(.system(.subheadline, design: .rounded).bold())
+                            .buttonStyle(.bordered).tint(Theme.accentText).buttonBorderShape(.capsule)
+                    }
+                    RunnerNote(text: "교체했다고 하면 이 러너는 '교체한 날'로 옮겨져요. 지난 기록은 그대로 남아요.")
+                }
+
+                PaperCard(tape: Theme.tapeYellow, tapeAngle: -2) { SharpeningGuideCard() }
+
+                PaperCard(tape: Theme.tapePink, tapeAngle: 5, dotted: true) {
+                    PaperTitle(text: "연마 이력", systemImage: "clock.arrow.circlepath")
+                    Button { addingSharpening = true } label: {
+                        Label("연마 기록 추가", icon: "plus")
+                            .font(.system(.subheadline, design: .rounded).bold())
+                            .frame(maxWidth: .infinity, minHeight: Theme.touch)
+                    }
+                    .buttonStyle(.borderedProminent).tint(Theme.neonPink).buttonBorderShape(.capsule)
+                    ForEach(Array(runner.sharpenings.sorted { $0.at > $1.at }.enumerated()), id: \.element.id) { i, log in
+                        sharpeningLine(log, index: i)
                     }
                 }
-            } header: {
-                Text("연마 이력")
             }
+            .padding(.horizontal, Theme.screenPadding).padding(.vertical, 12)
         }
+        .screenBackground()
         .navigationTitle("러너")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("고치기") { editing = true } } }
@@ -296,6 +379,27 @@ struct RunnerDetailView: View {
             Text("부츠에서 떼서 '교체한 날'로 옮겨요. 새 날은 스케이트 화면에서 추가해 주세요.")
         }
         .sheet(isPresented: $editing) { NavigationStack { RunnerEditorView(runner: runner, installOn: nil) } }
+    }
+
+    /// 연마 한 번 = 날짜 스티커 + 한 줄.
+    private func sharpeningLine(_ log: SharpeningLog, index i: Int) -> some View {
+        let feels = [("그립", log.grip), ("활주", log.glide), ("스톱", log.stop), ("턴", log.turn)]
+            .compactMap { n, v in v.map { "\(n) \($0)" } }
+        let line = ([log.hollow.isEmpty ? "RoH 미확인" : "\(log.hollow)\""] + feels + (log.shop.isEmpty ? [] : [log.shop]))
+            .joined(separator: " · ")
+        return HStack(alignment: .top, spacing: 10) {
+            Sticker(text: log.at.formatted(date: .abbreviated, time: .omitted), index: i, on: false, small: true)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(line)
+                    .font(.system(.subheadline, design: .rounded)).foregroundStyle(Theme.paperInk)
+                    .fixedSize(horizontal: false, vertical: true)
+                if !log.memo.isEmpty {
+                    Text(log.memo).font(.system(.caption, design: .rounded)).foregroundStyle(Theme.paperInkSoft)
+                }
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.vertical, 2)
     }
 }
 
@@ -323,45 +427,66 @@ struct SharpeningEditorView: View {
     private var customInvalid: Bool { !customHollow.isEmpty && Hollow(label: customHollow) == nil }
 
     var body: some View {
-        Form {
-            Section { DatePicker("연마한 때", selection: $at, displayedComponents: [.date, .hourAndMinute]) }
-            Section { SharpeningGuideCard() }
-            Section {
-                HStack {
-                    Text("작은 숫자 · 깊은 홈").font(.caption.bold()).foregroundStyle(Theme.warning)
-                    Spacer()
-                    AppIcon("arrow.left.and.right").font(.caption).foregroundStyle(Theme.inkSecondary)
-                    Spacer()
-                    Text("큰 숫자 · 얕은 홈").font(.caption.bold()).foregroundStyle(Theme.accent)
+        ScrollView {
+            VStack(spacing: 16) {
+                PaperCard(tape: Theme.tapePink, tapeAngle: -4) {
+                    DatePicker("연마한 때", selection: $at, displayedComponents: [.date, .hourAndMinute])
+                        .font(.system(.headline, design: .rounded)).foregroundStyle(Theme.paperInk)
+                        .tint(Theme.accentText)
                 }
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
-                    ForEach(Hollow.presets, id: \.self) { h in
-                        HollowCard(hollow: h, selected: customHollow.isEmpty && hollowLabel == h.label) {
-                            customHollow = ""
-                            hollowLabel = hollowLabel == h.label ? nil : h.label
+                PaperCard(tape: Theme.tapeYellow, tapeAngle: 3) { SharpeningGuideCard() }
+                PaperCard(tape: Theme.tapeMint, tapeAngle: -2, dotted: true) {
+                    PaperTitle(text: "홀로우 (RoH)", systemImage: "skateblade")
+                    HStack {
+                        Text("작은 숫자 · 깊은 홈").font(.caption.bold()).foregroundStyle(Theme.warning)
+                        Spacer()
+                        AppIcon("arrow.left.and.right").font(.caption).foregroundStyle(Theme.paperInkSoft)
+                        Spacer()
+                        Text("큰 숫자 · 얕은 홈").font(.caption.bold()).foregroundStyle(Theme.accent)
+                    }
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
+                        ForEach(Hollow.presets, id: \.self) { h in
+                            HollowCard(hollow: h, selected: customHollow.isEmpty && hollowLabel == h.label) {
+                                customHollow = ""
+                                hollowLabel = hollowLabel == h.label ? nil : h.label
+                            }
                         }
                     }
+                    .padding(.vertical, 4)
+                    TextField("직접 입력 (예: 9/16, 0.55)", text: $customHollow)
+                        .keyboardType(.numbersAndPunctuation)
+                        .runnerField()
+                    if customInvalid {
+                        Text("인치 값으로 적어 주세요. 예: 5/8, 0.55").font(.caption).foregroundStyle(Theme.danger)
+                    }
+                    RunnerNote(text: "홈이 깊으면 날이 얼음을 꽉 잡아서 턴과 스톱이 단단해요. 얕으면 덜 잡는 대신 쭉 나가요. 그림은 깊이 차이만 보여 줘요. 모르면 비워 둬도 돼요.\n\(Hollow.playerNicknameNote)")
                 }
-                .padding(.vertical, 4)
-                TextField("직접 입력 (예: 9/16, 0.55)", text: $customHollow)
-                    .keyboardType(.numbersAndPunctuation)
-                if customInvalid {
-                    Text("인치 값으로 적어 주세요. 예: 5/8, 0.55").font(.caption).foregroundStyle(Theme.danger)
+                PaperCard(tape: Theme.tapePink, tapeAngle: 4) {
+                    PaperTitle(text: "어디서?", systemImage: "mappin.and.ellipse")
+                    TextField("연마한 곳 (업체·링크장)", text: $shop).runnerField()
                 }
-            } header: {
-                Text("홀로우 (RoH)")
-            } footer: {
-                Text("홈이 깊으면 날이 얼음을 꽉 잡아서 턴과 스톱이 단단해요. 얕으면 덜 잡는 대신 쭉 나가요. 그림은 깊이 차이만 보여 줘요. 모르면 비워 둬도 돼요.\n\(Hollow.playerNicknameNote)")
+                PaperCard(tape: Theme.tapeYellow, tapeAngle: -3) {
+                    PaperTitle(text: "연마 후 느낌", systemImage: "sparkles")
+                    ScalePicker(title: "그립", low: "약함", high: "강함", value: $grip)
+                    ScalePicker(title: "활주", low: "무거움", high: "잘 나감", value: $glide)
+                    ScalePicker(title: "스톱", low: "밀림", high: "잘 섬", value: $stop)
+                    ScalePicker(title: "턴", low: "어려움", high: "편함", value: $turn)
+                    TextField("메모", text: $memo, axis: .vertical)
+                        .lineLimit(2...8)
+                        .runnerField()
+                }
+                Button(action: save) {
+                    Label("저장하기", icon: "heart.fill")
+                        .font(.system(.headline, design: .rounded))
+                        .frame(maxWidth: .infinity, minHeight: 52)
+                }
+                .buttonStyle(.borderedProminent).tint(Theme.neonPink).buttonBorderShape(.capsule)
+                .disabled(customInvalid)
             }
-            Section("어디서?") { TextField("연마한 곳 (업체·링크장)", text: $shop) }
-            Section("연마 후 느낌") {
-                ScalePicker(title: "그립", low: "약함", high: "강함", value: $grip)
-                ScalePicker(title: "활주", low: "무거움", high: "잘 나감", value: $glide)
-                ScalePicker(title: "스톱", low: "밀림", high: "잘 섬", value: $stop)
-                ScalePicker(title: "턴", low: "어려움", high: "편함", value: $turn)
-                TextField("메모", text: $memo, axis: .vertical)
-            }
+            .padding(.horizontal, Theme.screenPadding).padding(.vertical, 12)
         }
+        .screenBackground()
+        .scrollDismissesKeyboard(.interactively)
         .navigationTitle("연마 기록")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

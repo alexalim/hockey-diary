@@ -74,14 +74,18 @@ struct LockerView: View {
                 }
                 .frame(minHeight: Theme.touch)
 
-                Card {
-                    CardHeader(title: "바로 가기", systemImage: "list.bullet")
-                    NavigationLink { SkateListView() } label: { shortcut("스케이트", "shoeprints.fill", "\(skates.count)켤레") }
-                    NavigationLink { RunnerListView() } label: { shortcut("러너(날)", "minus", nil) }
-                    NavigationLink { RunnerListView(focusSharpening: true) } label: { shortcut("연마", "wrench.and.screwdriver.fill", nil) }
-                    ForEach(GearKind.Zone.allCases, id: \.self) { zone in
+                PaperCard(tape: Theme.tapeMint, tapeAngle: -4) {
+                    PaperTitle(text: "바로 가기", systemImage: "list.bullet")
+                    NavigationLink { SkateListView() } label: { shortcut("스케이트", "shoeprints.fill", "\(skates.count)켤레", 0) }
+                        .buttonStyle(.plain)
+                    NavigationLink { RunnerListView() } label: { shortcut("러너(날)", "skateblade", nil, 1) }
+                        .buttonStyle(.plain)
+                    NavigationLink { RunnerListView(focusSharpening: true) } label: { shortcut("연마", "wrench.and.screwdriver.fill", nil, 2) }
+                        .buttonStyle(.plain)
+                    ForEach(Array(GearKind.Zone.allCases.enumerated()), id: \.element) { i, zone in
                         let count = gear.filter { zone.kinds.contains($0.kind) }.count
-                        NavigationLink { GearListView(zone: zone) } label: { shortcut(zone.title, zone.symbol, "\(count)개") }
+                        NavigationLink { GearListView(zone: zone) } label: { shortcut(zone.title, zone.symbol, "\(count)개", 3 + i) }
+                            .buttonStyle(.plain)
                     }
                 }
             }
@@ -163,23 +167,35 @@ struct LockerView: View {
     }
 
     private var earnedBanner: some View {
-        Card(tint: Theme.successSoft) {
-            Label("새 스티커를 받았어요!", icon: "gift.fill").font(.headline).foregroundStyle(Theme.title)
-            Text(newStickers.compactMap { StickerCatalog.def($0)?.title }.joined(separator: " · "))
-                .font(.subheadline)
+        PaperCard(tape: Theme.tapeYellow, tapeAngle: 4, dotted: true) {
+            PaperTitle(text: "새 스티커를 받았어요!", systemImage: "gift.fill")
+            FlowLayout(spacing: 8) {
+                ForEach(Array(newStickers.compactMap { StickerCatalog.def($0)?.title }.enumerated()), id: \.offset) { i, title in
+                    Sticker(text: title, index: i, on: false, small: true)
+                }
+            }
+            .padding(.vertical, 2)
             Text("내 기록으로 받은 스티커예요. 꾸미기에서 문에 붙여 보세요.")
-                .font(.caption).foregroundStyle(Theme.inkSecondary)
+                .font(.system(.caption, design: .rounded)).foregroundStyle(Theme.paperInkSoft)
         }
     }
 
-    private func shortcut(_ title: String, _ icon: String, _ trailing: String?) -> some View {
-        HStack {
-            Label(title, icon: icon).foregroundStyle(Theme.title)
-            Spacer()
-            if let trailing { Text(trailing).font(.caption).foregroundStyle(Theme.inkSecondary) }
-            AppIcon("chevron.right").font(.caption).foregroundStyle(Theme.inkSecondary)
+    /// 바로 가기 한 줄. 파스텔 동그라미 아이콘, 오른쪽 개수는 작은 스티커.
+    private func shortcut(_ title: String, _ icon: String, _ trailing: String?, _ index: Int) -> some View {
+        HStack(spacing: 12) {
+            AppIcon(icon, size: 20)
+                .foregroundStyle(Theme.paperInk)
+                .frame(width: 40, height: 40)
+                .background(Theme.stickers[index % Theme.stickers.count], in: Circle())
+            Text(title)
+                .font(.system(.body, design: .rounded).weight(.semibold))
+                .foregroundStyle(Theme.paperInk)
+            Spacer(minLength: 0)
+            if let trailing { Sticker(text: trailing, index: index, on: false, small: true) }
+            AppIcon("chevron.right").font(.caption).foregroundStyle(Theme.paperInkSoft)
         }
         .frame(minHeight: Theme.touch)
+        .contentShape(Rectangle())
     }
 
     private func toggle() {
@@ -659,33 +675,79 @@ struct GearListView: View {
     @Query(sort: \GearItem.createdAt) private var all: [GearItem]
     @State private var adding: GearKind?
 
+    private let tapes = [Theme.tapePink, Theme.tapeMint, Theme.tapeYellow]
+    private let angles: [Double] = [-4, 3, -2]
+
     var body: some View {
-        List {
-            ForEach(zone.kinds, id: \.self) { kind in
-                Section(kind.title) {
+        ScrollView {
+            VStack(spacing: 16) {
+                ForEach(Array(zone.kinds.enumerated()), id: \.element) { k, kind in
                     let items = all.filter { $0.kind == kind }
-                    if items.isEmpty {
-                        Text("아직 없어요.").foregroundStyle(Theme.inkSecondary)
-                    }
-                    ForEach(items) { g in
-                        NavigationLink { GearEditorView(kind: kind, item: g) } label: {
-                            HStack {
-                                if let data = g.photo { PhotoThumb(data: data, size: 40) }
-                                else { AppIcon(kind.symbol).frame(width: 40, height: 40).foregroundStyle(Theme.accent) }
-                                VStack(alignment: .leading) {
-                                    Text(g.name).font(.subheadline.bold())
-                                    Text([g.size.isEmpty ? nil : g.size, g.status.title].compactMap { $0 }.joined(separator: " · "))
-                                        .font(.caption).foregroundStyle(Theme.inkSecondary)
-                                }
-                            }
+                    PaperCard(tape: tapes[k % tapes.count], tapeAngle: angles[k % angles.count]) {
+                        PaperTitle(text: kind.title, systemImage: kind.symbol)
+                        if items.isEmpty {
+                            EmptyHint(text: "아직 없어요.", systemImage: kind.symbol)
                         }
+                        ForEach(Array(items.enumerated()), id: \.element.id) { i, g in
+                            NavigationLink { GearEditorView(kind: kind, item: g) } label: { row(g, kind: kind, index: i) }
+                                .buttonStyle(.plain)
+                        }
+                        Button { adding = kind } label: {
+                            Label("\(kind.title) 추가", icon: "plus")
+                                .font(.system(.subheadline, design: .rounded).bold())
+                                .foregroundStyle(Theme.accentText)
+                                .frame(maxWidth: .infinity, minHeight: Theme.touch)
+                                .background(Theme.card.opacity(0.55), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    .stroke(Theme.paperDot, style: StrokeStyle(lineWidth: 1.5, dash: [5, 4])))
+                        }
+                        .buttonStyle(.plain)
                     }
-                    Button { adding = kind } label: { Label("\(kind.title) 추가", icon: "plus") }
                 }
             }
+            .padding(.horizontal, Theme.screenPadding).padding(.vertical, 12)
         }
+        .screenBackground()
         .navigationTitle(zone.title)
         .sheet(item: $adding) { kind in NavigationStack { GearEditorView(kind: kind, item: nil) } }
+    }
+
+    /// 장비 한 줄. 사진은 폴라로이드, 없으면 파스텔 동그라미. 상태는 작은 스티커.
+    private func row(_ g: GearItem, kind: GearKind, index i: Int) -> some View {
+        HStack(spacing: 12) {
+            if let data = g.photo {
+                PolaroidThumb(data: data, size: 46, index: i)
+            } else {
+                AppIcon(kind.symbol, size: 22)
+                    .foregroundStyle(Theme.paperInk)
+                    .frame(width: 46, height: 46)
+                    .background(Theme.stickers[i % Theme.stickers.count], in: Circle())
+            }
+            VStack(alignment: .leading, spacing: 4) {
+                Text(g.name)
+                    .font(.system(.subheadline, design: .rounded).bold())
+                    .foregroundStyle(Theme.paperInk)
+                HStack(spacing: 6) {
+                    if !g.size.isEmpty {
+                        Text(g.size).font(.system(.caption, design: .rounded)).foregroundStyle(Theme.paperInkSoft)
+                    }
+                    Sticker(text: g.status.title, index: Self.stickerIndex(g.status), on: false, small: true)
+                }
+            }
+            Spacer(minLength: 0)
+            AppIcon("chevron.right").font(.caption).foregroundStyle(Theme.paperInkSoft)
+        }
+        .frame(minHeight: 56)
+        .contentShape(Rectangle())
+    }
+
+    static func stickerIndex(_ status: SkateStatus) -> Int {
+        switch status {
+        case .main: return 0
+        case .sub: return 1
+        case .stored: return 2
+        case .retired: return 4
+        }
     }
 }
 
@@ -708,27 +770,47 @@ struct GearEditorView: View {
     @State private var loaded = false
 
     var body: some View {
-        Form {
-            Section(kind.title) {
-                TextField("브랜드", text: $brand)
-                TextField("모델명", text: $model)
-                TextField("사이즈", text: $size)
-                LabeledChoice(title: "상태", options: SkateStatus.choices, selection: $status, columns: 4, minHeight: 64)
-            }
-            Section("사진") {
-                if let data = item?.photo, photos.isEmpty, !removePhoto {
-                    HStack {
-                        PhotoThumb(data: data, size: 90)
-                        Button("사진 빼기", role: .destructive) { removePhoto = true }.buttonStyle(.borderless)
-                    }
+        ScrollView {
+            VStack(spacing: 16) {
+                PaperCard(tape: Theme.tapePink, tapeAngle: -4) {
+                    PaperTitle(text: kind.title, systemImage: kind.symbol)
+                    field("브랜드", text: $brand)
+                    field("모델명", text: $model)
+                    field("사이즈", text: $size)
+                    LabeledChoice(title: "상태", options: SkateStatus.choices, selection: $status, columns: 4, minHeight: 64)
                 }
-                PhotoPickerRow(existing: [], removedIDs: $removed, added: Binding(get: { photos }, set: { photos = Array($0.suffix(1)) }))
+                PaperCard(tape: Theme.tapeMint, tapeAngle: 3) {
+                    PaperTitle(text: "사진", systemImage: "camera")
+                    if let data = item?.photo, photos.isEmpty, !removePhoto {
+                        HStack(spacing: 16) {
+                            PolaroidThumb(data: data, size: 90)
+                            Button("사진 빼기", role: .destructive) { removePhoto = true }
+                                .font(.system(.subheadline, design: .rounded))
+                                .buttonStyle(.borderless)
+                        }
+                    }
+                    PhotoPickerRow(existing: [], removedIDs: $removed, added: Binding(get: { photos }, set: { photos = Array($0.suffix(1)) }))
+                }
+                PaperCard(tape: Theme.tapeYellow, tapeAngle: -2, dotted: true) {
+                    PaperTitle(text: "메모", systemImage: "pencil.line")
+                    field("메모", text: $memo, vertical: true)
+                }
+                if item != nil {
+                    Text("지우지 말고 '사용 종료'로 바꿔두면 기록이 남아요.")
+                        .font(.system(.caption, design: .rounded)).foregroundStyle(Theme.paperInkSoft)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                Button(action: save) {
+                    Label("저장하기", icon: "heart.fill")
+                        .font(.system(.headline, design: .rounded))
+                        .frame(maxWidth: .infinity, minHeight: 52)
+                }
+                .buttonStyle(.borderedProminent).tint(Theme.neonPink).buttonBorderShape(.capsule)
             }
-            Section("메모") { TextField("메모", text: $memo, axis: .vertical) }
-            if item != nil {
-                Section { Text("지우지 말고 '사용 종료'로 바꿔두면 기록이 남아요.").font(.caption).foregroundStyle(Theme.inkSecondary) }
-            }
+            .padding(.horizontal, Theme.screenPadding).padding(.vertical, 12)
         }
+        .screenBackground()
+        .scrollDismissesKeyboard(.interactively)
         .navigationTitle(item == nil ? "\(kind.title) 추가" : kind.title)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -740,6 +822,22 @@ struct GearEditorView: View {
             loaded = true
             brand = item.brand; model = item.model; size = item.size; status = item.status; memo = item.memo
         }
+    }
+
+    /// 종이 위 입력 칸. Form 밖이라 반투명 바탕을 깐다.
+    private func field(_ title: String, text: Binding<String>, vertical: Bool = false) -> some View {
+        Group {
+            if vertical {
+                TextField(title, text: text, axis: .vertical).lineLimit(3...8)
+            } else {
+                TextField(title, text: text)
+            }
+        }
+        .font(.system(.body, design: .rounded))
+        .foregroundStyle(Theme.paperInk)
+        .tint(Theme.accentText)
+        .padding(10)
+        .background(Theme.card.opacity(0.55), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 
     private func save() {

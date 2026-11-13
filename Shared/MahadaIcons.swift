@@ -19,6 +19,7 @@ enum IconOp {
 enum MahadaIcon: String, CaseIterable {
     case player, skate, tools, school, trophy, targetArrow, rink, target, flame, medal, flag, notebook, users
     case home, calendar, chartBar, door, heart, sparkles, star, pencil, moon, body, clock, bolt, run, scoreboard
+    case blade, helmet, jersey, glove, gift, archive
 
     /// SF Symbols 이름 → 그려 둔 아이콘.
     static let bySymbol: [String: MahadaIcon] = [
@@ -48,6 +49,9 @@ enum MahadaIcon: String, CaseIterable {
         "clock": .clock, "clock.fill": .clock, "clock.arrow.circlepath": .clock,
         "bolt.fill": .bolt, "bolt": .bolt,
         "figure.run": .run,
+        "line.diagonal": .player, "skateblade": .skate,
+        "shield.lefthalf.filled": .helmet, "tshirt.fill": .jersey, "hand.raised.fill": .glove,
+        "gift.fill": .gift, "archivebox.fill": .archive,
     ]
 
     /// 조각 목록. 각 조각은 기본이 선이고, `.f`가 들어 있으면 채운다.
