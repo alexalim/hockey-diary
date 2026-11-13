@@ -190,11 +190,29 @@ struct CardHeader: View {
 }
 
 /// 데이터가 없거나 모자랄 때의 빈 상태.
+/// 쪽지 아래 '바로 가기'. 안내가 다른 화면을 가리키면 눌러서 그곳으로 간다.
+struct EmptyAction {
+    var title: String
+    var run: () -> Void
+}
+
+/// 쪽지 아래 밀어 들어가는 화면.
+struct EmptyLink {
+    var title: String
+    var destination: () -> AnyView
+    init<D: View>(_ title: String, @ViewBuilder destination: @escaping () -> D) {
+        self.title = title
+        self.destination = { AnyView(destination()) }
+    }
+}
+
 struct EmptyHint: View {
     var text: String
     var systemImage: String = "snowflake"
+    var action: EmptyAction? = nil
+    var link: EmptyLink? = nil
 
-    /// 빈 상태는 종이 쪽지 한 장. 아이콘은 파스텔 동그라미, 왼쪽 위에 테이프.
+    /// 빈 상태는 종이 쪽지 한 장. 아이콘은 파스텔 동그라미, 왼쪽 위에 테이프, 필요하면 아래에 바로 가기.
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: systemImage)
@@ -202,8 +220,16 @@ struct EmptyHint: View {
                 .foregroundStyle(Theme.accent)
                 .frame(width: 34, height: 34)
                 .background(Theme.stickers[3], in: Circle())
-            Text(text).font(.system(.subheadline, design: .rounded)).foregroundStyle(Theme.paperInk)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            VStack(alignment: .leading, spacing: 8) {
+                Text(text).font(.system(.subheadline, design: .rounded)).foregroundStyle(Theme.paperInk)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                if let action {
+                    Button(action: action.run) { jumpLabel(action.title) }.buttonStyle(.plain)
+                }
+                if let link {
+                    NavigationLink { link.destination() } label: { jumpLabel(link.title) }.buttonStyle(.plain)
+                }
+            }
         }
         .padding(12)
         .background(Theme.paper, in: RoundedRectangle(cornerRadius: Theme.compactCorner, style: .continuous))
@@ -215,7 +241,18 @@ struct EmptyHint: View {
                 .accessibilityHidden(true)
         }
         .padding(.top, 4)
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: action == nil && link == nil ? .combine : .contain)
+    }
+
+    private func jumpLabel(_ title: String) -> some View {
+        HStack(spacing: 4) {
+            Text(title)
+            Image(systemName: "arrow.right")
+        }
+        .font(.system(.footnote, design: .rounded).bold())
+        .foregroundStyle(.white)
+        .padding(.horizontal, 12).frame(minHeight: 32)
+        .background(Theme.neonPink, in: Capsule())
     }
 }
 

@@ -158,6 +158,7 @@ final class RoutineRun: Identifiable, ObservableObject {
 
 /// 드릴 진행 화면: 큰 타이머(분) 또는 큰 횟수 버튼. 끝나면 기록으로 남긴다.
 struct RoutineRunView: View {
+    @Environment(AppJumper.self) private var jumper: AppJumper?
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
     @ObservedObject var run: RoutineRun
@@ -329,7 +330,10 @@ struct RoutineRunView: View {
                     ForEach(done, id: \.self) { Text("· \($0)").font(.subheadline) }
                 }
             }
-            Text("드릴 양은 성장 탭의 기술 성장에 쌓여요.").font(.caption).foregroundStyle(Theme.inkSecondary)
+            HStack(spacing: 8) {
+                Text("드릴 양은 성장 탭의 기술 성장에 쌓여요.").font(.caption).foregroundStyle(Theme.inkSecondary)
+                Button("성장 보기") { dismiss(); jumper?.go(.tab(.growth)) }.font(.caption.bold()).tint(Theme.accentText)
+            }
             Spacer()
             Button { dismiss() } label: { Text("닫기").frame(maxWidth: .infinity, minHeight: Theme.touch) }
                 .buttonStyle(PinkButtonStyle())

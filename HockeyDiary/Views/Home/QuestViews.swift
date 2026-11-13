@@ -113,6 +113,7 @@ struct QuestRow: View {
 /// 퀘스트 화면: 이달 목표·포인트, 이번 주 퀘스트, 받은 달 배지.
 struct QuestView: View {
     @Environment(\.modelContext) private var context
+    @Environment(AppJumper.self) private var jumper: AppJumper?
     @Query(sort: \Session.startsAt, order: .reverse) private var sessions: [Session]
     @Query private var drills: [DrillLog]
     @Query private var checks: [BodyCheck]
@@ -190,7 +191,8 @@ struct QuestView: View {
         let badges = earned.filter { $0.stickerKey.hasPrefix("badge-") }.sorted { $0.stickerKey > $1.stickerKey }
         return Card {
             if badges.isEmpty {
-                EmptyHint(text: "이달 목표를 채우면 첫 배지를 받아요. 받은 배지는 락커 문에 붙일 수 있어요.", systemImage: "medal.fill")
+                EmptyHint(text: "이달 목표를 채우면 첫 배지를 받아요. 받은 배지는 락커 문에 붙일 수 있어요.", systemImage: "medal.fill",
+                          action: EmptyAction(title: "락커 보기") { jumper?.go(.tab(.locker)) })
             } else {
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 4), spacing: 12) {
                     ForEach(badges, id: \.stickerKey) { b in

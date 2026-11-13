@@ -26,6 +26,7 @@ struct AttemptDraft: Identifiable, Equatable {
 /// 필수 입력은 최소로 두고, 나머지는 '더 기록하기'에 접어 둔다 (1분 입력 원칙).
 struct SessionEditorView: View {
     @Environment(\.modelContext) private var context
+    @Environment(AppJumper.self) private var jumper: AppJumper?
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \Skill.name) private var allSkills: [Skill]
     @Query(sort: \Skate.createdAt) private var skates: [Skate]
@@ -277,7 +278,10 @@ struct SessionEditorView: View {
         } footer: {
             VStack(alignment: .leading, spacing: 4) {
                 if let prefillNote { Text(prefillNote) }
-                if isNew, let note = RecordPrefs.editorNote() { Text(note) }
+                if isNew, let note = RecordPrefs.editorNote() {
+                    Text(note)
+                    Button("설정 열기") { jumper?.go(.settings) }.font(.footnote.bold()).tint(Theme.accentText)
+                }
             }
         }
     }

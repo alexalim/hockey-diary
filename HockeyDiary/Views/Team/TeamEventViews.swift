@@ -57,7 +57,7 @@ struct TeamEventView: View {
             CardHeader(title: "참석", systemImage: "checkmark.circle",
                        trailing: members.isEmpty ? nil : "참석 \(sheet.count(.going, among: ids)) · 미정 \(sheet.count(.maybe, among: ids)) · 불참 \(sheet.count(.notGoing, among: ids))")
             if members.isEmpty {
-                EmptyHint(text: "우리 팀 화면에서 팀원을 먼저 넣어 주세요.")
+                EmptyHint(text: "우리 팀 화면에서 팀원을 먼저 넣어 주세요.", link: EmptyLink("우리 팀으로") { TeamView() })
             }
             ForEach(members) { m in
                 HStack(spacing: 8) {

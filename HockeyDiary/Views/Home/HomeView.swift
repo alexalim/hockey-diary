@@ -16,6 +16,7 @@ struct HomeView: View {
     @Query(sort: \BodyCheck.day, order: .reverse) private var checks: [BodyCheck]
 
     @State private var showingSettings = false
+    @Environment(AppJumper.self) private var jumper: AppJumper?
     @State private var showingEdit = false
     @AppStorage(RestPrefs.key) private var restJSON = "[]"
     @AppStorage("homeBlocks") private var orderRaw = HomeBlock.defaultOrder
@@ -64,6 +65,7 @@ struct HomeView: View {
         .screenBackground()
         .navigationTitle("").navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showingSettings) { NavigationStack { SettingsView() } }
+        .onChange(of: jumper?.pendingSettings) { _, on in if on == true { showingSettings = true; jumper?.pendingSettings = false } }
         .sheet(isPresented: $showingEdit) { NavigationStack { HomeEditView() } }
     }
 
@@ -384,12 +386,16 @@ struct HomeView: View {
                 CardHeader(title: "장비 점검", systemImage: "shoeprints.fill")
                 Text("락커에 스케이트를 넣으면 연마하고 얼마나 탔는지 세어 드릴게요.")
                     .font(.subheadline).foregroundStyle(Theme.inkSecondary)
+                Button { jumper?.go(.tab(.locker)) } label: {
+                    Label("락커로 가기", systemImage: "arrow.right").font(.subheadline.bold())
+                }
+                .buttonStyle(.bordered).tint(Theme.cobalt)
             }
         } else if !due.isEmpty || !worn.isEmpty {
             Card(tint: Theme.iceBlue) {
                 CardHeader(title: "연마 점검해 볼까요?", systemImage: "wrench.and.screwdriver.fill")
                 ForEach(worn) { r in
-                    Text("러너 \(r.name): \(r.lifeSummary). 날 교체를 생각해볼 때야.").font(.subheadline)
+                    Text("러너 \(r.name): \(r.lifeSummary). 날 교체를 생각해 볼 때예요.").font(.subheadline)
                 }
                 ForEach(due) { r in
                     Text("러너 \(r.name): \(DiaryStore.sharpeningSummary(r, context: context)). 정해 둔 만큼 탔어요.")
@@ -397,6 +403,10 @@ struct HomeView: View {
                 }
                 Text("엣지가 밀리지 않으면 더 타도 돼요. 기준은 락커에서 바꿀 수 있어요.")
                     .font(.caption).foregroundStyle(Theme.inkSecondary)
+                Button { jumper?.go(.tab(.locker)) } label: {
+                    Label("락커에서 보기", systemImage: "arrow.right").font(.subheadline.bold())
+                }
+                .buttonStyle(.bordered).tint(Theme.cobalt)
             }
         }
     }

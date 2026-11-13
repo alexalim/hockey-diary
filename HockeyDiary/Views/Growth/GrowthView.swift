@@ -5,6 +5,7 @@ import HockeyCore
 
 /// 나의 빙판 리포트 (S06). 모든 요약에 기간·표본 수·출처를 붙이고, 표본이 모자라면 그래프 대신 안내한다.
 struct GrowthView: View {
+    @Environment(AppJumper.self) private var jumper: AppJumper?
     @Query(sort: \Session.startsAt, order: .reverse) private var sessions: [Session]
     @Query(sort: \Skill.name) private var skills: [Skill]
     @Query private var allShots: [ShotMark]
@@ -110,7 +111,8 @@ struct GrowthView: View {
                 Text(period.longTitle).font(.subheadline).foregroundStyle(Theme.inkSecondary)
             }
             if t.total == 0 && (t.previousTotal ?? 0) == 0 {
-                EmptyHint(text: metric == .drills ? "이 기간엔 드릴 기록이 없어요. 훈련 탭 드릴에서 세면 여기 쌓여요." : "이 기간엔 기록이 없어요.")
+                EmptyHint(text: metric == .drills ? "이 기간엔 드릴 기록이 없어요. 훈련 탭 드릴에서 세면 여기 쌓여요." : "이 기간엔 기록이 없어요.",
+                          action: metric == .drills ? EmptyAction(title: "드릴로 가기") { jumper?.go(.training(.drill)) } : nil)
             } else {
                 Chart {
                     ForEach(Array(t.buckets.enumerated()), id: \.offset) { i, b in
@@ -243,7 +245,8 @@ struct GrowthView: View {
         return Card {
             CardHeader(title: "슛 차트", systemImage: "scope", trailing: shots.isEmpty ? nil : shotSummaryText(st))
             if shots.isEmpty {
-                EmptyHint(text: "경기 기록에서 슛 자리를 찍으면 여기에 쌓여요. 어디서 쏘면 잘 들어가는지 보여 줄게요.", systemImage: "scope")
+                EmptyHint(text: "경기 기록에서 슛 자리를 찍으면 여기에 쌓여요. 어디서 쏘면 잘 들어가는지 보여 줄게요.", systemImage: "scope",
+                          action: EmptyAction(title: "경기 리뷰 쓰기") { jumper?.go(.entry(.session(.regularGame))) })
             } else {
                 ShotChartCanvas(shots: Array(shots.suffix(200)))
                     .accessibilityElement(children: .ignore)
@@ -324,7 +327,8 @@ struct GrowthView: View {
             CardHeader(title: "연습", systemImage: "figure.hockey",
                        trailing: logs.isEmpty ? nil : "연습한 날 \(DrillStats.practiceDays(logs.compactMap(\.entry)))일")
             if logs.isEmpty {
-                EmptyHint(text: "드릴을 세면서 연습하면 기술별 연습량이 여기 쌓여요.", systemImage: "figure.hockey")
+                EmptyHint(text: "드릴을 세면서 연습하면 기술별 연습량이 여기 쌓여요.", systemImage: "figure.hockey",
+                          action: EmptyAction(title: "드릴 시작") { jumper?.go(.training(.drill)) })
             } else {
                 ForEach(by.keys.sorted { (by[$0]?.sessions ?? 0) > (by[$1]?.sessions ?? 0) }, id: \.self) { name in
                     if let line = by[name] {
@@ -351,7 +355,8 @@ struct GrowthView: View {
         return Card {
             CardHeader(title: "기술 성장", systemImage: "chart.line.uptrend.xyaxis")
             if used.isEmpty {
-                EmptyHint(text: "수업에서 배운 기술을 남기면 경기에서 써본 것까지 이어서 볼 수 있어요.")
+                EmptyHint(text: "수업에서 배운 기술을 남기면 경기에서 써본 것까지 이어서 볼 수 있어요.",
+                          action: EmptyAction(title: "수업 기록 쓰기") { jumper?.go(.entry(.session(.lesson))) })
             }
             ForEach(used) { skill in
                 NavigationLink { SkillDetailView(skill: skill) } label: {

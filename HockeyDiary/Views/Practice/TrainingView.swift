@@ -13,6 +13,14 @@ struct TrainingView: View {
 
     enum Branch: String, CaseIterable { case practice = "연습", game = "경기", drill = "드릴" }
     @State private var branch: Branch = .practice
+    @Environment(AppJumper.self) private var jumper: AppJumper?
+
+    /// 다른 화면의 '드릴로 가기' 같은 요청이 있으면 그 갈래를 편다.
+    private func consumeBranch() {
+        guard let b = jumper?.pendingBranch else { return }
+        branch = b
+        jumper?.pendingBranch = nil
+    }
 
     var body: some View {
         ScrollView {
@@ -40,6 +48,9 @@ struct TrainingView: View {
             .padding(.horizontal, Theme.screenPadding).padding(.vertical, 12)
         }
         .screenBackground()
+        .onAppear { consumeBranch() }
+        .onChange(of: jumper?.pendingBranch) { _, _ in consumeBranch() }
+        
         .navigationTitle("").navigationBarTitleDisplayMode(.inline)
     }
 }
@@ -115,7 +126,8 @@ struct GameBranch: View {
                 }
                 .buttonStyle(.plain)
             } else {
-                EmptyHint(text: teams.isEmpty ? "팀을 만들면 경기 일정과 출석을 여기서 봐요." : "잡힌 경기가 없어요.", systemImage: "person.3")
+                EmptyHint(text: teams.isEmpty ? "팀을 만들면 경기 일정과 출석을 여기서 봐요." : "잡힌 경기가 없어요.", systemImage: "person.3",
+                          link: teams.isEmpty ? EmptyLink("팀 만들기") { TeamView() } : nil)
             }
             NavigationLink { TeamView() } label: {
                 Label("팀 일정 전체", systemImage: "person.3.fill").frame(maxWidth: .infinity, minHeight: Theme.touch)

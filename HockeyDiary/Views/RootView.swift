@@ -45,8 +45,28 @@ struct RootView: View {
     }
 
     @State private var tab: Tab = .home
+
+    /// 안내문의 '바로 가기'. 열려 있던 기록 시트는 닫고, 시트를 다시 열어야 하면 닫히는 시간을 조금 기다린다.
+    private func handle(_ jump: AppJump) {
+        let hadSheet = newEntry != nil
+        newEntry = nil
+        let wait: TimeInterval = hadSheet ? 0.45 : 0
+        switch jump {
+        case .tab(let t):
+            tab = t
+        case .training(let b):
+            tab = .practice
+            jumper.pendingBranch = b
+        case .entry(let e):
+            DispatchQueue.main.asyncAfter(deadline: .now() + wait) { newEntry = e }
+        case .settings:
+            tab = .home
+            DispatchQueue.main.asyncAfter(deadline: .now() + wait) { jumper.pendingSettings = true }
+        }
+    }
     @State private var newEntry: NewEntry?
     @State private var showingQuickMenu = false
+    @State private var jumper = AppJumper()
     @Environment(\.modelContext) private var context
     @Environment(\.scenePhase) private var scenePhase
 
@@ -66,6 +86,8 @@ struct RootView: View {
         .safeAreaInset(edge: .bottom, spacing: 0) { MahadaTabBar(selection: $tab) }
         .contentMargins(.bottom, MahadaTabBar.height, for: .scrollContent)
         .contentMargins(.bottom, MahadaTabBar.height, for: .scrollIndicators)
+        .environment(jumper)
+        .onChange(of: jumper.request) { _, r in if let r { handle(r); jumper.request = nil } }
         .task { await TeamReminder.reschedule(context); WidgetBridge.refresh(context) }
         .onChange(of: scenePhase) { _, p in if p == .active { Task { await TeamReminder.reschedule(context) }; WidgetBridge.refresh(context) } }
         // 기록 시트를 닫으면 위젯 숫자를 바로 맞춘다.
