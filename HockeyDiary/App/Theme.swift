@@ -72,6 +72,23 @@ enum Theme {
     static let iceDoor: [Color] = [Color(hex: 0xA9D8F2), Color(hex: 0x5D9CC4)]
     /// 러너(날) 쇠 느낌.
     static let steel: [Color] = [Color(light: 0xB8C4D6, dark: 0x8A97AA), Color(light: 0x6D7B91, dark: 0x5B6779)]
+
+    // MARK: 일기 전용 — 다이어리 속지(크림 종이·마스킹테이프·스티커). 빙판 앱 안의 따뜻한 한 칸이라 일기 화면과 일기 줄에서만 쓴다.
+    static let paper = Color(light: 0xFFFBF3, dark: 0x211D18)
+    static let paperDot = Color(light: 0xE3D4C1, dark: 0x3D342A)
+    static let paperInk = Color(light: 0x4B3A2C, dark: 0xF0E5D3)
+    static let paperInkSoft = Color(light: 0x9A8878, dark: 0xA89989)
+    static let tapePink = Color(light: 0xFFC9DF, dark: 0x8A4668)
+    static let tapeMint = Color(light: 0xC6EFE1, dark: 0x2F6353)
+    static let tapeYellow = Color(light: 0xFFE59C, dark: 0x7A6426)
+    /// 스티커(태그) 바탕 5색. 순서대로 돌려 붙인다.
+    static let stickers: [Color] = [Color(light: 0xFFD9E8, dark: 0x5E2F45), Color(light: 0xFFF0B8, dark: 0x5C4F1F),
+                                    Color(light: 0xD3F3E8, dark: 0x234A3E), Color(light: 0xD9ECFF, dark: 0x23405F),
+                                    Color(light: 0xE8DDFF, dark: 0x3E3260)]
+    /// 기분 5단계 얼굴 바탕(힘듦 → 최고). 나쁜 날도 차갑게 보이지 않게 전부 파스텔.
+    static let moodFills: [Color] = [Color(light: 0xE2E6ED, dark: 0x3A4250), Color(light: 0xD9ECFF, dark: 0x23405F),
+                                     Color(light: 0xFFF0B8, dark: 0x5C4F1F), Color(light: 0xD3F3E8, dark: 0x234A3E),
+                                     Color(light: 0xFFD9E8, dark: 0x5E2F45)]
 }
 
 extension ActivityType {

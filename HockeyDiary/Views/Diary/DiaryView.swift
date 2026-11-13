@@ -231,7 +231,8 @@ struct DayTimeline: View {
             ForEach(sessions) { s in
                 NavigationLink { SessionDetailView(session: s) } label: { SessionRow(session: s) }.buttonStyle(.plain)
             }
-            let photos = journals.flatMap(\.photos) + sessions.flatMap(\.photos)
+            // 일기 사진은 일기 카드 안에 폴라로이드로 들어가니 여기선 하키 사진만.
+            let photos = sessions.flatMap(\.photos)
             if !photos.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack { ForEach(photos) { p in PhotoThumb(data: p.imageData, size: 64) } }
@@ -239,9 +240,15 @@ struct DayTimeline: View {
             }
             if journals.isEmpty {
                 Button { newEntry = .journal(day) } label: {
-                    Label("일기 쓰기", systemImage: "square.and.pencil").frame(maxWidth: .infinity, minHeight: Theme.touch)
+                    Label("일기 쓰기", systemImage: "pencil.and.scribble")
+                        .font(.system(.subheadline, design: .rounded).bold())
+                        .foregroundStyle(Theme.paperInk)
+                        .frame(maxWidth: .infinity, minHeight: Theme.touch)
+                        .background(Theme.paper, in: RoundedRectangle(cornerRadius: Theme.compactCorner, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: Theme.compactCorner, style: .continuous).stroke(Theme.paperDot, style: StrokeStyle(lineWidth: 1.5, dash: [5, 4])))
+                        .overlay(alignment: .topLeading) { WashiTape(color: Theme.tapePink, angle: -8, width: 44).offset(x: 10, y: -8) }
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(.plain)
             }
         }
     }
@@ -261,33 +268,9 @@ struct JournalRow: View {
     @State private var editing = false
 
     var body: some View {
-        Button { editing = true } label: {
-            HStack(alignment: .top, spacing: 12) {
-                Text(journal.mood.map(Mood.face) ?? "📝")
-                    .font(.title2)
-                    .frame(width: 40, height: 40)
-                    .background(Theme.iceBlue, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 6) {
-                        Text(journal.entryDate.dayTitle).font(.caption).foregroundStyle(Theme.inkSecondary)
-                        if !journal.isPrivate {
-                            Image(systemName: "square.and.arrow.up").font(.caption2).foregroundStyle(Theme.inkSecondary)
-                                .accessibilityLabel("리포트 공유")
-                        }
-                    }
-                    if !journal.body.isEmpty {
-                        Text(journal.body).font(.subheadline).foregroundStyle(Theme.title).lineLimit(3)
-                            .multilineTextAlignment(.leading)
-                    }
-                    if !journal.tags.isEmpty {
-                        Text(journal.tags.map { "#\($0)" }.joined(separator: " ")).font(.caption).foregroundStyle(Theme.accent)
-                    }
-                }
-                Spacer()
-            }
-            .frame(minHeight: Theme.touch)
-        }
+        Button { editing = true } label: { JournalNote(journal: journal) }
         .buttonStyle(.plain)
+        .accessibilityHint("누르면 고치기")
         .sheet(isPresented: $editing) { NavigationStack { JournalEditorView(journal: journal) } }
     }
 }

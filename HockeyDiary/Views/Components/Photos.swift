@@ -74,6 +74,7 @@ struct PhotoPickerRow: View {
 struct PhotoThumb: View {
     var data: Data
     var size: CGFloat
+    var corner: CGFloat = 12
 
     var body: some View {
         Group {
@@ -84,7 +85,7 @@ struct PhotoThumb: View {
             }
         }
         .frame(width: size, height: size)
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: corner, style: .continuous))
         .accessibilityHidden(true)
     }
 }
