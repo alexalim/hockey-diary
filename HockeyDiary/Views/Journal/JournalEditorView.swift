@@ -69,7 +69,7 @@ struct JournalEditorView: View {
                 }
                 shareCard
                 if !canSave {
-                    Label("기분 하나만 골라도, 한 줄만 써도 저장돼.", systemImage: "sparkles")
+                    Label("기분 하나만 골라도, 한 줄만 써도 저장돼요.", systemImage: "sparkles")
                         .font(.system(.footnote, design: .rounded)).foregroundStyle(Theme.inkSecondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -90,10 +90,10 @@ struct JournalEditorView: View {
         }
         .screenBackground()
         .scrollDismissesKeyboard(.interactively)
-        .confirmationDialog("이 일기를 지울까?", isPresented: $confirmingDelete, titleVisibility: .visible) {
+        .confirmationDialog("이 일기를 지울까요?", isPresented: $confirmingDelete, titleVisibility: .visible) {
             Button("지우기", role: .destructive, action: delete)
         } message: {
-            Text("앱에 복사해 둔 사진도 같이 지워져. 사진 앱 원본은 그대로야.")
+            Text("앱에 복사해 둔 사진도 같이 지워져요. 사진 앱 원본은 그대로예요.")
         }
         .navigationTitle(journal == nil ? "하루 일기" : "일기 고치기")
         .navigationBarTitleDisplayMode(.inline)
@@ -121,7 +121,7 @@ struct JournalEditorView: View {
                 DatePicker("날짜", selection: $entryDate, displayedComponents: .date)
                     .labelsHidden().tint(Theme.accentText)
             }
-            Text(mood.map { "오늘은 \(Mood.label($0))" } ?? "오늘 기분은 어때?")
+            Text(mood.map { "오늘은 \(Mood.label($0))" } ?? "오늘 기분은 어때요?")
                 .font(.system(.headline, design: .rounded)).foregroundStyle(Theme.paperInk)
                 .contentTransition(.numericText())
             MoodFaces(value: $mood)
@@ -132,7 +132,7 @@ struct JournalEditorView: View {
     private var lineCard: some View {
         PaperCard(tape: Theme.tapeYellow, tapeAngle: 4, dotted: true) {
             PaperTitle(text: "한 줄 일기", systemImage: "pencil.line")
-            TextField("오늘 하루 어땠어?", text: $body_, axis: .vertical)
+            TextField("오늘 하루 어땠어요?", text: $body_, axis: .vertical)
                 .lineLimit(4...12)
                 .font(.system(.body, design: .rounded))
                 .foregroundStyle(Theme.paperInk)
@@ -140,7 +140,7 @@ struct JournalEditorView: View {
                 .padding(10)
                 .background(Theme.card.opacity(0.55), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             if let linked = linkedSessionID, let s = sameDaySessions.first(where: { $0.id == linked }) {
-                Label("\(s.title)랑 이어 붙였어", systemImage: "link")
+                Label("\(s.title)랑 이어 붙였어요", systemImage: "link")
                     .font(.system(.caption, design: .rounded)).foregroundStyle(Theme.paperInkSoft)
             }
         }
@@ -192,8 +192,8 @@ struct JournalEditorView: View {
             }
             .tint(Theme.neonPink)
             Text(isPrivate
-                 ? "꺼져 있으면 이 일기는 어디에도 안 들어가. 내용을 따로 분석하지도 않아."
-                 : "켜면 시즌 리포트 이미지에 이 일기 한 줄이 들어갈 수 있어. AI 요약에는 안 넣어.")
+                 ? "꺼져 있으면 이 일기는 어디에도 안 들어가요. 내용을 따로 분석하지도 않아요."
+                 : "켜면 시즌 리포트 이미지에 이 일기 한 줄이 들어갈 수 있어요. AI 요약에는 안 넣어요.")
                 .font(.system(.caption, design: .rounded)).foregroundStyle(Theme.paperInkSoft)
         }
     }

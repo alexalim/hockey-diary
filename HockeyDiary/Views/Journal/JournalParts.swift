@@ -75,7 +75,7 @@ struct DotGrid: View {
 /// 기분 얼굴 다섯 개. 고른 얼굴이 통통 튀어 오르고 나머지는 한 발 물러선다.
 struct MoodFaces: View {
     @Binding var value: Int?
-    private let names = ["힘들어", "별로", "그냥", "좋아", "최고"]
+    private let names = ["힘들어요", "별로", "그냥", "좋아요", "최고"]
 
     var body: some View {
         HStack(spacing: 6) {

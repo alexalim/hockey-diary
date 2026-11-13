@@ -11,7 +11,7 @@ struct RunnerListView: View {
     var body: some View {
         List {
             if runners.isEmpty {
-                Text("아직 러너(날)가 없어. 스케이트 화면에서 추가하면 바로 달려.")
+                Text("아직 러너(날)가 없어요. 스케이트 화면에서 추가하면 바로 달려요.")
                     .foregroundStyle(Theme.inkSecondary)
             }
             ForEach(runners.filter { $0.retiredAt == nil }) { r in
@@ -102,7 +102,7 @@ struct RunnerEditorView: View {
             } header: {
                 Text("러너(날)")
             } footer: {
-                Text("러너는 부츠에 끼우는 날이야. 연마는 이 날을 가는 거야. 그래서 연마 기록과 알림도 날마다 따로 세.")
+                Text("러너는 부츠에 끼우는 날이에요. 연마는 이 날을 가는 거예요. 그래서 연마 기록과 알림도 날마다 따로 세요.")
             }
             Section {
                 Toggle("연마 점검 표시하기", isOn: $useThreshold)
@@ -120,7 +120,7 @@ struct RunnerEditorView: View {
             } header: {
                 Text("연마 점검")
             } footer: {
-                Text("이 날로 정해둔 만큼 타면 홈 화면에 갈 때가 됐다고 띄워줘. 휴대폰 알림은 아직 안 보내. 정해진 주기는 없으니 내 느낌대로 정하면 돼.")
+                Text("이 날로 정해둔 만큼 타면 홈 화면에 갈 때가 됐다고 띄워 줘요. 휴대폰 알림은 아직 안 보내요. 정해진 주기는 없으니 내 느낌대로 정하면 돼요.")
             }
             Section {
                 Toggle("날 교체 시기 표시하기", isOn: $useReplace)
@@ -138,7 +138,7 @@ struct RunnerEditorView: View {
             } header: {
                 Text("날 교체 시기")
             } footer: {
-                Text("날은 갈수록 깎여. 얼마나 쓰면 바꿀지는 사람마다 달라. 내 기준으로 정해줘.")
+                Text("날은 갈수록 깎여요. 얼마나 쓰면 바꿀지는 사람마다 달라요. 내 기준으로 정해 주세요.")
             }
             Section("메모") { TextField("메모", text: $memo, axis: .vertical) }
         }
@@ -221,7 +221,7 @@ struct RunnerDetailView: View {
                 HStack {
                     Text("그 뒤로 탄 횟수")
                     Spacer()
-                    Text(rides == 0 ? "아직 안 탔어" : "\(rides)번").bold()
+                    Text(rides == 0 ? "아직 안 탔어요" : "\(rides)번").bold()
                 }
                 HStack {
                     Text("그 뒤로 탄 시간")
@@ -234,7 +234,7 @@ struct RunnerDetailView: View {
                     ProgressTrack(value: Double(since), total: Double(t), label: "\(minutesText(t)) 타면 홈에 표시", trailing: minutesText(since))
                 }
             } footer: {
-                Text("기록할 때 이 러너를 고른 활동만 세. 시간은 '실제로 탄 시간'으로 더해.")
+                Text("기록할 때 이 러너를 고른 활동만 세요. 시간은 '실제로 탄 시간'으로 더해요.")
             }
 
             Section {
@@ -250,14 +250,14 @@ struct RunnerDetailView: View {
                     ProgressTrack(value: Double(used), total: Double(m), label: "\(m)개월 쓰면 교체 표시", trailing: "\(used)개월")
                 }
                 if let retired = runner.retiredAt {
-                    Text("\(retired.formatted(date: .abbreviated, time: .omitted))에 교체했어.").foregroundStyle(Theme.inkSecondary)
+                    Text("\(retired.formatted(date: .abbreviated, time: .omitted))에 교체했어요.").foregroundStyle(Theme.inkSecondary)
                 } else {
-                    Button("이 날 교체했어") { confirmingRetire = true }
+                    Button("이 날 교체했어요") { confirmingRetire = true }
                 }
             } header: {
                 Text("날 교체")
             } footer: {
-                Text("교체했다고 하면 이 러너는 '교체한 날'로 옮겨져. 지난 기록은 그대로 남아.")
+                Text("교체했다고 하면 이 러너는 '교체한 날'로 옮겨져요. 지난 기록은 그대로 남아요.")
             }
 
             Section { SharpeningGuideCard() }
@@ -286,14 +286,14 @@ struct RunnerDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("고치기") { editing = true } } }
         .sheet(isPresented: $addingSharpening) { NavigationStack { SharpeningEditorView(runner: runner) } }
-        .confirmationDialog("이 날을 교체했어?", isPresented: $confirmingRetire, titleVisibility: .visible) {
-            Button("교체했어") {
+        .confirmationDialog("이 날을 교체했어요?", isPresented: $confirmingRetire, titleVisibility: .visible) {
+            Button("교체했어요") {
                 DiaryStore.uninstall(runner, context: context)
                 runner.retiredAt = Date()
                 context.saveOrReport()
             }
         } message: {
-            Text("부츠에서 떼고 '교체한 날'로 옮길게. 새 날은 스케이트 화면에서 추가해줘.")
+            Text("부츠에서 떼고 '교체한 날'로 옮길게요. 새 날은 스케이트 화면에서 추가해 주세요.")
         }
         .sheet(isPresented: $editing) { NavigationStack { RunnerEditorView(runner: runner, installOn: nil) } }
     }
@@ -346,12 +346,12 @@ struct SharpeningEditorView: View {
                 TextField("직접 입력 (예: 9/16, 0.55)", text: $customHollow)
                     .keyboardType(.numbersAndPunctuation)
                 if customInvalid {
-                    Text("인치 값으로 적어줘. 예: 5/8, 0.55").font(.caption).foregroundStyle(Theme.danger)
+                    Text("인치 값으로 적어 주세요. 예: 5/8, 0.55").font(.caption).foregroundStyle(Theme.danger)
                 }
             } header: {
                 Text("홀로우 (RoH)")
             } footer: {
-                Text("홈이 깊으면 날이 얼음을 꽉 잡아서 턴과 스톱이 단단해. 얕으면 덜 잡는 대신 쭉 나가. 그림은 깊이 차이만 보여줘. 모르면 비워둬도 돼.\n\(Hollow.playerNicknameNote)")
+                Text("홈이 깊으면 날이 얼음을 꽉 잡아서 턴과 스톱이 단단해요. 얕으면 덜 잡는 대신 쭉 나가요. 그림은 깊이 차이만 보여 줘요. 모르면 비워 둬도 돼요.\n\(Hollow.playerNicknameNote)")
             }
             Section("어디서?") { TextField("연마한 곳 (업체·링크장)", text: $shop) }
             Section("연마 후 느낌") {

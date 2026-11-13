@@ -37,7 +37,7 @@ struct StartView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 8) {
-                Text("무엇을 할까?").font(.headline)
+                Text("무엇을 할까요?").font(.headline)
                 ForEach(ActivityType.allCases, id: \.self) { t in
                     Button {
                         model.type = t
@@ -57,7 +57,7 @@ struct StartView: View {
                     }
                 }
                 if model.usesGPS {
-                    Text("야외·폰드는 GPS로 총거리만 재. 경로는 안 남겨.").font(.system(size: 10)).foregroundStyle(.secondary)
+                    Text("야외·폰드는 GPS로 총거리만 재요. 경로는 안 남겨요.").font(.system(size: 10)).foregroundStyle(.secondary)
                 }
                 Text("시작 전 기분").font(.caption).foregroundStyle(.secondary).padding(.top, 4)
                 WatchMoodRow(value: $model.moodBefore)
@@ -140,7 +140,7 @@ struct FinishView: View {
                     Label("아이폰에 저장", systemImage: "iphone").frame(maxWidth: .infinity, minHeight: 44)
                 }
                 .tint(cobalt)
-                Text("기술·메모는 아이폰에서 더 적을 수 있어.").font(.caption2).foregroundStyle(.secondary)
+                Text("기술·메모는 아이폰에서 더 적을 수 있어요.").font(.caption2).foregroundStyle(.secondary)
             }
         }
     }
@@ -152,8 +152,8 @@ struct SentView: View {
     var body: some View {
         VStack(spacing: 10) {
             Image(systemName: "checkmark.circle.fill").font(.largeTitle).foregroundStyle(pink)
-            Text("아이폰으로 보냈어").font(.headline)
-            Text("아이폰 앱을 열면 기록에 들어가 있어.").font(.caption2).foregroundStyle(.secondary).multilineTextAlignment(.center)
+            Text("아이폰으로 보냈어요").font(.headline)
+            Text("아이폰 앱을 열면 기록에 들어가 있어요.").font(.caption2).foregroundStyle(.secondary).multilineTextAlignment(.center)
             Button("처음으로") { model.reset() }
         }
     }

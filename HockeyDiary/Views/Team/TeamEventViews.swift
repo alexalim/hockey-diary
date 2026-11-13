@@ -57,7 +57,7 @@ struct TeamEventView: View {
             CardHeader(title: "참석", systemImage: "checkmark.circle",
                        trailing: members.isEmpty ? nil : "참석 \(sheet.count(.going, among: ids)) · 미정 \(sheet.count(.maybe, among: ids)) · 불참 \(sheet.count(.notGoing, among: ids))")
             if members.isEmpty {
-                EmptyHint(text: "우리 팀 화면에서 팀원을 먼저 넣어줘.")
+                EmptyHint(text: "우리 팀 화면에서 팀원을 먼저 넣어 주세요.")
             }
             ForEach(members) { m in
                 HStack(spacing: 8) {
@@ -86,7 +86,7 @@ struct TeamEventView: View {
                 .frame(minHeight: Theme.touch)
             }
             if !members.isEmpty {
-                Text("카톡 답을 보고 체크해. 한 번 더 누르면 '답 없음'으로 돌아가.").font(.caption2).foregroundStyle(Theme.inkSecondary)
+                Text("카톡 답을 보고 체크해요. 한 번 더 누르면 '답 없음'으로 돌아가요.").font(.caption2).foregroundStyle(Theme.inkSecondary)
             }
         }
     }
@@ -98,7 +98,7 @@ struct TeamEventView: View {
         return Card {
             CardHeader(title: "라인업", systemImage: "rectangle.split.3x3")
             if text.isEmpty {
-                EmptyHint(text: "포워드 3라인, 수비 3조, 골리를 자리에 넣어봐. 참석한 사람만 골라도 돼.", systemImage: "rectangle.split.3x3")
+                EmptyHint(text: "포워드 3라인, 수비 3조, 골리를 자리에 넣어 보세요. 참석한 사람만 골라도 돼요.", systemImage: "rectangle.split.3x3")
             } else {
                 LineupBoard(lineup: event.lineup, names: names)
             }
@@ -132,13 +132,13 @@ struct TeamEventView: View {
                 }
                 Button {
                     UIPasteboard.general.string = shareText
-                    toast = "글을 복사했어. 카톡에 붙여 넣어."
+                    toast = "글을 복사했어요. 카톡에 붙여 넣으세요."
                 } label: {
                     Label("글로 복사", systemImage: "doc.on.doc").frame(maxWidth: .infinity, minHeight: Theme.touch)
                 }
                 .buttonStyle(.bordered)
             }
-            Text("이미지에는 일정, 참석 인원, 라인업 이름이 들어가. 일기나 개인 기록은 안 들어가.").font(.caption2).foregroundStyle(Theme.inkSecondary)
+            Text("이미지에는 일정, 참석 인원, 라인업 이름이 들어가요. 일기나 개인 기록은 안 들어가요.").font(.caption2).foregroundStyle(Theme.inkSecondary)
         }
     }
 
@@ -162,9 +162,9 @@ struct TeamEventView: View {
         Card {
             CardHeader(title: "경기 기록", systemImage: "figure.hockey")
             if event.sessionID != nil {
-                Text("이 일정으로 만든 기록이 있어.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
+                Text("이 일정으로 만든 기록이 있어요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
             } else {
-                Text("경기가 끝나면 이 일정으로 기록을 만들어. 상대·링크장·시간이 미리 채워져.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
+                Text("경기가 끝나면 이 일정으로 기록을 만들어 보세요. 상대·링크장·시간이 미리 채워져요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
             }
             Button {
                 openSession = TeamStore.makeSession(for: event, context: context)
@@ -230,7 +230,7 @@ struct LineupEditor: View {
             Section {
                 Button("라인업 비우기", role: .destructive) { lineup = Lineup() }
             } footer: {
-                Text("참석으로 체크한 사람이 위에 먼저 나와. 한 사람은 한 자리에만 들어가.")
+                Text("참석으로 체크한 사람이 위에 먼저 나와요. 한 사람은 한 자리에만 들어가요.")
             }
         }
         .navigationTitle("라인업")

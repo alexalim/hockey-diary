@@ -93,9 +93,9 @@ public struct ShotStats: Equatable, Sendable {
     public func sentence(minimumShots: Int = 3) -> String? {
         guard total >= minimumShots else { return nil }
         if let z = bestZone(minimumShots: minimumShots), let line = byZone[z], let r = line.rate {
-            return "슛 \(total)번 중 \(goals)골. \(z.title)에서 \(line.shots)번 쏴서 \(line.goals)골(\(Int((r * 100).rounded()))%)로 가장 잘 들어갔어."
+            return "슛 \(total)번 중 \(goals)골. \(z.title)에서 \(line.shots)번 쏴서 \(line.goals)골(\(Int((r * 100).rounded()))%)로 가장 잘 들어갔어요."
         }
-        return "슛 \(total)번 중 \(goals)골이야. 골대 안으로 간 건 \(onTarget)번."
+        return "슛 \(total)번 중 \(goals)골이에요. 골대 안으로 간 건 \(onTarget)번."
     }
 }
 

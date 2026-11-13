@@ -56,7 +56,7 @@ struct PracticeBranch: View {
         Card(tint: Theme.cobalt) {
             Text("PRACTICE").font(.system(size: 12, weight: .semibold)).tracking(0.6).foregroundStyle(.white.opacity(0.75))
             Text("이번 달 연습 \(thisMonth.count)회").font(.title3.bold()).foregroundStyle(.white)
-            Text(thisMonth.isEmpty ? "이번 달 첫 연습을 남겨 봐." : "\(TrainingText.hours(thisMonth.map(\.minutes).reduce(0, +))) 탔어.")
+            Text(thisMonth.isEmpty ? "이번 달 첫 연습을 남겨 보세요." : "\(TrainingText.hours(thisMonth.map(\.minutes).reduce(0, +))) 탔어요.")
                 .font(.subheadline).foregroundStyle(.white.opacity(0.85))
             HStack(spacing: 8) {
                 HeroButton(title: "수업 기록", systemImage: "graduationcap.fill") { newEntry = .session(.lesson) }
@@ -67,11 +67,11 @@ struct PracticeBranch: View {
             Card {
                 CardHeader(title: "다음 목표", systemImage: "target")
                 Text(goal).font(.subheadline.bold()).foregroundStyle(Theme.title)
-                Text("지난 수업에서 적은 목표야. 드릴 갈래에서 이어서 다듬어.").font(.caption).foregroundStyle(Theme.inkSecondary)
+                Text("지난 수업에서 적은 목표예요. 드릴 갈래에서 이어서 다듬어 보세요.").font(.caption).foregroundStyle(Theme.inkSecondary)
             }
         }
         SectionHeader(title: "최근 연습")
-        RecentSessions(sessions: Array(mine.prefix(6)), empty: "아직 연습 기록이 없어. 위에서 수업이나 자유 연습을 남겨 봐.")
+        RecentSessions(sessions: Array(mine.prefix(6)), empty: "아직 연습 기록이 없어요. 위에서 수업이나 자유 연습을 남겨 보세요.")
     }
 }
 
@@ -90,7 +90,7 @@ struct GameBranch: View {
         Card(tint: Theme.cobalt) {
             Text("GAME DAY").font(.system(size: 12, weight: .semibold)).tracking(0.6).foregroundStyle(.white.opacity(0.75))
             Text("올해 경기 \(thisYear.count)회").font(.title3.bold()).foregroundStyle(.white)
-            Text(thisYear.isEmpty ? "첫 경기를 리뷰하면 골·어시가 여기 쌓여." : "골 \(goals) · 어시스트 \(assists)")
+            Text(thisYear.isEmpty ? "첫 경기를 리뷰하면 골·어시가 여기 쌓여요." : "골 \(goals) · 어시스트 \(assists)")
                 .font(.subheadline).foregroundStyle(.white.opacity(0.85))
             HStack(spacing: 8) {
                 HeroButton(title: "정규게임 리뷰", systemImage: "trophy.fill") { newEntry = .session(.regularGame) }
@@ -115,7 +115,7 @@ struct GameBranch: View {
                 }
                 .buttonStyle(.plain)
             } else {
-                EmptyHint(text: teams.isEmpty ? "팀을 만들면 경기 일정과 출석을 여기서 봐." : "잡힌 경기가 없어.", systemImage: "person.3")
+                EmptyHint(text: teams.isEmpty ? "팀을 만들면 경기 일정과 출석을 여기서 봐요." : "잡힌 경기가 없어요.", systemImage: "person.3")
             }
             NavigationLink { TeamView() } label: {
                 Label("팀 일정 전체", systemImage: "person.3.fill").frame(maxWidth: .infinity, minHeight: Theme.touch)
@@ -123,7 +123,7 @@ struct GameBranch: View {
             .buttonStyle(.bordered)
         }
         SectionHeader(title: "최근 경기")
-        RecentSessions(sessions: Array(games.prefix(6)), empty: "아직 경기 기록이 없어. 위에서 리뷰를 남겨 봐.")
+        RecentSessions(sessions: Array(games.prefix(6)), empty: "아직 경기 기록이 없어요. 위에서 리뷰를 남겨 보세요.")
     }
 }
 

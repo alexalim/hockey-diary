@@ -35,8 +35,8 @@ public enum Sufficiency: Equatable, Sendable {
     /// 데이터 없음과 0을 구분해 안내한다 (부록 B Empty state).
     public var message: String {
         switch self {
-        case .empty: return "아직 기록이 없어. 첫 기록을 남겨보자."
-        case .insufficient(let count, let needed): return "기록이 \(count)건이야. \(needed)건이 되면 보여줄게. 조금만 더 모아보자."
+        case .empty: return "아직 기록이 없어요. 첫 기록을 남겨 봐요."
+        case .insufficient(let count, let needed): return "기록이 \(count)건이에요. \(needed)건이 되면 보여 줄게요. 조금만 더 모아 봐요."
         case .sufficient(let count): return "기록 \(count)건"
         }
     }

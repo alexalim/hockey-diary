@@ -187,10 +187,10 @@ struct SessionEditorView: View {
 
     private var saveHint: String? {
         if type.isGame && attempts.contains(where: { $0.tried == nil }) {
-            return "기술마다 '못 써봄' 또는 '써봤어'를 골라줘. 못 써본 건 실패로 안 세."
+            return "기술마다 '못 써봄' 또는 '써봤어'를 골라 주세요. 못 써본 건 실패로 안 세요."
         }
         if type == .lesson && !canSave {
-            return "기술을 하나 고르거나 메모를 한 줄 남겨줘."
+            return "기술을 하나 고르거나 메모를 한 줄 남겨 주세요."
         }
         return nil
     }
@@ -265,7 +265,7 @@ struct SessionEditorView: View {
                             minutes = max(1, Int((w.end.timeIntervalSince(w.start) / 60).rounded()))
                             if !iceMinutesEdited { iceMinutes = minutes }
                             userTouchedTime = true
-                            prefillNote = "건강 앱 '\(w.activityName)' 운동 시간으로 채웠어."
+                            prefillNote = "건강 앱 '\(w.activityName)' 운동 시간으로 채웠어요."
                         } label: {
                             Text("\(w.activityName) · \(w.start.formatted(date: .omitted, time: .shortened))~\(w.end.formatted(date: .omitted, time: .shortened))\(w.kilocalories.map { " · \(Int($0))kcal" } ?? "")")
                         }
@@ -302,9 +302,9 @@ struct SessionEditorView: View {
             .buttonStyle(.plain)
             .accessibilityIdentifier("더 적기")
         } footer: {
-            Text(type.isGame ? "슛 차트, 골리, 경기 정보, 장소, 장비, 사진은 여기 있어. 안 열어도 저장돼."
-                             : (type == .lesson ? "코치 메모, 다음 목표, 장소, 장비, 사진은 여기 있어. 안 열어도 저장돼."
-                                                : "장소, 장비, 사진은 여기 있어. 안 열어도 저장돼."))
+            Text(type.isGame ? "슛 차트, 골리, 경기 정보, 장소, 장비, 사진은 여기 있어요. 안 열어도 저장돼요."
+                             : (type == .lesson ? "코치 메모, 다음 목표, 장소, 장비, 사진은 여기 있어요. 안 열어도 저장돼요."
+                                                : "장소, 장비, 사진은 여기 있어요. 안 열어도 저장돼요."))
         }
     }
 
@@ -347,7 +347,7 @@ struct SessionEditorView: View {
         } header: {
             Text("오늘 배운 기술")
         } footer: {
-            Text("기술 없이 메모만 남겨도 저장돼.")
+            Text("기술 없이 메모만 남겨도 저장돼요.")
         }
     }
 
@@ -365,10 +365,10 @@ struct SessionEditorView: View {
                             .buttonStyle(.borderless)
                             .accessibilityLabel("\(draft.name) 빼기")
                     }
-                    Text("시합에서 실제 써봤어?").font(.subheadline).foregroundStyle(Theme.inkSecondary)
+                    Text("시합에서 실제 써봤어요?").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     ChoiceCards(options: [
-                        ChoiceOption(value: Optional(false), title: "못 써봄", subtitle: "기회가 없었어", art: .symbol("moon.zzz")),
-                        ChoiceOption(value: Optional(true), title: "써봤어", subtitle: "시도했어", art: .symbol("figure.hockey")),
+                        ChoiceOption(value: Optional(false), title: "못 써봄", subtitle: "기회가 없었어요", art: .symbol("moon.zzz")),
+                        ChoiceOption(value: Optional(true), title: "써봤어요", subtitle: "시도했어요", art: .symbol("figure.hockey")),
                     ], selection: Binding(
                         get: { draft.tried },
                         set: { draft.tried = $0; if $0 != true { draft.outcome = nil; draft.count = nil } }
@@ -381,9 +381,9 @@ struct SessionEditorView: View {
                                     },
                                     selection: $draft.outcome, columns: 4, minHeight: 60)
                         if preset.showsSkillDetail { OptionalNumberField(title: "시도 횟수", value: $draft.count) }
-                        TextField("어떤 상황이었어?", text: $draft.notes, axis: .vertical)
+                        TextField("어떤 상황이었어요?", text: $draft.notes, axis: .vertical)
                     } else if draft.tried == false {
-                        Text("괜찮아. 기회가 없었던 날도 기록이야. 실패로 세지 않아.")
+                        Text("괜찮아요. 기회가 없었던 날도 기록이에요. 실패로 세지 않아요.")
                             .font(.caption).foregroundStyle(Theme.inkSecondary)
                     }
                 }
@@ -395,9 +395,9 @@ struct SessionEditorView: View {
                 Label("기술 추가", systemImage: "plus")
             }
         } header: {
-            Text("배운 기술, 써봤어?")
+            Text("배운 기술, 써봤어요?")
         } footer: {
-            Text(attempts.isEmpty ? "최근 수업에서 배운 기술이 없으면 직접 추가해줘." : "최근 수업에서 배운 기술을 넣어뒀어. 빼거나 더해도 돼.")
+            Text(attempts.isEmpty ? "최근 수업에서 배운 기술이 없으면 직접 추가해 주세요." : "최근 수업에서 배운 기술을 넣어 뒀어요. 빼거나 더해도 돼요.")
         }
     }
 
@@ -439,7 +439,7 @@ struct SessionEditorView: View {
         } header: {
             Text("메모")
         } footer: {
-            if type == .miniGame { Text("미니게임은 점수 없이 저장해도 돼.") }
+            if type == .miniGame { Text("미니게임은 점수 없이 저장해도 돼요.") }
         }
     }
 
@@ -464,12 +464,12 @@ struct SessionEditorView: View {
                 }
             }
         } header: {
-            Text("어디서 탔어?")
+            Text("어디서 탔어요?")
         } footer: {
             if surface == .pond {
-                Text("얼음이 안전한지는 앱이 알 수 없어. 현장 안내를 꼭 확인해줘. 정확한 위치는 저장하지 않아.")
+                Text("얼음이 안전한지는 앱이 알 수 없어요. 현장 안내를 꼭 확인해 주세요. 정확한 위치는 저장하지 않아요.")
             } else {
-                Text("빙질은 내가 느낀 대로 남기면 돼.")
+                Text("빙질은 내가 느낀 대로 남기면 돼요.")
             }
         }
     }
@@ -479,7 +479,7 @@ struct SessionEditorView: View {
     private var equipmentSection: some View {
         Section {
             if skates.isEmpty {
-                Text("락커 탭에 스케이트를 넣으면 연마하고 탄 시간이 저절로 쌓여.")
+                Text("락커 탭에 스케이트를 넣으면 연마하고 탄 시간이 저절로 쌓여요.")
                     .font(.footnote).foregroundStyle(Theme.inkSecondary)
             } else {
                 LabeledChoice(title: "스케이트",
@@ -516,7 +516,7 @@ struct SessionEditorView: View {
             Text("장비")
         } footer: {
             if skateID != nil {
-                Text("벤치에 있던 시간은 빼줘. 고른 스케이트·러너에만 쌓여.")
+                Text("벤치에 있던 시간은 빼 주세요. 고른 스케이트·러너에만 쌓여요.")
             }
         }
     }
@@ -526,7 +526,7 @@ struct SessionEditorView: View {
     /// 골리로 뛴 날: 세이브·실점·세이브율.
     private var goalieSection: some View {
         Section {
-            Toggle("오늘 골리로 뛰었어", isOn: $playedGoalie)
+            Toggle("오늘 골리로 뛰었어요", isOn: $playedGoalie)
             if playedGoalie {
                 OptionalNumberField(title: "세이브", value: $saves)
                 OptionalNumberField(title: "실점", value: $goalsAgainst)
@@ -538,7 +538,7 @@ struct SessionEditorView: View {
                 }
             }
         } footer: {
-            if playedGoalie { Text("세이브율은 세이브 ÷ (세이브 + 실점)이야. 몰라도 저장돼.") }
+            if playedGoalie { Text("세이브율은 세이브 ÷ (세이브 + 실점)이에요. 몰라도 저장돼요.") }
         }
     }
 
@@ -550,7 +550,7 @@ struct SessionEditorView: View {
                 withAnimation(.spring(response: 0.25)) { shots.append(ShotPoint(x: x, y: y, outcome: shotOutcome)) }
             }
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel("슛 차트. 표시 \(shots.count)개. 아래 숫자 칸으로도 적을 수 있어.")
+            .accessibilityLabel("슛 차트. 표시 \(shots.count)개. 아래 숫자 칸으로도 적을 수 있어요.")
             HStack {
                 ShotLegend()
                 Spacer()
@@ -565,7 +565,7 @@ struct SessionEditorView: View {
         } header: {
             Text("슛 차트")
         } footer: {
-            Text("위에서 결과를 고르고, 슛을 쏜 자리를 눌러. 위가 상대 골대야. 골로 찍은 수는 골 칸과 따로 세.")
+            Text("위에서 결과를 고르고, 슛을 쏜 자리를 눌러 주세요. 위가 상대 골대예요. 골로 찍은 수는 골 칸과 따로 세요.")
         }
     }
 
@@ -627,12 +627,12 @@ struct SessionEditorView: View {
                 if surface == .unknown { surface = .indoorRink }
             }
             if !e.opponent.isEmpty { opponent = e.opponent }
-            prefillNote = "팀 일정(\(e.at.formatted(date: .omitted, time: .shortened)))으로 채웠어. 맞는지만 봐줘."
+            prefillNote = "팀 일정(\(e.at.formatted(date: .omitted, time: .shortened)))으로 채웠어요. 맞는지만 봐 주세요."
         case .workout:
             linkedEventID = nil
-            prefillNote = "Apple 건강 운동 기록으로 시간을 채웠어. 맞는지만 봐줘."
+            prefillNote = "Apple 건강 운동 기록으로 시간을 채웠어요. 맞는지만 봐 주세요."
         case .lastSession:
-            prefillNote = "지난 \(type.title) 시간(\(minutesText(plan.minutes)))만큼 지금부터 거슬러 채웠어."
+            prefillNote = "지난 \(type.title) 시간(\(minutesText(plan.minutes)))만큼 지금부터 거슬러 채웠어요."
         case .none:
             prefillNote = nil
         }

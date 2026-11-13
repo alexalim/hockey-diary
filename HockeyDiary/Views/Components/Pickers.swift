@@ -78,12 +78,12 @@ struct ScalePicker: View {
 /// 저장 값은 피로도와 같은 1~5라 예전 기록과 그대로 이어진다.
 struct EffortPicker: View {
     @Binding var value: Int?
-    static let words = ["쉬웠어", "할 만했어", "적당히 힘들었어", "꽤 힘들었어", "다 짜냈어"]
+    static let words = ["쉬웠어요", "할 만했어요", "적당히 힘들었어요", "꽤 힘들었어요", "다 짜냈어요"]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
-                Text("얼마나 힘들었어?").font(.subheadline).foregroundStyle(Theme.inkSecondary)
+                Text("얼마나 힘들었어요?").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                 Spacer()
                 if let v = value { Text(Self.words[v - 1]).font(.subheadline.bold()).foregroundStyle(Theme.title) }
             }

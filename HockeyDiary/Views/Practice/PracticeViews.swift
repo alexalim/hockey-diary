@@ -62,7 +62,7 @@ struct DrillSection: View {
             AcademyGrid { pickingDrill = true }
             Card {
                 CardHeader(title: "드릴 하나만", systemImage: "figure.hockey")
-                Text("루틴 없이 지금 하고 싶은 드릴만 골라서 세.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
+                Text("루틴 없이 지금 하고 싶은 드릴만 골라서 세요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                 Button { pickingDrill = true } label: {
                     Label("드릴 고르기", systemImage: "magnifyingglass").frame(maxWidth: .infinity, minHeight: Theme.touch)
                 }
@@ -93,8 +93,8 @@ struct DrillSection: View {
         let first = routines.first { !$0.items.isEmpty }
         Card(tint: Theme.cobalt) {
             Text("TODAY'S FOCUS").font(.system(size: 12, weight: .semibold)).tracking(0.6).foregroundStyle(.white.opacity(0.75))
-            Text(goal ?? "오늘은 뭘 다듬을까?").font(.title3.bold()).foregroundStyle(.white)
-            Text(goal == nil ? "수업 기록에 '다음 목표'를 적으면 여기로 이어져." : "지난 수업의 다음 목표를 오늘의 드릴로 이어가자.")
+            Text(goal ?? "오늘은 뭘 다듬을까요?").font(.title3.bold()).foregroundStyle(.white)
+            Text(goal == nil ? "수업 기록에 '다음 목표'를 적으면 여기로 이어져요." : "지난 수업의 다음 목표를 오늘의 드릴로 이어가요.")
                 .font(.subheadline).foregroundStyle(.white.opacity(0.85))
             if let first {
                 Button { running = RoutineRun(routine: first) } label: {
@@ -114,7 +114,7 @@ struct DrillSection: View {
             CardHeader(title: "최근 드릴", systemImage: "clock.arrow.circlepath",
                        trailing: logs.isEmpty ? nil : "드릴 한 날 \(DrillStats.practiceDays(logs.compactMap(\.entry)))일")
             if recent.isEmpty {
-                EmptyHint(text: "아직 드릴 기록이 없어. 위에서 루틴을 시작해봐.")
+                EmptyHint(text: "아직 드릴 기록이 없어요. 위에서 루틴을 시작해 보세요.")
             }
             ForEach(recent) { log in
                 HStack {
@@ -190,11 +190,11 @@ struct RoutineRunView: View {
         .onReceive(timer) { _ in
             guard timerOn, secondsLeft > 0 else { return }
             secondsLeft -= 1
-            if voiceOn && secondsLeft == 60 { Speaker.shared.say("1분 남았어") }
+            if voiceOn && secondsLeft == 60 { Speaker.shared.say("1분 남았어요") }
             if voiceOn && secondsLeft == 10 { Speaker.shared.say("10초") }
             if secondsLeft == 0 {
                 timerOn = false; finishedTick += 1
-                if voiceOn { Speaker.shared.say("끝. 잘했어") }
+                if voiceOn { Speaker.shared.say("끝. 잘했어요") }
             }
         }
         .sensoryFeedback(.success, trigger: finishedTick)
@@ -263,7 +263,7 @@ struct RoutineRunView: View {
             Text(String(format: "%d:%02d", secondsLeft / 60, secondsLeft % 60))
                 .font(.system(size: 72, weight: .black, design: .rounded)).monospacedDigit()
                 .foregroundStyle(secondsLeft == 0 ? Theme.success : Theme.title)
-            Text(secondsLeft == 0 ? "다 했어! 다음으로 넘어가." : "목표 \(item.target)분").font(.subheadline).foregroundStyle(Theme.inkSecondary)
+            Text(secondsLeft == 0 ? "다 했어요! 다음으로 넘어가요." : "목표 \(item.target)분").font(.subheadline).foregroundStyle(Theme.inkSecondary)
             HStack(spacing: 10) {
                 Button { timerOn.toggle() } label: {
                     Label(timerOn ? "잠깐" : (secondsLeft == item.target * 60 ? "시작" : "계속"), systemImage: timerOn ? "pause.fill" : "play.fill")
@@ -289,8 +289,8 @@ struct RoutineRunView: View {
                 .font(.system(size: 96, weight: .black, design: .rounded)).monospacedDigit()
                 .foregroundStyle(count >= item.target ? Theme.success : Theme.title)
                 .contentTransition(.numericText())
-                .accessibilityLabel(count >= item.target ? "\(count)번 했어" : "\(left)번 남았어")
-            Text(count >= item.target ? "목표 \(item.target)번 다 했어!" : "번 남았어 · 지금 \(count)번").font(.subheadline).foregroundStyle(Theme.inkSecondary)
+                .accessibilityLabel(count >= item.target ? "\(count)번 했어요" : "\(left)번 남았어요")
+            Text(count >= item.target ? "목표 \(item.target)번 다 했어요!" : "번 남았어요 · 지금 \(count)번").font(.subheadline).foregroundStyle(Theme.inkSecondary)
             HStack(spacing: 10) {
                 Button { if count > 0 { count -= 1 } } label: { Image(systemName: "minus").frame(width: 64, height: 64) }
                     .buttonStyle(.bordered).accessibilityLabel("하나 빼기")
@@ -308,7 +308,7 @@ struct RoutineRunView: View {
                     withAnimation(.snappy) { count += 5 }
                     repTick += 1
                     if before < item.target && count >= item.target { finishedTick += 1 }
-                    if voiceOn { Speaker.shared.say(count >= item.target && before < item.target ? "\(count)번. 목표 다 했어" : "\(count)번") }
+                    if voiceOn { Speaker.shared.say(count >= item.target && before < item.target ? "\(count)번. 목표 다 했어요" : "\(count)번") }
                 } label: { Text("+5").font(.headline).frame(width: 64, height: 64) }
                     .buttonStyle(.bordered)
             }
@@ -323,13 +323,13 @@ struct RoutineRunView: View {
             Image(systemName: "checkmark.seal.fill").font(.system(size: 56)).foregroundStyle(Theme.neonPink)
             Text("오늘 훈련 끝!").font(.title.bold()).foregroundStyle(Theme.title)
             if done.isEmpty {
-                Text("저장한 드릴이 없어.").foregroundStyle(Theme.inkSecondary)
+                Text("저장한 드릴이 없어요.").foregroundStyle(Theme.inkSecondary)
             } else {
                 Card {
                     ForEach(done, id: \.self) { Text("· \($0)").font(.subheadline) }
                 }
             }
-            Text("드릴 양은 성장 탭의 기술 성장에 쌓여.").font(.caption).foregroundStyle(Theme.inkSecondary)
+            Text("드릴 양은 성장 탭의 기술 성장에 쌓여요.").font(.caption).foregroundStyle(Theme.inkSecondary)
             Spacer()
             Button { dismiss() } label: { Text("닫기").frame(maxWidth: .infinity, minHeight: Theme.touch) }
                 .buttonStyle(PinkButtonStyle())
@@ -390,7 +390,7 @@ struct DrillPickerView: View {
     var body: some View {
         List {
             if groups.isEmpty {
-                Text("'\(search)'에 맞는 드릴이 없어. 기술 이름(예: 스톱, 크로스오버)으로 찾아봐.")
+                Text("'\(search)'에 맞는 드릴이 없어요. 기술 이름(예: 스톱, 크로스오버)으로 찾아보세요.")
                     .font(.subheadline).foregroundStyle(Theme.inkSecondary)
             }
             ForEach(groups, id: \.0) { name, drills in
@@ -456,7 +456,7 @@ struct RoutineEditorView: View {
             } header: {
                 Text("드릴 순서 · 약 \(StarterRoutine.estimatedMinutes(items))분")
             } footer: {
-                Text("길게 눌러 순서를 바꾸고, 왼쪽으로 밀어 빼.")
+                Text("길게 눌러 순서를 바꾸고, 왼쪽으로 밀어 빼요.")
             }
             if routine != nil {
                 Section { Button("이 루틴 지우기", role: .destructive) { confirmingDelete = true } }
@@ -479,12 +479,12 @@ struct RoutineEditorView: View {
                 }
             }
         }
-        .confirmationDialog("이 루틴을 지울까?", isPresented: $confirmingDelete, titleVisibility: .visible) {
+        .confirmationDialog("이 루틴을 지울까요?", isPresented: $confirmingDelete, titleVisibility: .visible) {
             Button("지우기", role: .destructive) {
                 if let routine { context.delete(routine); context.saveOrReport() }
                 dismiss()
             }
-        } message: { Text("연습 기록은 그대로 남아.") }
+        } message: { Text("연습 기록은 그대로 남아요.") }
         .onAppear {
             guard !loaded, let routine else { return }
             loaded = true

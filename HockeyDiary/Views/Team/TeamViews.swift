@@ -38,7 +38,7 @@ struct TeamView: View {
             VStack(spacing: 12) {
                 Card(tint: Theme.cobalt) {
                     Text("우리 팀 만들기").font(.title3.bold()).foregroundStyle(.white)
-                    Text("일정, 참석, 라인업을 여기서 정리하고 카톡에 이미지나 글로 올려. 팀 데이터는 이 아이폰 안에만 있어.")
+                    Text("일정, 참석, 라인업을 여기서 정리하고 카톡에 이미지나 글로 올려요. 팀 데이터는 이 아이폰 안에만 있어요.")
                         .font(.subheadline).foregroundStyle(.white.opacity(0.85))
                 }
                 Card {
@@ -63,7 +63,7 @@ struct TeamView: View {
                 Card {
                     CardHeader(title: "다음 일정", systemImage: "calendar", trailing: upcoming.isEmpty ? nil : "\(upcoming.count)개")
                     if upcoming.isEmpty {
-                        EmptyHint(text: "다음 경기나 연습 일정을 넣어봐. 참석 체크와 라인업도 여기서 해.", systemImage: "calendar.badge.plus")
+                        EmptyHint(text: "다음 경기나 연습 일정을 넣어 보세요. 참석 체크와 라인업도 여기서 해요.", systemImage: "calendar.badge.plus")
                     }
                     ForEach(upcoming) { e in
                         NavigationLink { TeamEventView(event: e, team: team) } label: { eventRow(e) }.buttonStyle(.plain)
@@ -73,7 +73,7 @@ struct TeamView: View {
                 Card {
                     CardHeader(title: "명단", systemImage: "person.3.fill", trailing: "\(members.count)명")
                     if members.isEmpty {
-                        EmptyHint(text: "팀원을 넣어두면 참석 체크와 라인업에서 바로 고를 수 있어. 용병도 넣을 수 있어.")
+                        EmptyHint(text: "팀원을 넣어두면 참석 체크와 라인업에서 바로 고를 수 있어요. 용병도 넣을 수 있어요.")
                     }
                     ForEach(members) { m in
                         Button { editingMember = m } label: {
@@ -99,7 +99,7 @@ struct TeamView: View {
                         }
                     }
                 }
-                Text("팀 데이터는 이 아이폰에만 있어. 공유는 일정 화면에서 이미지나 글로 해.")
+                Text("팀 데이터는 이 아이폰에만 있어요. 공유는 일정 화면에서 이미지나 글로 해요.")
                     .font(.caption).foregroundStyle(Theme.inkSecondary).frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(16)
@@ -159,7 +159,7 @@ struct TeamMemberEditor: View {
                               selection: $position, columns: 4, minHeight: 64)
                 Toggle("용병", isOn: $isGuest)
             } footer: {
-                Text("이름은 이 아이폰에만 저장돼. 공유 이미지에 들어가니 본인이 괜찮아하는 이름으로 적어줘.")
+                Text("이름은 이 아이폰에만 저장돼요. 공유 이미지에 들어가니 본인이 괜찮아하는 이름으로 적어 주세요.")
             }
             if let member {
                 Section {
@@ -168,7 +168,7 @@ struct TeamMemberEditor: View {
                         context.saveOrReport()
                         dismiss()
                     }
-                } footer: { Text("지난 일정의 참석·라인업 기록은 그대로 남아.") }
+                } footer: { Text("지난 일정의 참석·라인업 기록은 그대로 남아요.") }
             }
         }
         .navigationTitle(member == nil ? "팀원 추가" : "팀원")
@@ -233,7 +233,7 @@ struct TeamEventEditor: View {
             ToolbarItem(placement: .cancellationAction) { Button("닫기") { dismiss() } }
             ToolbarItem(placement: .confirmationAction) { Button("저장", action: save) }
         }
-        .confirmationDialog("이 일정을 지울까?", isPresented: $confirmingDelete, titleVisibility: .visible) {
+        .confirmationDialog("이 일정을 지울까요?", isPresented: $confirmingDelete, titleVisibility: .visible) {
             Button("지우기", role: .destructive) {
                 if let event { let ctx = context; dismiss(); DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { ctx.delete(event); ctx.saveOrReport() } }
             }

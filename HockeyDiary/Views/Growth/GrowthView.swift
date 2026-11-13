@@ -47,7 +47,7 @@ struct GrowthView: View {
                 NavigationLink { ConditionView() } label: {
                     Card(tint: Theme.iceBlue) {
                         CardHeader(title: "컨디션 흐름", systemImage: "waveform.path.ecg")
-                        Text("잔 시간, 안정 심박, 기분, 힘듦, 몸 상태를 날마다 이어서 봐. 볼 항목은 내가 골라.")
+                        Text("잔 시간, 안정 심박, 기분, 힘듦, 몸 상태를 날마다 이어서 봐요. 볼 항목은 내가 골라요.")
                             .font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     }
                 }
@@ -58,14 +58,14 @@ struct GrowthView: View {
                 NavigationLink { AISummaryView() } label: {
                     Card {
                         Label("AI로 돌아보기", systemImage: "sparkles").font(.headline).foregroundStyle(Theme.title)
-                        Text("켜야만 동작해. 아이폰 안에서 하키 기록만 요약해.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
+                        Text("켜야만 동작해요. 아이폰 안에서 하키 기록만 요약해요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     }
                 }
                 .buttonStyle(.plain)
                 NavigationLink { SeasonReportView() } label: {
                     Card(tint: Theme.cobalt) {
                         Label("시즌 리포트 만들기", systemImage: "photo.on.rectangle.angled").font(.headline).foregroundStyle(.white)
-                        Text("횟수와 기술만 담은 이미지를 만들어 저장하고 공유해.").font(.subheadline).foregroundStyle(.white.opacity(0.85))
+                        Text("횟수와 기술만 담은 이미지를 만들어 저장하고 공유해요.").font(.subheadline).foregroundStyle(.white.opacity(0.85))
                     }
                 }
                 .buttonStyle(.plain)
@@ -99,8 +99,8 @@ struct GrowthView: View {
     private var trendCard: some View {
         let t = trend
         return Card {
-            CardHeader(title: "늘고 있어?", systemImage: "chart.line.uptrend.xyaxis")
-            Picker("무엇을 볼까", selection: $metric) {
+            CardHeader(title: "늘고 있어요?", systemImage: "chart.line.uptrend.xyaxis")
+            Picker("무엇을 볼까요", selection: $metric) {
                 ForEach(TrendMetric.allCases, id: \.self) { Text($0.title).tag($0) }
             }
             .pickerStyle(.segmented)
@@ -110,7 +110,7 @@ struct GrowthView: View {
                 Text(period.longTitle).font(.subheadline).foregroundStyle(Theme.inkSecondary)
             }
             if t.total == 0 && (t.previousTotal ?? 0) == 0 {
-                EmptyHint(text: metric == .drills ? "이 기간엔 드릴 기록이 없어. 훈련 탭 드릴에서 세면 여기 쌓여." : "이 기간엔 기록이 없어.")
+                EmptyHint(text: metric == .drills ? "이 기간엔 드릴 기록이 없어요. 훈련 탭 드릴에서 세면 여기 쌓여요." : "이 기간엔 기록이 없어요.")
             } else {
                 Chart {
                     ForEach(Array(t.buckets.enumerated()), id: \.offset) { i, b in
@@ -185,11 +185,11 @@ struct GrowthView: View {
                     StatTile(title: "그대로", value: "\(change.same)", tint: Theme.title)
                     StatTile(title: "낮아짐", value: "\(change.worse)", tint: Theme.danger)
                 }
-                Text("기분은 내가 고른 값이야. 운동 덕분이라고 말하는 건 아니야.")
+                Text("기분은 내가 고른 값이에요. 운동 덕분이라고 말하는 건 아니에요.")
                     .font(.caption).foregroundStyle(Theme.inkSecondary)
             } else {
                 EmptyHint(text: change.sufficiency == .empty
-                          ? "운동 전후 기분을 둘 다 남긴 기록이 아직 없어."
+                          ? "운동 전후 기분을 둘 다 남긴 기록이 아직 없어요."
                           : change.sufficiency.message)
             }
             footnote(change.paired, note: "전후 기분이 모두 있는 활동만")
@@ -201,7 +201,7 @@ struct GrowthView: View {
     private var surfaceCard: some View {
         let bySurface = Insights.bySurface(samples)
         return Card {
-            CardHeader(title: "어디서 탔어?", systemImage: "snowflake")
+            CardHeader(title: "어디서 탔어요?", systemImage: "snowflake")
             if samples.isEmpty {
                 EmptyHint(text: Sufficiency.empty.message)
             } else {
@@ -221,7 +221,7 @@ struct GrowthView: View {
                         .frame(minHeight: 32)
                     }
                 }
-                Text("어디서 탔는지만 보여줘. 장소로 잘하고 못한 걸 따지지 않아.")
+                Text("어디서 탔는지만 보여 줘요. 장소로 잘하고 못한 걸 따지지 않아요.")
                     .font(.caption).foregroundStyle(Theme.inkSecondary)
             }
             footnote(samples.count)
@@ -243,7 +243,7 @@ struct GrowthView: View {
         return Card {
             CardHeader(title: "슛 차트", systemImage: "scope", trailing: shots.isEmpty ? nil : shotSummaryText(st))
             if shots.isEmpty {
-                EmptyHint(text: "경기 기록에서 슛 자리를 찍으면 여기에 쌓여. 어디서 쏘면 잘 들어가는지 보여줄게.", systemImage: "scope")
+                EmptyHint(text: "경기 기록에서 슛 자리를 찍으면 여기에 쌓여요. 어디서 쏘면 잘 들어가는지 보여 줄게요.", systemImage: "scope")
             } else {
                 ShotChartCanvas(shots: Array(shots.suffix(200)))
                     .accessibilityElement(children: .ignore)
@@ -260,7 +260,7 @@ struct GrowthView: View {
                             HStack {
                                 Text(z.title).font(.caption)
                                 Spacer()
-                                Text(line.shots >= 3 ? "\(line.goals)/\(line.shots) · \(Int(((line.rate ?? 0) * 100).rounded()))%" : "\(line.goals)/\(line.shots) · 더 모아보자")
+                                Text(line.shots >= 3 ? "\(line.goals)/\(line.shots) · \(Int(((line.rate ?? 0) * 100).rounded()))%" : "\(line.goals)/\(line.shots) · 더 모아 봐요")
                                     .font(.caption).foregroundStyle(Theme.inkSecondary)
                             }
                         }
@@ -269,7 +269,7 @@ struct GrowthView: View {
                 let byGame = Dictionary(grouping: allShots, by: \.sessionID)
                 let games = periodSessions.filter { byGame[$0.id] != nil }.prefix(5)
                 if !games.isEmpty {
-                    Text("어느 경기였어?").font(.caption.bold()).foregroundStyle(Theme.inkSecondary).padding(.top, 4)
+                    Text("어느 경기였어요?").font(.caption.bold()).foregroundStyle(Theme.inkSecondary).padding(.top, 4)
                     ForEach(Array(games), id: \.id) { g in
                         let marks = byGame[g.id] ?? []
                         NavigationLink { SessionDetailView(session: g) } label: {
@@ -284,7 +284,7 @@ struct GrowthView: View {
                         .buttonStyle(.plain)
                     }
                 }
-                Text("골로 찍은 표시만 세. 성공률은 골 ÷ 전체 슛이야.").font(.caption2).foregroundStyle(Theme.inkSecondary)
+                Text("골로 찍은 표시만 세요. 성공률은 골 ÷ 전체 슛이에요.").font(.caption2).foregroundStyle(Theme.inkSecondary)
             }
             footnote(shots.count)
         }
@@ -303,7 +303,7 @@ struct GrowthView: View {
                     StatTile(title: "세이브율", value: total.savePctText)
                 }
                 if games.count < 3 {
-                    Text("3경기부터 흐름을 보여줄게.").font(.caption).foregroundStyle(Theme.inkSecondary)
+                    Text("3경기부터 흐름을 보여 줄게요.").font(.caption).foregroundStyle(Theme.inkSecondary)
                 }
                 footnote(games.count, note: "골리로 뛴 경기만")
             }
@@ -324,7 +324,7 @@ struct GrowthView: View {
             CardHeader(title: "연습", systemImage: "figure.hockey",
                        trailing: logs.isEmpty ? nil : "연습한 날 \(DrillStats.practiceDays(logs.compactMap(\.entry)))일")
             if logs.isEmpty {
-                EmptyHint(text: "드릴을 세면서 연습하면 기술별 연습량이 여기 쌓여.", systemImage: "figure.hockey")
+                EmptyHint(text: "드릴을 세면서 연습하면 기술별 연습량이 여기 쌓여요.", systemImage: "figure.hockey")
             } else {
                 ForEach(by.keys.sorted { (by[$0]?.sessions ?? 0) > (by[$1]?.sessions ?? 0) }, id: \.self) { name in
                     if let line = by[name] {
@@ -351,7 +351,7 @@ struct GrowthView: View {
         return Card {
             CardHeader(title: "기술 성장", systemImage: "chart.line.uptrend.xyaxis")
             if used.isEmpty {
-                EmptyHint(text: "수업에서 배운 기술을 남기면 경기에서 써본 것까지 이어서 볼 수 있어.")
+                EmptyHint(text: "수업에서 배운 기술을 남기면 경기에서 써본 것까지 이어서 볼 수 있어요.")
             }
             ForEach(used) { skill in
                 NavigationLink { SkillDetailView(skill: skill) } label: {
@@ -471,7 +471,7 @@ struct SkillDetailView: View {
                         .frame(minHeight: 32)
                     }
                 }
-                Text("경기는 성공한 날이 앞, 그다음 시도 횟수 순이야.").font(.caption2).foregroundStyle(Theme.inkSecondary)
+                Text("경기는 성공한 날이 앞, 그다음 시도 횟수 순이에요.").font(.caption2).foregroundStyle(Theme.inkSecondary)
             }
         }
     }
@@ -492,7 +492,7 @@ struct SkillDetailView: View {
                         Text(skill.name).font(.title2.bold()).foregroundStyle(.white)
                         SkillInfoButton(name: skill.name, tint: .white)
                     }
-                    Text("처음보다 나아졌을까? 아래 숫자는 각각 다른 걸 세.")
+                    Text("처음보다 나아졌을까요? 아래 숫자는 각각 다른 걸 세요.")
                         .font(.subheadline).foregroundStyle(.white.opacity(0.85))
                 }
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
@@ -505,7 +505,7 @@ struct SkillDetailView: View {
                     Card {
                         Text("일부 성공 \(st.partials) · 어려움 \(st.difficulties) · 시도 횟수 합 \(st.attemptTotal)")
                             .font(.subheadline)
-                        Text("내가 매긴 결과야. 실제 슛 성공률과는 달라.")
+                        Text("내가 매긴 결과예요. 실제 슛 성공률과는 달라요.")
                             .font(.caption).foregroundStyle(Theme.inkSecondary)
                     }
                 }
@@ -539,7 +539,7 @@ struct SkillDetailView: View {
             case .attempted(let a, let s):
                 Image(systemName: "figure.hockey").foregroundStyle(Theme.accent).frame(width: 24)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("\(s.startsAt.dayTitle) \(s.type.title) · \(a.tried ? (a.outcome?.title ?? "써봤어") : "못 써봄")")
+                    Text("\(s.startsAt.dayTitle) \(s.type.title) · \(a.tried ? (a.outcome?.title ?? "써봤어요") : "못 써봄")")
                         .font(.subheadline.bold())
                     if !a.notes.isEmpty { Text(a.notes).font(.caption).foregroundStyle(Theme.inkSecondary) }
                 }

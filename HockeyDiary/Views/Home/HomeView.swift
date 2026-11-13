@@ -41,7 +41,7 @@ struct HomeView: View {
         ScrollView {
             VStack(spacing: 12) {
                 ScreenHeader(eyebrow: Date().formatted(.dateTime.weekday(.wide).month().day()).uppercased(),
-                             title: "오늘도, 빙판 위에서.", subtitle: "작은 기록이 나의 플레이를 바꿔.") {
+                             title: "오늘도, 빙판 위에서.", subtitle: "작은 기록이 나의 플레이를 바꿔요.") {
                     RoundIconButton(systemImage: "gearshape.fill", label: "설정") { showingSettings = true }
                 }
                 if health.openFailed || health.lastSaveFailed { storeWarning }
@@ -73,8 +73,8 @@ struct HomeView: View {
     private var levelCard: some View {
         if levelRaw.isEmpty {
             Card {
-                CardHeader(title: "내 하키 실력은 어느 정도야?", systemImage: "person.crop.circle.badge.questionmark")
-                Text("레벨에 맞춰 기록 입력을 간단하게, 또는 자세하게 맞춰줄게. 구력은 참고만 해. 설정에서 언제든 바꿔.")
+                CardHeader(title: "내 하키 실력은 어느 정도예요?", systemImage: "person.crop.circle.badge.questionmark")
+                Text("레벨에 맞춰 기록 입력을 간단하게, 또는 자세하게 맞춰 드릴게요. 구력은 참고만 하세요. 설정에서 언제든 바꿀 수 있어요.")
                     .font(.subheadline).foregroundStyle(Theme.inkSecondary)
                 HStack(spacing: 8) {
                     ForEach(PlayerLevel.allCases, id: \.rawValue) { l in
@@ -120,12 +120,12 @@ struct HomeView: View {
             Card(tint: p == .resting ? Theme.iceBlue : Theme.neonPink.opacity(0.12)) {
                 switch p {
                 case .resting:
-                    Label("쉬는 중이야", systemImage: "moon.zzz.fill").font(.headline).foregroundStyle(Theme.title)
-                    Text("연속 기록과 목표는 그대로 둘게. 돌아오면 이어서 세.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
-                    Button("다시 탈래") { restJSON = RestPrefs.toggled(restJSON) }.buttonStyle(.bordered)
+                    Label("쉬는 중이에요", systemImage: "moon.zzz.fill").font(.headline).foregroundStyle(Theme.title)
+                    Text("연속 기록과 목표는 그대로 둘게요. 돌아오면 이어서 세요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
+                    Button("다시 탈래요") { restJSON = RestPrefs.toggled(restJSON) }.buttonStyle(.bordered)
                 case .logEvent(let title):
-                    Label("\(title) 끝났지? 바로 남기자", systemImage: "pencil.and.list.clipboard").font(.headline).foregroundStyle(Theme.title)
-                    Text("시간이랑 장소는 팀 일정으로 채워둘게.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
+                    Label("\(title) 끝났죠? 바로 남겨요", systemImage: "pencil.and.list.clipboard").font(.headline).foregroundStyle(Theme.title)
+                    Text("시간이랑 장소는 팀 일정으로 채워 둘게요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     Button {
                         let kind = teamEvents.first { $0.title == title && $0.sessionID == nil }.flatMap { ActivityType(rawValue: $0.kindRaw) } ?? .regularGame
                         newEntry = .session(kind)
@@ -136,14 +136,14 @@ struct HomeView: View {
                     if let g = lastWithGoal?.nextGoal, !g.isEmpty {
                         Text("오늘 목표: \(g)").font(.subheadline).foregroundStyle(Theme.title)
                     } else {
-                        Text("오늘 해볼 거 하나 정해두면 좋아.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
+                        Text("오늘 해볼 거 하나 정해 두면 좋아요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     }
                 case .morningGoal(let goal):
                     Label("오늘 해볼 거", systemImage: "target").font(.headline).foregroundStyle(Theme.title)
                     Text(goal).font(.subheadline).foregroundStyle(Theme.title)
                 case .eveningJournal:
-                    Label("오늘 어땠어?", systemImage: "book.fill").font(.headline).foregroundStyle(Theme.title)
-                    Text("한 줄이면 돼. 내일의 나한테 남기는 거야.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
+                    Label("오늘 어땠어요?", systemImage: "book.fill").font(.headline).foregroundStyle(Theme.title)
+                    Text("한 줄이면 돼요. 내일의 나한테 남기는 거예요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     Button { newEntry = .journal(Date()) } label: { Text("일기 쓰기").frame(maxWidth: .infinity, minHeight: Theme.touch) }
                         .buttonStyle(PinkButtonStyle())
                 }
@@ -192,8 +192,8 @@ struct HomeView: View {
 
     private var storeWarning: some View {
         Card(tint: Theme.dangerSoft) {
-            Label(health.openFailed ? "기록을 불러오지 못했어. 지금 쓰는 건 앱을 끄면 사라져. 앱을 다시 켜봐."
-                                    : "방금 기록을 저장하지 못했어. 한 번 더 저장해줘.",
+            Label(health.openFailed ? "기록을 불러오지 못했어요. 지금 쓰는 건 앱을 끄면 사라져요. 앱을 다시 켜 보세요."
+                                    : "방금 기록을 저장하지 못했어요. 한 번 더 저장해 주세요.",
                   systemImage: "exclamationmark.triangle.fill")
                 .font(.subheadline)
                 .foregroundStyle(Theme.title)
@@ -263,7 +263,7 @@ struct HomeView: View {
                 Text("\(min(100, weekCount * 100 / goal))% 달성").font(.caption).foregroundStyle(Theme.inkSecondary)
             }
             ProgressView(value: Double(min(weekCount, goal)), total: Double(goal)).tint(weekCount >= goal ? Theme.success : Theme.cobalt)
-            Text(weekCount >= goal ? "이번 주 목표 달성! 더 타면 보너스야." : (weekCount == goal - 1 ? "한 번만 더 타면 주간 목표를 달성해." : "하키는 매주 꾸준히가 제일 어려워. 한 번부터."))
+            Text(weekCount >= goal ? "이번 주 목표 달성! 더 타면 보너스예요." : (weekCount == goal - 1 ? "한 번만 더 타면 주간 목표 달성이에요." : "하키는 매주 꾸준히가 제일 어려워요. 한 번부터요."))
                 .font(.caption).foregroundStyle(Theme.inkSecondary)
             if !todaySessions.isEmpty {
                 Divider()
@@ -288,11 +288,11 @@ struct HomeView: View {
             Text(Date().formatted(.dateTime.month().day().weekday(.wide)))
                 .font(.subheadline).foregroundStyle(.white.opacity(0.8))
             if todaySessions.isEmpty && todayJournal == nil {
-                Text("오늘은 아직 기록이 없어.").font(.title3.bold()).foregroundStyle(.white)
-                Text("수업 끝나고 10분 안에 남겨봐. 잊어버리기 전에.")
+                Text("오늘은 아직 기록이 없어요.").font(.title3.bold()).foregroundStyle(.white)
+                Text("수업 끝나고 10분 안에 남겨 보세요. 잊어버리기 전에요.")
                     .font(.subheadline).foregroundStyle(.white.opacity(0.85))
             } else {
-                Text(todaySessions.isEmpty ? "오늘은 하키 기록이 없어 · 일기 1개" : "오늘 하키 \(todaySessions.count)번\(todayJournal == nil ? "" : " · 일기 1개")")
+                Text(todaySessions.isEmpty ? "오늘은 하키 기록이 없어요 · 일기 1개" : "오늘 하키 \(todaySessions.count)번\(todayJournal == nil ? "" : " · 일기 1개")")
                     .font(.title3.bold()).foregroundStyle(.white)
                 ForEach(todaySessions) { s in
                     NavigationLink { SessionDetailView(session: s) } label: {
@@ -308,22 +308,22 @@ struct HomeView: View {
                 }
             }
             rings
-            Text("이번 주는 두 번 타면 원이 다 차.").font(.caption2).foregroundStyle(.white.opacity(0.7))
+            Text("이번 주는 두 번 타면 원이 다 차요.").font(.caption2).foregroundStyle(.white.opacity(0.7))
         }
     }
 
     private var quickButtons: some View {
         HStack(spacing: 8) {
-            QuickAction(title: "연습 기록", systemImage: "graduationcap.fill") { newEntry = .session(.lesson) }
-            QuickAction(title: "경기 리뷰", systemImage: "trophy.fill") { newEntry = .session(.regularGame) }
-            QuickAction(title: "하루 일기", systemImage: "book.fill") {
+            QuickAction(title: "연습 기록", systemImage: "graduationcap.fill", bubble: Theme.stickers[3]) { newEntry = .session(.lesson) }
+            QuickAction(title: "경기 리뷰", systemImage: "trophy.fill", bubble: Theme.stickers[1]) { newEntry = .session(.regularGame) }
+            QuickAction(title: "하루 일기", systemImage: "book.fill", bubble: Theme.stickers[0]) {
                 if let todayJournal {
                     editingJournal = todayJournal
                 } else {
                     newEntry = .journal(Date())
                 }
             }
-            QuickAction(title: "드릴 시작", systemImage: "bolt.fill") { newEntry = .practice }
+            QuickAction(title: "드릴 시작", systemImage: "bolt.fill", bubble: Theme.stickers[2]) { newEntry = .practice }
         }
         .sheet(item: $editingJournal) { j in NavigationStack { JournalEditorView(journal: j) } }
     }
@@ -355,7 +355,7 @@ struct HomeView: View {
                 CardHeader(title: "다음 목표", systemImage: "target", trailing: s.startsAt.dayTitle)
                 Text(s.nextGoal).font(.body).foregroundStyle(Theme.title)
                 Button { restJSON = RestPrefs.toggled(restJSON) } label: {
-                    Label("한동안 쉬어 (비시즌·부상)", systemImage: "moon.zzz").font(.caption)
+                    Label("한동안 쉬어요 (비시즌·부상)", systemImage: "moon.zzz").font(.caption)
                 }
                 .buttonStyle(.borderless).foregroundStyle(Theme.inkSecondary)
             }
@@ -382,20 +382,20 @@ struct HomeView: View {
         if skates.isEmpty {
             Card(tint: Theme.iceBlue) {
                 CardHeader(title: "장비 점검", systemImage: "shoeprints.fill")
-                Text("락커에 스케이트를 넣으면 연마하고 얼마나 탔는지 세어줄게.")
+                Text("락커에 스케이트를 넣으면 연마하고 얼마나 탔는지 세어 드릴게요.")
                     .font(.subheadline).foregroundStyle(Theme.inkSecondary)
             }
         } else if !due.isEmpty || !worn.isEmpty {
             Card(tint: Theme.iceBlue) {
-                CardHeader(title: "연마 점검해볼까?", systemImage: "wrench.and.screwdriver.fill")
+                CardHeader(title: "연마 점검해 볼까요?", systemImage: "wrench.and.screwdriver.fill")
                 ForEach(worn) { r in
                     Text("러너 \(r.name): \(r.lifeSummary). 날 교체를 생각해볼 때야.").font(.subheadline)
                 }
                 ForEach(due) { r in
-                    Text("러너 \(r.name): \(DiaryStore.sharpeningSummary(r, context: context)). 정해둔 만큼 탔어.")
+                    Text("러너 \(r.name): \(DiaryStore.sharpeningSummary(r, context: context)). 정해 둔 만큼 탔어요.")
                         .font(.subheadline)
                 }
-                Text("엣지가 밀리지 않으면 더 타도 돼. 기준은 락커에서 바꿀 수 있어.")
+                Text("엣지가 밀리지 않으면 더 타도 돼요. 기준은 락커에서 바꿀 수 있어요.")
                     .font(.caption).foregroundStyle(Theme.inkSecondary)
             }
         }
@@ -413,9 +413,9 @@ struct HomeView: View {
                     Text("\(next.title) · \(next.at.formatted(.dateTime.hour().minute()))\(next.rinkName.isEmpty ? "" : " · \(next.rinkName)")")
                         .font(.subheadline).foregroundStyle(Theme.title)
                 } else if teams.isEmpty {
-                    Text("팀 일정·참석·라인업을 정리하고 카톡에 올려봐.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
+                    Text("팀 일정·참석·라인업을 정리하고 카톡에 올려 보세요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                 } else {
-                    Text("다음 일정이 없어. 하나 넣어볼까?").font(.subheadline).foregroundStyle(Theme.inkSecondary)
+                    Text("다음 일정이 없어요. 하나 넣어 볼까요?").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                 }
             }
         }

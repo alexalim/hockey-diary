@@ -44,7 +44,7 @@ struct WeekWidget: Widget {
             WeekView(snap: entry.snapshot).containerBackground(for: .widget) { Color(.systemBackground) }
         }
         .configurationDisplayName("이번 주 하키")
-        .description("이번 주에 빙판에 선 날과 연속 주를 보여 줘.")
+        .description("이번 주에 빙판에 선 날과 연속 주를 보여 줘요.")
         .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular, .accessoryCircular])
     }
 }
@@ -67,7 +67,7 @@ struct WeekView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(snap.resting ? "쉬는 중" : "이번 주 \(snap.weekCount)회 · \(snap.streakWeeks)주 연속").font(.headline)
                 dayRow(size: 14)
-                Text(snap.monthLeft == 0 ? "이달 목표 달성!" : "이달 \(snap.monthLeft)번 남았어").font(.caption2)
+                Text(snap.monthLeft == 0 ? "이달 목표 달성!" : "이달 \(snap.monthLeft)번 남았어요").font(.caption2)
             }
         case .systemMedium:
             HStack(spacing: 14) {
@@ -88,7 +88,7 @@ struct WeekView: View {
                         Text("다음 경기 \(at.formatted(.dateTime.month(.defaultDigits).day().weekday(.abbreviated)))").font(.caption2).foregroundStyle(WColor.inkSecondary)
                         Text(t).font(.caption.bold()).foregroundStyle(WColor.deepNavy).lineLimit(1)
                     } else {
-                        Text("\(snap.points)점 모았어").font(.caption2).foregroundStyle(WColor.inkSecondary)
+                        Text("\(snap.points)점 모았어요").font(.caption2).foregroundStyle(WColor.inkSecondary)
                     }
                 }
             }
@@ -111,8 +111,8 @@ struct WeekView: View {
     }
 
     private var line: String {
-        if snap.resting { return "쉬는 중이야. 돌아오면 이어서." }
-        if snap.weekCount == 0 { return "이번 주 첫 빙판은 언제?" }
+        if snap.resting { return "쉬는 중이에요. 돌아오면 이어서 해요." }
+        if snap.weekCount == 0 { return "이번 주 첫 빙판은 언제예요?" }
         return "이번 주 \(snap.weekCount)회 · 이달 \(snap.monthLeft == 0 ? "목표 달성" : "\(snap.monthLeft)번 남음")"
     }
 

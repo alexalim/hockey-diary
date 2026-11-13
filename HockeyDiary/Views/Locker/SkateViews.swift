@@ -12,8 +12,8 @@ struct SkateListView: View {
             if skates.isEmpty {
                 Section {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("아직 스케이트가 없어.").font(.headline)
-                        Text("사진 없이도 등록돼. 여러 켤레를 넣고 주력 하나를 정해봐.")
+                        Text("아직 스케이트가 없어요.").font(.headline)
+                        Text("사진 없이도 등록돼요. 여러 켤레를 넣고 주력 하나를 정해 보세요.")
                             .font(.subheadline).foregroundStyle(Theme.inkSecondary)
                         Button("첫 스케이트 등록") { adding = true }
                             .buttonStyle(PinkButtonStyle())
@@ -192,7 +192,7 @@ struct SkateDetailView: View {
                     set: { skate.status = $0; if !$0.isActive { skate.isPrimary = false }; context.saveOrReport() }
                 ), columns: 4, minHeight: 64)
             } footer: {
-                Text("지우지 말고 '사용 종료'로 바꿔두면 지난 기록이 남아.")
+                Text("지우지 말고 '사용 종료'로 바꿔두면 지난 기록이 남아요.")
             }
 
             Section {
@@ -202,7 +202,7 @@ struct SkateDetailView: View {
                     }
                     Button("러너 떼기", role: .destructive) { DiaryStore.uninstall(current, context: context) }
                 } else {
-                    Text("장착된 러너가 없어.").foregroundStyle(Theme.inkSecondary)
+                    Text("장착된 러너가 없어요.").foregroundStyle(Theme.inkSecondary)
                 }
                 ForEach(swappable) { r in
                     Button {
@@ -218,7 +218,7 @@ struct SkateDetailView: View {
             } header: {
                 Text("러너(날)")
             } footer: {
-                Text("러너 하나는 부츠 하나에만 달 수 있어. 바꿔 달면 언제부터 언제까지 썼는지 남아.")
+                Text("러너 하나는 부츠 하나에만 달 수 있어요. 바꿔 달면 언제부터 언제까지 썼는지 남아요.")
             }
 
             if !history.isEmpty {
@@ -240,7 +240,7 @@ struct SkateDetailView: View {
         .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("고치기") { editing = true } } }
         .sheet(isPresented: $editing) { NavigationStack { SkateEditorView(skate: skate) } }
         .sheet(isPresented: $addingRunner) { NavigationStack { RunnerEditorView(runner: nil, installOn: skate) } }
-        .alert("러너를 달 수 없어", isPresented: Binding(get: { errorText != nil }, set: { if !$0 { errorText = nil } })) {
+        .alert("러너를 달 수 없어요", isPresented: Binding(get: { errorText != nil }, set: { if !$0 { errorText = nil } })) {
             Button("확인", role: .cancel) {}
         } message: {
             Text(errorText ?? "")
@@ -261,8 +261,8 @@ struct SkateDetailView: View {
 
     private func message(_ e: InstallError) -> String {
         switch e {
-        case .runnerAlreadyInstalled: return "이 러너는 그때 다른 부츠에 달려 있었어."
-        case .invalidRange: return "장착 기간이 맞지 않아."
+        case .runnerAlreadyInstalled: return "이 러너는 그때 다른 부츠에 달려 있었어요."
+        case .invalidRange: return "장착 기간이 맞지 않아요."
         }
     }
 }

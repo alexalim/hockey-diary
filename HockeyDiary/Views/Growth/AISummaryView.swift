@@ -24,7 +24,7 @@ struct AISummaryView: View {
                     Toggle("수업·경기 메모도 넣기", isOn: $includeNotes)
                 }
             } footer: {
-                Text("켜면 고른 기간의 하키 기록(활동, 배운·써본 기술\(includeNotes ? ", 수업·경기 메모" : ""))만 아이폰 안의 Apple Intelligence로 요약해. 일기와 건강 데이터는 안 넣어. 어디에도 안 보내.")
+                Text("켜면 고른 기간의 하키 기록(활동, 배운·써본 기술\(includeNotes ? ", 수업·경기 메모" : ""))만 아이폰 안의 Apple Intelligence로 요약해요. 일기와 건강 데이터는 안 넣어요. 어디에도 안 보내요.")
             }
             if enabled {
                 Section {
@@ -39,7 +39,7 @@ struct AISummaryView: View {
                             .frame(maxWidth: .infinity, minHeight: Theme.touch)
                     }
                     .disabled(working || facts.isEmpty)
-                    if facts.isEmpty { Text("이 기간엔 하키 기록이 없어.").font(.footnote).foregroundStyle(Theme.inkSecondary) }
+                    if facts.isEmpty { Text("이 기간엔 하키 기록이 없어요.").font(.footnote).foregroundStyle(Theme.inkSecondary) }
                 }
                 if let summary {
                     Section {
@@ -47,7 +47,7 @@ struct AISummaryView: View {
                     } header: {
                         Text("\(period.longTitle) 돌아보기")
                     } footer: {
-                        Text("AI가 쓴 거라 틀릴 수 있어. 기록 \(facts.count)건으로 만들었어. 실력이나 몸 상태를 판단하는 건 아니야.")
+                        Text("AI가 쓴 거라 틀릴 수 있어요. 기록 \(facts.count)건으로 만들었어요. 실력이나 몸 상태를 판단하는 건 아니에요.")
                     }
                 }
                 if let errorText { Section { Text(errorText).foregroundStyle(Theme.danger) } }
@@ -83,20 +83,20 @@ struct AISummaryView: View {
                         let session = LanguageModelSession(instructions: SummaryFacts.instructions)
                         summary = SummaryFacts.clean(try await session.respond(to: "사실:\n\(input)").content)
                     } catch {
-                        errorText = "요약을 만들지 못했어. 잠시 뒤 다시 해줘."
+                        errorText = "요약을 만들지 못했어요. 잠시 뒤 다시 해 주세요."
                     }
                 case .unavailable(let reason):
                     switch reason {
-                    case .deviceNotEligible: errorText = "이 아이폰은 Apple Intelligence가 안 돼서 AI 요약을 쓸 수 없어."
-                    case .appleIntelligenceNotEnabled: errorText = "설정 → Apple Intelligence 및 Siri에서 Apple Intelligence를 켜줘."
-                    case .modelNotReady: errorText = "AI 모델을 준비하는 중이야. 잠시 뒤 다시 해줘."
-                    @unknown default: errorText = "지금은 AI 요약을 쓸 수 없어."
+                    case .deviceNotEligible: errorText = "이 아이폰은 Apple Intelligence가 안 돼서 AI 요약을 쓸 수 없어요."
+                    case .appleIntelligenceNotEnabled: errorText = "설정 → Apple Intelligence 및 Siri에서 Apple Intelligence를 켜 주세요."
+                    case .modelNotReady: errorText = "AI 모델을 준비하는 중이에요. 잠시 뒤 다시 해 주세요."
+                    @unknown default: errorText = "지금은 AI 요약을 쓸 수 없어요."
                     }
                 }
                 return
             }
             #endif
-            errorText = "AI 요약은 iOS 26 이상이고 Apple Intelligence가 되는 아이폰에서만 돼."
+            errorText = "AI 요약은 iOS 26 이상이고 Apple Intelligence가 되는 아이폰에서만 돼요."
         }
     }
 }

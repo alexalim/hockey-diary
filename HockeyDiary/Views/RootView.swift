@@ -70,7 +70,7 @@ struct RootView: View {
         .onChange(of: scenePhase) { _, p in if p == .active { Task { await TeamReminder.reschedule(context) }; WidgetBridge.refresh(context) } }
         // 기록 시트를 닫으면 위젯 숫자를 바로 맞춘다.
         .onChange(of: newEntry == nil) { _, closed in if closed { WidgetBridge.refresh(context) } }
-        .confirmationDialog("무엇을 기록할까?", isPresented: $showingQuickMenu, titleVisibility: .visible) {
+        .confirmationDialog("무엇을 기록할까요?", isPresented: $showingQuickMenu, titleVisibility: .visible) {
             Button("수업 기록") { newEntry = .session(.lesson) }
             Button("자유 연습") { newEntry = .session(.freePractice) }
             Button("정규게임 리뷰") { newEntry = .session(.regularGame) }

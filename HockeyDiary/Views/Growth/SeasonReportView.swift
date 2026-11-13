@@ -60,14 +60,14 @@ struct SeasonReportView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                     .shadow(color: .black.opacity(0.15), radius: 8, y: 4)
                 if r.sessions == 0 {
-                    EmptyHint(text: "이 기간엔 활동 기록이 없어. 기록이 쌓이면 리포트가 채워져.")
+                    EmptyHint(text: "이 기간엔 활동 기록이 없어요. 기록이 쌓이면 리포트가 채워져요.")
                 } else if let image = render(r) {
                     ShareLink(item: image, preview: SharePreview("마하다 \(r.title) 리포트", image: image)) {
                         Label("이미지 저장·공유", systemImage: "square.and.arrow.up")
                     }
                     .buttonStyle(PinkButtonStyle())
                 }
-                Text("리포트에는 횟수, 시간, 기술 이름이 들어가. 일기는 '리포트 공유'를 켠 것만 한 줄 들어가. 메모, 잠, 심박, 사진, 위치는 안 넣어.")
+                Text("리포트에는 횟수, 시간, 기술 이름이 들어가요. 일기는 '리포트 공유'를 켠 것만 한 줄 들어가요. 메모, 잠, 심박, 사진, 위치는 안 넣어요.")
                     .font(.caption).foregroundStyle(Theme.inkSecondary)
             }
             .padding(16)
@@ -104,9 +104,9 @@ struct ReportCard: View {
                 Text(rangeText).font(.caption).opacity(0.8)
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text("\(report.sessions)").font(.system(size: 54, weight: .black, design: .rounded))
-                    Text("번 빙판에 섰어").font(.headline)
+                    Text("번 빙판에 섰어요").font(.headline)
                 }
-                Text("모두 \(minutesText(report.minutes)) 탔어").font(.title3.bold())
+                Text("모두 \(minutesText(report.minutes)) 탔어요").font(.title3.bold())
                 HStack(spacing: 8) {
                     stat("수업", report.byType[.lesson] ?? 0)
                     stat("경기", (report.byType[.miniGame] ?? 0) + (report.byType[.regularGame] ?? 0))

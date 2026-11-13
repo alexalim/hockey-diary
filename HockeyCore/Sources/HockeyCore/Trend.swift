@@ -77,7 +77,7 @@ public struct Trend: Equatable, Sendable {
         guard let p = previousTotal else { return nil }
         let d = total - p
         if p == 0 && total == 0 { return nil }
-        if d == 0 { return "앞선 \(periodTitle)와 같아." }
-        return "앞선 \(periodTitle)보다 \(abs(d))\(metric.unit) \(d > 0 ? "늘었어" : "줄었어")."
+        if d == 0 { return "앞선 \(periodTitle)와 같아요." }
+        return "앞선 \(periodTitle)보다 \(abs(d))\(metric.unit) \(d > 0 ? "늘었어요" : "줄었어요")."
     }
 }

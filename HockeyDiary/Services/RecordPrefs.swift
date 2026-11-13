@@ -25,7 +25,7 @@ enum RecordPrefs {
     static func editorNote(_ defaults: UserDefaults = .standard) -> String? {
         let m = resolved(defaults)
         guard m != .normal else { return nil }
-        return "지금은 '\(m.title)' 입력이야. 설정 > 기록 방식에서 바꿀 수 있어."
+        return "지금은 '\(m.title)' 입력이에요. 설정 > 기록 방식에서 바꿀 수 있어요."
     }
 
     /// 설정 화면 설명(설정은 합니다체).

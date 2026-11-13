@@ -300,7 +300,7 @@ final class RunnerSet {
 
     var lifeSummary: String {
         let months = RunnerLife.monthsUsed(since: firstUsedAt)
-        let used = months == 0 ? "쓴 지 한 달 안 됐어" : "쓴 지 \(months)개월"
+        let used = months == 0 ? "쓴 지 한 달 안 됐어요" : "쓴 지 \(months)개월"
         return "연마 \(sharpenings.count)번 · \(used)"
     }
 

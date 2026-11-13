@@ -20,7 +20,7 @@ final class Speaker {
 
     /// 5의 배수와 목표 도달 때만 말한다. 매번 말하면 시끄럽다.
     static func repLine(count: Int, target: Int) -> String? {
-        if count == target { return "\(count)번. 목표 다 했어" }
+        if count == target { return "\(count)번. 목표 다 했어요" }
         if count > 0 && count % 5 == 0 { return "\(count)번" }
         return nil
     }

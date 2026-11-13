@@ -27,14 +27,14 @@ struct TacticDetailView: View {
                     }
                 }
                 Card(tint: Theme.iceBlue) {
-                    CardHeader(title: "언제 써?", systemImage: "clock")
+                    CardHeader(title: "언제 써요?", systemImage: "clock")
                     Text(topic.when).font(.subheadline)
                 }
                 Card {
-                    CardHeader(title: "이렇게 연습해봐", systemImage: "figure.hockey")
+                    CardHeader(title: "이렇게 연습해 보세요", systemImage: "figure.hockey")
                     Text(topic.practice).font(.subheadline)
                 }
-                Text("전술은 정답이 없어. 팀마다 다르게 쓰니까 코치님 방식이 먼저야.")
+                Text("전술은 정답이 없어요. 팀마다 다르게 쓰니까 코치님 방식이 먼저예요.")
                     .font(.caption).foregroundStyle(Theme.inkSecondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -70,7 +70,7 @@ struct TacticPlay {
             ],
             puckFrom: CGPoint(x: 0.91, y: 0.4), puckTo: CGPoint(x: 0.91, y: 0.34),
             moves: [Move(kind: .skate, from: CGPoint(x: 0.62, y: 0.5), to: CGPoint(x: 0.85, y: 0.33))],
-            caption: "F1이 퍽 잡은 수비에게 붙고, F2·F3가 보드 쪽 패스 길을 막아."),
+            caption: "F1이 퍽 잡은 수비에게 붙고, F2·F3가 보드 쪽 패스 길을 막아요."),
         "forecheck-122": TacticPlay(
             players: [
                 Player(label: "F1", side: .us, from: CGPoint(x: 0.6, y: 0.5), to: CGPoint(x: 0.8, y: 0.42)),
@@ -81,7 +81,7 @@ struct TacticPlay {
             ],
             puckFrom: CGPoint(x: 0.9, y: 0.5), puckTo: CGPoint(x: 0.88, y: 0.3),
             moves: [Move(kind: .skate, from: CGPoint(x: 0.6, y: 0.5), to: CGPoint(x: 0.79, y: 0.43))],
-            caption: "F1이 한쪽으로 몰고, 나머지는 자리를 지키며 기다려."),
+            caption: "F1이 한쪽으로 몰고, 나머지는 자리를 지키며 기다려요."),
         "breakout": TacticPlay(
             players: [
                 Player(label: "D", side: .us, from: CGPoint(x: 0.12, y: 0.45), to: CGPoint(x: 0.05, y: 0.5)),
@@ -92,7 +92,7 @@ struct TacticPlay {
             puckFrom: CGPoint(x: 0.05, y: 0.55), puckTo: CGPoint(x: 0.22, y: 0.12),
             moves: [Move(kind: .pass, from: CGPoint(x: 0.05, y: 0.55), to: CGPoint(x: 0.22, y: 0.12)),
                     Move(kind: .skate, from: CGPoint(x: 0.22, y: 0.1), to: CGPoint(x: 0.42, y: 0.1))],
-            caption: "수비가 골대 뒤에서 퍽을 잡고, 보드 쪽 윙에게 줘서 빠져나가."),
+            caption: "수비가 골대 뒤에서 퍽을 잡고, 보드 쪽 윙에게 줘서 빠져나가요."),
         "board-house": TacticPlay(
             players: [
                 Player(label: "F1", side: .us, from: CGPoint(x: 0.74, y: 0.15), to: CGPoint(x: 0.82, y: 0.48)),
@@ -103,7 +103,7 @@ struct TacticPlay {
             moves: [Move(kind: .pass, from: CGPoint(x: 0.75, y: 0.12), to: CGPoint(x: 0.92, y: 0.22)),
                     Move(kind: .skate, from: CGPoint(x: 0.74, y: 0.15), to: CGPoint(x: 0.82, y: 0.48)),
                     Move(kind: .pass, from: CGPoint(x: 0.92, y: 0.25), to: CGPoint(x: 0.82, y: 0.48))],
-            caption: "보드를 맞혀 주고 바로 골대 앞으로 들어가. 다시 받아서 쏴."),
+            caption: "보드를 맞혀 주고 바로 골대 앞으로 들어가요. 다시 받아서 쏴요."),
         "cycle": TacticPlay(
             players: [
                 Player(label: "F1", side: .us, from: CGPoint(x: 0.88, y: 0.12), to: CGPoint(x: 0.78, y: 0.2)),
@@ -113,7 +113,7 @@ struct TacticPlay {
             puckFrom: CGPoint(x: 0.9, y: 0.1), puckTo: CGPoint(x: 0.91, y: 0.1),
             moves: [Move(kind: .skate, from: CGPoint(x: 0.88, y: 0.12), to: CGPoint(x: 0.78, y: 0.2)),
                     Move(kind: .skate, from: CGPoint(x: 0.76, y: 0.12), to: CGPoint(x: 0.9, y: 0.12))],
-            caption: "F1이 퍽을 남기고 위로 돌고, F2가 이어받아. 계속 돌리며 빈틈을 기다려."),
+            caption: "F1이 퍽을 남기고 위로 돌고, F2가 이어받아요. 계속 돌리며 빈틈을 기다려요."),
     ]
 }
 

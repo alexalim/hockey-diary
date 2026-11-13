@@ -57,10 +57,10 @@ struct SessionDetailView: View {
         .sheet(isPresented: $editing) {
             NavigationStack { SessionEditorView(session: session) }
         }
-        .confirmationDialog("이 기록을 지울까?", isPresented: $confirmingDelete, titleVisibility: .visible) {
+        .confirmationDialog("이 기록을 지울까요?", isPresented: $confirmingDelete, titleVisibility: .visible) {
             Button("지우기", role: .destructive) { delete() }
         } message: {
-            Text("이 기록의 기술과 장비 시간도 같이 지워져. 사진 앱 원본은 그대로야.")
+            Text("이 기록의 기술과 장비 시간도 같이 지워져요. 사진 앱 원본은 그대로예요.")
         }
     }
 
@@ -108,7 +108,7 @@ struct SessionDetailView: View {
                 }
             }
             if session.distanceMeters != nil {
-                Text("거리는 야외·폰드에서 GPS로 잰 총거리야. 어디를 지났는지는 남기지 않았어.").font(.caption2).foregroundStyle(Theme.inkSecondary)
+                Text("거리는 야외·폰드에서 GPS로 잰 총거리예요. 어디를 지났는지는 남기지 않았어요.").font(.caption2).foregroundStyle(Theme.inkSecondary)
             }
         }
     }
@@ -157,7 +157,7 @@ struct SessionDetailView: View {
                     HStack {
                         Text(a.skill?.name ?? "알 수 없는 기술").font(.subheadline.bold())
                         Spacer()
-                        Text(a.tried ? (a.outcome?.title ?? "써봤어") : "못 써봄")
+                        Text(a.tried ? (a.outcome?.title ?? "써봤어요") : "못 써봄")
                             .font(.caption.bold())
                             .padding(.horizontal, 8).padding(.vertical, 3)
                             .background(a.tried ? Theme.cobaltSoft : Theme.inkTertiary.opacity(0.12), in: Capsule())

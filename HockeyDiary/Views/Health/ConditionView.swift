@@ -37,7 +37,7 @@ struct ConditionView: View {
                 todayBodyCard
                 listCard
                 settingsCard
-                Text("여기 값은 내 기록이 어땠는지만 보여줘. 몸 상태를 진단하거나 운동을 하라·말라 하지 않아. 건강 값은 저장하지 않고, 리포트·공유·AI 요약에도 안 넣어.")
+                Text("여기 값은 내 기록이 어땠는지만 보여 줘요. 몸 상태를 진단하거나 운동을 하라·말라 하지 않아요. 건강 값은 저장하지 않고, 리포트·공유·AI 요약에도 안 넣어요.")
                     .font(.caption).foregroundStyle(Theme.inkSecondary)
             }
             .padding(16)
@@ -62,7 +62,7 @@ struct ConditionView: View {
         return Card {
             CardHeader(title: "흐름", systemImage: "waveform.path.ecg")
             if enabledMetrics.isEmpty {
-                EmptyHint(text: "아래에서 볼 항목을 하나 이상 켜줘.")
+                EmptyHint(text: "아래에서 볼 항목을 하나 이상 켜 주세요.")
             } else {
                 Picker("항목", selection: $metric) {
                     ForEach(enabledMetrics, id: \.self) { Text($0.title).tag($0) }
@@ -116,11 +116,11 @@ struct ConditionView: View {
     private var emptyReason: String {
         switch metric {
         case .sleep, .restingHR, .hrv:
-            if !healthOn { return "Apple 건강을 연결하면 보여줄 수 있어. 아래 '항목 고르기'에서 연결해." }
+            if !healthOn { return "Apple 건강을 연결하면 보여 줄 수 있어요. 아래 '항목 고르기'에서 연결해 주세요." }
             if let errorText { return errorText }
-            return "이 기간엔 건강 앱에 \(metric.title) 기록이 없어. 워치를 차고 자면 쌓여."
-        case .mood, .fatigue: return "기록을 남기면 쌓여. 운동 후 기분과 '얼마나 힘들었어?'를 적어줘."
-        case .body: return "홈이나 아래에서 '오늘 몸 상태'를 남기면 쌓여."
+            return "이 기간엔 건강 앱에 \(metric.title) 기록이 없어요. 워치를 차고 자면 쌓여요."
+        case .mood, .fatigue: return "기록을 남기면 쌓여요. 운동 후 기분과 '얼마나 힘들었어요?'를 적어 주세요."
+        case .body: return "홈이나 아래에서 '오늘 몸 상태'를 남기면 쌓여요."
         }
     }
 
@@ -149,7 +149,7 @@ struct ConditionView: View {
             Card(tint: Theme.warningSoft) {
                 CardHeader(title: "평소와 다른 점", systemImage: "exclamationmark.bubble")
                 ForEach(lines, id: \.self) { Text("• \($0)").font(.subheadline).foregroundStyle(Theme.title) }
-                Text("최근 7일을 그 앞 4주와 견준 거야. 왜 그런지는 내가 제일 잘 알아.").font(.caption).foregroundStyle(Theme.inkSecondary)
+                Text("최근 7일을 그 앞 4주와 견준 거예요. 왜 그런지는 내가 제일 잘 알아요.").font(.caption).foregroundStyle(Theme.inkSecondary)
             }
         }
     }
@@ -166,7 +166,7 @@ struct ConditionView: View {
                 BodyCheckRow(value: todayCheck?.value) { v in
                     BodyCheckStore.set(v, context: context)
                 }
-                Text("하키 안 탄 날도 남겨. 1은 많이 처짐, 5는 아주 좋음.").font(.caption).foregroundStyle(Theme.inkSecondary)
+                Text("하키 안 탄 날도 남겨 보세요. 1은 많이 처짐, 5는 아주 좋음.").font(.caption).foregroundStyle(Theme.inkSecondary)
             }
         }
     }
@@ -178,7 +178,7 @@ struct ConditionView: View {
         return Card {
             CardHeader(title: "날마다", systemImage: "list.bullet.rectangle")
             if recent.isEmpty {
-                EmptyHint(text: "아직 보여줄 날이 없어.")
+                EmptyHint(text: "아직 보여 줄 날이 없어요.")
             }
             ForEach(recent, id: \.day) { d in
                 VStack(alignment: .leading, spacing: 4) {
@@ -234,7 +234,7 @@ struct ConditionView: View {
         if on && [.restingHR, .hrv].contains(m) && healthOn {
             Task {
                 do { try await HealthService.shared.requestConditionAccess(); ConditionPrefs.set(m, true) }
-                catch { errorText = "권한 화면을 열지 못했어." }
+                catch { errorText = "권한 화면을 열지 못했어요." }
                 prefsTick += 1
             }
         } else {
@@ -346,13 +346,13 @@ struct CycleConsentToggle: View {
             if on {
                 Task {
                     do { try await HealthService.shared.requestCycleAccess(); cycleEnabled = true }
-                    catch { errorText = "권한 화면을 열지 못했어." }
+                    catch { errorText = "권한 화면을 열지 못했어요." }
                 }
             } else { cycleEnabled = false }
         })) {
             VStack(alignment: .leading, spacing: 2) {
                 Text("생리 기간 같이 보기").font(.subheadline)
-                Text("그래프에 옅은 띠로만 표시해. 리포트·공유·AI 요약엔 절대 안 넣어.").font(.caption2).foregroundStyle(Theme.inkSecondary)
+                Text("그래프에 옅은 띠로만 표시해요. 리포트·공유·AI 요약엔 절대 안 넣어요.").font(.caption2).foregroundStyle(Theme.inkSecondary)
             }
         }
         if let errorText { Text(errorText).font(.footnote).foregroundStyle(Theme.danger) }

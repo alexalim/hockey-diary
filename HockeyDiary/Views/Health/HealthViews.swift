@@ -9,9 +9,9 @@ struct HealthConnectView: View {
     @State private var errorText: String?
 
     private let items: [(String, String, String)] = [
-        ("bed.double.fill", "수면", "하키 전날 밤에 얼마나 잤는지 그날 기록 옆에 보여줄게."),
-        ("heart.fill", "심박수", "수업이나 경기 중 평균·최고 심박을 보여줄게."),
-        ("figure.hockey", "운동", "워치나 가민이 잰 운동을 내 기록과 맞춰볼게. 여러 기기로 재도 시간은 한 번만 세."),
+        ("bed.double.fill", "수면", "하키 전날 밤에 얼마나 잤는지 그날 기록 옆에 보여 줄게요."),
+        ("heart.fill", "심박수", "수업이나 경기 중 평균·최고 심박을 보여 줄게요."),
+        ("figure.hockey", "운동", "워치나 가민이 잰 운동을 내 기록과 맞춰 볼게요. 여러 기기로 재도 시간은 한 번만 세요."),
     ]
 
     var body: some View {
@@ -30,12 +30,12 @@ struct HealthConnectView: View {
             } header: {
                 Text("읽는 데이터")
             } footer: {
-                Text("아이폰 앱은 읽기만 해. 워치로 잰 하키 운동만 건강 앱에 저장돼. 읽은 값은 따로 저장하지 않고 볼 때마다 다시 가져와. 어디에도 안 보내.")
+                Text("아이폰 앱은 읽기만 해요. 워치로 잰 하키 운동만 건강 앱에 저장돼요. 읽은 값은 따로 저장하지 않고 볼 때마다 다시 가져와요. 어디에도 안 보내요.")
             }
 
             Section {
                 if !HealthService.shared.isAvailable {
-                    Text("이 기기에서는 Apple 건강을 쓸 수 없어.").foregroundStyle(Theme.inkSecondary)
+                    Text("이 기기에서는 Apple 건강을 쓸 수 없어요.").foregroundStyle(Theme.inkSecondary)
                 } else if enabled {
                     Label("연결됨", systemImage: "checkmark.circle.fill").foregroundStyle(Theme.accent)
                     Button("건강 데이터 그만 보기", role: .destructive) { enabled = false }
@@ -52,7 +52,7 @@ struct HealthConnectView: View {
                 }
                 if let errorText { Text(errorText).font(.footnote).foregroundStyle(Theme.danger) }
             } footer: {
-                Text("연결 안 해도 기록은 다 쓸 수 있어. 허용 항목은 설정 → 건강 → 데이터 접근 및 기기 → 마하다에서 바꿔.")
+                Text("연결 안 해도 기록은 다 쓸 수 있어요. 허용 항목은 설정 → 건강 → 데이터 접근 및 기기 → 마하다에서 바꿔요.")
             }
 
             if enabled {
@@ -65,12 +65,12 @@ struct HealthConnectView: View {
                 } header: {
                     Text("심박 구간 기준")
                 } footer: {
-                    Text("심박 구간(가볍게~전력)은 이 값 대비 %로 나눠. 보통 220에서 나이를 뺀 값 근처야. 운동 중 본 최고 심박이 더 높으면 그걸로 올려.")
+                    Text("심박 구간(가볍게~전력)은 이 값 대비 %로 나눠요. 보통 220에서 나이를 뺀 값 근처예요. 운동 중 본 최고 심박이 더 높으면 그걸로 올려 주세요.")
                 }
             }
 
             Section("가민을 쓰고 있다면") {
-                Text("Garmin Connect 앱 → 설정 → 연결된 앱 → Apple 건강에서 동기화를 켜줘. 그러면 가민의 수면·심박·운동이 여기로 들어와. 기기에 따라 일부만 올 수 있어. 가민 앱이 동기화한 뒤에 보여.")
+                Text("Garmin Connect 앱 → 설정 → 연결된 앱 → Apple 건강에서 동기화를 켜 주세요. 그러면 가민의 수면·심박·운동이 여기로 들어와요. 기기에 따라 일부만 올 수 있어요. 가민 앱이 동기화한 뒤에 보여요.")
                     .font(.subheadline).foregroundStyle(Theme.inkSecondary)
             }
         }
@@ -86,7 +86,7 @@ struct HealthConnectView: View {
                 try await HealthService.shared.requestAccess()
                 enabled = true
             } catch {
-                errorText = "권한 화면을 열지 못했어. 잠시 뒤 다시 해줘."
+                errorText = "권한 화면을 열지 못했어요. 잠시 뒤 다시 해 주세요."
             }
             requesting = false
         }
@@ -121,7 +121,7 @@ struct SessionHealthCard: View {
                             w.kilocalories.map { "\(Int($0)) kcal" })
                     }
                     if h.workouts.count > 1 {
-                        Text("같은 활동을 \(h.workouts.count)개 기기가 쟀어. 시간은 한 번만 세서 \(minutesText(h.mergedWorkoutMinutes))야.")
+                        Text("같은 활동을 \(h.workouts.count)개 기기가 쟀어요. 시간은 한 번만 세서 \(minutesText(h.mergedWorkoutMinutes))이에요.")
                             .font(.caption).foregroundStyle(Theme.inkSecondary)
                     }
                     if h.samples.count >= 6 {
@@ -130,12 +130,12 @@ struct SessionHealthCard: View {
                         if !spans.isEmpty {
                             row("arrow.left.arrow.right", "심박으로 짐작한 쉬프트 (실험)",
                                 "\(spans.count)번", "얼음 위 약 \(minutesText(ShiftDetector.onIceSeconds(spans) / 60))")
-                            Text("심박이 높게 이어진 구간을 얼음 위로 본 거야. 워치에서 직접 누른 쉬프트가 더 정확해.")
+                            Text("심박이 높게 이어진 구간을 얼음 위로 본 거예요. 워치에서 직접 누른 쉬프트가 더 정확해요.")
                                 .font(.caption2).foregroundStyle(Theme.inkSecondary)
                         }
                     }
                 } else {
-                    EmptyHint(text: "이 시간에 건강 앱 기록이 없어. 권한이 꺼져 있거나 아직 동기화 전일 수 있어.",
+                    EmptyHint(text: "이 시간에 건강 앱 기록이 없어요. 권한이 꺼져 있거나 아직 동기화 전일 수 있어요.",
                               systemImage: "heart.slash")
                 }
             }
@@ -166,7 +166,7 @@ struct SleepGrowthCard: View {
         Card(tint: Theme.iceBlue) {
             CardHeader(title: "수면·컨디션", systemImage: "bed.double.fill")
             if !enabled {
-                Text("Apple 건강을 연결하면 전날 밤 잠과 운동 후 기분을 같이 볼 수 있어.")
+                Text("Apple 건강을 연결하면 전날 밤 잠과 운동 후 기분을 같이 볼 수 있어요.")
                     .font(.subheadline).foregroundStyle(Theme.inkSecondary)
                 NavigationLink { HealthConnectView() } label: {
                     Label("Apple 건강 연결", systemImage: "heart.text.square").frame(minHeight: Theme.touch)
@@ -176,17 +176,17 @@ struct SleepGrowthCard: View {
             } else {
                 let comparison = SleepMoodComparison.compute(pairs)
                 if pairs.isEmpty {
-                    EmptyHint(text: "이 기간에는 건강 앱에 잠 기록이 없어.", systemImage: "bed.double")
+                    EmptyHint(text: "이 기간에는 건강 앱에 잠 기록이 없어요.", systemImage: "bed.double")
                 } else {
                     let avg = pairs.map(\.sleepMinutes).reduce(0, +) / pairs.count
                     Text("하키 전날 평균 수면 \(minutesText(avg))").font(.headline).foregroundStyle(Theme.title)
                     if let s = comparison.sentence {
                         Text(s).font(.subheadline)
                     } else {
-                        Text("7시간 넘게 잔 날과 덜 잔 날이 3번씩 쌓이면 비교해줄게.")
+                        Text("7시간 넘게 잔 날과 덜 잔 날이 3번씩 쌓이면 비교해 줄게요.")
                             .font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     }
-                    Text("기록을 나란히 놓은 거야. 잠 때문이라고 말하는 건 아니야.").font(.caption).foregroundStyle(Theme.inkSecondary)
+                    Text("기록을 나란히 놓은 거예요. 잠 때문이라고 말하는 건 아니에요.").font(.caption).foregroundStyle(Theme.inkSecondary)
                 }
                 Text(Insights.footnote(periodTitle: periodTitle, count: pairs.count, source: "잠: Apple 건강 · 기분: 직접 입력"))
                     .font(.caption2).foregroundStyle(Theme.inkSecondary)
@@ -218,7 +218,7 @@ struct CycleConsentSection: View {
                 if on {
                     Task {
                         do { try await HealthService.shared.requestCycleAccess(); cycleEnabled = true }
-                        catch { errorText = "권한 화면을 열지 못했어." }
+                        catch { errorText = "권한 화면을 열지 못했어요." }
                     }
                 } else { cycleEnabled = false }
             }))
@@ -226,7 +226,7 @@ struct CycleConsentSection: View {
         } header: {
             Text("생리 주기 (선택)")
         } footer: {
-            Text("켜면 건강 앱의 생리 기록을 읽어. 생리 기간에 탄 날의 피로도를 다른 날과 같이 보여줘. 운동을 하라 말라 하지 않아. 리포트, 공유, AI 요약에는 절대 안 넣어.")
+            Text("켜면 건강 앱의 생리 기록을 읽어요. 생리 기간에 탄 날의 피로도를 다른 날과 같이 보여 줘요. 운동을 하라 말라 하지 않아요. 리포트, 공유, AI 요약에는 절대 안 넣어요.")
         }
     }
 }
@@ -247,10 +247,10 @@ struct CycleGrowthCard: View {
                     if let s = c.sentence {
                         Text(s).font(.subheadline)
                     } else {
-                        Text("생리 기간과 다른 날의 피로도 기록이 3번씩 쌓이면 비교해줄게.")
+                        Text("생리 기간과 다른 날의 피로도 기록이 3번씩 쌓이면 비교해 줄게요.")
                             .font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     }
-                    Text("피로도는 내가 직접 고른 값이야. 운동 강도를 정해주지는 않아.").font(.caption).foregroundStyle(Theme.inkSecondary)
+                    Text("피로도는 내가 직접 고른 값이에요. 운동 강도를 정해 주지는 않아요.").font(.caption).foregroundStyle(Theme.inkSecondary)
                     Text(Insights.footnote(periodTitle: periodTitle, count: c.periodCount + c.otherCount, source: "생리: Apple 건강 · 피로도: 직접 입력"))
                         .font(.caption2).foregroundStyle(Theme.inkSecondary)
                 } else {

@@ -9,19 +9,35 @@ struct SessionSavedView: View {
     var onClose: () -> Void
 
     @State private var shareImage: Image?
+    @State private var popped = false
 
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                VStack(spacing: 8) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 56)).foregroundStyle(Theme.success)
-                        .symbolEffect(.bounce, value: true)
-                    Text("저장했어").font(.title2.bold()).foregroundStyle(Theme.title)
-                    Text("다이어리와 성장에 바로 들어갔어.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
+                VStack(spacing: 10) {
+                    ZStack {
+                        ConfettiBurst()
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 30, weight: .black))
+                            .foregroundStyle(.white)
+                            .frame(width: 72, height: 72)
+                            .background(Theme.neonPink, in: Circle())
+                            .overlay(Circle().stroke(Theme.achievementSoft, lineWidth: 6))
+                            .scaleEffect(popped ? 1 : 0.3)
+                            .rotationEffect(.degrees(popped ? 0 : -20))
+                            .animation(.spring(response: 0.45, dampingFraction: 0.5), value: popped)
+                    }
+                    .frame(height: 110)
+                    Text("저장했어요").font(.system(.title2, design: .rounded).bold()).foregroundStyle(Theme.title)
+                    Text("다이어리와 성장에 바로 들어갔어요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
+                    Sticker(text: "빙판 +1", index: 0)
+                        .rotationEffect(.degrees(-6))
+                        .scaleEffect(popped ? 1 : 0.5).opacity(popped ? 1 : 0)
+                        .animation(.spring(response: 0.4, dampingFraction: 0.55).delay(0.25), value: popped)
                 }
                 .padding(.top, 12)
                 .accessibilityElement(children: .combine)
+                .onAppear { popped = true }
 
                 SessionShareCard(session: session, bests: bests, shotCount: shotCount)
                     .frame(maxWidth: 360)
@@ -52,7 +68,7 @@ struct SessionSavedView: View {
                 }
                 Button { onClose() } label: { Text("닫기") }
                     .buttonStyle(PinkButtonStyle())
-                Text("공유 이미지엔 종류, 날짜, 시간, 기술 수, 골·슛 수만 들어가. 메모·장소·사진은 안 넣어.")
+                Text("공유 이미지엔 종류, 날짜, 시간, 기술 수, 골·슛 수만 들어가요. 메모·장소·사진은 안 넣어요.")
                     .font(.caption).foregroundStyle(Theme.inkSecondary)
             }
             .padding(16)
@@ -70,6 +86,32 @@ struct SessionSavedView: View {
             .frame(width: 360).environment(\.colorScheme, .light))
         r.scale = 3
         return r.uiImage.map { Image(uiImage: $0) }
+    }
+}
+
+/// 저장 순간의 색종이. 가운데서 퍼져 나가며 사라진다.
+struct ConfettiBurst: View {
+    @State private var fired = false
+    private let count = 14
+
+    var body: some View {
+        ZStack {
+            ForEach(0..<count, id: \.self) { i in
+                let angle = Double(i) / Double(count) * 2 * Double.pi
+                let radius: CGFloat = i % 2 == 0 ? 82 : 60
+                let colors = Theme.stickers + [Theme.neonPink, Theme.gold]
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(colors[i % colors.count])
+                    .frame(width: i % 3 == 0 ? 9 : 6, height: i % 3 == 0 ? 6 : 9)
+                    .rotationEffect(.degrees(fired ? Double(i) * 47 : 0))
+                    .offset(x: fired ? CGFloat(cos(angle)) * radius : 0, y: fired ? CGFloat(sin(angle)) * radius : 0)
+                    .opacity(fired ? 0 : 1)
+                    .animation(.easeOut(duration: 1.0).delay(0.15), value: fired)
+            }
+        }
+        .onAppear { fired = true }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 }
 

@@ -88,7 +88,7 @@ struct HomeEditView: View {
                     orderRaw = order.map(\.rawValue).joined(separator: ",")
                 }
             } footer: {
-                Text("끌어서 순서를 바꾸고, 끄면 홈에서 숨겨. 맨 위 오늘 카드와 바로가기는 그대로야.")
+                Text("끌어서 순서를 바꾸고, 끄면 홈에서 숨겨요. 맨 위 오늘 카드와 바로가기는 그대로예요.")
             }
             Section {
                 Button("처음대로") {

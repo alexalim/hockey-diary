@@ -249,7 +249,7 @@ final class InsightsTests: XCTestCase {
         XCTAssertEqual(change.paired, 3)
         XCTAssertEqual(change.improved, 2)
         XCTAssertEqual(change.same, 1)
-        XCTAssertEqual(change.sentence, "운동 전후 기분을 다 남긴 3번 중 2번은 운동하고 기분이 나아졌어.")
+        XCTAssertEqual(change.sentence, "운동 전후 기분을 다 남긴 3번 중 2번은 운동하고 기분이 나아졌어요.")
         XCTAssertFalse(change.sentence!.contains("때문"), "원인 단정 금지")
     }
 
@@ -322,7 +322,7 @@ final class SleepTests: XCTestCase {
         let c = SleepMoodComparison.compute(pairs)
         XCTAssertEqual(c.longCount, 3)
         XCTAssertEqual(c.shortCount, 3, "기분 없는 기록은 제외")
-        XCTAssertEqual(c.sentence, "최근 6번 기록이야. 7시간 넘게 잔 날(3번)이 덜 잔 날(3번)보다 운동 후 기분이 더 좋았어.")
+        XCTAssertEqual(c.sentence, "최근 6번 기록이에요. 7시간 넘게 잔 날(3번)이 덜 잔 날(3번)보다 운동 후 기분이 더 좋았어요.")
         XCTAssertFalse(c.sentence!.contains("때문"))
     }
 }
@@ -472,7 +472,7 @@ final class CycleTests: XCTestCase {
         let pairs: [(inPeriod: Bool, fatigue: Int?)] = [(true, 4), (true, 5), (true, 4), (false, 2), (false, 3), (false, 2), (false, nil)]
         let c = CycleFatigueComparison.compute(pairs)
         XCTAssertEqual(c.otherCount, 3)
-        XCTAssertEqual(c.sentence, "생리 기간에 탄 날(3번)이 다른 날(3번)보다 피로도가 더 높았어.")
+        XCTAssertEqual(c.sentence, "생리 기간에 탄 날(3번)이 다른 날(3번)보다 피로도가 더 높았어요.")
         for banned in ["하면 안", "쉬어", "때문"] { XCTAssertFalse(c.sentence!.contains(banned)) }
     }
 }
@@ -570,7 +570,7 @@ final class ShotTests: XCTestCase {
         XCTAssertEqual(st.total, 5); XCTAssertEqual(st.goals, 2); XCTAssertEqual(st.onTarget, 3)
         XCTAssertEqual(st.byZone[.slot]?.shots, 3); XCTAssertEqual(st.byZone[.slot]?.goals, 2)
         XCTAssertEqual(st.bestZone(), .slot)
-        XCTAssertEqual(st.sentence(), "슛 5번 중 2골. 슬롯에서 3번 쏴서 2골(67%)로 가장 잘 들어갔어.")
+        XCTAssertEqual(st.sentence(), "슛 5번 중 2골. 슬롯에서 3번 쏴서 2골(67%)로 가장 잘 들어갔어요.")
         XCTAssertNil(ShotStats.compute([shots[0]]).sentence(), "표본 부족이면 문장 없음")
         XCTAssertNil(ShotStats.compute([]).shootingRate, "슛이 없으면 0%가 아니라 없음")
     }
@@ -809,7 +809,7 @@ final class TrendTests: XCTestCase {
         XCTAssertEqual(t.buckets.first?.current, 1, "11/4 칸")
         XCTAssertEqual(t.total, 3)
         XCTAssertEqual(t.previousTotal, 2, "11/3, 11/1은 앞선 7일")
-        XCTAssertEqual(t.comparison(.sessions, periodTitle: "7일"), "앞선 7일보다 1회 늘었어.")
+        XCTAssertEqual(t.comparison(.sessions, periodTitle: "7일"), "앞선 7일보다 1회 늘었어요.")
     }
 
     func testMonthAndQuarterShapes() {
@@ -893,10 +893,10 @@ final class ConditionTests: XCTestCase {
         for o in 7...30 { days.append(ConditionDay(day: day(-o), sleepMinutes: 450, restingHR: 55, hrv: 60)) }
         for o in 0...6 { days.append(ConditionDay(day: day(-o), sleepMinutes: o < 3 ? 330 : 450, restingHR: 62, hrv: 40, fatigue: o < 3 ? 5 : nil)) }
         let lines = ConditionTrack.unusual(days, now: t(11, 12), calendar: cal)
-        XCTAssertEqual(lines, ["잠이 평소보다 1시간 넘게 적은 날이 최근 7일에 3번이야.",
-                               "안정 심박이 평소보다 7bpm 높아.",
-                               "심박 변이도가 평소보다 33% 낮아.",
-                               "최근 7일 '힘듦'이 높은 편이야(평균 5.0)."])
+        XCTAssertEqual(lines, ["잠이 평소보다 1시간 넘게 적은 날이 최근 7일에 3번이에요.",
+                               "안정 심박이 평소보다 7bpm 높아요.",
+                               "심박 변이도가 평소보다 33% 낮아요.",
+                               "최근 7일 '힘듦'이 높은 편이에요(평균 5.0)."])
     }
 
     func testMetricText() {

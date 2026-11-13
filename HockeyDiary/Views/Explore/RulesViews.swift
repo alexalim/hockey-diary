@@ -22,7 +22,7 @@ struct RuleDetailView: View {
                         RuleArt(id: topic.id)
                             .frame(height: RuleArt.detailHeight(topic.id))
                             .accessibilityHidden(true)
-                        Text("그림은 이해를 돕는 도식이야.").font(.caption2).foregroundStyle(Theme.inkSecondary)
+                        Text("그림은 이해를 돕는 도식이에요.").font(.caption2).foregroundStyle(Theme.inkSecondary)
                     }
                 }
                 if topic.id == "fouls" {
@@ -39,7 +39,7 @@ struct RuleDetailView: View {
                 }
                 }
                 quizCard
-                Text("\(RuleGuide.source)의 \(topic.reference) 내용을 보고 쉽게 풀어 썼어. 대회나 동호회마다 다를 수 있으니 꼭 확인해줘.")
+                Text("\(RuleGuide.source)의 \(topic.reference) 내용을 보고 쉽게 풀어 썼어요. 대회나 동호회마다 다를 수 있으니 꼭 확인해 주세요.")
                     .font(.caption).foregroundStyle(Theme.inkSecondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -74,7 +74,7 @@ struct RuleDetailView: View {
                 .disabled(picked != nil)
             }
             if let picked {
-                Text((picked == topic.quiz.answer ? "맞았어! " : "아쉬워. ") + topic.quiz.explain)
+                Text((picked == topic.quiz.answer ? "맞았어요! " : "아쉬워요. ") + topic.quiz.explain)
                     .font(.subheadline)
                 Button("다시 풀기") { self.picked = nil }.font(.footnote)
             }
@@ -104,48 +104,48 @@ struct RuleScene {
                       lines: [Line(x: 0.55, color: blue, label: "상대 블루라인")],
                       markers: [Marker(kind: .attacker, from: CGPoint(x: 0.3, y: 0.45), to: CGPoint(x: 0.78, y: 0.45)),
                                 Marker(kind: .puck, from: CGPoint(x: 0.18, y: 0.62), to: CGPoint(x: 0.62, y: 0.62))],
-                      caption: "선수가 퍽보다 먼저 블루라인을 넘었어 → 오프사이드"),
+                      caption: "선수가 퍽보다 먼저 블루라인을 넘었어요 → 오프사이드"),
             RuleScene(title: "정상 상황", ok: true,
                       lines: [Line(x: 0.55, color: blue, label: "상대 블루라인")],
                       markers: [Marker(kind: .attacker, from: CGPoint(x: 0.25, y: 0.45), to: CGPoint(x: 0.7, y: 0.45)),
                                 Marker(kind: .puck, from: CGPoint(x: 0.4, y: 0.62), to: CGPoint(x: 0.88, y: 0.62))],
-                      caption: "퍽이 먼저 라인을 넘고 선수가 따라 들어가 → 정상"),
+                      caption: "퍽이 먼저 라인을 넘고 선수가 따라 들어가요 → 정상"),
         ],
         "icing": [
             RuleScene(title: "잘못된 상황", ok: false,
                       lines: [Line(x: 0.5, color: red, label: "센터 레드라인"), Line(x: 0.93, color: red, label: "상대 골라인")],
                       markers: [Marker(kind: .attacker, from: CGPoint(x: 0.22, y: 0.4), to: CGPoint(x: 0.22, y: 0.4)),
                                 Marker(kind: .puck, from: CGPoint(x: 0.26, y: 0.55), to: CGPoint(x: 0.98, y: 0.55))],
-                      caption: "레드라인 뒤에서 친 퍽이 그대로 골라인을 넘어 → 아이싱"),
+                      caption: "레드라인 뒤에서 친 퍽이 그대로 골라인을 넘어요 → 아이싱"),
             RuleScene(title: "정상 상황", ok: true,
                       lines: [Line(x: 0.5, color: red, label: "센터 레드라인"), Line(x: 0.93, color: red, label: "상대 골라인")],
                       markers: [Marker(kind: .attacker, from: CGPoint(x: 0.3, y: 0.4), to: CGPoint(x: 0.56, y: 0.4)),
                                 Marker(kind: .puck, from: CGPoint(x: 0.34, y: 0.55), to: CGPoint(x: 0.98, y: 0.55))],
-                      caption: "퍽을 몰고 레드라인을 넘은 뒤 쳤어 → 아이싱 아님"),
+                      caption: "퍽을 몰고 레드라인을 넘은 뒤 쳤어요 → 아이싱 아님"),
         ],
         "faceoff": [
             RuleScene(title: "잘못된 상황", ok: false, lines: [],
                       markers: [Marker(kind: .attacker, from: CGPoint(x: 0.42, y: 0.6), to: CGPoint(x: 0.49, y: 0.6)),
                                 Marker(kind: .defender, from: CGPoint(x: 0.58, y: 0.6), to: CGPoint(x: 0.58, y: 0.6)),
                                 Marker(kind: .puck, from: CGPoint(x: 0.5, y: 0.1), to: CGPoint(x: 0.5, y: 0.35))],
-                      caption: "퍽이 떨어지기 전에 먼저 움직였어 → 위반, 센터가 바뀌어"),
+                      caption: "퍽이 떨어지기 전에 먼저 움직였어요 → 위반, 센터가 바뀌어요"),
             RuleScene(title: "정상 상황", ok: true, lines: [],
                       markers: [Marker(kind: .attacker, from: CGPoint(x: 0.42, y: 0.6), to: CGPoint(x: 0.42, y: 0.6)),
                                 Marker(kind: .defender, from: CGPoint(x: 0.58, y: 0.6), to: CGPoint(x: 0.58, y: 0.6)),
                                 Marker(kind: .puck, from: CGPoint(x: 0.5, y: 0.1), to: CGPoint(x: 0.5, y: 0.6))],
-                      caption: "퍽이 얼음에 닿은 다음에 다퉈 → 정상"),
+                      caption: "퍽이 얼음에 닿은 다음에 다퉈요 → 정상"),
         ],
         "linechange": [
             RuleScene(title: "잘못된 상황", ok: false, lines: [], bench: true,
                       markers: [Marker(kind: .defender, from: CGPoint(x: 0.5, y: 0.8), to: CGPoint(x: 0.5, y: 0.55)),
                                 Marker(kind: .attacker, from: CGPoint(x: 0.35, y: 0.12), to: CGPoint(x: 0.4, y: 0.62)),
                                 Marker(kind: .puck, from: CGPoint(x: 0.45, y: 0.7), to: CGPoint(x: 0.45, y: 0.7))],
-                      caption: "나가는 선수가 벤치에 닿기 전에 새 선수가 퍽을 건드렸어 → 투 매니 플레이어"),
+                      caption: "나가는 선수가 벤치에 닿기 전에 새 선수가 퍽을 건드렸어요 → 투 매니 플레이어"),
             RuleScene(title: "정상 상황", ok: true, lines: [], bench: true,
                       markers: [Marker(kind: .defender, from: CGPoint(x: 0.5, y: 0.8), to: CGPoint(x: 0.5, y: 0.14)),
                                 Marker(kind: .attacker, from: CGPoint(x: 0.35, y: 0.12), to: CGPoint(x: 0.4, y: 0.62)),
                                 Marker(kind: .puck, from: CGPoint(x: 0.45, y: 0.7), to: CGPoint(x: 0.45, y: 0.7))],
-                      caption: "나가는 선수가 벤치 1.5m 안에 들어온 뒤 새 선수가 뛰어 → 정상"),
+                      caption: "나가는 선수가 벤치 1.5m 안에 들어온 뒤 새 선수가 뛰어요 → 정상"),
         ],
     ]
 }
@@ -176,7 +176,7 @@ struct RuleSceneCard: View {
             if !reduceMotion {
                 Button { play() } label: { Label("다시 보기", systemImage: "play.circle") }.font(.footnote)
             }
-            Text("그림은 이해를 돕는 도식이야.").font(.caption2).foregroundStyle(Theme.inkSecondary)
+            Text("그림은 이해를 돕는 도식이에요.").font(.caption2).foregroundStyle(Theme.inkSecondary)
         }
         .onAppear(perform: play)
         .onChange(of: index) { _, _ in play() }

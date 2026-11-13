@@ -46,7 +46,7 @@ public enum SurfaceType: String, CaseIterable, Codable, Sendable {
         case .outdoorRink: return "인공으로 관리하는 야외 빙상장"
         case .pond: return "자연적으로 얼어붙은 수면 위 하키"
         case .other: return "어디에도 안 맞는 곳"
-        case .unknown: return "장소 없이 저장하고 나중에 고칠게"
+        case .unknown: return "장소 없이 저장하고 나중에 고칠게요"
         }
     }
 
@@ -115,11 +115,11 @@ public enum Mood {
 
     public static func label(_ value: Int) -> String {
         switch value {
-        case 1: return "많이 힘듦"
-        case 2: return "별로"
-        case 3: return "그냥 그래"
-        case 4: return "좋아"
-        case 5: return "최고"
+        case 1: return "많이 힘들어요"
+        case 2: return "별로예요"
+        case 3: return "그냥 그래요"
+        case 4: return "좋아요"
+        case 5: return "최고예요"
         default: return "없음"
         }
     }

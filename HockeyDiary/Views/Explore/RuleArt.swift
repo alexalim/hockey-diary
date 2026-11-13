@@ -189,7 +189,7 @@ struct PenaltyBarsArt: View {
             if !compact {
                 HStack(spacing: 6) {
                     Image(systemName: "person.fill").foregroundStyle(Theme.accent)
-                    Text("마이너는 상대가 골을 넣으면 바로 끝나. 메이저는 끝까지 채워야 해.").font(.caption2).foregroundStyle(Theme.inkSecondary)
+                    Text("마이너는 상대가 골을 넣으면 바로 끝나요. 메이저는 끝까지 채워야 해요.").font(.caption2).foregroundStyle(Theme.inkSecondary)
                 }
             }
         }

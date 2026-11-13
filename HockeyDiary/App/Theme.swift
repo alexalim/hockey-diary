@@ -194,12 +194,27 @@ struct EmptyHint: View {
     var text: String
     var systemImage: String = "snowflake"
 
+    /// 빈 상태는 종이 쪽지 한 장. 아이콘은 파스텔 동그라미, 왼쪽 위에 테이프.
     var body: some View {
-        HStack(spacing: 10) {
-            Image(systemName: systemImage).foregroundStyle(Theme.accent)
-            Text(text).font(.subheadline).foregroundStyle(Theme.inkSecondary)
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: systemImage)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(Theme.accent)
+                .frame(width: 34, height: 34)
+                .background(Theme.stickers[3], in: Circle())
+            Text(text).font(.system(.subheadline, design: .rounded)).foregroundStyle(Theme.paperInk)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        .background(Theme.paper, in: RoundedRectangle(cornerRadius: Theme.compactCorner, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: Theme.compactCorner, style: .continuous)
+            .stroke(Theme.paperDot, style: StrokeStyle(lineWidth: 1.2, dash: [4, 3])))
+        .overlay(alignment: .topLeading) {
+            RoundedRectangle(cornerRadius: 2).fill(Theme.tapePink.opacity(0.85))
+                .frame(width: 40, height: 12).rotationEffect(.degrees(-10)).offset(x: 10, y: -6)
+                .accessibilityHidden(true)
+        }
+        .padding(.top, 4)
         .accessibilityElement(children: .combine)
     }
 }
@@ -311,13 +326,15 @@ struct QuickAction: View {
     var title: String
     var systemImage: String
     var tint: Color = Theme.accent
+    /// 아이콘 뒤 동그라미. 홈 빠른 시작은 파스텔 스티커 색을 하나씩 받는다.
+    var bubble: Color = Theme.cobaltSoft
     var action: () -> Void
 
     var body: some View {
         Button(action: action) {
             VStack(spacing: 8) {
                 Image(systemName: systemImage).font(.system(size: 20, weight: .semibold)).foregroundStyle(tint)
-                    .frame(width: 44, height: 44).background(Theme.cobaltSoft, in: Circle())
+                    .frame(width: 44, height: 44).background(bubble, in: Circle())
                 Text(title).font(.system(size: 13, weight: .semibold)).foregroundStyle(Theme.title)
             }
             .frame(maxWidth: .infinity, minHeight: 96)

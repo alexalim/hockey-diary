@@ -56,7 +56,7 @@ enum DiaryStore {
     /// "연마한 지 5일 · 3번 탔어" 같은 한 줄 요약.
     static func sharpeningSummary(_ runner: RunnerSet, context: ModelContext) -> String {
         let n = sessionsSinceSharpening(runner, context: context)
-        let ride = n == 0 ? "아직 안 탔어" : "\(n)번 탔어"
+        let ride = n == 0 ? "아직 안 탔어요" : "\(n)번 탔어요"
         guard let last = runner.lastSharpening else { return "연마 기록 없음 · \(ride)" }
         let ago = ElapsedText.since(last.at)
         let head = ago == "오늘" ? "오늘 연마" : (ago == "어제" ? "어제 연마" : "연마한 지 \(ago.replacingOccurrences(of: " 전", with: ""))")

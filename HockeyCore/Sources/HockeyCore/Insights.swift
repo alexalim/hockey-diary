@@ -72,7 +72,7 @@ public enum Insights {
         /// 관찰된 사실만 말한다. 원인을 단정하지 않는다 (7.2).
         public var sentence: String? {
             guard sufficiency.isSufficient else { return nil }
-            return "운동 전후 기분을 다 남긴 \(paired)번 중 \(improved)번은 운동하고 기분이 나아졌어."
+            return "운동 전후 기분을 다 남긴 \(paired)번 중 \(improved)번은 운동하고 기분이 나아졌어요."
         }
     }
 

@@ -44,7 +44,7 @@ final class ScreenTourTests: XCTestCase {
             if lineView.waitForExistence(timeout: 3) {
                 lineView.tap(); lineView.typeText("스톱 왼쪽이 잘 됐어")
                 XCTAssertTrue(tapButton("저장"), "저장 버튼이 없다")
-                XCTAssertTrue(app.staticTexts["저장했어"].waitForExistence(timeout: 5), "저장 후 완료 화면이 안 나왔다")
+                XCTAssertTrue(app.staticTexts["저장했어요"].waitForExistence(timeout: 5), "저장 후 완료 화면이 안 나왔다")
                 snap("02h-saved")
                 tapButton("닫기")
             } else {

@@ -31,12 +31,11 @@ struct QuestCard: View {
                     Text("\(s.monthDone)").font(.system(size: 30, weight: .bold)).foregroundStyle(Theme.title)
                     Text("/ \(s.monthTarget)회 빙판").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     Spacer()
-                    Text(s.monthReached ? "이달 배지 획득!" : "\(s.monthTarget - s.monthDone)번 남았어").font(.caption).foregroundStyle(s.monthReached ? Theme.success : Theme.inkSecondary)
+                    Text(s.monthReached ? "이달 배지 획득!" : "\(s.monthTarget - s.monthDone)번 남았어요").font(.caption).foregroundStyle(s.monthReached ? Theme.success : Theme.inkSecondary)
                 }
-                ProgressView(value: Double(min(s.monthDone, s.monthTarget)), total: Double(max(s.monthTarget, 1)))
-                    .tint(s.monthReached ? Theme.success : Theme.neonPink)
+                StampRow(done: s.monthDone, target: s.monthTarget)
                 if resting {
-                    Text("쉬는 중이라 퀘스트도 쉬어. 돌아오면 이어서.").font(.caption).foregroundStyle(Theme.inkSecondary)
+                    Text("쉬는 중이라 퀘스트도 쉬어요. 돌아오면 이어서 해요.").font(.caption).foregroundStyle(Theme.inkSecondary)
                 } else {
                     Divider()
                     ForEach(s.weekly) { p in QuestRow(progress: p, compact: true) }
@@ -45,6 +44,46 @@ struct QuestCard: View {
         }
         .buttonStyle(.plain)
         .onAppear { QuestStore.awardBadges(context) }
+    }
+}
+
+/// 이달 빙판 도장판. 목표가 10회 이하면 도장 칸, 넘으면 진행 바.
+struct StampRow: View {
+    let done: Int
+    let target: Int
+    var onDark = false
+    @State private var shown = false
+
+    var body: some View {
+        if target <= 10 {
+            HStack(spacing: 8) {
+                ForEach(0..<max(target, 1), id: \.self) { i in
+                    let filled = i < done
+                    ZStack {
+                        Circle()
+                            .fill(filled ? (onDark ? Color.white : Theme.stickers[i % Theme.stickers.count]) : Color.clear)
+                        Circle()
+                            .stroke(filled ? Color.clear : (onDark ? Color.white.opacity(0.5) : Theme.paperDot), style: StrokeStyle(lineWidth: 1.5, dash: [3, 3]))
+                        if filled {
+                            Image(systemName: "figure.hockey")
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundStyle(onDark ? Theme.cobalt : Theme.paperInk)
+                        }
+                    }
+                    .frame(width: 30, height: 30)
+                    .rotationEffect(.degrees(filled ? Double((i % 3) - 1) * 8 : 0))
+                    .scaleEffect(filled && !shown ? 0.4 : 1)
+                    .animation(.spring(response: 0.35, dampingFraction: 0.5).delay(Double(i) * 0.05), value: shown)
+                }
+                Spacer(minLength: 0)
+            }
+            .onAppear { shown = true }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("이달 빙판 \(done) / \(target)회")
+        } else {
+            ProgressView(value: Double(min(done, target)), total: Double(max(target, 1)))
+                .tint(onDark ? .white : (done >= target ? Theme.success : Theme.neonPink))
+        }
     }
 }
 
@@ -96,10 +135,10 @@ struct QuestView: View {
                 SectionHeader(title: "이번 주 퀘스트", trailing: weekText(s.week))
                 Card {
                     if RestPrefs.isResting(restJSON) {
-                        EmptyHint(text: "쉬는 중이라 퀘스트도 쉬어. 쉬는 동안은 못 채워도 아무 일 없어.", systemImage: "moon.zzz.fill")
+                        EmptyHint(text: "쉬는 중이라 퀘스트도 쉬어요. 쉬는 동안은 못 채워도 아무 일 없어요.", systemImage: "moon.zzz.fill")
                     }
                     ForEach(s.weekly) { p in QuestRow(progress: p) }
-                    Text("월요일마다 새 퀘스트 3개가 와. 하나 끝낼 때마다 \(Quest.pointsPerQuest)점. 못 채운 주는 그냥 지나가.")
+                    Text("월요일마다 새 퀘스트 3개가 와요. 하나 끝낼 때마다 \(Quest.pointsPerQuest)점. 못 채운 주는 그냥 지나가요.")
                         .font(.caption).foregroundStyle(Theme.inkSecondary)
                 }
                 SectionHeader(title: "받은 배지")
@@ -123,9 +162,9 @@ struct QuestView: View {
                     .padding(.horizontal, 8).padding(.vertical, 4).background(.white.opacity(0.18), in: Capsule())
             }
             Text("이달 빙판 \(s.monthDone) / \(s.monthTarget)회").font(.title2.bold()).foregroundStyle(.white)
-            ProgressView(value: Double(min(s.monthDone, s.monthTarget)), total: Double(max(s.monthTarget, 1))).tint(.white)
-            Text(s.monthReached ? "목표 달성! \(s.month.start.formatted(.dateTime.month())) 배지를 받았어. 락커 문에 붙여봐."
-                                : "\(s.monthTarget - s.monthDone)번 더 타면 \(s.month.start.formatted(.dateTime.month())) 배지야.")
+            StampRow(done: s.monthDone, target: s.monthTarget, onDark: true)
+            Text(s.monthReached ? "목표 달성! \(s.month.start.formatted(.dateTime.month())) 배지를 받았어요. 락커 문에 붙여 보세요."
+                                : "\(s.monthTarget - s.monthDone)번 더 타면 \(s.month.start.formatted(.dateTime.month())) 배지예요.")
                 .font(.subheadline).foregroundStyle(.white.opacity(0.9))
         }
         .padding(16)
@@ -141,7 +180,7 @@ struct QuestView: View {
             if targetOverride > 0 {
                 Button("레벨 기본값(\(Quest.monthlyTarget(level: level))회)으로") { targetOverride = 0 }.font(.subheadline)
             } else {
-                Text(level == nil ? "레벨을 정하면 목표가 거기에 맞춰져. 지금은 4회." : "\(level!.title)은 한 달 \(s.monthTarget)회가 기본이야. 바꿔도 돼.")
+                Text(level == nil ? "레벨을 정하면 목표가 거기에 맞춰져요. 지금은 4회예요." : "\(level!.title)은 한 달 \(s.monthTarget)회가 기본이에요. 바꿔도 돼요.")
                     .font(.caption).foregroundStyle(Theme.inkSecondary)
             }
         }
@@ -151,7 +190,7 @@ struct QuestView: View {
         let badges = earned.filter { $0.stickerKey.hasPrefix("badge-") }.sorted { $0.stickerKey > $1.stickerKey }
         return Card {
             if badges.isEmpty {
-                EmptyHint(text: "이달 목표를 채우면 첫 배지를 받아. 받은 배지는 락커 문에 붙일 수 있어.", systemImage: "medal.fill")
+                EmptyHint(text: "이달 목표를 채우면 첫 배지를 받아요. 받은 배지는 락커 문에 붙일 수 있어요.", systemImage: "medal.fill")
             } else {
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 4), spacing: 12) {
                     ForEach(badges, id: \.stickerKey) { b in
@@ -161,7 +200,7 @@ struct QuestView: View {
                         }
                     }
                 }
-                Text("배지는 락커 꾸미기의 성취 스티커에도 있어.").font(.caption).foregroundStyle(Theme.inkSecondary)
+                Text("배지는 락커 꾸미기의 성취 스티커에도 있어요.").font(.caption).foregroundStyle(Theme.inkSecondary)
             }
         }
     }

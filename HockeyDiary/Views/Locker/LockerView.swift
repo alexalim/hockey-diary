@@ -48,7 +48,7 @@ struct LockerView: View {
                             .onTapGesture(perform: toggle)
                             .accessibilityElement(children: .ignore)
                             .accessibilityLabel(doorLabel)
-                            .accessibilityHint("두 번 탭하면 문이 열려")
+                            .accessibilityHint("두 번 탭하면 문이 열려요")
                             .accessibilityAddTraits(.isButton)
                     }
                     .contentShape(Rectangle())
@@ -164,10 +164,10 @@ struct LockerView: View {
 
     private var earnedBanner: some View {
         Card(tint: Theme.successSoft) {
-            Label("새 스티커를 받았어!", systemImage: "gift.fill").font(.headline).foregroundStyle(Theme.title)
+            Label("새 스티커를 받았어요!", systemImage: "gift.fill").font(.headline).foregroundStyle(Theme.title)
             Text(newStickers.compactMap { StickerCatalog.def($0)?.title }.joined(separator: " · "))
                 .font(.subheadline)
-            Text("내 기록으로 받은 스티커야. 꾸미기에서 문에 붙여봐.")
+            Text("내 기록으로 받은 스티커예요. 꾸미기에서 문에 붙여 보세요.")
                 .font(.caption).foregroundStyle(Theme.inkSecondary)
         }
     }
@@ -375,11 +375,11 @@ struct LockerCustomizeView: View {
                 .frame(height: 380)
                 .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel("락커 문 미리보기, 스티커 \(placements.count)개. 아래 목록에서도 고칠 수 있어.")
+                .accessibilityLabel("락커 문 미리보기, 스티커 \(placements.count)개. 아래 목록에서도 고칠 수 있어요.")
                 if let item = selectedItem { selectionTools(item) }
                 Button { showingLibrary = true } label: { Label("스티커 붙이기", systemImage: "plus.circle.fill") }
             } footer: {
-                Text("스티커를 끌어서 옮겨봐. 두 손가락으로 키우고 돌릴 수도 있어. 바꾸면 바로 저장돼.")
+                Text("스티커를 끌어서 옮겨 보세요. 두 손가락으로 키우고 돌릴 수도 있어요. 바꾸면 바로 저장돼요.")
             }
 
             Section("번호판·이름표") {
@@ -401,7 +401,7 @@ struct LockerCustomizeView: View {
                         set: { profile.nameplate = String($0.prefix(14)); context.saveOrReport() }))
                         .multilineTextAlignment(.trailing)
                 }
-                Text("꾸미기용 번호야. 링크장 사물함 예약과는 상관없어.").font(.caption).foregroundStyle(Theme.inkSecondary)
+                Text("꾸미기용 번호예요. 링크장 사물함 예약과는 상관없어요.").font(.caption).foregroundStyle(Theme.inkSecondary)
             }
 
             Section("문 색") {
@@ -448,7 +448,7 @@ struct LockerCustomizeView: View {
                 } header: {
                     Text("붙인 스티커 (위가 맨 앞)")
                 } footer: {
-                    Text("목록에서 고른 뒤 위 버튼으로 순서·크기·각도를 바꿔도 돼. 왼쪽으로 밀면 떼져.")
+                    Text("목록에서 고른 뒤 위 버튼으로 순서·크기·각도를 바꿔도 돼요. 왼쪽으로 밀면 떼져요.")
                 }
             }
         }
@@ -458,14 +458,14 @@ struct LockerCustomizeView: View {
         .sheet(isPresented: $showingLibrary) {
             NavigationStack { StickerLibraryView { key, photo in add(key, photo: photo) } }
         }
-        .confirmationDialog("붙인 스티커를 모두 뗄까?", isPresented: $confirmingReset, titleVisibility: .visible) {
+        .confirmationDialog("붙인 스티커를 모두 뗄까요?", isPresented: $confirmingReset, titleVisibility: .visible) {
             Button("모두 떼기", role: .destructive) {
                 for p in placements { context.delete(p) }
                 selected = nil
                 context.saveOrReport()
             }
         } message: {
-            Text("받은 스티커는 그대로 남아. 다시 붙일 수 있어.")
+            Text("받은 스티커는 그대로 남아요. 다시 붙일 수 있어요.")
         }
     }
 
@@ -619,7 +619,7 @@ struct StickerLibraryView: View {
                     if let d = StickerCatalog.def(e.stickerKey) { pickButton(d, locked: false) }
                 }
             }
-            Text("첫 수업, 첫 경기, 첫 골처럼 기록을 남기면 받아. 잠긴 건 기록이 쌓이면 열려. 이달 퀘스트를 채우면 그달 배지도 생겨.")
+            Text("첫 수업, 첫 경기, 첫 골처럼 기록을 남기면 받아요. 잠긴 건 기록이 쌓이면 열려요. 이달 퀘스트를 채우면 그달 배지도 생겨요.")
                 .font(.caption).foregroundStyle(Theme.inkSecondary)
         }
     }
@@ -627,7 +627,7 @@ struct StickerLibraryView: View {
     private var photoSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("내 사진 스티커").font(.headline).foregroundStyle(Theme.title)
-            Text("다른 사람 얼굴이나 팀 로고는 허락받은 것만 붙여줘. 사진 스티커는 이 아이폰에만 있어.")
+            Text("다른 사람 얼굴이나 팀 로고는 허락받은 것만 붙여 주세요. 사진 스티커는 이 아이폰에만 있어요.")
                 .font(.caption).foregroundStyle(Theme.inkSecondary)
             PhotosPicker(selection: $photoItem, matching: .images) {
                 Label("사진 고르기", systemImage: "photo.badge.plus").frame(maxWidth: .infinity, minHeight: Theme.touch)
@@ -666,7 +666,7 @@ struct GearListView: View {
                 Section(kind.title) {
                     let items = all.filter { $0.kind == kind }
                     if items.isEmpty {
-                        Text("아직 없어.").foregroundStyle(Theme.inkSecondary)
+                        Text("아직 없어요.").foregroundStyle(Theme.inkSecondary)
                     }
                     ForEach(items) { g in
                         NavigationLink { GearEditorView(kind: kind, item: g) } label: {
@@ -727,7 +727,7 @@ struct GearEditorView: View {
             }
             Section("메모") { TextField("메모", text: $memo, axis: .vertical) }
             if item != nil {
-                Section { Text("지우지 말고 '사용 종료'로 바꿔두면 기록이 남아.").font(.caption).foregroundStyle(Theme.inkSecondary) }
+                Section { Text("지우지 말고 '사용 종료'로 바꿔두면 기록이 남아요.").font(.caption).foregroundStyle(Theme.inkSecondary) }
             }
         }
         .navigationTitle(item == nil ? "\(kind.title) 추가" : kind.title)

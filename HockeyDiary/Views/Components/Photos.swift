@@ -37,7 +37,7 @@ struct PhotoPickerRow: View {
                     .accessibilityLabel("사진 추가")
                 }
             }
-            Text("앱에 복사해 둬. 여기서 지워도 사진 앱 원본은 그대로야.")
+            Text("앱에 복사해 둬요. 여기서 지워도 사진 앱 원본은 그대로예요.")
                 .font(.caption2).foregroundStyle(Theme.inkSecondary)
         }
         .onChange(of: items) { _, newItems in

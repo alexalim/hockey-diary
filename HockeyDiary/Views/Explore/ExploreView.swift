@@ -8,7 +8,7 @@ struct ExploreView: View {
             VStack(spacing: 12) {
                 Card(tint: Theme.cobalt) {
                     Text("규칙·전술").font(.title3.bold()).foregroundStyle(.white)
-                    Text("헷갈리는 규칙과 전술을 그림으로 익혀봐. 경기에서 겪은 상황을 여기서 다시 봐.")
+                    Text("헷갈리는 규칙과 전술을 그림으로 익혀 보세요. 경기에서 겪은 상황을 여기서 다시 보세요.")
                         .font(.subheadline).foregroundStyle(.white.opacity(0.85))
                 }
                 Card {
@@ -33,7 +33,7 @@ struct ExploreView: View {
                             .buttonStyle(.plain)
                         }
                     }
-                    Text("\(RuleGuide.source)을 보고 쉽게 풀어 썼어. 대회나 동호회마다 다를 수 있으니 꼭 확인해줘.")
+                    Text("\(RuleGuide.source)을 보고 쉽게 풀어 썼어요. 대회나 동호회마다 다를 수 있으니 꼭 확인해 주세요.")
                         .font(.caption).foregroundStyle(Theme.inkSecondary)
                 }
                 Card {

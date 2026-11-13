@@ -39,7 +39,7 @@ struct RinkNameField: View {
                     suggestion(c.title, c.subtitle, icon: "mappin.circle") { pick(c) }
                 }
                 if !text.isEmpty && search.results.isEmpty && localMatches.isEmpty {
-                    Text(search.failed ? "지금은 지도 검색이 안 돼. 이름만 적어도 저장돼." : "찾는 중이거나 결과가 없어. 그냥 적어도 저장돼.")
+                    Text(search.failed ? "지금은 지도 검색이 안 돼요. 이름만 적어도 저장돼요." : "찾는 중이거나 결과가 없어요. 그냥 적어도 저장돼요.")
                         .font(.caption).foregroundStyle(Theme.inkSecondary)
                 }
             }
@@ -115,7 +115,7 @@ struct RinkFinderView: View {
                                 selection: Binding(get: { browseQuery }, set: { browseQuery = $0; Task { await loadBrowse() } }),
                                 columns: 3, minHeight: 52)
                 } footer: {
-                    Text("핑크는 내 링크장, 파랑은 찾은 곳이야.")
+                    Text("핑크는 내 링크장, 파랑은 찾은 곳이에요.")
                 }
             }
 
@@ -124,8 +124,8 @@ struct RinkFinderView: View {
                     if finding && found.isEmpty {
                         HStack { ProgressView(); Text("찾는 중…").foregroundStyle(Theme.inkSecondary) }
                     } else if found.isEmpty {
-                        Text(search.failed ? "앱에 담긴 목록엔 없고, 지금은 지도 검색도 안 돼. 인터넷 연결을 확인해줘."
-                             : "'\(query)'로는 못 찾았어. 링크장 이름이나 구·동 이름으로 다시 찾아보거나 직접 추가해봐.")
+                        Text(search.failed ? "앱에 담긴 목록엔 없고, 지금은 지도 검색도 안 돼요. 인터넷 연결을 확인해 주세요."
+                             : "'\(query)'로는 못 찾았어요. 링크장 이름이나 구·동 이름으로 다시 찾아보거나 직접 추가해 보세요.")
                             .font(.subheadline).foregroundStyle(Theme.inkSecondary)
                         otherMapLinks(for: query)
                         Button { addManually = true } label: { Label("링크장 직접 추가", systemImage: "plus.circle") }
@@ -139,7 +139,7 @@ struct RinkFinderView: View {
                 } header: {
                     Text("'\(query)' 검색 결과")
                 } footer: {
-                    Text("동네나 역 이름만 쳐도 찾아줘. 전국 실내 링크장 목록이 앱에 들어 있어.")
+                    Text("동네나 역 이름만 쳐도 찾아 줘요. 전국 실내 링크장 목록이 앱에 들어 있어요.")
                 }
             }
 
@@ -154,7 +154,7 @@ struct RinkFinderView: View {
                 } header: {
                     Text("내 링크장")
                 } footer: {
-                    Text("왼쪽으로 밀면 뺄 수 있어. 기록에 적힌 링크장 이름은 그대로 남아.")
+                    Text("왼쪽으로 밀면 뺄 수 있어요. 기록에 적힌 링크장 이름은 그대로 남아요.")
                 }
             }
 
@@ -163,7 +163,7 @@ struct RinkFinderView: View {
                     if browsing && browse.isEmpty {
                         HStack { ProgressView(); Text("찾는 중…").foregroundStyle(Theme.inkSecondary) }
                     } else if browse.isEmpty {
-                        Text(search.failed ? "지금은 지도 검색이 안 돼. 인터넷 연결을 확인해줘." : "여기서는 찾은 곳이 없어. 위 검색창에 이름이나 동네를 적어봐.")
+                        Text(search.failed ? "지금은 지도 검색이 안 돼요. 인터넷 연결을 확인해 주세요." : "여기서는 찾은 곳이 없어요. 위 검색창에 이름이나 동네를 적어 보세요.")
                             .font(.subheadline).foregroundStyle(Theme.inkSecondary)
                         otherMapLinks(for: browseQuery)
                     }
@@ -175,12 +175,12 @@ struct RinkFinderView: View {
                 } header: {
                     Text("'\(browseQuery)' 찾은 곳")
                 } footer: {
-                    Text("누르면 내 링크장에 담기고 자세히 볼 수 있어.")
+                    Text("누르면 내 링크장에 담기고 자세히 볼 수 있어요.")
                 }
             }
 
             Section {
-                Text("앱에 담긴 전국 링크장 목록에서 먼저 찾고, 없으면 Apple 지도에 검색어를 보내. 내 위치는 쓰지 않아. 운영 시간과 대관은 자주 바뀌니 공식 안내를 확인해줘.")
+                Text("앱에 담긴 전국 링크장 목록에서 먼저 찾고, 없으면 Apple 지도에 검색어를 보내요. 내 위치는 쓰지 않아요. 운영 시간과 대관은 자주 바뀌니 공식 안내를 확인해 주세요.")
                     .font(.caption).foregroundStyle(Theme.inkSecondary)
             }
         }
@@ -213,7 +213,7 @@ struct RinkFinderView: View {
             }
             Button("취소", role: .cancel) { manualName = "" }
         } message: {
-            Text("지도에 없는 곳도 이름만 적으면 기록할 때 고를 수 있어. 주소와 시설 정보는 다음 화면에서 적어.")
+            Text("지도에 없는 곳도 이름만 적으면 기록할 때 고를 수 있어요. 주소와 시설 정보는 다음 화면에서 적어요.")
         }
         .task { if browse.isEmpty { await loadBrowse() } }
     }
@@ -236,7 +236,7 @@ struct RinkFinderView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title).foregroundStyle(.primary)
                 if !subtitle.isEmpty { Text(subtitle).font(.caption).foregroundStyle(Theme.inkSecondary).lineLimit(1) }
-                if needsCheck { Text("운영 중인지 가기 전에 확인해줘").font(.caption2).foregroundStyle(Theme.warning) }
+                if needsCheck { Text("운영 중인지 가기 전에 확인해 주세요").font(.caption2).foregroundStyle(Theme.warning) }
             }
             Spacer()
             Image(systemName: saved ? "checkmark.circle.fill" : "plus.circle").foregroundStyle(saved ? Theme.neonPink : Theme.accent)
@@ -315,21 +315,21 @@ struct RinkDetailView: View {
             } header: {
                 Text("내가 확인한 정보")
             } footer: {
-                Text(rink.verifiedAt.map { "\($0.formatted(date: .abbreviated, time: .omitted))에 확인했어. 그 뒤로 바뀌었을 수 있어." }
-                     ?? "아직 확인한 게 없어. 직접 본 것만 골라줘.")
+                Text(rink.verifiedAt.map { "\($0.formatted(date: .abbreviated, time: .omitted))에 확인했어요. 그 뒤로 바뀌었을 수 있어요." }
+                     ?? "아직 확인한 게 없어요. 직접 본 것만 골라 주세요.")
             }
             Section {
                 Button(role: .destructive) { confirmRemove = true } label: {
                     Label("내 링크장에서 빼기", systemImage: "trash").foregroundStyle(Theme.danger)
                 }
             } footer: {
-                Text("기록에 적힌 링크장 이름은 그대로 남아. 다시 찾아서 담을 수 있어.")
+                Text("기록에 적힌 링크장 이름은 그대로 남아요. 다시 찾아서 담을 수 있어요.")
             }
         }
         .navigationTitle("링크장")
         .navigationBarTitleDisplayMode(.inline)
         .onDisappear { context.saveOrReport() }
-        .confirmationDialog("'\(rink.name)'을 내 링크장에서 뺄까?", isPresented: $confirmRemove, titleVisibility: .visible) {
+        .confirmationDialog("'\(rink.name)'을 내 링크장에서 뺄까요?", isPresented: $confirmRemove, titleVisibility: .visible) {
             Button("빼기", role: .destructive) {
                 // 먼저 화면을 닫고, 닫힌 뒤 지운다(지운 객체를 화면이 붙들고 있으면 멈춤).
                 dismiss()
@@ -347,8 +347,8 @@ struct RinkDetailView: View {
     private func facility(_ title: String, _ value: Binding<Bool?>) -> some View {
         LabeledChoice(title: title, options: [
             ChoiceOption(value: Bool?.none, title: "모름", art: .symbol("questionmark")),
-            ChoiceOption(value: Optional(true), title: "있어", art: .symbol("checkmark")),
-            ChoiceOption(value: Optional(false), title: "없어", art: .symbol("xmark")),
+            ChoiceOption(value: Optional(true), title: "있어요", art: .symbol("checkmark")),
+            ChoiceOption(value: Optional(false), title: "없어요", art: .symbol("xmark")),
         ], selection: Binding(get: { value.wrappedValue }, set: { value.wrappedValue = $0; rink.verifiedAt = Date() }),
         columns: 3, minHeight: 56)
     }

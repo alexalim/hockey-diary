@@ -73,7 +73,7 @@ struct DiaryView: View {
                 HStack(spacing: 12) {
                     Image(systemName: "flame.fill").font(.title).foregroundStyle(st.current > 0 ? Theme.neonPink : Theme.inkTertiary)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(st.current > 0 ? "\(st.current)주 연속 탔어" : "이번 주 한 번 타면 다시 시작해")
+                        Text(st.current > 0 ? "\(st.current)주 연속 탔어요" : "이번 주 한 번 타면 다시 시작해요")
                             .font(.headline).foregroundStyle(Theme.title)
                         Text(streakSubtitle(st)).font(.caption).foregroundStyle(Theme.inkSecondary)
                     }
@@ -91,9 +91,9 @@ struct DiaryView: View {
     }
 
     private func streakSubtitle(_ st: WeeklyStreak) -> String {
-        if RestPrefs.isResting(restJSON) { return "쉬는 중이라 안 끊겨. 최고 \(st.best)주" }
-        if st.thisWeekPending { return "이번 주에 한 번 타면 이어져. 최고 \(st.best)주" }
-        return "한 주에 한 번이면 이어져. 최고 \(st.best)주"
+        if RestPrefs.isResting(restJSON) { return "쉬는 중이라 안 끊겨요. 최고 \(st.best)주" }
+        if st.thisWeekPending { return "이번 주에 한 번 타면 이어져요. 최고 \(st.best)주" }
+        return "한 주에 한 번이면 이어져요. 최고 \(st.best)주"
     }
 
     // MARK: - 달력
@@ -194,7 +194,7 @@ struct DiaryView: View {
         }
         return VStack(spacing: 12) {
             if js.isEmpty && ss.isEmpty {
-                Card { EmptyHint(text: "'\(q)'와 맞는 기록이 없어.", systemImage: "magnifyingglass") }
+                Card { EmptyHint(text: "'\(q)'와 맞는 기록이 없어요.", systemImage: "magnifyingglass") }
             }
             if !ss.isEmpty {
                 Card {
@@ -225,7 +225,7 @@ struct DayTimeline: View {
         Card {
             CardHeader(title: day.dayTitle, systemImage: "list.bullet.below.rectangle")
             if sessions.isEmpty && journals.isEmpty {
-                EmptyHint(text: "이날은 비어 있어. 하키는 훈련 탭에서, 한 줄 일기는 여기서 남겨.")
+                EmptyHint(text: "이날은 비어 있어요. 하키는 훈련 탭에서, 한 줄 일기는 여기서 남겨요.")
             }
             ForEach(journals) { j in JournalRow(journal: j) }
             ForEach(sessions) { s in

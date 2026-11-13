@@ -37,11 +37,11 @@ public enum ConditionMetric: String, CaseIterable, Sendable {
     /// 무엇을 재는지 한 줄 풀이.
     public var help: String {
         switch self {
-        case .sleep: return "그날 아침까지 잠든 시간. 낮잠도 더해."
-        case .restingHR: return "가만히 있을 때 심박. Apple Watch가 하루 한 번 재."
-        case .hrv: return "심박 사이 간격이 얼마나 흔들리는지. 보통 쉬면 오르고 지치면 내려가. 사람마다 크게 달라서 내 평소와만 견줘."
+        case .sleep: return "그날 아침까지 잠든 시간. 낮잠도 더해요."
+        case .restingHR: return "가만히 있을 때 심박. Apple Watch가 하루 한 번 재요."
+        case .hrv: return "심박 사이 간격이 얼마나 흔들리는지. 보통 쉬면 오르고 지치면 내려가요. 사람마다 크게 달라서 내 평소와만 견줘요."
         case .mood: return "기록과 일기에 남긴 기분 1~5."
-        case .fatigue: return "기록에 남긴 '얼마나 힘들었어?' 1~5."
+        case .fatigue: return "기록에 남긴 '얼마나 힘들었어요?' 1~5."
         case .body: return "홈에서 남긴 '오늘 몸 상태' 1~5."
         }
     }
@@ -106,21 +106,21 @@ public enum ConditionTrack {
         if bSleep.count >= 7 {
             let usual = median(bSleep)
             let short = values(recent, .sleep).filter { $0 < usual - 60 }.count
-            if short >= 2 { out.append("잠이 평소보다 1시간 넘게 적은 날이 최근 7일에 \(short)번이야.") }
+            if short >= 2 { out.append("잠이 평소보다 1시간 넘게 적은 날이 최근 7일에 \(short)번이에요.") }
         }
         let bHR = values(base, .restingHR), rHR = values(recent, .restingHR)
         if bHR.count >= 7, rHR.count >= 3 {
             let diff = rHR.reduce(0, +) / Double(rHR.count) - median(bHR)
-            if diff >= 5 { out.append("안정 심박이 평소보다 \(Int(diff.rounded()))bpm 높아.") }
+            if diff >= 5 { out.append("안정 심박이 평소보다 \(Int(diff.rounded()))bpm 높아요.") }
         }
         let bHRV = values(base, .hrv), rHRV = values(recent, .hrv)
         if bHRV.count >= 7, rHRV.count >= 3 {
             let usual = median(bHRV), avg = rHRV.reduce(0, +) / Double(rHRV.count)
-            if avg < usual * 0.8 { out.append("심박 변이도가 평소보다 \(Int(((1 - avg / usual) * 100).rounded()))% 낮아.") }
+            if avg < usual * 0.8 { out.append("심박 변이도가 평소보다 \(Int(((1 - avg / usual) * 100).rounded()))% 낮아요.") }
         }
         let rF = values(recent, .fatigue)
         if rF.count >= 3, rF.reduce(0, +) / Double(rF.count) >= 4 {
-            out.append("최근 7일 '힘듦'이 높은 편이야(평균 \(String(format: "%.1f", rF.reduce(0, +) / Double(rF.count)))).")
+            out.append("최근 7일 '힘듦'이 높은 편이에요(평균 \(String(format: "%.1f", rF.reduce(0, +) / Double(rF.count)))).")
         }
         return out
     }
