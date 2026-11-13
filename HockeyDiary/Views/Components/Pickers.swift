@@ -19,8 +19,7 @@ struct MoodPicker: View {
                     Button {
                         value = selected ? nil : v
                     } label: {
-                        Text(Mood.face(v))
-                            .font(.title2)
+                        MoodFace(level: v, size: 30)
                             .frame(maxWidth: .infinity, minHeight: Theme.touch)
                             .background(selected ? Theme.neonPink.opacity(0.15) : Color.clear,
                                         in: RoundedRectangle(cornerRadius: 10, style: .continuous))

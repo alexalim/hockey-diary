@@ -169,7 +169,7 @@ struct WatchMoodRow: View {
                 Button {
                     value = value == v ? nil : v
                 } label: {
-                    Text(Mood.face(v)).font(.title3)
+                    MoodFace(level: v, size: 26)
                         .frame(maxWidth: .infinity, minHeight: 36)
                         .background(value == v ? pink.opacity(0.35) : Color.clear, in: RoundedRectangle(cornerRadius: 8))
                 }

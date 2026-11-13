@@ -186,7 +186,11 @@ struct SessionDetailView: View {
 
     private func moodItem(_ title: String, _ value: Int?) -> some View {
         VStack {
-            Text(value.map(Mood.face) ?? "–").font(.title)
+            if let value {
+                MoodFace(level: value, size: 34)
+            } else {
+                Text("–").font(.title).foregroundStyle(Theme.inkTertiary).frame(height: 34)
+            }
             Text(title).font(.caption).foregroundStyle(Theme.inkSecondary)
         }
         .accessibilityElement(children: .ignore)
@@ -289,7 +293,7 @@ struct SessionRow: View {
                     .font(.caption).foregroundStyle(Theme.inkSecondary)
             }
             Spacer()
-            if let after = session.moodAfter { Text(Mood.face(after)).font(.title3) }
+            if let after = session.moodAfter { MoodFace(level: after, size: 24, label: "끝나고 기분 \(Mood.label(after))") }
         }
         .frame(minHeight: Theme.touch)
         .accessibilityElement(children: .combine)

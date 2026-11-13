@@ -112,6 +112,8 @@ struct HomeRing: View {
     var center: String
     var label: String
     var color: Color
+    /// 가운데에 글자 대신 기분 얼굴을 보일 때.
+    var face: Int? = nil
 
     var body: some View {
         VStack(spacing: 6) {
@@ -120,7 +122,11 @@ struct HomeRing: View {
                 Circle().trim(from: 0, to: max(0.001, min(value, 1)))
                     .stroke(color, style: StrokeStyle(lineWidth: 7, lineCap: .round))
                     .rotationEffect(.degrees(-90))
-                Text(center).font(.headline.bold()).foregroundStyle(.white).minimumScaleFactor(0.6).lineLimit(1)
+                if let face {
+                    MoodFace(level: face, size: 34)
+                } else {
+                    Text(center).font(.headline.bold()).foregroundStyle(.white).minimumScaleFactor(0.6).lineLimit(1)
+                }
             }
             .frame(width: 62, height: 62)
             Text(label).font(.caption2.weight(.semibold)).foregroundStyle(.white.opacity(0.85))

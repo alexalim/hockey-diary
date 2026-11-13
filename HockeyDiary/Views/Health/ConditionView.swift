@@ -193,8 +193,12 @@ struct ConditionView: View {
                             if let v = m.value(d) {
                                 VStack(alignment: .leading, spacing: 0) {
                                     Text(m.title).font(.caption2).foregroundStyle(Theme.inkSecondary)
-                                    Text(m == .mood ? Mood.face(Int(v)) : (m == .body ? BodyWords.short(Int(v)) : (m == .fatigue ? "\(Int(v))/5" : m.text(v))))
-                                        .font(.caption.bold()).foregroundStyle(Theme.title)
+                                    if m == .mood {
+                                        MoodFace(level: Int(v), size: 18, label: Mood.label(Int(v)))
+                                    } else {
+                                        Text(m == .body ? BodyWords.short(Int(v)) : (m == .fatigue ? "\(Int(v))/5" : m.text(v)))
+                                            .font(.caption.bold()).foregroundStyle(Theme.title)
+                                    }
                                 }
                             }
                         }

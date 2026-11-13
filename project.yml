@@ -83,6 +83,7 @@ targets:
     deploymentTarget: "10.0"
     sources:
       - path: HockeyDiaryWatch
+      - path: Shared/MoodFace.swift
     dependencies:
       - package: HockeyCore
     entitlements:

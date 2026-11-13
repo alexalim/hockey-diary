@@ -187,7 +187,7 @@ struct HomeView: View {
         HStack(spacing: 4) {
             HomeRing(value: todaySessions.isEmpty ? 0 : 1, center: "\(todaySessions.count)", label: "오늘 기록", color: Theme.neonPink)
             HomeRing(value: Double(weekCount) / 2, center: "\(weekCount)/2", label: "이번 주", color: Theme.success)
-            HomeRing(value: Double(todayMood ?? 0) / 5, center: todayMood.map(Mood.face) ?? "–", label: "컨디션", color: Theme.warningFill)
+            HomeRing(value: Double(todayMood ?? 0) / 5, center: todayMood.map(Mood.label) ?? "–", label: "컨디션", color: Theme.warningFill, face: todayMood)
         }
         .padding(.top, 4)
     }

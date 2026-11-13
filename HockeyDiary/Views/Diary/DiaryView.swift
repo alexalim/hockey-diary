@@ -146,7 +146,9 @@ struct DiaryView: View {
                 Text("\(calendar.component(.day, from: day))")
                     .font(.caption.weight(isToday ? .bold : .regular))
                     .foregroundStyle(isToday ? Theme.accent : Theme.title)
-                Text(mood.map(Mood.face) ?? " ").font(.callout)
+                Group {
+                    if let mood { MoodFace(level: mood, size: 18) } else { Color.clear.frame(width: 18, height: 18) }
+                }
                 Circle()
                     .fill(daySessions.first?.type.color ?? Color.clear)
                     .frame(width: 5, height: 5)

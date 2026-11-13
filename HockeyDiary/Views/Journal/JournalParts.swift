@@ -86,10 +86,7 @@ struct MoodFaces: View {
                     value = selected ? nil : v
                 } label: {
                     VStack(spacing: 6) {
-                        Text(Mood.face(v))
-                            .font(.system(size: 30))
-                            .frame(width: 54, height: 54)
-                            .background(Theme.moodFills[v - 1], in: Circle())
+                        MoodFace(level: v, size: 54)
                             .overlay(Circle().stroke(selected ? Theme.neonPink : .clear, lineWidth: 2.5))
                             .shadow(color: selected ? Theme.neonPink.opacity(0.35) : .clear, radius: 8, y: 3)
                         Text(names[v - 1])
@@ -197,10 +194,14 @@ struct JournalNote: View {
     var body: some View {
         PaperCard(tape: journal.mood.map { Theme.moodFills[$0 - 1] } ?? Theme.tapePink, tapeAngle: 5, dotted: true) {
             HStack(alignment: .top, spacing: 12) {
-                Text(journal.mood.map(Mood.face) ?? "📝")
-                    .font(.system(size: 26))
-                    .frame(width: 46, height: 46)
-                    .background(journal.mood.map { Theme.moodFills[$0 - 1] } ?? Theme.tapePink, in: Circle())
+                Group {
+                    if let mood = journal.mood {
+                        MoodFace(level: mood, size: 46)
+                    } else {
+                        Image(systemName: "pencil.line").font(.system(size: 20, weight: .bold)).foregroundStyle(Theme.paperInk)
+                            .frame(width: 46, height: 46).background(Theme.tapePink, in: Circle())
+                    }
+                }
                     .overlay(Circle().stroke(Theme.paper, lineWidth: 2))
                     .shadow(color: Theme.deepNavy.opacity(0.1), radius: 3, y: 2)
                 VStack(alignment: .leading, spacing: 6) {

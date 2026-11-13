@@ -150,7 +150,7 @@ struct SessionShareCard: View {
                 } else if shotCount > 0 {
                     stat("\(shotCount)", "슛")
                 }
-                if let m = session.moodAfter { stat(Mood.face(m), "끝나고 기분") }
+                if let m = session.moodAfter { moodStat(m) }
             }
             if let b = bests.first {
                 Label("새 기록 · \(b.title) \(b.value)", systemImage: "rosette")
@@ -163,6 +163,16 @@ struct SessionShareCard: View {
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Theme.heroGradient)
+    }
+
+    private func moodStat(_ m: Int) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            MoodFace(level: m, size: 22, label: Mood.label(m))
+            Text("끝나고 기분").font(.caption2).foregroundStyle(.white.opacity(0.75))
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 
     private func stat(_ value: String, _ label: String) -> some View {
