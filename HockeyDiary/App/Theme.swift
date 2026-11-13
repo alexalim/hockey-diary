@@ -70,6 +70,13 @@ enum Theme {
     static let navyDoor: [Color] = [deepNavy, Color(hex: 0x0A1428)]
     static let pinkDoor: [Color] = [neonPink, Color(hex: 0x9E0F57)]
     static let iceDoor: [Color] = [Color(hex: 0xA9D8F2), Color(hex: 0x5D9CC4)]
+    /// 파스텔 문 4종. 다크 모드에서도 같은 색(문은 물건이라 밤에도 색이 그대로).
+    static let strawberryDoor: [Color] = [Color(hex: 0xFFD6E5), Color(hex: 0xFFA8C7)]
+    static let mintDoor: [Color] = [Color(hex: 0xD2F5E8), Color(hex: 0x9DDEC6)]
+    static let lemonDoor: [Color] = [Color(hex: 0xFFF3C2), Color(hex: 0xFFDB72)]
+    static let lavenderDoor: [Color] = [Color(hex: 0xEAE2FF), Color(hex: 0xC4B3F6)]
+    /// 파스텔 문 위 글자·선 색(라이트·다크 같은 진한 갈색).
+    static let doorInk = Color(hex: 0x4B3A2C)
     /// 러너(날) 쇠 느낌.
     static let steel: [Color] = [Color(light: 0xB8C4D6, dark: 0x8A97AA), Color(light: 0x6D7B91, dark: 0x5B6779)]
 

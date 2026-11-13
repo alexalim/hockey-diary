@@ -329,6 +329,13 @@ final class SleepTests: XCTestCase {
 
 final class LockerTests: XCTestCase {
     // T17: 번호판 007은 문자열 그대로, 앞자리 0 유지, 4자리까지.
+    func testLockerThemeRawValuesStayStableAndPastelsAreFlagged() {
+        // 저장된 rawValue가 바뀌면 사용자가 고른 문 색이 코발트로 돌아간다.
+        XCTAssertEqual(LockerTheme.allCases.prefix(4).map(\.rawValue), ["cobalt", "navy", "neonPink", "iceBlue"])
+        XCTAssertEqual(LockerTheme.allCases.filter(\.isPastel), [.strawberry, .mint, .lemon, .lavender])
+        XCTAssertEqual(LockerTheme(rawValue: "strawberry")?.title, "딸기우유")
+    }
+
     func testLockerNumberKeepsLeadingZeros() {
         XCTAssertEqual(LockerNumber.normalize("007"), "007")
         XCTAssertEqual(LockerNumber.normalize("00"), "00")

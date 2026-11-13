@@ -12,7 +12,9 @@ public enum LockerNumber {
 
 /// 락커 색 테마 (LK-10). 장비 데이터와 분리된 장식 값이다.
 public enum LockerTheme: String, CaseIterable, Sendable {
+    // 저장 값(rawValue)이라 이름을 바꾸지 말고 뒤에만 더한다.
     case cobalt, navy, neonPink, iceBlue
+    case strawberry, mint, lemon, lavender
 
     public var title: String {
         switch self {
@@ -20,6 +22,18 @@ public enum LockerTheme: String, CaseIterable, Sendable {
         case .navy: return "네이비"
         case .neonPink: return "네온 핑크"
         case .iceBlue: return "아이스 블루"
+        case .strawberry: return "딸기우유"
+        case .mint: return "민트"
+        case .lemon: return "레몬"
+        case .lavender: return "라벤더"
+        }
+    }
+
+    /// 밝은 파스텔 문. 문 위 글자·선을 흰색 대신 진한 색으로 그려야 보인다.
+    public var isPastel: Bool {
+        switch self {
+        case .strawberry, .mint, .lemon, .lavender: return true
+        default: return false
         }
     }
 }

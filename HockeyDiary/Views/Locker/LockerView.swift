@@ -212,6 +212,10 @@ extension LockerTheme {
         case .navy: return Theme.navyDoor
         case .neonPink: return Theme.pinkDoor
         case .iceBlue: return Theme.iceDoor
+        case .strawberry: return Theme.strawberryDoor
+        case .mint: return Theme.mintDoor
+        case .lemon: return Theme.lemonDoor
+        case .lavender: return Theme.lavenderDoor
         }
     }
 }
@@ -225,10 +229,11 @@ struct LockerDoorBase: View {
     var body: some View {
         let theme = profile?.theme ?? .cobalt
         let shape = RoundedRectangle(cornerRadius: Self.corner, style: .continuous)
+        let line: Color = theme.isPastel ? Theme.doorInk : .white
         shape
             .fill(LinearGradient(colors: theme.colors, startPoint: .top, endPoint: .bottom))
             // 가장자리 바느질 선
-            .overlay(shape.inset(by: 7).stroke(.white.opacity(0.35), style: StrokeStyle(lineWidth: 2, lineCap: .round, dash: [6, 6])))
+            .overlay(shape.inset(by: 7).stroke(line.opacity(theme.isPastel ? 0.22 : 0.35), style: StrokeStyle(lineWidth: 2, lineCap: .round, dash: [6, 6])))
             .overlay(alignment: .top) {
                 VStack(spacing: 18) {
                     // 이름표: 테이프로 붙인 종이 쪽지
@@ -257,7 +262,7 @@ struct LockerDoorBase: View {
                     // 통풍구: 말랑한 캡슐
                     VStack(spacing: 8) {
                         ForEach(0..<5, id: \.self) { _ in
-                            Capsule().fill(.white.opacity(0.22)).frame(width: 128, height: 8)
+                            Capsule().fill(line.opacity(theme.isPastel ? 0.12 : 0.22)).frame(width: 128, height: 8)
                         }
                     }
                 }
@@ -265,7 +270,7 @@ struct LockerDoorBase: View {
             }
             .overlay(alignment: .trailing) {
                 // 손잡이: 파스텔 사탕
-                Capsule().fill(Theme.stickers[0])
+                Capsule().fill(theme.isPastel ? Color.white : Theme.stickers[0])
                     .frame(width: 16, height: 72)
                     .overlay(Capsule().stroke(.white, lineWidth: 3))
                     .shadow(color: .black.opacity(0.2), radius: 2, y: 1)
@@ -293,7 +298,9 @@ struct LockerDoor: View {
             }
         }
         .overlay(alignment: .bottom) {
-            Label("손잡이를 밀어서 열기", icon: "chevron.left.2").font(.caption).foregroundStyle(.white.opacity(0.8)).padding(.bottom, 16)
+            Label("손잡이를 밀어서 열기", icon: "chevron.left.2").font(.caption)
+                .foregroundStyle((profile?.theme.isPastel ?? false) ? Theme.doorInk.opacity(0.7) : Color.white.opacity(0.8))
+                .padding(.bottom, 16)
         }
     }
 }
@@ -461,7 +468,7 @@ struct LockerCustomizeView: View {
             .listRowBackground(Theme.paper)
 
             Section {
-                HStack(spacing: 10) {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 4), spacing: 12) {
                     ForEach(LockerTheme.allCases, id: \.self) { t in
                         Button {
                             profile.theme = t
