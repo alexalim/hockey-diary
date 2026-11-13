@@ -44,7 +44,7 @@ struct WeekWidget: Widget {
             WeekView(snap: entry.snapshot).containerBackground(for: .widget) { Color(.systemBackground) }
         }
         .configurationDisplayName("이번 주 하키")
-        .description("이번 주에 빙판에 선 날과 연속 주를 보여 줘요.")
+        .description("이번 주 빙판에 선 날과 몇 주째 이어 왔는지 보여요.")
         .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular, .accessoryCircular])
     }
 }

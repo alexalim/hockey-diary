@@ -76,7 +76,7 @@ struct HomeView: View {
         if levelRaw.isEmpty {
             Card {
                 CardHeader(title: "내 하키 실력은 어느 정도예요?", systemImage: "person.crop.circle.badge.questionmark")
-                Text("레벨에 맞춰 기록 입력을 간단하게, 또는 자세하게 맞춰 드릴게요. 구력은 참고만 하세요. 설정에서 언제든 바꿀 수 있어요.")
+                Text("레벨에 따라 입력 칸이 간단해지거나 자세해져요. 구력은 참고만 하세요. 설정에서 언제든 바꿀 수 있어요.")
                     .font(.subheadline).foregroundStyle(Theme.inkSecondary)
                 HStack(spacing: 8) {
                     ForEach(PlayerLevel.allCases, id: \.rawValue) { l in
@@ -123,11 +123,11 @@ struct HomeView: View {
                 switch p {
                 case .resting:
                     Label("쉬는 중이에요", systemImage: "moon.zzz.fill").font(.headline).foregroundStyle(Theme.title)
-                    Text("연속 기록과 목표는 그대로 둘게요. 돌아오면 이어서 세요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
+                    Text("연속 기록과 목표는 멈춰 있어요. 돌아오면 이어서 세요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     Button("다시 탈래요") { restJSON = RestPrefs.toggled(restJSON) }.buttonStyle(.bordered)
                 case .logEvent(let title):
                     Label("\(title) 끝났죠? 바로 남겨요", systemImage: "pencil.and.list.clipboard").font(.headline).foregroundStyle(Theme.title)
-                    Text("시간이랑 장소는 팀 일정으로 채워 둘게요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
+                    Text("시간과 장소는 팀 일정에서 가져와 미리 채워져요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     Button {
                         let kind = teamEvents.first { $0.title == title && $0.sessionID == nil }.flatMap { ActivityType(rawValue: $0.kindRaw) } ?? .regularGame
                         newEntry = .session(kind)
@@ -384,7 +384,7 @@ struct HomeView: View {
         if skates.isEmpty {
             Card(tint: Theme.iceBlue) {
                 CardHeader(title: "장비 점검", systemImage: "shoeprints.fill")
-                Text("락커에 스케이트를 넣으면 연마하고 얼마나 탔는지 세어 드릴게요.")
+                Text("락커에 스케이트를 넣어 두면 연마한 뒤 얼마나 탔는지 알 수 있어요.")
                     .font(.subheadline).foregroundStyle(Theme.inkSecondary)
                 Button { jumper?.go(.tab(.locker)) } label: {
                     Label("락커로 가기", systemImage: "arrow.right").font(.subheadline.bold())

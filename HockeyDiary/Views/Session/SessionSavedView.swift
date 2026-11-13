@@ -29,7 +29,7 @@ struct SessionSavedView: View {
                     }
                     .frame(height: 110)
                     Text("저장했어요").font(.system(.title2, design: .rounded).bold()).foregroundStyle(Theme.title)
-                    Text("다이어리와 성장에 바로 들어갔어요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
+                    Text("기록 탭과 성장 탭에서 바로 볼 수 있어요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     Sticker(text: "빙판 +1", index: 0)
                         .rotationEffect(.degrees(-6))
                         .scaleEffect(popped ? 1 : 0.5).opacity(popped ? 1 : 0)
@@ -68,7 +68,7 @@ struct SessionSavedView: View {
                 }
                 Button { onClose() } label: { Text("닫기") }
                     .buttonStyle(PinkButtonStyle())
-                Text("공유 이미지엔 종류, 날짜, 시간, 기술 수, 골·슛 수만 들어가요. 메모·장소·사진은 안 넣어요.")
+                Text("공유 이미지에는 종류, 날짜, 시간, 기술 수, 골과 슛 수만 들어가요. 메모와 장소, 사진은 들어가지 않아요.")
                     .font(.caption).foregroundStyle(Theme.inkSecondary)
             }
             .padding(16)

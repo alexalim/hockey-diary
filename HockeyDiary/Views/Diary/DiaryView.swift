@@ -194,7 +194,7 @@ struct DiaryView: View {
         }
         return VStack(spacing: 12) {
             if js.isEmpty && ss.isEmpty {
-                Card { EmptyHint(text: "'\(q)'와 맞는 기록이 없어요.", systemImage: "magnifyingglass") }
+                Card { EmptyHint(text: "'\(q)'가 들어간 기록이 없어요.", systemImage: "magnifyingglass") }
             }
             if !ss.isEmpty {
                 Card {

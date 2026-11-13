@@ -106,7 +106,7 @@ public enum ConditionTrack {
         if bSleep.count >= 7 {
             let usual = median(bSleep)
             let short = values(recent, .sleep).filter { $0 < usual - 60 }.count
-            if short >= 2 { out.append("잠이 평소보다 1시간 넘게 적은 날이 최근 7일에 \(short)번이에요.") }
+            if short >= 2 { out.append("최근 7일 중 평소보다 1시간 넘게 덜 잔 날이 \(short)번이에요.") }
         }
         let bHR = values(base, .restingHR), rHR = values(recent, .restingHR)
         if bHR.count >= 7, rHR.count >= 3 {

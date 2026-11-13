@@ -38,7 +38,7 @@ struct TeamView: View {
             VStack(spacing: 12) {
                 Card(tint: Theme.cobalt) {
                     Text("우리 팀 만들기").font(.title3.bold()).foregroundStyle(.white)
-                    Text("일정, 참석, 라인업을 여기서 정리하고 카톡에 이미지나 글로 올려요. 팀 데이터는 이 아이폰 안에만 있어요.")
+                    Text("경기 일정과 참석, 라인업을 정리해서 카톡에 이미지나 글로 올릴 수 있어요. 팀 정보는 이 아이폰에만 저장돼요.")
                         .font(.subheadline).foregroundStyle(.white.opacity(0.85))
                 }
                 Card {
@@ -63,7 +63,7 @@ struct TeamView: View {
                 Card {
                     CardHeader(title: "다음 일정", systemImage: "calendar", trailing: upcoming.isEmpty ? nil : "\(upcoming.count)개")
                     if upcoming.isEmpty {
-                        EmptyHint(text: "다음 경기나 연습 일정을 넣어 보세요. 참석 체크와 라인업도 여기서 해요.", systemImage: "calendar.badge.plus")
+                        EmptyHint(text: "다음 경기나 연습 일정을 넣어 보세요. 일정마다 참석 체크와 라인업을 짤 수 있어요.", systemImage: "calendar.badge.plus")
                     }
                     ForEach(upcoming) { e in
                         NavigationLink { TeamEventView(event: e, team: team) } label: { eventRow(e) }.buttonStyle(.plain)
@@ -99,7 +99,7 @@ struct TeamView: View {
                         }
                     }
                 }
-                Text("팀 데이터는 이 아이폰에만 있어요. 공유는 일정 화면에서 이미지나 글로 해요.")
+                Text("팀 정보는 이 아이폰에만 있어요. 공유하려면 일정 화면에서 이미지나 글로 올려요.")
                     .font(.caption).foregroundStyle(Theme.inkSecondary).frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(16)

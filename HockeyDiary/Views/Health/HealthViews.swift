@@ -9,9 +9,9 @@ struct HealthConnectView: View {
     @State private var errorText: String?
 
     private let items: [(String, String, String)] = [
-        ("bed.double.fill", "수면", "하키 전날 밤에 얼마나 잤는지 그날 기록 옆에 보여 줄게요."),
-        ("heart.fill", "심박수", "수업이나 경기 중 평균·최고 심박을 보여 줄게요."),
-        ("figure.hockey", "운동", "워치나 가민이 잰 운동을 내 기록과 맞춰 볼게요. 여러 기기로 재도 시간은 한 번만 세요."),
+        ("bed.double.fill", "수면", "하키 전날 밤 잠이 그날 기록 옆에 같이 나와요."),
+        ("heart.fill", "심박수", "수업이나 경기 중 평균·최고 심박이 보여요."),
+        ("figure.hockey", "운동", "워치나 가민이 잰 운동을 내 기록과 맞춰 볼 수 있어요. 여러 기기로 재도 시간은 한 번만 세요."),
     ]
 
     var body: some View {
@@ -70,7 +70,7 @@ struct HealthConnectView: View {
             }
 
             Section("가민을 쓰고 있다면") {
-                Text("Garmin Connect 앱 → 설정 → 연결된 앱 → Apple 건강에서 동기화를 켜 주세요. 그러면 가민의 수면·심박·운동이 여기로 들어와요. 기기에 따라 일부만 올 수 있어요. 가민 앱이 동기화한 뒤에 보여요.")
+                Text("Garmin Connect 앱 → 설정 → 연결된 앱 → Apple 건강에서 동기화를 켜 주세요. 그러면 가민의 수면·심박·운동도 볼 수 있어요. 기기에 따라 일부만 보일 수 있어요. 가민 앱이 동기화한 뒤에 보여요.")
                     .font(.subheadline).foregroundStyle(Theme.inkSecondary)
             }
         }
@@ -183,7 +183,7 @@ struct SleepGrowthCard: View {
                     if let s = comparison.sentence {
                         Text(s).font(.subheadline)
                     } else {
-                        Text("7시간 넘게 잔 날과 덜 잔 날이 3번씩 쌓이면 비교해 줄게요.")
+                        Text("7시간 넘게 잔 날과 덜 잔 날이 3번씩 모이면 비교할 수 있어요.")
                             .font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     }
                     Text("기록을 나란히 놓은 거예요. 잠 때문이라고 말하는 건 아니에요.").font(.caption).foregroundStyle(Theme.inkSecondary)
@@ -226,7 +226,7 @@ struct CycleConsentSection: View {
         } header: {
             Text("생리 주기 (선택)")
         } footer: {
-            Text("켜면 건강 앱의 생리 기록을 읽어요. 생리 기간에 탄 날의 피로도를 다른 날과 같이 보여 줘요. 운동을 하라 말라 하지 않아요. 리포트, 공유, AI 요약에는 절대 안 넣어요.")
+            Text("켜면 건강 앱의 생리 기록을 읽어 생리 기간에 탄 날의 피로도를 다른 날과 같이 보여요. 운동을 하라 말라 하는 건 아니에요. 리포트, 공유, AI 요약에는 절대 넣지 않아요.")
         }
     }
 }
@@ -247,7 +247,7 @@ struct CycleGrowthCard: View {
                     if let s = c.sentence {
                         Text(s).font(.subheadline)
                     } else {
-                        Text("생리 기간과 다른 날의 피로도 기록이 3번씩 쌓이면 비교해 줄게요.")
+                        Text("생리 기간과 다른 날의 피로도 기록이 3번씩 모이면 비교할 수 있어요.")
                             .font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     }
                     Text("피로도는 내가 직접 고른 값이에요. 운동 강도를 정해 주지는 않아요.").font(.caption).foregroundStyle(Theme.inkSecondary)

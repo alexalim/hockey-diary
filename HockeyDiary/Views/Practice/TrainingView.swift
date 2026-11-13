@@ -101,7 +101,7 @@ struct GameBranch: View {
         Card(tint: Theme.cobalt) {
             Text("GAME DAY").font(.system(size: 12, weight: .semibold)).tracking(0.6).foregroundStyle(.white.opacity(0.75))
             Text("올해 경기 \(thisYear.count)회").font(.title3.bold()).foregroundStyle(.white)
-            Text(thisYear.isEmpty ? "첫 경기를 리뷰하면 골·어시가 여기 쌓여요." : "골 \(goals) · 어시스트 \(assists)")
+            Text(thisYear.isEmpty ? "첫 경기를 리뷰하면 골과 어시스트가 보이기 시작해요." : "골 \(goals) · 어시스트 \(assists)")
                 .font(.subheadline).foregroundStyle(.white.opacity(0.85))
             HStack(spacing: 8) {
                 HeroButton(title: "정규게임 리뷰", systemImage: "trophy.fill") { newEntry = .session(.regularGame) }
@@ -126,7 +126,7 @@ struct GameBranch: View {
                 }
                 .buttonStyle(.plain)
             } else {
-                EmptyHint(text: teams.isEmpty ? "팀을 만들면 경기 일정과 출석을 여기서 봐요." : "잡힌 경기가 없어요.", systemImage: "person.3",
+                EmptyHint(text: teams.isEmpty ? "팀을 만들면 다음 경기 일정과 참석 인원이 보여요." : "잡힌 경기가 없어요.", systemImage: "person.3",
                           link: teams.isEmpty ? EmptyLink("팀 만들기") { TeamView() } : nil)
             }
             NavigationLink { TeamView() } label: {

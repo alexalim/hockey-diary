@@ -124,7 +124,7 @@ struct RinkFinderView: View {
                     if finding && found.isEmpty {
                         HStack { ProgressView(); Text("찾는 중…").foregroundStyle(Theme.inkSecondary) }
                     } else if found.isEmpty {
-                        Text(search.failed ? "앱에 담긴 목록엔 없고, 지금은 지도 검색도 안 돼요. 인터넷 연결을 확인해 주세요."
+                        Text(search.failed ? "앱에 든 목록에는 없고, 지금은 지도 검색도 안 돼요. 인터넷이 연결돼 있는지 봐 주세요."
                              : "'\(query)'로는 못 찾았어요. 링크장 이름이나 구·동 이름으로 다시 찾아보거나 직접 추가해 보세요.")
                             .font(.subheadline).foregroundStyle(Theme.inkSecondary)
                         otherMapLinks(for: query)
@@ -139,7 +139,7 @@ struct RinkFinderView: View {
                 } header: {
                     Text("'\(query)' 검색 결과")
                 } footer: {
-                    Text("동네나 역 이름만 쳐도 찾아 줘요. 전국 실내 링크장 목록이 앱에 들어 있어요.")
+                    Text("동네나 역 이름만 쳐도 돼요. 전국 실내 링크장 목록이 앱에 들어 있어요.")
                 }
             }
 
@@ -163,7 +163,7 @@ struct RinkFinderView: View {
                     if browsing && browse.isEmpty {
                         HStack { ProgressView(); Text("찾는 중…").foregroundStyle(Theme.inkSecondary) }
                     } else if browse.isEmpty {
-                        Text(search.failed ? "지금은 지도 검색이 안 돼요. 인터넷 연결을 확인해 주세요." : "여기서는 찾은 곳이 없어요. 위 검색창에 이름이나 동네를 적어 보세요.")
+                        Text(search.failed ? "지금은 지도 검색이 안 돼요. 인터넷이 연결돼 있는지 봐 주세요." : "찾은 곳이 없어요. 위 검색창에 이름이나 동네를 적어 보세요.")
                             .font(.subheadline).foregroundStyle(Theme.inkSecondary)
                         otherMapLinks(for: browseQuery)
                     }
@@ -180,7 +180,7 @@ struct RinkFinderView: View {
             }
 
             Section {
-                Text("앱에 담긴 전국 링크장 목록에서 먼저 찾고, 없으면 Apple 지도에 검색어를 보내요. 내 위치는 쓰지 않아요. 운영 시간과 대관은 자주 바뀌니 공식 안내를 확인해 주세요.")
+                Text("앱에 든 전국 링크장 목록에서 먼저 찾고, 없으면 Apple 지도에서도 찾아요. 내 위치는 쓰지 않아요. 운영 시간과 대관은 자주 바뀌니 공식 안내를 한 번 더 봐 주세요.")
                     .font(.caption).foregroundStyle(Theme.inkSecondary)
             }
         }

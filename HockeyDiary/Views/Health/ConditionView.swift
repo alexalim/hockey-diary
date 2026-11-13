@@ -37,7 +37,7 @@ struct ConditionView: View {
                 todayBodyCard
                 listCard
                 settingsCard
-                Text("여기 값은 내 기록이 어땠는지만 보여 줘요. 몸 상태를 진단하거나 운동을 하라·말라 하지 않아요. 건강 값은 저장하지 않고, 리포트·공유·AI 요약에도 안 넣어요.")
+                Text("여기 값은 내 기록이 어땠는지 보는 용도예요. 몸 상태를 진단하거나 운동을 하라 말라 하는 건 아니에요. 건강 값은 저장하지 않고, 리포트·공유·AI 요약에도 넣지 않아요.")
                     .font(.caption).foregroundStyle(Theme.inkSecondary)
             }
             .padding(16)
@@ -116,11 +116,11 @@ struct ConditionView: View {
     private var emptyReason: String {
         switch metric {
         case .sleep, .restingHR, .hrv:
-            if !healthOn { return "Apple 건강을 연결하면 보여 줄 수 있어요. 아래 '항목 고르기'에서 연결해 주세요." }
+            if !healthOn { return "Apple 건강을 연결하면 볼 수 있어요. 아래 '항목 고르기'에서 연결해 주세요." }
             if let errorText { return errorText }
-            return "이 기간엔 건강 앱에 \(metric.title) 기록이 없어요. 워치를 차고 자면 쌓여요."
-        case .mood, .fatigue: return "기록을 남기면 쌓여요. 운동 후 기분과 '얼마나 힘들었어요?'를 적어 주세요."
-        case .body: return "홈이나 아래에서 '오늘 몸 상태'를 남기면 쌓여요."
+            return "이 기간엔 건강 앱에 \(metric.title) 기록이 없어요. 워치를 차고 자면 기록이 생겨요."
+        case .mood, .fatigue: return "활동을 기록할 때 운동 후 기분과 '얼마나 힘들었어요?'를 적으면 흐름이 보여요."
+        case .body: return "홈이나 아래에서 '오늘 몸 상태'를 며칠 남기면 흐름이 보여요."
         }
     }
 

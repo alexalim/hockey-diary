@@ -33,7 +33,7 @@ enum TeamReminder {
                   let fire = cal.date(bySettingHour: 19, minute: 0, second: 0, of: day), fire > now else { continue }
             let content = UNMutableNotificationContent()
             content.title = "\(e.at.formatted(.dateTime.weekday(.wide))) \(e.title)"
-            content.body = "아직 참석을 안 정한 사람이 \(undecided)명 있어요. 확인해 볼래요?"
+            content.body = "아직 참석 여부를 안 정한 사람이 \(undecided)명 있어요. 확인해 볼래요?"
             content.sound = .default
             let comps = cal.dateComponents([.year, .month, .day, .hour, .minute], from: fire)
             let req = UNNotificationRequest(identifier: prefix + e.id.uuidString, content: content,

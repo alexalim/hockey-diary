@@ -153,7 +153,7 @@ struct SentView: View {
         VStack(spacing: 10) {
             Image(systemName: "checkmark.circle.fill").font(.largeTitle).foregroundStyle(pink)
             Text("아이폰으로 보냈어요").font(.headline)
-            Text("아이폰 앱을 열면 기록에 들어가 있어요.").font(.caption2).foregroundStyle(.secondary).multilineTextAlignment(.center)
+            Text("아이폰 앱을 열면 기록에서 볼 수 있어요.").font(.caption2).foregroundStyle(.secondary).multilineTextAlignment(.center)
             Button("처음으로") { model.reset() }
         }
     }

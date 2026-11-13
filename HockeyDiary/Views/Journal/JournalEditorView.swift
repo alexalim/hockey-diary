@@ -192,8 +192,8 @@ struct JournalEditorView: View {
             }
             .tint(Theme.neonPink)
             Text(isPrivate
-                 ? "꺼져 있으면 이 일기는 어디에도 안 들어가요. 내용을 따로 분석하지도 않아요."
-                 : "켜면 시즌 리포트 이미지에 이 일기 한 줄이 들어갈 수 있어요. AI 요약에는 안 넣어요.")
+                 ? "꺼 두면 이 일기는 어디에도 들어가지 않고, 내용을 따로 분석하지도 않아요."
+                 : "켜면 시즌 리포트 이미지에 이 일기 한 줄이 실릴 수 있어요. AI 요약에는 들어가지 않아요.")
                 .font(.system(.caption, design: .rounded)).foregroundStyle(Theme.paperInkSoft)
         }
     }

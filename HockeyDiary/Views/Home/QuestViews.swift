@@ -181,7 +181,7 @@ struct QuestView: View {
             if targetOverride > 0 {
                 Button("레벨 기본값(\(Quest.monthlyTarget(level: level))회)으로") { targetOverride = 0 }.font(.subheadline)
             } else {
-                Text(level == nil ? "레벨을 정하면 목표가 거기에 맞춰져요. 지금은 4회예요." : "\(level!.title)은 한 달 \(s.monthTarget)회가 기본이에요. 바꿔도 돼요.")
+                Text(level == nil ? "레벨을 정하면 목표도 거기에 맞춰져요. 지금은 한 달 4회예요." : "\(level!.title)은 한 달 \(s.monthTarget)회가 기본이에요. 바꿔도 돼요.")
                     .font(.caption).foregroundStyle(Theme.inkSecondary)
             }
         }

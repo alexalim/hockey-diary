@@ -11,7 +11,7 @@ public enum SkillGuide {
 
     public static let entries: [Entry] = [
         Entry(name: "크로스오버", category: "스케이팅",
-              summary: "코너를 돌 때 바깥 발을 안쪽 발 앞으로 넘기며 미는 기술이에요. 돌면서도 속도를 살리고 더 붙일 수 있어요."),
+              summary: "코너를 돌 때 바깥 발을 안쪽 발 앞으로 넘기며 미는 기술이에요. 돌면서도 속도가 줄지 않고 오히려 붙어요."),
         Entry(name: "엣지 턴", category: "스케이팅",
               summary: "날 엣지에 무게를 싣고 몸을 기울여 도는 턴이에요. 무릎을 굽히고, 가려는 쪽을 먼저 봐요."),
         Entry(name: "하키 스톱", category: "스케이팅",

@@ -188,7 +188,7 @@ struct SessionEditorView: View {
 
     private var saveHint: String? {
         if type.isGame && attempts.contains(where: { $0.tried == nil }) {
-            return "기술마다 '못 써봄' 또는 '써봤어'를 골라 주세요. 못 써본 건 실패로 안 세요."
+            return "기술마다 '못 써봄'이나 '써봤어요'를 골라 주세요. 못 써본 건 실패로 치지 않아요."
         }
         if type == .lesson && !canSave {
             return "기술을 하나 고르거나 메모를 한 줄 남겨 주세요."
@@ -306,9 +306,9 @@ struct SessionEditorView: View {
             .buttonStyle(.plain)
             .accessibilityIdentifier("더 적기")
         } footer: {
-            Text(type.isGame ? "슛 차트, 골리, 경기 정보, 장소, 장비, 사진은 여기 있어요. 안 열어도 저장돼요."
-                             : (type == .lesson ? "코치 메모, 다음 목표, 장소, 장비, 사진은 여기 있어요. 안 열어도 저장돼요."
-                                                : "장소, 장비, 사진은 여기 있어요. 안 열어도 저장돼요."))
+            Text(type.isGame ? "슛 차트, 골리, 경기 정보, 장소, 장비, 사진도 적을 수 있어요. 안 열어도 저장돼요."
+                             : (type == .lesson ? "코치 메모, 다음 목표, 장소, 장비, 사진도 적을 수 있어요. 안 열어도 저장돼요."
+                                                : "장소, 장비, 사진도 적을 수 있어요. 안 열어도 저장돼요."))
         }
     }
 
@@ -401,7 +401,7 @@ struct SessionEditorView: View {
         } header: {
             Text("배운 기술, 써봤어요?")
         } footer: {
-            Text(attempts.isEmpty ? "최근 수업에서 배운 기술이 없으면 직접 추가해 주세요." : "최근 수업에서 배운 기술을 넣어 뒀어요. 빼거나 더해도 돼요.")
+            Text(attempts.isEmpty ? "최근 수업에서 배운 기술이 없어요. 써본 기술을 직접 추가해 주세요." : "최근 수업에서 배운 기술이 미리 들어가 있어요. 빼거나 더해도 돼요.")
         }
     }
 
@@ -483,7 +483,7 @@ struct SessionEditorView: View {
     private var equipmentSection: some View {
         Section {
             if skates.isEmpty {
-                Text("락커 탭에 스케이트를 넣으면 연마하고 탄 시간이 저절로 쌓여요.")
+                Text("락커 탭에 스케이트를 넣어 두면 연마한 뒤로 얼마나 탔는지 보여요.")
                     .font(.footnote).foregroundStyle(Theme.inkSecondary)
             } else {
                 LabeledChoice(title: "스케이트",
@@ -520,7 +520,7 @@ struct SessionEditorView: View {
             Text("장비")
         } footer: {
             if skateID != nil {
-                Text("벤치에 있던 시간은 빼 주세요. 고른 스케이트·러너에만 쌓여요.")
+                Text("벤치에 있던 시간은 빼 주세요. 탄 시간은 고른 스케이트와 러너에만 더해져요.")
             }
         }
     }
@@ -569,7 +569,7 @@ struct SessionEditorView: View {
         } header: {
             Text("슛 차트")
         } footer: {
-            Text("위에서 결과를 고르고, 슛을 쏜 자리를 눌러 주세요. 위가 상대 골대예요. 골로 찍은 수는 골 칸과 따로 세요.")
+            Text("위에서 결과를 고르고, 슛을 쏜 자리를 눌러 주세요. 위가 상대 골대예요. 여기 찍은 골 개수는 골 칸 숫자와 별개예요.")
         }
     }
 

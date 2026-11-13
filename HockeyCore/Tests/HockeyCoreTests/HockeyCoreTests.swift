@@ -809,7 +809,7 @@ final class TrendTests: XCTestCase {
         XCTAssertEqual(t.buckets.first?.current, 1, "11/4 칸")
         XCTAssertEqual(t.total, 3)
         XCTAssertEqual(t.previousTotal, 2, "11/3, 11/1은 앞선 7일")
-        XCTAssertEqual(t.comparison(.sessions, periodTitle: "7일"), "앞선 7일보다 1회 늘었어요.")
+        XCTAssertEqual(t.comparison(.sessions, periodTitle: "7일"), "그 전 7일보다 1회 늘었어요.")
     }
 
     func testMonthAndQuarterShapes() {
@@ -893,7 +893,7 @@ final class ConditionTests: XCTestCase {
         for o in 7...30 { days.append(ConditionDay(day: day(-o), sleepMinutes: 450, restingHR: 55, hrv: 60)) }
         for o in 0...6 { days.append(ConditionDay(day: day(-o), sleepMinutes: o < 3 ? 330 : 450, restingHR: 62, hrv: 40, fatigue: o < 3 ? 5 : nil)) }
         let lines = ConditionTrack.unusual(days, now: t(11, 12), calendar: cal)
-        XCTAssertEqual(lines, ["잠이 평소보다 1시간 넘게 적은 날이 최근 7일에 3번이에요.",
+        XCTAssertEqual(lines, ["최근 7일 중 평소보다 1시간 넘게 덜 잔 날이 3번이에요.",
                                "안정 심박이 평소보다 7bpm 높아요.",
                                "심박 변이도가 평소보다 33% 낮아요.",
                                "최근 7일 '힘듦'이 높은 편이에요(평균 5.0)."])

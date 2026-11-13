@@ -94,7 +94,7 @@ struct DrillSection: View {
         Card(tint: Theme.cobalt) {
             Text("TODAY'S FOCUS").font(.system(size: 12, weight: .semibold)).tracking(0.6).foregroundStyle(.white.opacity(0.75))
             Text(goal ?? "오늘은 뭘 다듬을까요?").font(.title3.bold()).foregroundStyle(.white)
-            Text(goal == nil ? "수업 기록에 '다음 목표'를 적으면 여기로 이어져요." : "지난 수업의 다음 목표를 오늘의 드릴로 이어가요.")
+            Text(goal == nil ? "수업 기록에 '다음 목표'를 적어 두면 다음 연습 때 그 목표가 먼저 보여요." : "지난 수업의 다음 목표를 오늘의 드릴로 이어가요.")
                 .font(.subheadline).foregroundStyle(.white.opacity(0.85))
             if let first {
                 Button { running = RoutineRun(routine: first) } label: {
@@ -331,7 +331,7 @@ struct RoutineRunView: View {
                 }
             }
             HStack(spacing: 8) {
-                Text("드릴 양은 성장 탭의 기술 성장에 쌓여요.").font(.caption).foregroundStyle(Theme.inkSecondary)
+                Text("오늘 한 드릴은 성장 탭의 기술 성장에서 볼 수 있어요.").font(.caption).foregroundStyle(Theme.inkSecondary)
                 Button("성장 보기") { dismiss(); jumper?.go(.tab(.growth)) }.font(.caption.bold()).tint(Theme.accentText)
             }
             Spacer()

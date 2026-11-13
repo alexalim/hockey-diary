@@ -60,7 +60,7 @@ struct SeasonReportView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                     .shadow(color: .black.opacity(0.15), radius: 8, y: 4)
                 if r.sessions == 0 {
-                    EmptyHint(text: "이 기간엔 활동 기록이 없어요. 기록이 쌓이면 리포트가 채워져요.")
+                    EmptyHint(text: "이 기간엔 활동 기록이 없어요. 활동을 남기면 리포트가 채워져요.")
                 } else if let image = render(r) {
                     ShareLink(item: image, preview: SharePreview("마하다 \(r.title) 리포트", image: image)) {
                         Label("이미지 저장·공유", systemImage: "square.and.arrow.up")

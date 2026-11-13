@@ -293,7 +293,7 @@ struct RunnerDetailView: View {
                 context.saveOrReport()
             }
         } message: {
-            Text("부츠에서 떼고 '교체한 날'로 옮길게요. 새 날은 스케이트 화면에서 추가해 주세요.")
+            Text("부츠에서 떼서 '교체한 날'로 옮겨요. 새 날은 스케이트 화면에서 추가해 주세요.")
         }
         .sheet(isPresented: $editing) { NavigationStack { RunnerEditorView(runner: runner, installOn: nil) } }
     }
