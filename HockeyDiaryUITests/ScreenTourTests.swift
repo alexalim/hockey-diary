@@ -8,7 +8,9 @@ final class ScreenTourTests: XCTestCase {
     override func setUp() {
         continueAfterFailure = true
         app = XCUIApplication()
-        app.launchArguments = ["-ui-demo", "-AppleLanguages", "(ko)", "-AppleLocale", "ko_KR"]
+        // 빈 상태 투어는 예시 데이터 없이 메모리 저장소만 쓴다(처음 설치한 사람이 보는 화면).
+        let seed = name.contains("test_emptyTour") ? ["-inMemoryStore"] : ["-ui-demo"]
+        app.launchArguments = seed + ["-AppleLanguages", "(ko)", "-AppleLocale", "ko_KR"]
         addUIInterruptionMonitor(withDescription: "권한") { alert in
             for label in ["Don’t Allow", "Don't Allow", "허용 안 함", "OK", "확인"] where alert.buttons[label].exists {
                 alert.buttons[label].tap()
@@ -17,6 +19,19 @@ final class ScreenTourTests: XCTestCase {
             return false
         }
         app.launch()
+    }
+
+    /// 기록이 하나도 없을 때 다섯 탭과 훈련 세 갈래, 컨디션, (+) 메뉴가 어떻게 보이는지 남긴다.
+    func test_emptyTour() {
+        XCTAssertTrue(app.buttons["tab-홈"].waitForExistence(timeout: 15), "홈 탭이 보여야 한다")
+        snap("E01-home"); app.swipeUp(); snap("E01b-home-bottom")
+        if tapVisible("새 기록") { sleep(1); snap("E01c-new-record-menu"); tapButton("취소") }
+        tab("기록"); snap("E02-diary"); app.swipeUp(); snap("E02b-diary-bottom")
+        tab("기록"); if tapText("컨디션 흐름") { sleep(1); snap("E02c-condition"); back() }
+        tab("훈련"); for b in ["연습", "경기", "드릴"] { branch(b); snap("E03-training-\(b)"); app.swipeUp(); snap("E03b-training-\(b)-bottom"); for _ in 0..<3 { app.swipeDown() } }
+        tab("성장"); snap("E04-growth"); app.swipeUp(); snap("E04b-growth-bottom")
+        tab("락커"); snap("E05-locker"); if tapButton("문 열기") { sleep(1); snap("E05b-locker-open") }
+        app.swipeUp(); snap("E05c-locker-bottom")
     }
 
     func test_tour() {
