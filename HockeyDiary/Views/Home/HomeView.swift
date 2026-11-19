@@ -504,6 +504,8 @@ struct SettingsView: View {
                 }
                 Text("분석은 내 기록의 흐름만 보여 줍니다. 의료 조언이나 실력 예측은 하지 않습니다.")
                     .font(.footnote).foregroundStyle(Theme.inkSecondary)
+                Link(destination: URL(string: "https://alexalim.github.io/hockey-diary/")!) { Label("개인정보 처리방침", icon: "lock.fill") }
+                Link(destination: URL(string: "mailto:esl2dev@gmail.com")!) { Label("문의하기", icon: "envelope.fill") }
             }
         }
         .navigationTitle("설정")
