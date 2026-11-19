@@ -354,7 +354,7 @@ struct LockerInside: View {
             zoneLink(.middle, 1)
             NavigationLink { SkateListView() } label: {
                 // UI 테스트가 "스케이트 1켤레"를 글자 하나로 찾는다. 나누지 말 것.
-                zoneLabel(skateCount == 0 ? "스케이트 · 첫 장비 등록" : "스케이트 \(skateCount)켤레", "shoeprints.fill", 2)
+                zoneLabel(skateCount == 0 ? "스케이트" : "스케이트 \(skateCount)켤레", empty: skateCount == 0, "shoeprints.fill", 2)
             }
             .buttonStyle(.plain)
             zoneLink(.side, 3)
@@ -367,20 +367,27 @@ struct LockerInside: View {
     private func zoneLink(_ zone: GearKind.Zone, _ i: Int) -> some View {
         let count = gear.filter { zone.kinds.contains($0.kind) }.count
         return NavigationLink { GearListView(zone: zone) } label: {
-            zoneLabel(count == 0 ? "\(zone.title) · 첫 장비 등록" : "\(zone.title) \(count)개", zone.symbol, i)
+            zoneLabel(count == 0 ? zone.title : "\(zone.title) \(count)개", empty: count == 0, zone.symbol, i)
         }
         .buttonStyle(.plain)
     }
 
-    private func zoneLabel(_ title: String, _ icon: String, _ i: Int) -> some View {
+    /// 칸 이름은 한 줄, 비어 있으면 아래에 작게 안내. 오른쪽 알약은 비었을 땐 '등록', 아니면 '열기'.
+    private func zoneLabel(_ title: String, empty: Bool, _ icon: String, _ i: Int) -> some View {
         HStack(spacing: 12) {
             AppIcon(icon, size: 24)
                 .foregroundStyle(Theme.paperInk)
                 .frame(width: 48, height: 48)
                 .background(Theme.stickers[i % Theme.stickers.count], in: Circle())
-            Text(title).font(.system(.headline, design: .rounded)).foregroundStyle(Theme.paperInk)
-            Spacer()
-            Text("열기").font(.system(.caption, design: .rounded).bold())
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.system(.headline, design: .rounded)).foregroundStyle(Theme.paperInk)
+                    .lineLimit(1).minimumScaleFactor(0.85)
+                if empty {
+                    Text("아직 비어 있어요").font(.system(.caption, design: .rounded)).foregroundStyle(Theme.paperInkSoft)
+                }
+            }
+            Spacer(minLength: 8)
+            Text(empty ? "등록" : "열기").font(.system(.caption, design: .rounded).bold())
                 .foregroundStyle(.white)
                 .padding(.horizontal, 10).padding(.vertical, 5)
                 .background(Theme.neonPink, in: Capsule())
