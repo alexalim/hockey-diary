@@ -105,7 +105,11 @@ final class ComponentDriveTests: XCTestCase {
 
     func test_skate_register() {
         tab("락커")
-        XCTAssertTrue(tapText("스케이트"), "스케이트 바로 가기가 없다")
+        // 락커 화면에서 끌면 문이 열리는 제스처로 먹힌다. 끌지 않고 문을 열어 안쪽 '스케이트' 칸을 바로 누른다.
+        XCTAssertTrue(tapButton("문 열기"), "문 열기 버튼이 없다"); sleep(2)
+        let zone = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "스케이트,")).firstMatch
+        XCTAssertTrue(zone.waitForExistence(timeout: 5), "락커 안 스케이트 칸이 없다"); zone.tap()
+        XCTAssertTrue(app.navigationBars["스케이트"].waitForExistence(timeout: 5), "스케이트 목록이 안 열렸다")
         XCTAssertTrue(tapButton("스케이트 추가"), "스케이트 추가 버튼이 없다")
         guard let brand = formField("브랜드 (예: Bauer)") else { XCTFail("브랜드 칸이 없다"); return }
         brand.tap(); brand.typeText("Bauer")
@@ -114,7 +118,8 @@ final class ComponentDriveTests: XCTestCase {
         sleep(1)
         XCTAssertNotNil(find("Bauer"), "스케이트 목록에 등록한 스케이트가 없다")
         back()
-        XCTAssertNotNil(find("1켤레"), "락커 바로 가기에 1켤레가 안 보인다")
+        let one = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "스케이트 1켤레")).firstMatch
+        XCTAssertTrue(one.waitForExistence(timeout: 5), "락커 안 스케이트 칸이 1켤레로 안 바뀐다")
     }
 
     // MARK: 팀: 만들기 → 팀원 추가 → 명단에 보임
@@ -135,9 +140,10 @@ final class ComponentDriveTests: XCTestCase {
 
     // MARK: - 도우미 (ScreenTourTests와 같은 규칙)
 
+    /// 하단 바가 보일 때만 그 윗선 아래를 버린다(바 뒤를 누르면 탭이 대신 눌린다). 시트 안에서는 화면 끝까지 본다.
     private var barTop: CGFloat {
         let bar = app.buttons["tab-홈"]
-        return bar.exists && bar.isHittable ? bar.frame.minY - 4 : app.frame.height * 0.92
+        return bar.exists && bar.isHittable ? bar.frame.minY - 4 : app.frame.maxY
     }
 
     /// 글자가 들어간 보이는 요소를 찾는다. 안 보이면 조금씩 내려서 찾는다.
