@@ -198,9 +198,14 @@ final class ScreenTourTests: XCTestCase {
 
     /// 훈련 탭의 갈래(연습·경기·드릴)를 고른다.
     private func branch(_ name: String) {
-        let seg = app.segmentedControls.buttons[name]
-        if seg.waitForExistence(timeout: 3) { seg.tap() } else { XCTFail("훈련 갈래 \(name)이 없다") }
-        sleep(1)
+        // 숨은 탭에도 같은 갈래 버튼이 있다. 보이는(누를 수 있는) 것만 누른다.
+        let all = app.segmentedControls.buttons.matching(NSPredicate(format: "label == %@", name))
+        _ = all.firstMatch.waitForExistence(timeout: 3)
+        for i in 0..<min(all.count, 10) {
+            let seg = all.element(boundBy: i)
+            if seg.exists && seg.isHittable { seg.tap(); sleep(1); return }
+        }
+        XCTFail("훈련 갈래 \(name)이 없다")
     }
 
     /// 훈련 탭 → 드릴 갈래, 맨 위로.
