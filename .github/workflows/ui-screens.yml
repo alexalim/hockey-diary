@@ -9,6 +9,10 @@ on:
         description: "App Store 스크린샷용 6.9인치(Pro Max)로 찍기"
         type: boolean
         default: false
+      only:
+        description: "이 테스트만 돌리기 (예: HockeyDiaryUITests/LockScreenTests). 비우면 전부"
+        type: string
+        default: ""
 
 jobs:
   screens:
@@ -50,7 +54,7 @@ jobs:
             -project HockeyDiary.xcodeproj \
             -scheme HockeyDiary \
             -destination "id=${{ steps.sim.outputs.udid }}" \
-            -only-testing:HockeyDiaryUITests \
+            -only-testing:"${{ inputs.only || 'HockeyDiaryUITests' }}" \
             -resultBundlePath "$RUNNER_TEMP/screens.xcresult" \
             CODE_SIGNING_ALLOWED=NO \
             | tee test.log | grep -E "error:|Test Case|failed|TEST (SUCCEEDED|FAILED)" || true
