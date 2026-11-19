@@ -63,15 +63,9 @@ struct LockerView: View {
                 }
                 .sensoryFeedback(.impact(weight: .medium), trigger: isOpen)
 
-                HStack(spacing: 8) {
-                    BigToggle(isOn: isOpen, onTitle: "문 닫기", offTitle: "문 열기", onImage: "door.left.hand.open", offImage: "door.left.hand.closed", action: toggle)
-                        .frame(maxWidth: 160)
-                    Spacer()
-                    Button { editingProfile = LockerStore.profile(context) } label: { Label("꾸미기", icon: "paintbrush.fill") }
-                        .buttonStyle(.borderedProminent)
-                        .tint(Theme.neonPink)
-                }
-                .frame(minHeight: Theme.touch)
+                BigToggle(isOn: isOpen, onTitle: "문 닫기", offTitle: "문 열기", onImage: "door.left.hand.open", offImage: "door.left.hand.closed", action: toggle)
+                    .frame(maxWidth: 160)
+                    .frame(maxWidth: .infinity, minHeight: Theme.touch)
 
                 PaperCard(tape: Theme.tapeMint, tapeAngle: -4) {
                     PaperTitle(text: "바로 가기", systemImage: "list.bullet")
