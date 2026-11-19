@@ -45,6 +45,8 @@ struct RootView: View {
     }
 
     @State private var tab: Tab = .home
+    /// 지금 탭을 한 번 더 누르면 그 탭을 첫 화면으로 되돌린다(iOS 기본 탭 동작). 스택을 새로 만들어 비운다.
+    @State private var resets: [Tab: Int] = [:]
 
     /// 안내문의 '바로 가기'. 열려 있던 기록 시트는 닫고, 시트를 다시 열어야 하면 닫히는 시간을 조금 기다린다.
     private func handle(_ jump: AppJump) {
@@ -83,7 +85,7 @@ struct RootView: View {
         }
         // 바는 안전영역 삽입으로 놓되, 스크롤 내용의 아래 여백은 contentMargins로 따로 준다.
         // (iOS 26 시뮬레이터 측정: 안전영역 삽입만으로는 NavigationStack 안의 ScrollView·List 내용 여백이 늘지 않았다.)
-        .safeAreaInset(edge: .bottom, spacing: 0) { MahadaTabBar(selection: $tab) }
+        .safeAreaInset(edge: .bottom, spacing: 0) { MahadaTabBar(selection: $tab) { resets[$0, default: 0] += 1 } }
         .contentMargins(.bottom, MahadaTabBar.height, for: .scrollContent)
         .contentMargins(.bottom, MahadaTabBar.height, for: .scrollIndicators)
         .environment(jumper)
@@ -118,6 +120,7 @@ struct RootView: View {
     private func stack<Content: View>(_ t: Tab, @ViewBuilder content: () -> Content) -> some View {
         let on = tab == t
         return NavigationStack { content().toolbar { plusButton } }
+            .id(resets[t, default: 0])
             .opacity(on ? 1 : 0)
             .allowsHitTesting(on)
             .accessibilityHidden(!on)
@@ -141,6 +144,12 @@ struct RootView: View {
 /// 직접 그린 하단 바. 가운데 홈은 크고 솟은 원형 버튼.
 struct MahadaTabBar: View {
     @Binding var selection: RootView.Tab
+    /// 이미 고른 탭을 다시 눌렀을 때.
+    var onReselect: (RootView.Tab) -> Void = { _ in }
+
+    private func pick(_ t: RootView.Tab) {
+        if selection == t { onReselect(t) } else { selection = t }
+    }
 
     /// 홈 원이 바 위로 솟은 높이. 이만큼 투명한 띠를 두어 화면 내용이 원 뒤에 가려지지 않게 한다.
     static let raise: CGFloat = 14
@@ -169,7 +178,7 @@ struct MahadaTabBar: View {
     private func item(_ t: RootView.Tab) -> some View {
         let on = selection == t
         return Button {
-            selection = t
+            pick(t)
         } label: {
             VStack(spacing: 3) {
                 AppIcon(t.symbol, size: 25)
@@ -189,7 +198,7 @@ struct MahadaTabBar: View {
     private var homeButton: some View {
         let on = selection == .home
         return Button {
-            selection = .home
+            pick(.home)
         } label: {
             VStack(spacing: 2) {
                 ZStack {

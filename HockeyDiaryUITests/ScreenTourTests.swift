@@ -26,7 +26,7 @@ final class ScreenTourTests: XCTestCase {
 
         // 수업 기록 편집기
         app.swipeDown()
-        if tapText("수업 기록") {
+        if newRecord("수업 기록") {
             snap("02-lesson-editor")
             if tapMore() { snap("02b-lesson-editor-mid"); app.swipeUp(); snap("02c-lesson-editor-bottom") }
             tapButton("닫기")
@@ -34,7 +34,7 @@ final class ScreenTourTests: XCTestCase {
 
         // 접힌 상태로도 저장되고 완료 화면이 나와야 한다(한 줄만 적고 저장).
         tab("홈")
-        if tapText("수업 기록") {
+        if newRecord("수업 기록") {
             // Form은 화면 밖 칸을 아직 안 만든다. 보일 때까지 조금씩 내린다.
             var lineView = app.textViews["오늘의 배움 한 줄"].firstMatch
             for _ in 0..<6 where !(lineView.exists && lineView.isHittable) {
@@ -62,7 +62,7 @@ final class ScreenTourTests: XCTestCase {
         }
 
         // 미니게임 기록: 슛 차트
-        if tapText("경기 리뷰") {
+        if newRecord("미니게임 리뷰") {
             snap("02d-game-editor")
             if tapMore() {
                 // 펼치면 슛 차트가 지금 위치보다 위에 생긴다. 위로 올린 뒤 찾는다.
@@ -223,10 +223,18 @@ final class ScreenTourTests: XCTestCase {
         add(a)
     }
 
+    /// 상단 (+) '새 기록' 메뉴에서 고른다.
+    @discardableResult
+    private func newRecord(_ label: String) -> Bool {
+        guard tapButton("새 기록") else { snap("miss-새 기록"); return false }
+        guard tapButton(label) else { snap("miss-\(label)"); return false }
+        sleep(1); return true
+    }
+
     private func tab(_ name: String) {
-        // 직접 그린 하단 바(식별자 tab-이름). 예전 기본 탭 바도 받아준다.
+        // 직접 그린 하단 바(식별자 tab-이름). 한 번 더 누르면 그 탭 첫 화면으로 돌아간다.
         let custom = app.buttons["tab-\(name)"]
-        if custom.waitForExistence(timeout: 5) { custom.tap(); return }
+        if custom.waitForExistence(timeout: 5) { custom.tap(); usleep(300_000); custom.tap(); sleep(1); return }
         let b = app.tabBars.buttons[name]
         if b.waitForExistence(timeout: 3) { b.tap() } else { XCTFail("탭 \(name)이 없다") }
     }
