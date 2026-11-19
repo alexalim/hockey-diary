@@ -42,9 +42,8 @@ struct HomeView: View {
         ScrollView {
             VStack(spacing: 12) {
                 ScreenHeader(eyebrow: Date().formatted(.dateTime.weekday(.wide).month().day()).uppercased(),
-                             title: "오늘도, 빙판 위에서.", subtitle: "작은 기록이 나의 플레이를 바꿔요.") {
-                    RoundIconButton(systemImage: "gearshape.fill", label: "설정") { showingSettings = true }
-                }
+                             title: "오늘도, 빙판 위에서.", subtitle: "작은 기록이 나의 플레이를 바꿔요.")
+                    .toolbar { BarAction(icon: "gearshape.fill", label: "설정") { showingSettings = true } }
                 if health.openFailed || health.lastSaveFailed { storeWarning }
                 promptCard
                 levelCard

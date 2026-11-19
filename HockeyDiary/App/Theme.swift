@@ -344,6 +344,35 @@ struct ScreenHeader<Trailing: View>: View {
     }
 }
 
+/// 탭 첫 화면의 화면별 버튼. 상단 바 오른쪽, 새 기록(+) 옆에 한 줄로 놓인다.
+/// (예전엔 머리글 오른쪽에 따로 있어서 + 아래에 동그라미가 하나 더 쌓여 보였다.)
+struct BarAction: ToolbarContent {
+    var icon: String
+    var label: String
+    var action: () -> Void
+
+    var body: some ToolbarContent {
+        ToolbarItem(placement: .topBarTrailing) {
+            Button(action: action) { AppIcon(icon).font(.title3).foregroundStyle(Theme.title) }
+                .accessibilityLabel(label)
+        }
+    }
+}
+
+/// BarAction과 같은 자리, 밀어 들어가는 화면.
+struct BarLink<Destination: View>: ToolbarContent {
+    var icon: String
+    var label: String
+    @ViewBuilder var destination: () -> Destination
+
+    var body: some ToolbarContent {
+        ToolbarItem(placement: .topBarTrailing) {
+            NavigationLink { destination() } label: { AppIcon(icon).font(.title3).foregroundStyle(Theme.title) }
+                .accessibilityLabel(label)
+        }
+    }
+}
+
 /// 둥근 작은 행동 버튼(머리 오른쪽).
 struct RoundIconButton: View {
     var systemImage: String

@@ -25,14 +25,8 @@ struct TrainingView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
-                ScreenHeader(eyebrow: "TRAINING STUDIO", title: "훈련", subtitle: "연습, 경기, 드릴을 한곳에서.") {
-                    NavigationLink { SkillGuideListView() } label: {
-                        AppIcon("book.pages", size: 19.55).foregroundStyle(Theme.title)
-                            .frame(width: 44, height: 44).background(Theme.card, in: Circle())
-                            .overlay(Circle().stroke(Theme.border, lineWidth: 1))
-                    }
-                    .buttonStyle(.plain).accessibilityLabel("기술 도감")
-                }
+                ScreenHeader(eyebrow: "TRAINING STUDIO", title: "훈련", subtitle: "연습, 경기, 드릴을 한곳에서.")
+                    .toolbar { BarLink(icon: "book.pages", label: "기술 도감") { SkillGuideListView() } }
                 Picker("갈래", selection: $branch) {
                     ForEach(Branch.allCases, id: \.self) { Text($0.rawValue).tag($0) }
                 }

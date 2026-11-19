@@ -35,7 +35,7 @@ enum DemoData {
         lesson.surface = .indoorRink; lesson.rinkName = "목동 아이스링크"; lesson.iceFeel = .normal
         lesson.moodBefore = 2; lesson.moodAfter = 4; lesson.fatigue = 3
         lesson.coachNotes = "무릎을 더 굽혀서 낮게"; lesson.nextGoal = "크로스오버 리듬 맞추기"
-        for (name, fb) in [("크로스오버", "바깥 발 넘길 때 상체가 들려"), ("하키 스톱", "왼쪽은 잘 되는데 오른쪽이 밀려")] {
+        for (name, fb) in [("크로스오버", "바깥 발 넘길 때 상체가 들림"), ("하키 스톱", "왼쪽은 잘 되는데 오른쪽이 밀림")] {
             guard let s = skill(name) else { continue }
             let l = SkillLearning(); context.insert(l); l.skill = s; l.session = lesson; l.feedback = fb; l.difficulty = 3
         }
@@ -45,7 +45,7 @@ enum DemoData {
         let game = Session(type: .miniGame, startsAt: daysAgo(1), minutes: 90)
         context.insert(game)
         game.surface = .indoorRink; game.rinkName = "목동 아이스링크"; game.moodBefore = 3; game.moodAfter = 5
-        game.review = "패스 받을 자리를 먼저 잡았더니 편했어"
+        game.review = "패스 받을 자리를 먼저 잡았더니 편했음"
         if let s = skill("크로스오버") {
             let t = SkillAttempt(); context.insert(t); t.skill = s; t.session = game; t.tried = true; t.outcome = .partial; t.count = 3
         }
@@ -73,7 +73,7 @@ enum DemoData {
         // 일기
         let j = DailyJournal(entryDate: Date())
         context.insert(j)
-        j.mood = 4; j.body = "퇴근하고 링크 다녀옴. 머리가 맑아졌어"; j.tags = ["하키", "업무"]; j.isPrivate = false
+        j.mood = 4; j.body = "퇴근하고 링크 다녀옴. 머리가 맑아짐"; j.tags = ["하키", "업무"]; j.isPrivate = false
 
         // 락커
         let profile = LockerStore.profile(context)

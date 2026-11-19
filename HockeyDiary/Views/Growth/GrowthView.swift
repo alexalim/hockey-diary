@@ -26,14 +26,8 @@ struct GrowthView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
-                ScreenHeader(eyebrow: "YOUR PROGRESS", title: "성장", subtitle: "활동과 실력은 따로, 변화는 함께.") {
-                    NavigationLink { SeasonReportView() } label: {
-                        AppIcon("square.and.arrow.up", size: 19.55).foregroundStyle(Theme.title)
-                            .frame(width: 44, height: 44).background(Theme.card, in: Circle())
-                            .overlay(Circle().stroke(Theme.border, lineWidth: 1))
-                    }
-                    .buttonStyle(.plain).accessibilityLabel("시즌 리포트")
-                }
+                ScreenHeader(eyebrow: "YOUR PROGRESS", title: "성장", subtitle: "활동과 실력은 따로, 변화는 함께.")
+                    .toolbar { BarLink(icon: "square.and.arrow.up", label: "시즌 리포트") { SeasonReportView() } }
                 Picker("기간", selection: $period) {
                     ForEach(Period.allCases, id: \.self) { p in Text(p.title).tag(p) }
                 }
@@ -497,14 +491,15 @@ struct SkillDetailView: View {
                         Text(skill.name).font(.title2.bold()).foregroundStyle(.white)
                         SkillInfoButton(name: skill.name, tint: .white)
                     }
-                    Text("처음보다 나아졌을까요? 아래 숫자는 각각 다른 걸 세요.")
+                    Text("처음보다 나아졌을까요?")
                         .font(.subheadline).foregroundStyle(.white.opacity(0.85))
                 }
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
-                    StatTile(title: "배운 수업", value: "\(st.lessonCount)회")
+                    StatTile(title: "수업에서 배움", value: "\(st.lessonCount)회")
                     StatTile(title: "경기에서 써봄", value: "\(st.triedEvents)회")
-                    StatTile(title: "기회가 없었음", value: "\(st.untriedEvents)회")
-                    StatTile(title: "성공 기록", value: st.evaluated == 0 ? "평가 없음" : "\(st.successes)/\(st.evaluated)", tint: Theme.success)
+                    StatTile(title: "경기에서 못 써봄", value: "\(st.untriedEvents)회")
+                    StatTile(title: st.evaluated == 0 ? "성공" : "써 본 \(st.evaluated)번 중 성공",
+                             value: st.evaluated == 0 ? "아직 없음" : "\(st.successes)번", tint: Theme.success)
                 }
                 if st.partials > 0 || st.difficulties > 0 {
                     Card {
