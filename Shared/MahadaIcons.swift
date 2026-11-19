@@ -62,11 +62,13 @@ enum MahadaIcon: String, CaseIterable {
 struct MahadaIconView: View {
     let icon: MahadaIcon
     var size: CGFloat = 24
+    /// 큰 그림에 쓸 때 선 굵기 상한. 없으면 크기에 비례해 굵어진다(아이콘 크기에선 그게 맞다).
+    var maxLine: CGFloat? = nil
 
     var body: some View {
         Canvas { ctx, s in
             let k = s.width / 24
-            let lw = max(1.3, 1.9 * k)
+            let lw = min(max(1.3, 1.9 * k), maxLine ?? .infinity)
             for piece in icon.ops {
                 var path = Path()
                 var fill = false
@@ -97,16 +99,18 @@ struct MahadaIconView: View {
 struct AppIcon: View {
     let name: String
     var size: CGFloat? = nil
+    var maxLine: CGFloat? = nil
     @Environment(\.font) private var font
 
-    init(_ name: String, size: CGFloat? = nil) {
+    init(_ name: String, size: CGFloat? = nil, maxLine: CGFloat? = nil) {
         self.name = name
         self.size = size
+        self.maxLine = maxLine
     }
 
     var body: some View {
         if let icon = MahadaIcon.bySymbol[name] {
-            MahadaIconView(icon: icon, size: size ?? Self.guess(font))
+            MahadaIconView(icon: icon, size: size ?? Self.guess(font), maxLine: maxLine)
         } else {
             Image(systemName: name)
         }

@@ -70,7 +70,8 @@ struct ConditionView: View {
                 .pickerStyle(.segmented)
                 Text(metric.help).font(.caption).foregroundStyle(Theme.inkSecondary)
                 if points.isEmpty {
-                    EmptyHint(text: loading ? "불러오는 중…" : emptyReason)
+                    EmptyHint(text: loading ? "불러오는 중…" : emptyReason,
+                              link: !loading && !healthOn && [ConditionMetric.sleep, .restingHR, .hrv].contains(metric) ? EmptyLink("Apple 건강 연결하기") { HealthConnectView() } : nil)
                 } else {
                     Chart {
                         if cycleOn {
@@ -116,7 +117,7 @@ struct ConditionView: View {
     private var emptyReason: String {
         switch metric {
         case .sleep, .restingHR, .hrv:
-            if !healthOn { return "Apple 건강을 연결하면 볼 수 있어요. 아래 '항목 고르기'에서 연결해 주세요." }
+            if !healthOn { return "Apple 건강을 연결하면 볼 수 있어요." }
             if let errorText { return errorText }
             return "이 기간엔 건강 앱에 \(metric.title) 기록이 없어요. 워치를 차고 자면 기록이 생겨요."
         case .mood, .fatigue: return "활동을 기록할 때 운동 후 기분과 '얼마나 힘들었어요?'를 적으면 흐름이 보여요."

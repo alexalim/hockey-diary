@@ -59,6 +59,7 @@ struct TrainingView: View {
 struct PracticeBranch: View {
     let sessions: [Session]
     @Binding var newEntry: NewEntry?
+    @Environment(AppJumper.self) private var jumper: AppJumper?
 
     private var mine: [Session] { sessions.filter { $0.type == .lesson || $0.type == .freePractice } }
     private var thisMonth: [Session] { mine.filter { Calendar.current.isDate($0.startsAt, equalTo: Date(), toGranularity: .month) } }
@@ -78,7 +79,11 @@ struct PracticeBranch: View {
             Card {
                 CardHeader(title: "다음 목표", systemImage: "target")
                 Text(goal).font(.subheadline.bold()).foregroundStyle(Theme.title)
-                Text("지난 수업에서 적은 목표예요. 드릴 갈래에서 이어서 다듬어 보세요.").font(.caption).foregroundStyle(Theme.inkSecondary)
+                Text("지난 수업에서 적은 목표예요. 드릴로 이어서 다듬어 보세요.").font(.caption).foregroundStyle(Theme.inkSecondary)
+                Button { jumper?.go(.training(.drill)) } label: {
+                    Label("드릴로 가기", icon: "figure.hockey").font(.subheadline.bold())
+                }
+                .buttonStyle(.bordered).tint(Theme.accent).buttonBorderShape(.capsule)
             }
         }
         SectionHeader(title: "최근 연습")

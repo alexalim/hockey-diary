@@ -16,7 +16,7 @@ struct RuleArt: View {
     var body: some View {
         switch id {
         case "offside", "icing", "faceoff", "linechange":
-            if let s = RuleScene.scenes[id]?.first { RinkSketch(scene: s, progress: 1) } else { EmptyView() }
+            if let s = RuleScene.scenes[id]?.first { RinkSketch(scene: s, progress: 1, labels: !compact) } else { EmptyView() }
         case "fouls":
             if let s = FoulSketch.named("트리핑") { FoulSketchView(sketch: s) } else { EmptyView() }
         case "positions": PositionsMini()
@@ -130,7 +130,7 @@ struct EquipmentArt: View {
             let w = geo.size.width, h = geo.size.height
             ZStack {
                 RoundedRectangle(cornerRadius: 14).fill(iceFill)
-                AppIcon("figure.stand", size: h * 0.9)
+                AppIcon("figure.stand", size: h * 0.9, maxLine: compact ? 3.5 : 5)
                     .foregroundStyle(Theme.cobalt.opacity(0.85))
                     .position(x: w / 2, y: h / 2)
                 Path { p in p.move(to: CGPoint(x: w * 0.62, y: h * 0.45)); p.addLine(to: CGPoint(x: w * 0.68, y: h * 0.95)) }

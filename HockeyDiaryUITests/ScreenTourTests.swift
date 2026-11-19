@@ -226,9 +226,22 @@ final class ScreenTourTests: XCTestCase {
     /// 상단 (+) '새 기록' 메뉴에서 고른다.
     @discardableResult
     private func newRecord(_ label: String) -> Bool {
-        guard tapButton("새 기록") else { snap("miss-새 기록"); return false }
-        guard tapButton(label) else { snap("miss-\(label)"); return false }
+        // 숨은 탭에도 같은 이름의 버튼이 있다. 보이는(누를 수 있는) 것만 누른다.
+        guard tapVisible("새 기록") else { snap("miss-새 기록"); return false }
+        sleep(1)
+        guard tapVisible(label) else { snap("miss-\(label)"); return false }
         sleep(1); return true
+    }
+
+    @discardableResult
+    private func tapVisible(_ label: String) -> Bool {
+        let all = app.buttons.matching(NSPredicate(format: "label == %@ OR identifier == %@", label, label))
+        _ = all.firstMatch.waitForExistence(timeout: 3)
+        for i in 0..<min(all.count, 10) {
+            let b = all.element(boundBy: i)
+            if b.exists && b.isHittable { b.tap(); return true }
+        }
+        return false
     }
 
     private func tab(_ name: String) {

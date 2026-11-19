@@ -193,6 +193,8 @@ struct RuleSceneCard: View {
 struct RinkSketch: View, Animatable {
     let scene: RuleScene
     var progress: CGFloat
+    /// 목록 썸네일은 칸이 좁아 선 이름이 서로·선과 겹친다. 그때는 선만 그린다.
+    var labels = true
 
     var animatableData: CGFloat {
         get { progress }
@@ -214,9 +216,11 @@ struct RinkSketch: View, Animatable {
                 ForEach(Array(scene.lines.enumerated()), id: \.offset) { _, line in
                     Rectangle().fill(line.color).frame(width: 5, height: h)
                         .position(x: line.x * w, y: h / 2)
-                    Text(line.label).font(.caption2).foregroundStyle(line.color)
-                        .padding(3).background(.background.opacity(0.8), in: Capsule())
-                        .position(x: min(max(line.x * w, 44), w - 44), y: 12)
+                    if labels {
+                        Text(line.label).font(.caption2).foregroundStyle(line.color)
+                            .padding(3).background(.background.opacity(0.8), in: Capsule())
+                            .position(x: min(max(line.x * w, 44), w - 44), y: 12)
+                    }
                 }
                 ForEach(Array(scene.markers.enumerated()), id: \.offset) { _, m in
                     let x = (m.from.x + (m.to.x - m.from.x) * progress) * w
