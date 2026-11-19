@@ -37,21 +37,21 @@ final class LockScreenTests: XCTestCase {
         plus.tap(); sleep(1)
         shot("L01-runner")
 
-        // 잠금 버튼을 누르면 잠금 화면이 뜬다. 한 번 더 누르면 화면이 꺼지므로 홈으로 깨운다.
+        // 잠금 버튼을 누르면 잠금 화면이 뜬다. 실시간 활동 카드는 몇 초 늦게 그려지므로 보일 때까지 기다렸다 찍는다.
         XCUIDevice.shared.perform(NSSelectorFromString("pressLockButton"))
-        sleep(3)
-        shot("L02-lock")
-        XCUIDevice.shared.press(.home); sleep(2)
-        shot("L03-lock-after-home")
-
-        // 잠금 화면에 드릴 이름이 보여야 실시간 활동이 뜬 것이다.
         let card = springboard.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "라인 스톱")).firstMatch
-        XCTAssertTrue(card.waitForExistence(timeout: 5), "잠금 화면에 드릴 실시간 활동이 없다")
-        if card.exists {
-            // 카드 크기와, 그 아래로 이어지는 요소가 있는지 로그에 남긴다.
-            print("LIVE-ACTIVITY card frame:", card.frame)
-            print("LIVE-ACTIVITY springboard tree:\n", springboard.debugDescription.prefix(6000))
-        }
+        let shown = card.waitForExistence(timeout: 25)
+        sleep(2)
+        shot("L02-lock")
+        XCTAssertTrue(shown, "잠금 화면에 드릴 실시간 활동이 없다")
+        sleep(5)
+        shot("L03-lock-5s")
+        XCUIDevice.shared.press(.home); sleep(3)
+        shot("L04-lock-after-home")
+
+        // 카드 크기와 잠금 화면 요소 전체를 로그에 남겨 카드 밖으로 이어지는 요소가 있는지 본다.
+        print("LIVE-ACTIVITY card frame:", card.frame)
+        print("LIVE-ACTIVITY springboard tree BEGIN\n", springboard.debugDescription, "\nLIVE-ACTIVITY springboard tree END")
     }
 
     // MARK: 도우미
