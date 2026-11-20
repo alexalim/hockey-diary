@@ -142,7 +142,9 @@ struct RoutineLiveActivity: Widget {
         ActivityConfiguration(for: RoutineActivityAttributes.self) { context in
             lockScreen(context.attributes, context.state)
                 .padding(14)
-                .activityBackgroundTint(WColor.deepNavy)
+                // iOS 26 잠금 화면은 카드를 유리 재질 위에 올린다. 완전 불투명 틴트는 그 합성과 어긋나
+                // 카드 오른쪽 아래로 긴 유리 기둥이 남는 현상이 보고됐다(2026-11-19). 살짝 비치게 둔다.
+                .activityBackgroundTint(WColor.deepNavy.opacity(0.85))
                 .activitySystemActionForegroundColor(.white)
         } dynamicIsland: { context in
             DynamicIsland {
@@ -188,9 +190,14 @@ struct RoutineLiveActivity: Widget {
                 Text(s.drillTitle).font(.headline).foregroundStyle(.white).lineLimit(1)
                 Text(s.skillName).font(.caption2).foregroundStyle(.white.opacity(0.7))
             }
-            Spacer()
+            Spacer(minLength: 8)
+            // 큰 숫자는 크기를 못 박아 둔다. 시스템이 카드 밖까지 레이어를 늘리지 않게.
             big(s).font(.system(size: 36, weight: .black, design: .rounded)).foregroundStyle(WColor.pink)
+                .lineLimit(1).minimumScaleFactor(0.6)
+                .frame(width: 96, height: 44, alignment: .trailing)
+                .fixedSize()
         }
+        .frame(maxWidth: .infinity)
     }
 }
 
