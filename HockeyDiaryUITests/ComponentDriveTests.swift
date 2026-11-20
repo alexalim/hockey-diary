@@ -148,7 +148,9 @@ final class ComponentDriveTests: XCTestCase {
         guard let name = formField("팀 이름 (예: 목동 펭귄스)") else { XCTFail("팀 이름 칸이 없다"); return }
         name.tap(); name.typeText("테스트 펭귄스")
         XCTAssertTrue(tapButton("만들기"))
-        XCTAssertTrue(app.navigationBars["테스트 펭귄스"].waitForExistence(timeout: 5), "팀 화면 제목이 팀 이름이 아니다")
+        // 제목은 '팀'으로 고정이고 팀 이름은 화면 안 이름표에 보인다.
+        XCTAssertNotNil(find("테스트 펭귄스"), "팀 화면 이름표에 팀 이름이 없다")
+        XCTAssertFalse(app.navigationBars["테스트 펭귄스"].exists, "팀 이름이 화면 제목으로 올라가 있다")
         XCTAssertTrue(tapText("팀원 추가"))
         guard let member = formField("이름 또는 별명") else { XCTFail("팀원 이름 칸이 없다"); return }
         member.tap(); member.typeText("김하키")

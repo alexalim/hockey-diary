@@ -157,17 +157,22 @@ struct MahadaTabBar: View {
         if selection == t { onReselect(t) } else { selection = t }
     }
 
-    /// 홈 원이 바 위로 솟은 높이. 이만큼 투명한 띠를 두어 화면 내용이 원 뒤에 가려지지 않게 한다.
+    /// 홈 원이 제자리에서 위로 올라가는 거리.
     static let raise: CGFloat = 14
+    /// 바 위에 두는 투명한 띠. 솟은 원과 그 그림자가 여기 들어가므로 화면 내용이 원 뒤에 가려지지 않는다.
+    /// (예전엔 raise와 같았고 홈 칸 높이도 50으로 잡아, 실제 바보다 24pt 짧은 여백이 나와 맨 아래 글이 원에 가렸다. 2026-11-20)
+    static let overhang: CGFloat = raise + 8
     private static let itemHeight: CGFloat = 50
+    /// 홈 칸은 원(58) + 글자라 다른 칸보다 크다. 바 높이 계산이 어긋나지 않게 고정한다.
+    private static let homeHeight: CGFloat = 74
     private static let padTop: CGFloat = 6
     private static let padBottom: CGFloat = 4
     /// 기기 아래 안전영역을 뺀 바 전체 높이. 각 탭 내용은 이만큼 아래 여백을 둔다.
-    static let height: CGFloat = raise + padTop + itemHeight + padBottom
+    static let height: CGFloat = overhang + padTop + homeHeight + padBottom
 
     var body: some View {
         VStack(spacing: 0) {
-            Color.clear.frame(height: Self.raise)
+            Color.clear.frame(height: Self.overhang)
             HStack(alignment: .bottom, spacing: 0) {
                 ForEach(RootView.Tab.allCases, id: \.self) { t in
                     if t == .home { homeButton } else { item(t) }
@@ -220,7 +225,8 @@ struct MahadaTabBar: View {
                     .foregroundStyle(on ? Theme.accent : Theme.inkSecondary)
                     .offset(y: -12)
             }
-            .frame(maxWidth: .infinity, minHeight: Self.itemHeight)
+            .frame(maxWidth: .infinity)
+            .frame(height: Self.homeHeight)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

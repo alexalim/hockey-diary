@@ -30,12 +30,18 @@ struct TeamView: View {
             }
         }
         .screenBackground()
-        .navigationTitle(team?.name ?? "우리 팀")
+        // 제목은 늘 '팀'. 팀 이름은 화면 안 이름표에 둔다(제목에 팀 이름이 먼저 오면 어느 화면인지 안 보인다는 피드백, 2026-11-20).
+        .navigationTitle("").navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var header: some View {
+        ScreenHeader(eyebrow: "OUR TEAM", title: "팀", subtitle: "일정, 참석, 라인업을 한곳에.")
     }
 
     private var createBody: some View {
         ScrollView {
             VStack(spacing: 12) {
+                header
                 Card(tint: Theme.cobalt) {
                     Text("우리 팀 만들기").font(.title3.bold()).foregroundStyle(.white)
                     Text("경기 일정과 참석, 라인업을 정리해서 카톡에 이미지나 글로 올릴 수 있어요. 팀 정보는 이 아이폰에만 저장돼요.")
@@ -60,6 +66,18 @@ struct TeamView: View {
     private func teamBody(_ team: Team) -> some View {
         ScrollView {
             VStack(spacing: 12) {
+                header
+                // 이름표: 팀 이름은 여기서 보고 여기서 바꾼다.
+                Card {
+                    HStack(spacing: 10) {
+                        AppIcon("person.3.fill").font(.title3).foregroundStyle(Theme.accent)
+                        Text(team.name).font(.title3.bold()).foregroundStyle(Theme.title).lineLimit(1)
+                        Spacer()
+                        Button("이름 바꾸기") { newTeamName = team.name; renaming = true }
+                            .font(.subheadline).foregroundStyle(Theme.accent)
+                    }
+                    .frame(minHeight: Theme.touch)
+                }
                 Card {
                     CardHeader(title: "다음 일정", systemImage: "calendar", trailing: upcoming.isEmpty ? nil : "\(upcoming.count)개")
                     if upcoming.isEmpty {
@@ -104,7 +122,6 @@ struct TeamView: View {
             }
             .padding(16)
         }
-        .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("이름") { newTeamName = team.name; renaming = true } } }
         .alert("팀 이름", isPresented: $renaming) {
             TextField("팀 이름", text: $newTeamName)
             Button("저장") { team.name = newTeamName.trimmingCharacters(in: .whitespaces); context.saveOrReport() }
@@ -117,15 +134,25 @@ struct TeamView: View {
 
     private func eventRow(_ e: TeamEvent) -> some View {
         let going = e.attendance.count(.going, among: members.map(\.id))
+        let cal = Calendar.current
+        // 날짜 칸은 숫자와 요일 두 줄만. '20일'을 좁은 칸에 넣으면 '20 / 일 / 금' 세 줄로 갈라졌다(피드백 2026-11-20).
+        let day = cal.component(.day, from: e.at)
+        let weekday = e.at.formatted(.dateTime.weekday(.abbreviated))
+        // 이번 달이면 시간만, 다른 달이면 '12월 3일 오후 9:00'처럼 달까지 적는다.
+        let sameMonth = cal.isDate(e.at, equalTo: Date(), toGranularity: .month)
+        let when = sameMonth ? e.at.formatted(.dateTime.hour().minute()) : e.at.formatted(.dateTime.month().day().hour().minute())
         return HStack(spacing: 12) {
             VStack(spacing: 0) {
-                Text(e.at.formatted(.dateTime.day())).font(.title3.bold()).foregroundStyle(Theme.title)
-                Text(e.at.formatted(.dateTime.weekday(.abbreviated))).font(.caption2).foregroundStyle(Theme.inkSecondary)
+                Text("\(day)").font(.title3.bold()).monospacedDigit().foregroundStyle(Theme.title)
+                Text(weekday).font(.caption2).foregroundStyle(Theme.inkSecondary)
             }
+            .lineLimit(1).fixedSize()
             .frame(width: 40)
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("\(day)일 \(weekday)요일")
             VStack(alignment: .leading, spacing: 2) {
                 Text(e.title).font(.subheadline.bold()).foregroundStyle(Theme.title)
-                Text("\(e.at.formatted(.dateTime.month().hour().minute()))\(e.rinkName.isEmpty ? "" : " · \(e.rinkName)")").font(.caption).foregroundStyle(Theme.inkSecondary)
+                Text("\(when)\(e.rinkName.isEmpty ? "" : " · \(e.rinkName)")").font(.caption).foregroundStyle(Theme.inkSecondary)
             }
             Spacer()
             if !members.isEmpty {

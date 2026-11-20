@@ -139,10 +139,11 @@ final class ScreenTourTests: XCTestCase {
         tab("기록"); snap("03-diary")
         // 성장
         tab("성장"); for _ in 0..<3 { app.swipeDown() }; snap("04-growth")
-        tab("팀"); snap("07-team")
-        tab("뭐할까"); snap("08-whatnow"); app.swipeUp(); snap("08b-whatnow-bottom")
         app.swipeUp(); snap("04b-growth-mid")
         app.swipeUp(); snap("04c-growth-bottom")
+        // 팀·뭐할까는 성장 스크롤을 다 찍은 뒤에(앞에 끼우면 성장 중간·아래 캡처가 뭐할까 화면이 된다)
+        tab("팀"); snap("07-team")
+        tab("뭐할까"); snap("08-whatnow"); app.swipeUp(); snap("08b-whatnow-bottom")
 
         // 훈련(드릴) → 하키 아카데미 → 규칙·전술: 목록, 반칙 그림, 링크 구조, 전술
         drills(); snap("04n-practice-academy")

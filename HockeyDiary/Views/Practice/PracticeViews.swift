@@ -291,7 +291,8 @@ struct RoutineRunView: View {
                 .foregroundStyle(count >= item.target ? Theme.success : Theme.title)
                 .contentTransition(.numericText())
                 .accessibilityLabel(count >= item.target ? "\(count)번 했어요" : "\(left)번 남았어요")
-            Text(count >= item.target ? "목표 \(item.target)번 다 했어요!" : "번 남았어요 · 지금 \(count)번").font(.subheadline).foregroundStyle(Theme.inkSecondary)
+            // 큰 숫자 아래 줄이라 '번 남았어요'로 이어 붙이면 '10 / 번 남았어요'로 끊겨 읽혔다. 줄 혼자서도 읽히게 쓴다.
+            Text(count >= item.target ? "목표 \(item.target)번 다 했어요!" : "남은 횟수예요 · 지금까지 \(count)번").font(.subheadline).foregroundStyle(Theme.inkSecondary)
             HStack(spacing: 10) {
                 Button { if count > 0 { count -= 1 } } label: { AppIcon("minus").frame(width: 64, height: 64) }
                     .buttonStyle(.bordered).accessibilityLabel("하나 빼기")

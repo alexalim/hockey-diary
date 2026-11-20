@@ -186,7 +186,9 @@ struct TacticRink: View, Animatable {
                         .trim(from: 0, to: progress)
                         .stroke(Theme.accent.opacity(0.8), style: StrokeStyle(lineWidth: 2, lineCap: .round, dash: m.kind == .pass ? [5, 4] : []))
                 }
-                ForEach(Array(play.players.enumerated()), id: \.offset) { _, pl in
+                // 상대를 먼저 그려 우리 선수(글자 있는 쪽)가 위에 오게 한다. 붙는 장면에서 F1 글자가 가려졌다.
+                let ordered = play.players.filter { $0.side == .them } + play.players.filter { $0.side == .us }
+                ForEach(Array(ordered.enumerated()), id: \.offset) { _, pl in
                     let pt = p(CGPoint(x: pl.from.x + (pl.to.x - pl.from.x) * progress, y: pl.from.y + (pl.to.y - pl.from.y) * progress))
                     ZStack {
                         Circle().fill(pl.side == .us ? Theme.cobalt : Color.white)
