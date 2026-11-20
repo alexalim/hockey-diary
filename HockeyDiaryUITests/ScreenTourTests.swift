@@ -21,7 +21,7 @@ final class ScreenTourTests: XCTestCase {
         app.launch()
     }
 
-    /// 기록이 하나도 없을 때 다섯 탭과 훈련 세 갈래, 컨디션, (+) 메뉴가 어떻게 보이는지 남긴다.
+    /// 기록이 하나도 없을 때 일곱 탭과 훈련 세 갈래, 컨디션, (+) 메뉴가 어떻게 보이는지 남긴다.
     func test_emptyTour() {
         XCTAssertTrue(app.buttons["tab-홈"].waitForExistence(timeout: 15), "홈 탭이 보여야 한다")
         snap("E01-home"); app.swipeUp(); snap("E01b-home-bottom")
@@ -32,6 +32,8 @@ final class ScreenTourTests: XCTestCase {
         tab("성장"); snap("E04-growth"); app.swipeUp(); snap("E04b-growth-bottom")
         tab("락커"); snap("E05-locker"); if tapButton("문 열기") { sleep(1); snap("E05b-locker-open") }
         app.swipeUp(); snap("E05c-locker-bottom")
+        tab("팀"); snap("E07-team")
+        tab("뭐할까"); snap("E08-whatnow"); app.swipeUp(); snap("E08b-whatnow-bottom")
         // 설정 맨 아래: 앱 정보, 처리방침·문의 링크.
         tab("홈")
         if tapButton("설정") { sleep(1); snap("E06-settings"); app.swipeUp(); app.swipeUp(); snap("E06b-settings-bottom"); tapButton("닫기") }
@@ -137,6 +139,8 @@ final class ScreenTourTests: XCTestCase {
         tab("기록"); snap("03-diary")
         // 성장
         tab("성장"); for _ in 0..<3 { app.swipeDown() }; snap("04-growth")
+        tab("팀"); snap("07-team")
+        tab("뭐할까"); snap("08-whatnow"); app.swipeUp(); snap("08b-whatnow-bottom")
         app.swipeUp(); snap("04b-growth-mid")
         app.swipeUp(); snap("04c-growth-bottom")
 

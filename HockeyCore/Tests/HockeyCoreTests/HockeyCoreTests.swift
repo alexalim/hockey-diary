@@ -1002,3 +1002,101 @@ final class QuestTests: XCTestCase {
         XCTAssertEqual(StickerCatalog.def("badge-2026-03")?.title, "3월 배지")
     }
 }
+
+// 테스트 계층: Unit — '뭐할까' 추천 규칙. 같은 사실이면 같은 순서가 나와야 한다.
+final class WhatNowTests: XCTestCase {
+    var cal: Calendar {
+        var c = Calendar(identifier: .gregorian)
+        c.timeZone = TimeZone(identifier: "Asia/Seoul")!
+        return c
+    }
+    func d(_ day: Int, _ h: Int, _ m: Int = 0) -> Date { cal.date(from: DateComponents(year: 2026, month: 11, day: day, hour: h, minute: m))! }
+    func kinds(_ f: WhatNow.Facts) -> [WhatNow.Kind] { WhatNow.suggest(f, calendar: cal).map(\.kind) }
+
+    func testRestingShowsOnlyRest() {
+        let f = WhatNow.Facts(now: d(20, 10), resting: true, lastGoal: "스톱", sharpenDue: true)
+        XCTAssertEqual(kinds(f), [.rest])
+    }
+
+    func testEndedEventComesFirstThenBody() {
+        let ev = HomePrompt.Event(title: "정규게임", start: d(20, 19), minutes: 90, logged: false)
+        let f = WhatNow.Facts(now: d(20, 21, 30), events: [ev], bodyCheckedToday: false, lastSessionAt: d(19, 20))
+        let s = WhatNow.suggest(f, calendar: cal)
+        XCTAssertEqual(s.first?.kind, .logEvent)
+        XCTAssertEqual(s.first?.key, "정규게임")
+        XCTAssertEqual(s[1].kind, .bodyCheck)
+        // 기록한 뒤에는 그 카드가 사라진다.
+        let logged = HomePrompt.Event(title: "정규게임", start: d(20, 19), minutes: 90, logged: true)
+        XCTAssertFalse(kinds(WhatNow.Facts(now: d(20, 21, 30), events: [logged])).contains(.logEvent))
+    }
+
+    func testUpcomingTodayAndDDay() {
+        let today = HomePrompt.Event(title: "미니게임", start: d(20, 19), minutes: 60, logged: false)
+        let later = HomePrompt.Event(title: "정규게임", start: d(22, 20), minutes: 90, logged: false)
+        let s1 = WhatNow.suggest(WhatNow.Facts(now: d(20, 9), events: [today, later]), calendar: cal)
+        XCTAssertEqual(s1.first?.title, "오늘 19:00 미니게임")
+        let s2 = WhatNow.suggest(WhatNow.Facts(now: d(20, 9), events: [later]), calendar: cal)
+        XCTAssertEqual(s2.first?.title, "D-2 정규게임")
+        // 나흘 뒤는 아직 준비 카드가 아니다.
+        let far = HomePrompt.Event(title: "정규게임", start: d(24, 20), minutes: 90, logged: false)
+        XCTAssertFalse(kinds(WhatNow.Facts(now: d(20, 9), events: [far])).contains(.prepareEvent))
+    }
+
+    func testQuestSkipsKindsOtherCardsCover() {
+        let quests = [
+            QuestProgress(quest: WeeklyQuest(kind: .drills, target: 3), done: 2),
+            QuestProgress(quest: WeeklyQuest(kind: .conditions, target: 3), done: 2),
+            QuestProgress(quest: WeeklyQuest(kind: .sessions, target: 2), done: 0),
+        ]
+        // 몸 상태 카드가 있으니 conditions는 빠지고, 드릴은 드릴 카드가 맡는다 → sessions.
+        let s = WhatNow.suggest(WhatNow.Facts(now: d(20, 10), bodyCheckedToday: false, quests: quests), calendar: cal)
+        XCTAssertEqual(s.first { $0.kind == .quest }?.key, "sessions")
+        // 몸 상태를 이미 남겼으면 conditions 퀘스트(남은 1)가 sessions(남은 2)보다 먼저다.
+        let s2 = WhatNow.suggest(WhatNow.Facts(now: d(20, 10), bodyCheckedToday: true, quests: quests), calendar: cal)
+        XCTAssertEqual(s2.first { $0.kind == .quest }?.key, "conditions")
+        // 다 끝났으면 퀘스트 카드가 없다.
+        let done = quests.map { QuestProgress(quest: $0.quest, done: 9) }
+        XCTAssertFalse(kinds(WhatNow.Facts(now: d(20, 10), quests: done)).contains(.quest))
+    }
+
+    func testPickDrillLeastPracticedSkill() {
+        let logs = [WhatNow.DrillFact(skillName: "하키 스톱", at: d(19, 10)), WhatNow.DrillFact(skillName: "하키 스톱", at: d(18, 10)),
+                    WhatNow.DrillFact(skillName: "크로스오버", at: d(19, 10))]
+        // 낮: 빙판 드릴 중 2주 안에 안 한 첫 기술 → 엣지 턴(엣지 슬라럼).
+        XCTAssertEqual(WhatNow.pickDrill(logs, now: d(20, 10), calendar: cal).key, "edge-slalom")
+        // 오래된 기록은 안 센다: 크로스오버를 20일 전에만 했으면 처음 기술인 크로스오버가 나온다.
+        let old = [WhatNow.DrillFact(skillName: "크로스오버", at: d(1, 10))]
+        XCTAssertEqual(WhatNow.pickDrill(old, now: d(20, 10), calendar: cal).key, "crossover-circle")
+        // 모든 빙판 기술을 한 번씩 했으면 가장 적은 것 중 앞선 것.
+        var all = DrillCatalog.onIce.map { WhatNow.DrillFact(skillName: $0.skillName, at: d(19, 10)) }
+        all.append(WhatNow.DrillFact(skillName: "크로스오버", at: d(19, 11)))
+        XCTAssertEqual(WhatNow.pickDrill(all, now: d(20, 10), calendar: cal).key, "edge-slalom")
+    }
+
+    func testPickDrillNightAndFirstTimeAreOffIce() {
+        XCTAssertTrue(WhatNow.pickDrill([], now: d(20, 10), calendar: cal).offIce, "처음이면 집에서 하는 드릴")
+        let logs = [WhatNow.DrillFact(skillName: "리스트 샷", at: d(19, 10))]
+        let night = WhatNow.pickDrill(logs, now: d(20, 22), calendar: cal)
+        XCTAssertTrue(night.offIce)
+        XCTAssertNotEqual(night.skillName, "리스트 샷", "밤에도 덜 한 기술을 고른다")
+        let s = WhatNow.suggest(WhatNow.Facts(now: d(20, 22), drills: logs), calendar: cal)
+        XCTAssertTrue(s.first { $0.kind == .drill }?.detail.contains("늦은 시간") ?? false)
+    }
+
+    func testOrderAndCap() {
+        // 17시 시작 90분 → 18:30 끝, 지금 21시: 끝난 지 6시간 안.
+        let ev = HomePrompt.Event(title: "정규게임", start: d(20, 17), minutes: 90, logged: false)
+        let quests = [QuestProgress(quest: WeeklyQuest(kind: .sessions, target: 2), done: 0)]
+        let f = WhatNow.Facts(now: d(20, 21), events: [ev], bodyCheckedToday: false, journaledToday: false, quests: quests,
+                              lastGoal: "스톱 양쪽", lastSessionAt: nil, sharpenDue: true, hasTeam: true)
+        let s = WhatNow.suggest(f, calendar: cal)
+        XCTAssertEqual(s.count, WhatNow.maxCount)
+        XCTAssertEqual(s.map(\.kind), [.logEvent, .bodyCheck, .quest, .drill, .goal])
+        // 저녁 일기 카드가 있으니 journals 퀘스트는 덮인다.
+        let jq = [QuestProgress(quest: WeeklyQuest(kind: .journals, target: 3), done: 0)]
+        XCTAssertFalse(kinds(WhatNow.Facts(now: d(20, 21), quests: jq)).contains(.quest))
+        XCTAssertTrue(kinds(WhatNow.Facts(now: d(20, 21), quests: jq)).contains(.journal))
+        // 할 게 적은 날: 몸 상태 남겼고 최근에 탔으면 드릴 카드만 남는다.
+        XCTAssertEqual(kinds(WhatNow.Facts(now: d(20, 10), bodyCheckedToday: true, lastSessionAt: d(19, 20))), [.drill])
+    }
+}

@@ -91,6 +91,25 @@ final class ComponentDriveTests: XCTestCase {
         XCTAssertNil(find("아직 드릴 기록이 없어요", swipes: 1), "드릴을 저장했는데 빈 안내가 남아 있다")
     }
 
+    // MARK: 팀 탭 → 만들기 화면이 바로 보인다 / 뭐할까 탭 → 드릴 카드의 '지금 시작'이 러너를 띄운다
+
+    func test_team_tab_and_whatNow_drill() {
+        tab("팀")
+        XCTAssertTrue(app.staticTexts["우리 팀 만들기"].waitForExistence(timeout: 5), "팀 탭에 만들기 화면이 없다")
+
+        tab("뭐할까")
+        XCTAssertNotNil(find("지금 하나", swipes: 0), "뭐할까 첫 묶음 제목이 없다")
+        // 빈 저장소: 몸 상태 카드가 먼저, 드릴 카드는 집에서 하는 첫 드릴이어야 한다.
+        XCTAssertNotNil(find("오늘 몸 상태 남기기", swipes: 0), "몸 상태 카드가 없다")
+        let start = app.buttons["whatnow-drill"].firstMatch
+        for _ in 0..<4 where !(start.exists && start.isHittable) { nudgeUp() }
+        XCTAssertTrue(start.exists && start.isHittable, "드릴 카드의 지금 시작 버튼이 없다")
+        start.tap(); sleep(2)
+        XCTAssertTrue(app.staticTexts["스틱핸들링 볼 (집)"].waitForExistence(timeout: 5), "드릴 러너가 추천 드릴로 안 열렸다")
+        tapButton("그만"); sleep(1)
+        if let confirm = [app.sheets.buttons["그만두기"].firstMatch, app.sheets.buttons["그만"].firstMatch].first(where: { $0.exists }) { confirm.tap() }
+    }
+
     // MARK: 오늘 몸 상태: 누르면 선택되고 퀘스트가 1/3로 오른다
 
     func test_body_check_updates_quest() {

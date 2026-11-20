@@ -17,19 +17,21 @@ enum NewEntry: Identifiable, Hashable {
     }
 }
 
-/// 하단 탭 5개: 기록 · 훈련 · 홈(가운데 큰 버튼) · 성장 · 락커. 시작 화면은 홈.
+/// 하단 탭 7개: 기록 · 훈련 · 팀 · 홈(가운데 큰 버튼) · 성장 · 락커 · 뭐할까. 시작 화면은 홈.
 /// 훈련은 연습·경기·드릴 세 갈래. 규칙·전술·링크장은 드릴 갈래의 '하키 아카데미'에 있다. 어디서나 상단 (+)로 새 기록을 시작한다.
 struct RootView: View {
     enum Tab: Hashable, CaseIterable {
-        case record, practice, home, growth, locker
+        case record, practice, team, home, growth, locker, whatNow
 
         var title: String {
             switch self {
             case .home: return "홈"
             case .record: return "기록"
             case .practice: return "훈련"
+            case .team: return "팀"
             case .growth: return "성장"
             case .locker: return "락커"
+            case .whatNow: return "뭐할까"
             }
         }
 
@@ -38,8 +40,10 @@ struct RootView: View {
             case .home: return "house.fill"
             case .record: return "calendar"
             case .practice: return "figure.hockey"
+            case .team: return "person.3.fill"
             case .growth: return "chart.bar.xaxis"
             case .locker: return "door.left.hand.closed"
+            case .whatNow: return "sparkles"
             }
         }
     }
@@ -74,14 +78,16 @@ struct RootView: View {
 
     var body: some View {
         // TabView(UIKit 탭 컨트롤러)는 바깥에서 건 안전영역 여백을 탭 안의 스크롤에 전해 주지 않아
-        // 마지막 줄이 하단 바에 가려졌다. 그래서 TabView 대신 다섯 스택을 겹쳐 두고 고른 것만 보여준다.
+        // 마지막 줄이 하단 바에 가려졌다. 그래서 TabView 대신 일곱 스택을 겹쳐 두고 고른 것만 보여준다.
         // 숨은 스택도 살아 있어 각 탭의 스크롤 위치·밀어 들어간 화면이 유지된다(TabView와 같은 동작).
         ZStack {
             stack(.record) { DiaryView(newEntry: $newEntry) }
             stack(.practice) { TrainingView(newEntry: $newEntry) }
+            stack(.team) { TeamView() }
             stack(.home) { HomeView(newEntry: $newEntry) }
             stack(.growth) { GrowthView() }
             stack(.locker) { LockerView() }
+            stack(.whatNow) { WhatNowView(newEntry: $newEntry) }
         }
         // 바는 안전영역 삽입으로 놓되, 스크롤 내용의 아래 여백은 contentMargins로 따로 준다.
         // (iOS 26 시뮬레이터 측정: 안전영역 삽입만으로는 NavigationStack 안의 ScrollView·List 내용 여백이 늘지 않았다.)
@@ -167,7 +173,7 @@ struct MahadaTabBar: View {
                     if t == .home { homeButton } else { item(t) }
                 }
             }
-            .padding(.horizontal, 8)
+            .padding(.horizontal, 4)
             .padding(.top, Self.padTop)
             .padding(.bottom, Self.padBottom)
             .background(.bar, ignoresSafeAreaEdges: .bottom)
@@ -181,8 +187,8 @@ struct MahadaTabBar: View {
             pick(t)
         } label: {
             VStack(spacing: 3) {
-                AppIcon(t.symbol, size: 25)
-                Text(t.title).font(.system(size: 11, weight: on ? .semibold : .regular))
+                AppIcon(t.symbol, size: 23)
+                Text(t.title).font(.system(size: 10.5, weight: on ? .semibold : .regular)).lineLimit(1).minimumScaleFactor(0.8)
             }
             .foregroundStyle(on ? Theme.accent : Theme.inkSecondary)
             .frame(maxWidth: .infinity, minHeight: Self.itemHeight)
@@ -205,10 +211,10 @@ struct MahadaTabBar: View {
                     Circle().fill(on ? Theme.cobalt : Theme.card)
                         .overlay(Circle().stroke(Theme.cobalt, lineWidth: on ? 0 : 2))
                         .shadow(color: Theme.cobalt.opacity(on ? 0.35 : 0.15), radius: 10, y: 4)
-                    AppIcon("house.fill", size: 30)
+                    AppIcon("house.fill", size: 28)
                         .foregroundStyle(on ? .white : Theme.accent)
                 }
-                .frame(width: 62, height: 62)
+                .frame(width: 58, height: 58)
                 .offset(y: -Self.raise)
                 Text("홈").font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(on ? Theme.accent : Theme.inkSecondary)
