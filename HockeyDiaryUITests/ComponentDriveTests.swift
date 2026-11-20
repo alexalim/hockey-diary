@@ -249,10 +249,15 @@ final class ComponentDriveTests: XCTestCase {
         if b.exists { b.tap(); sleep(1) }
     }
 
+    /// 같은 라벨의 버튼이 숨은 탭 스택에도 있을 수 있다(팀 탭의 '만들기'). 보이는 것을 누른다.
     @discardableResult
     private func tapButton(_ label: String) -> Bool {
-        let b = app.buttons[label].firstMatch
-        guard b.waitForExistence(timeout: 3) else { return false }
-        b.tap(); return true
+        let all = app.buttons.matching(NSPredicate(format: "label == %@ OR identifier == %@", label, label))
+        _ = all.firstMatch.waitForExistence(timeout: 3)
+        for i in 0..<min(all.count, 10) {
+            let b = all.element(boundBy: i)
+            if b.exists && b.isHittable { b.tap(); return true }
+        }
+        return false
     }
 }

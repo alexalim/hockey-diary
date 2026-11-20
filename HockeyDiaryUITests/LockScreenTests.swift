@@ -63,6 +63,12 @@ final class LockScreenTests: XCTestCase {
         add(a)
     }
 
+    /// 하단 바(홈 원 포함) 위쪽 경계. 바에 가려진 요소를 누르면 홈으로 넘어가 버린다.
+    private var barTop: CGFloat {
+        let bar = app.buttons["tab-홈"]
+        return bar.exists && bar.isHittable ? bar.frame.minY - 4 : app.frame.maxY
+    }
+
     private func find(_ text: String, swipes: Int = 8) -> XCUIElement? {
         let pred = NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", text, text)
         for i in 0...swipes {
@@ -70,7 +76,7 @@ final class LockScreenTests: XCTestCase {
                 let m = q.matching(pred)
                 for j in 0..<min(m.count, 12) {
                     let e = m.element(boundBy: j)
-                    if e.exists && e.isHittable { return e }
+                    if e.exists && e.isHittable && e.frame.maxY <= barTop { return e }
                 }
             }
             if i < swipes { nudgeUp() }
