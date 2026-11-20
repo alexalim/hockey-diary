@@ -76,13 +76,23 @@ struct WhatNowView: View {
             if s.kind == .bodyCheck {
                 BodyCheckRow(value: todayCheck?.value) { v in BodyCheckStore.set(v, context: context) }
             } else if !s.action.isEmpty {
-                Button { act(s) } label: {
-                    Text(s.action).frame(maxWidth: .infinity, minHeight: Theme.touch)
-                }
-                .buttonStyle(first ? AnyButtonStyle(PinkButtonStyle()) : AnyButtonStyle(BorderedButtonStyle()))
-                .tint(Theme.cobalt)
-                .accessibilityIdentifier("whatnow-\(s.kind.rawValue)")
+                actionButton(s, first: first)
             }
+        }
+    }
+
+    /// 첫 카드는 분홍 큰 버튼, 나머지는 테두리 버튼. 스타일 종류가 달라 갈래를 나눈다.
+    @ViewBuilder
+    private func actionButton(_ s: WhatNow.Suggestion, first: Bool) -> some View {
+        let label = Text(s.action).frame(maxWidth: .infinity, minHeight: Theme.touch)
+        if first {
+            Button { act(s) } label: { label }
+                .buttonStyle(PinkButtonStyle())
+                .accessibilityIdentifier("whatnow-\(s.kind.rawValue)")
+        } else {
+            Button { act(s) } label: { label }
+                .buttonStyle(.bordered).tint(Theme.cobalt)
+                .accessibilityIdentifier("whatnow-\(s.kind.rawValue)")
         }
     }
 
@@ -130,11 +140,4 @@ struct WhatNowView: View {
         case .firstIce: return "sportscourt"
         }
     }
-}
-
-/// 조건에 따라 버튼 스타일을 바꾸려고 타입을 지운다.
-struct AnyButtonStyle: ButtonStyle {
-    private let make: (Configuration) -> AnyView
-    init<S: ButtonStyle>(_ style: S) { make = { AnyView(style.makeBody(configuration: $0)) } }
-    func makeBody(configuration: Configuration) -> some View { make(configuration) }
 }
