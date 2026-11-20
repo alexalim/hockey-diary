@@ -10,14 +10,14 @@ on:
         type: boolean
         default: false
       only:
-        description: "이 테스트만 돌리기 (예: HockeyDiaryUITests/LockScreenTests). 비우면 전부"
+        description: "이 테스트만 돌리기 (쉼표로 여러 개, 예: HockeyDiaryUITests/LockScreenTests,HockeyDiaryUITests/ScreenTourTests/test_tour). 비우면 전부"
         type: string
         default: ""
 
 jobs:
   screens:
     runs-on: macos-26
-    timeout-minutes: 45
+    timeout-minutes: 90
     env:
       TEAM_ID: ""
       PROFILE_NAME: ""
@@ -50,11 +50,14 @@ jobs:
       - name: 화면 둘러보기 테스트
         run: |
           set -o pipefail
+          only="${{ inputs.only }}"; flags=()
+          for t in ${only//,/ }; do flags+=("-only-testing:$t"); done
+          [ ${#flags[@]} -eq 0 ] && flags=("-only-testing:HockeyDiaryUITests")
           xcodebuild test \
             -project HockeyDiary.xcodeproj \
             -scheme HockeyDiary \
             -destination "id=${{ steps.sim.outputs.udid }}" \
-            -only-testing:"${{ inputs.only || 'HockeyDiaryUITests' }}" \
+            "${flags[@]}" \
             -resultBundlePath "$RUNNER_TEMP/screens.xcresult" \
             CODE_SIGNING_ALLOWED=NO \
             | tee test.log | grep -E "error:|Test Case|failed|TEST (SUCCEEDED|FAILED)" || true

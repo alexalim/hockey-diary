@@ -188,11 +188,15 @@ final class ComponentDriveTests: XCTestCase {
     }
 
     /// Form 안의 글칸. 화면 밖 칸은 늦게 만들어지므로 보일 때까지 내린다.
+    /// 숨은 탭 스택에 같은 칸이 하나 더 있을 수 있어(팀 탭의 팀 이름 칸) firstMatch 대신 보이는 것을 고른다.
     private func formField(_ placeholder: String) -> XCUIElement? {
         for _ in 0..<8 {
             for q in [app.textFields, app.textViews] {
-                let f = q[placeholder].firstMatch
-                if f.exists && f.isHittable { return f }
+                let all = q.matching(NSPredicate(format: "placeholderValue == %@ OR label == %@ OR identifier == %@", placeholder, placeholder, placeholder))
+                for i in 0..<min(all.count, 6) {
+                    let f = all.element(boundBy: i)
+                    if f.exists && f.isHittable { return f }
+                }
             }
             nudgeUp()
         }

@@ -31,7 +31,7 @@ final class LockScreenTests: XCTestCase {
     func test_lockScreen_liveActivity() {
         tab("훈련"); branch("드릴")
         XCTAssertTrue(tapText("드릴 고르기"))
-        XCTAssertTrue(tapText("라인 스톱"), "드릴 목록에 라인 스톱이 없다")
+        if !tapText("라인 스톱") { shot("L00-no-line-stop"); XCTFail("드릴 목록에 라인 스톱이 없다"); return }
         let plus = app.buttons["+1"].firstMatch
         XCTAssertTrue(plus.waitForExistence(timeout: 5), "+1 버튼이 없다")
         plus.tap(); sleep(1)
