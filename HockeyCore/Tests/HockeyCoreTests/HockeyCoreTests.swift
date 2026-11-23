@@ -1100,3 +1100,51 @@ final class WhatNowTests: XCTestCase {
         XCTAssertEqual(kinds(WhatNow.Facts(now: d(20, 10), bodyCheckedToday: true, lastSessionAt: d(19, 20))), [.drill])
     }
 }
+
+// 드릴 타이머: 틱 횟수가 아니라 끝나는 시각으로 남은 시간을 센다.
+final class CountdownTests: XCTestCase {
+    let t0 = Date(timeIntervalSince1970: 1_800_000_000)
+
+    // 화면이 잠겨 틱이 한 번도 안 와도, 돌아왔을 때 남은 시간은 흐른 시간만큼 줄어 있다.
+    func testMissedTicksStillCount() {
+        var c = Countdown(seconds: 300)
+        c.start(at: t0)
+        XCTAssertEqual(c.secondsLeft(at: t0.addingTimeInterval(240)), 60)
+        XCTAssertEqual(c.secondsLeft(at: t0.addingTimeInterval(400)), 0, "끝난 뒤로는 0에서 멈춤")
+    }
+
+    // 잠깐 멈춘 동안은 줄지 않고, 계속하면 멈춘 데서 이어진다.
+    func testPauseAndResume() {
+        var c = Countdown(seconds: 300)
+        XCTAssertFalse(c.isRunning)
+        XCTAssertEqual(c.secondsLeft(at: t0.addingTimeInterval(999)), 300, "시작 전엔 그대로")
+        c.start(at: t0)
+        c.pause(at: t0.addingTimeInterval(100))
+        XCTAssertFalse(c.isRunning)
+        XCTAssertEqual(c.secondsLeft(at: t0.addingTimeInterval(1000)), 200)
+        c.start(at: t0.addingTimeInterval(1000))
+        XCTAssertEqual(c.secondsLeft(at: t0.addingTimeInterval(1050)), 150)
+        XCTAssertEqual(c.endsAt, t0.addingTimeInterval(1200))
+    }
+
+    // 다 쓴 타이머는 다시 시작되지 않는다.
+    func testFinishedDoesNotRestart() {
+        var c = Countdown(seconds: 60)
+        c.start(at: t0)
+        c.pause(at: t0.addingTimeInterval(90))
+        c.start(at: t0.addingTimeInterval(100))
+        XCTAssertFalse(c.isRunning)
+        XCTAssertEqual(c.secondsLeft(at: t0.addingTimeInterval(100)), 0)
+    }
+
+    // 알림 말: 한꺼번에 많이 줄었으면(잠금에서 돌아옴) 지나친 안내는 건너뛰고 가장 나중 것만.
+    func testCueOnCrossing() {
+        XCTAssertEqual(Countdown.cue(from: 61, to: 60), .minuteLeft)
+        XCTAssertEqual(Countdown.cue(from: 11, to: 10), .tenSeconds)
+        XCTAssertEqual(Countdown.cue(from: 1, to: 0), .finished)
+        XCTAssertEqual(Countdown.cue(from: 200, to: 0), .finished)
+        XCTAssertEqual(Countdown.cue(from: 200, to: 8), .tenSeconds)
+        XCTAssertNil(Countdown.cue(from: 60, to: 59))
+        XCTAssertNil(Countdown.cue(from: 0, to: 0), "이미 끝난 타이머는 다시 알리지 않음")
+    }
+}

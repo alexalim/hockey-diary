@@ -166,6 +166,8 @@ struct RoutineRunView: View {
     @State private var count = 0
     @State private var secondsLeft = 0
     @State private var timerOn = false
+    /// 끝나는 시각으로 세는 타이머. secondsLeft·timerOn은 화면에 보여 주는 값이다.
+    @State private var countdown = Countdown(seconds: 0)
     @State private var done: [String] = []
     @State private var finishedTick = 0
     @State private var repTick = 0
@@ -190,12 +192,16 @@ struct RoutineRunView: View {
         }
         .onReceive(timer) { _ in
             guard timerOn, secondsLeft > 0 else { return }
-            secondsLeft -= 1
-            if voiceOn && secondsLeft == 60 { Speaker.shared.say("1분 남았어요") }
-            if voiceOn && secondsLeft == 10 { Speaker.shared.say("10초") }
-            if secondsLeft == 0 {
-                timerOn = false; finishedTick += 1
+            // 틱을 세지 않고 끝나는 시각에서 다시 계산한다(잠금·백그라운드에서 틱이 빠져도 맞게).
+            let now = Date(), before = secondsLeft
+            secondsLeft = countdown.secondsLeft(at: now)
+            switch Countdown.cue(from: before, to: secondsLeft) {
+            case .minuteLeft: if voiceOn { Speaker.shared.say("1분 남았어요") }
+            case .tenSeconds: if voiceOn { Speaker.shared.say("10초") }
+            case .finished:
+                countdown.pause(at: now); timerOn = false; finishedTick += 1
                 if voiceOn { Speaker.shared.say("끝. 잘했어요") }
+            case nil: break
             }
         }
         .sensoryFeedback(.success, trigger: finishedTick)
@@ -216,7 +222,7 @@ struct RoutineRunView: View {
     private var activityState: RoutineActivityAttributes.ContentState? {
         guard let (drill, item) = run.current else { return nil }
         return .init(drillTitle: drill.title, skillName: drill.skillName, index: run.index + 1, total: run.items.count,
-                     endDate: timerOn && secondsLeft > 0 ? Date().addingTimeInterval(TimeInterval(secondsLeft)) : nil,
+                     endDate: timerOn && secondsLeft > 0 ? countdown.endsAt : nil,
                      secondsLeft: secondsLeft, count: count, target: item.target, isMinutes: drill.unit == .minutes)
     }
 
@@ -266,12 +272,12 @@ struct RoutineRunView: View {
                 .foregroundStyle(secondsLeft == 0 ? Theme.success : Theme.title)
             Text(secondsLeft == 0 ? "다 했어요! 다음으로 넘어가요." : "목표 \(item.target)분").font(.subheadline).foregroundStyle(Theme.inkSecondary)
             HStack(spacing: 10) {
-                Button { timerOn.toggle() } label: {
+                Button { toggleTimer() } label: {
                     Label(timerOn ? "잠깐" : (secondsLeft == item.target * 60 ? "시작" : "계속"), icon: timerOn ? "pause.fill" : "play.fill")
                         .frame(maxWidth: .infinity, minHeight: 56)
                 }
                 .buttonStyle(.borderedProminent).tint(Theme.cobalt).disabled(secondsLeft == 0)
-                Button { timerOn = false; secondsLeft = item.target * 60 } label: {
+                Button { setTimer(seconds: item.target * 60) } label: {
                     AppIcon("arrow.counterclockwise").frame(width: 56, height: 56)
                 }
                 .buttonStyle(.bordered).accessibilityLabel("처음부터")
@@ -349,8 +355,22 @@ struct RoutineRunView: View {
 
     private func resetForCurrent() {
         count = 0
+        setTimer(seconds: (run.current?.1.target ?? 1) * 60)
+    }
+
+    /// 타이머를 멈춘 채 주어진 길이로 맞춘다.
+    private func setTimer(seconds: Int) {
+        countdown = Countdown(seconds: seconds)
         timerOn = false
-        secondsLeft = (run.current?.1.target ?? 1) * 60
+        secondsLeft = seconds
+    }
+
+    /// 시작·계속 ↔ 잠깐.
+    private func toggleTimer() {
+        let now = Date()
+        if timerOn { countdown.pause(at: now) } else { countdown.start(at: now) }
+        secondsLeft = countdown.secondsLeft(at: now)
+        timerOn = countdown.isRunning
     }
 
     private func saveAndNext(_ drill: Drill, amount: Int, skipped: Bool) {
