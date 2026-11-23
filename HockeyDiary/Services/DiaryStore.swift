@@ -120,6 +120,19 @@ enum DiaryStore {
         for old in shots(for: sessionID, context: context) { context.delete(old) }
     }
 
+    // MARK: - 활동 지우기
+
+    /// 활동을 지운다. 관계로 묶이지 않은 사진·슛도 같이 지우고, 이 활동을 가리키던 팀 일정은 '기록 없음'으로 돌린다.
+    static func deleteSession(_ session: Session, context: ModelContext) {
+        let id = session.id
+        for p in session.photos { context.delete(p) }
+        deleteShots(for: id, context: context)
+        let events = (try? context.fetch(FetchDescriptor<TeamEvent>())) ?? []
+        for e in events where e.sessionID == id { e.sessionID = nil }
+        context.delete(session)
+        context.saveOrReport()
+    }
+
     // MARK: - 기술
 
     static func skill(named raw: String, category: String = "내 기술", context: ModelContext) -> Skill? {

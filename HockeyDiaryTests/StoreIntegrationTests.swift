@@ -260,4 +260,24 @@ final class StoreIntegrationTests: XCTestCase {
         XCTAssertEqual(s1.id, s2.id, "두 번 눌러도 기록은 하나")
         XCTAssertEqual(s1.opponent, "베어스"); XCTAssertEqual(s1.rinkName, "목동"); XCTAssertEqual(s1.type, .regularGame)
     }
+
+    // 일정으로 만든 기록을 지우면 일정은 '기록 없음'으로 돌아가고, 슛도 같이 지워진다. 다른 일정의 연결은 그대로.
+    func testDeletingSessionFreesTeamEvent() throws {
+        let team = Team(name: "펭귄스"); context.insert(team)
+        let ev = TeamEvent(teamID: team.id, at: Date().addingTimeInterval(-3_600)); ev.opponent = "베어스"
+        let other = TeamEvent(teamID: team.id, at: Date().addingTimeInterval(-90_000))
+        context.insert(ev); context.insert(other)
+        let s = TeamStore.makeSession(for: ev, context: context)
+        let kept = TeamStore.makeSession(for: other, context: context)
+        DiaryStore.replaceShots(for: s.id, with: [ShotPoint(x: 0.5, y: 0.3, outcome: .goal)], context: context)
+        try context.save()
+        XCTAssertEqual(ev.sessionID, s.id)
+
+        DiaryStore.deleteSession(s, context: context)
+
+        XCTAssertNil(ev.sessionID, "지운 기록을 가리키는 연결이 남으면 '기록 보기'가 빈 기록을 새로 만든다")
+        XCTAssertEqual(other.sessionID, kept.id, "다른 일정의 연결은 그대로")
+        XCTAssertEqual(try context.fetch(FetchDescriptor<Session>()).map(\.id), [kept.id])
+        XCTAssertEqual(try context.fetchCount(FetchDescriptor<ShotMark>()), 0)
+    }
 }

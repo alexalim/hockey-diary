@@ -268,10 +268,7 @@ struct SessionDetailView: View {
         let target = session, ctx = context
         dismiss()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-            for p in target.photos { ctx.delete(p) }
-            DiaryStore.deleteShots(for: target.id, context: ctx)
-            ctx.delete(target)
-            ctx.saveOrReport()
+            DiaryStore.deleteSession(target, context: ctx)
         }
     }
 }
