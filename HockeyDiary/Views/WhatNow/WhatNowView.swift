@@ -18,7 +18,10 @@ struct WhatNowView: View {
     @AppStorage(RestPrefs.key) private var restJSON = "[]"
     @AppStorage(RecordPrefs.levelKey) private var levelRaw = ""
     @AppStorage(QuestStore.targetKey) private var targetOverride = 0
+    @Query(sort: \PracticeRoutine.createdAt) private var routines: [PracticeRoutine]
     @State private var running: RoutineRun?
+    /// 지금 쓸 수 있는 시간(분). 고르면 그 안에 끝나는 드릴·루틴을 권한다. 다시 누르면 해제.
+    @State private var minutesFree: Int?
 
     private var todayCheck: BodyCheck? { checks.first { Calendar.current.isDateInToday($0.day) } }
 
@@ -28,7 +31,7 @@ struct WhatNowView: View {
                                          facts: QuestStore.facts(sessions: sessions, drills: drills, checks: checks, journals: journals),
                                          level: PlayerLevel(rawValue: levelRaw), targetOverride: targetOverride)
         let due = runners.contains { $0.retiredAt == nil && ($0.needsReplacement || DiaryStore.needsCheck($0, context: context)) }
-        return WhatNow.Facts(
+        var f = WhatNow.Facts(
             now: now,
             resting: RestPrefs.isResting(restJSON),
             events: teamEvents.map { .init(title: $0.title, start: $0.at, minutes: $0.minutes, logged: $0.sessionID != nil) },
@@ -41,6 +44,32 @@ struct WhatNowView: View {
             lastSessionAt: sessions.first?.startsAt,
             sharpenDue: due,
             hasTeam: !teams.isEmpty)
+        f.bodyToday = todayCheck?.value
+        f.minutesFree = minutesFree
+        f.routines = routines.filter { !$0.items.isEmpty }
+            .map { WhatNow.RoutineFact(name: $0.name, minutes: StarterRoutine.estimatedMinutes($0.items)) }
+        return f
+    }
+
+    /// 남은 시간 고르기. 안 골라도 추천은 나온다.
+    private var timeCard: some View {
+        Card {
+            CardHeader(title: "시간이 얼마나 있어요?", systemImage: "clock")
+            HStack(spacing: 8) {
+                ForEach([5, 15, 30], id: \.self) { m in
+                    let on = minutesFree == m
+                    Button { minutesFree = on ? nil : m } label: {
+                        Text("\(m)분").font(.subheadline.bold())
+                            .frame(maxWidth: .infinity, minHeight: Theme.touch)
+                            .foregroundStyle(on ? Color.white : Theme.cobalt)
+                            .background(on ? Theme.cobalt : Theme.cobaltSoft, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("시간 \(m)분")
+                    .accessibilityAddTraits(on ? .isSelected : [])
+                }
+            }
+        }
     }
 
     var body: some View {
@@ -51,6 +80,7 @@ struct WhatNowView: View {
                 if list.isEmpty {
                     EmptyHint(text: "오늘 할 건 다 했어요. 푹 쉬어도 돼요.", systemImage: "sparkles")
                 }
+                if !RestPrefs.isResting(restJSON) { timeCard }
                 ForEach(Array(list.enumerated()), id: \.element.id) { i, s in
                     if i == 0 { SectionHeader(title: "지금 하나") }
                     if i == 1 { SectionHeader(title: "그 다음") }
@@ -115,6 +145,8 @@ struct WhatNowView: View {
             }
         case .drill:
             if let d = DrillCatalog.drill(s.key) { running = RoutineRun(single: d) } else { newEntry = .practice }
+        case .routine:
+            if let r = routines.first(where: { $0.name == s.key }) { running = RoutineRun(routine: r) } else { jumper?.go(.training(.drill)) }
         case .goal:
             jumper?.go(.training(.practice))
         case .sharpen:
@@ -134,6 +166,7 @@ struct WhatNowView: View {
         case .bodyCheck: return "figure.stand"
         case .quest: return "flag.checkered"
         case .drill: return "figure.hockey"
+        case .routine: return "list.bullet.rectangle"
         case .goal: return "target"
         case .sharpen: return "wrench.and.screwdriver.fill"
         case .journal: return "book.fill"

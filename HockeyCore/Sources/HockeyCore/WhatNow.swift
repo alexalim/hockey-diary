@@ -4,7 +4,7 @@ import Foundation
 /// 규칙은 전부 여기 있고 화면은 보여 주기만 한다. 같은 사실이면 언제나 같은 답이 나온다.
 public enum WhatNow {
     public enum Kind: String, Sendable {
-        case rest, logEvent, prepareEvent, bodyCheck, quest, drill, goal, sharpen, journal, firstIce
+        case rest, logEvent, prepareEvent, bodyCheck, quest, drill, routine, goal, sharpen, journal, firstIce
     }
 
     public struct Suggestion: Equatable, Identifiable, Sendable {
@@ -28,6 +28,13 @@ public enum WhatNow {
         public init(skillName: String, at: Date) { self.skillName = skillName; self.at = at }
     }
 
+    /// 내 루틴 하나(이름과 걸리는 시간).
+    public struct RoutineFact: Equatable, Sendable {
+        public var name: String
+        public var minutes: Int
+        public init(name: String, minutes: Int) { self.name = name; self.minutes = minutes }
+    }
+
     public struct Facts: Sendable {
         public var now: Date
         public var resting: Bool
@@ -42,6 +49,11 @@ public enum WhatNow {
         public var lastSessionAt: Date?
         public var sharpenDue: Bool
         public var hasTeam: Bool
+        /// 오늘 남긴 몸 상태(1 처짐 ~ 5 최고). 안 남겼으면 nil.
+        public var bodyToday: Int? = nil
+        /// 지금 쓸 수 있는 시간(분). 고르지 않았으면 nil.
+        public var minutesFree: Int? = nil
+        public var routines: [RoutineFact] = []
 
         public init(now: Date, resting: Bool = false, events: [HomePrompt.Event] = [], conditionOn: Bool = true,
                     bodyCheckedToday: Bool = false, journaledToday: Bool = false, quests: [QuestProgress] = [],
@@ -106,7 +118,21 @@ public enum WhatNow {
         } else {
             drillDetail = "최근 \(drillWindowDays)일 \(drill.skillName) 연습이 제일 적었어요. \(drill.targetText())."
         }
-        let drillCard = Suggestion(kind: .drill, title: "드릴 하나: \(drill.title)", detail: drillDetail, action: "지금 시작", key: drill.key)
+        var drillCard = Suggestion(kind: .drill, title: "드릴 하나: \(drill.title)", detail: drillDetail, action: "지금 시작", key: drill.key)
+        if let body = f.bodyToday, body <= lowBody, let light = DrillCatalog.drill(lightDrillKey) {
+            // 몸이 무거운 날: 가장 가벼운 집 드릴 하나만. 쉬어도 된다고 먼저 말한다.
+            drillCard = Suggestion(kind: .drill, title: "오늘은 가볍게: \(light.title)",
+                                   detail: "몸이 무거운 날이에요. 쉬어도 돼요. 하고 싶으면 \(light.targetText())만요.", action: "지금 시작", key: light.key)
+        } else if let free = f.minutesFree {
+            if let r = f.routines.filter({ $0.minutes > 0 && $0.minutes <= free }).max(by: { $0.minutes < $1.minutes }), free >= routineMinMinutes {
+                drillCard = Suggestion(kind: .routine, title: "루틴: \(r.name)",
+                                       detail: "\(free)분이면 이 루틴이 딱 맞아요. 약 \(r.minutes)분 걸려요.", action: "지금 시작", key: r.name)
+            } else {
+                let fit = fits(drill, in: free) ? drill : (DrillCatalog.all.first { $0.offIce == drill.offIce && fits($0, in: free) } ?? drill)
+                drillCard = Suggestion(kind: .drill, title: "드릴 하나: \(fit.title)",
+                                       detail: "\(free)분 안에 끝나요. \(fit.targetText()).", action: "지금 시작", key: fit.key)
+            }
+        }
 
         // 5. 이번 주 퀘스트 중 가장 가까운 것. 다른 카드가 이미 덮는 종류는 뺀다.
         var covered: Set<QuestKind> = [.drills]
@@ -170,6 +196,16 @@ public enum WhatNow {
     }
 
     static func isNight(_ hour: Int) -> Bool { hour >= 21 || hour < 6 }
+
+    /// 몸 상태가 이 값 이하면 '가볍게' 카드를 낸다(1 처짐, 2 약간).
+    public static let lowBody = 2
+    static let lightDrillKey = "office-balance"
+    /// 이만큼은 시간이 있어야 루틴을 권한다. 그보다 짧으면 드릴 하나.
+    public static let routineMinMinutes = 10
+
+    static func fits(_ d: Drill, in minutes: Int) -> Bool {
+        StarterRoutine.estimatedMinutes([RoutineItem(drillKey: d.key, target: d.defaultTarget)]) <= minutes
+    }
 
     static func questAction(_ k: QuestKind) -> String {
         switch k {
