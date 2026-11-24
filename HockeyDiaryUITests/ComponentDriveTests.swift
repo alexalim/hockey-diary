@@ -159,6 +159,33 @@ final class ComponentDriveTests: XCTestCase {
         XCTAssertNotNil(find("김하키"), "명단에 추가한 팀원이 없다")
     }
 
+    // MARK: 팀 일정으로 만든 기록을 기록 탭에서 지움 → 팀 탭이 빈 화면이 아니라 일정으로 돌아옴
+
+    func test_deleting_event_record_elsewhere_does_not_blank_team_tab() {
+        XCTAssertTrue(tapText("우리 팀"), "홈에 우리 팀 카드가 없다")
+        guard let name = formField("팀 이름 (예: 목동 펭귄스)") else { XCTFail("팀 이름 칸이 없다"); return }
+        name.tap(); name.typeText("테스트 펭귄스")
+        XCTAssertTrue(tapButton("만들기"))
+        XCTAssertTrue(tapText("일정 추가"), "일정 추가 버튼이 없다")
+        XCTAssertTrue(tapButton("저장"), "일정 저장 버튼이 없다")
+        sleep(1)
+        XCTAssertTrue(tapText("정규게임"), "만든 일정이 목록에 없다")
+        XCTAssertTrue(tapText("이 일정으로 기록 만들기"), "기록 만들기 버튼이 없다")
+        XCTAssertNotNil(find("이 기록 지우기"), "팀 탭에 기록 상세가 안 열렸다")
+
+        // 팀 탭에 상세를 열어 둔 채로 기록 탭에서 같은 기록을 지운다.
+        tab("기록")
+        XCTAssertTrue(tapText("정규게임"), "기록 탭에 일정으로 만든 기록이 없다")
+        XCTAssertTrue(tapText("이 기록 지우기"), "지우기 버튼이 없다")
+        let confirm = app.sheets.buttons["지우기"].firstMatch
+        XCTAssertTrue(confirm.waitForExistence(timeout: 3), "지우기 확인창이 없다"); confirm.tap()
+        sleep(2)
+
+        // 한 번만 누른다(두 번 누르면 탭이 처음 화면으로 돌아가 버려 증상이 가려진다).
+        app.buttons["tab-팀"].tap(); sleep(2)
+        XCTAssertNotNil(find("이 일정으로 기록 만들기"), "팀 탭이 일정 화면으로 돌아오지 않았다(빈 화면)")
+    }
+
     // MARK: - 도우미 (ScreenTourTests와 같은 규칙)
 
     /// 하단 바가 보일 때만 그 윗선 아래를 버린다(바 뒤를 누르면 탭이 대신 눌린다). 시트 안에서는 화면 끝까지 본다.
