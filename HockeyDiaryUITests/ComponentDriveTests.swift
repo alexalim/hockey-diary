@@ -297,7 +297,8 @@ final class ComponentDriveTests: XCTestCase {
         snap("template-3-record-name")
         app.alerts.buttons["저장"].tap(); sleep(1)
 
-        // 새 기록(정규게임)을 열어 템플릿을 고르면 종류가 수업으로 바뀐다.
+        // 새 기록(정규게임)을 열어 템플릿을 고르면 종류가 수업으로 바뀐다. (+) 버튼은 탭 첫 화면에만 있다.
+        tab("홈")
         XCTAssertTrue(newRecord("정규게임 리뷰"))
         XCTAssertTrue(tapText("템플릿으로 채우기"), "새 기록에 템플릿 줄이 없다")
         snap("template-4-record-menu")
@@ -333,11 +334,16 @@ final class ComponentDriveTests: XCTestCase {
 
     func test_record_quick_and_detailed_switch() {
         snap("redesign-1-home-top")
+        // 빠른 기록(처음 값): 아래까지 내려 봐도 운동 전 기분은 없다.
         XCTAssertTrue(newRecord("수업 기록"))
+        snap("redesign-2-record-quick")
         XCTAssertNotNil(find("운동 후 기분"), "빠른 기록에 운동 후 기분이 없다")
         XCTAssertNil(find("운동 전 기분", swipes: 0), "빠른 기록인데 운동 전 기분을 묻는다")
-        for _ in 0..<4 { app.swipeDown() }
-        snap("redesign-2-record-quick")
+        XCTAssertTrue(tapButton("닫기"))
+        sleep(1)
+
+        // 상세 기록으로 바꾸면 운동 전 기분도 묻는다. 전환 버튼은 화면 맨 위에 있다.
+        XCTAssertTrue(newRecord("수업 기록"))
         branch("상세 기록")
         XCTAssertNotNil(find("운동 전 기분"), "상세 기록으로 바꿔도 운동 전 기분이 안 나온다")
         snap("redesign-3-record-detailed")
