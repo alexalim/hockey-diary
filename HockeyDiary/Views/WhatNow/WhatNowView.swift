@@ -80,9 +80,10 @@ struct WhatNowView: View {
                 if list.isEmpty {
                     EmptyHint(text: "오늘 할 건 다 했어요. 푹 쉬어도 돼요.", systemImage: "sparkles")
                 }
-                if !RestPrefs.isResting(restJSON) { timeCard }
                 ForEach(Array(list.enumerated()), id: \.element.id) { i, s in
                     if i == 0 { SectionHeader(title: "지금 하나") }
+                    // 시간 고르기는 첫 카드 아래에 둔다(맨 위에 두면 '지금 하나'가 밀려 내려간다).
+                    if i == 1 && !RestPrefs.isResting(restJSON) { timeCard }
                     if i == 1 { SectionHeader(title: "그 다음") }
                     card(s, first: i == 0)
                 }

@@ -102,7 +102,7 @@ final class ComponentDriveTests: XCTestCase {
         // 빈 저장소: 몸 상태 카드가 먼저, 드릴 카드는 집에서 하는 첫 드릴이어야 한다.
         XCTAssertNotNil(find("오늘 몸 상태 남기기", swipes: 0), "몸 상태 카드가 없다")
         let start = app.buttons["whatnow-drill"].firstMatch
-        for _ in 0..<4 where !(start.exists && start.isHittable) { nudgeUp() }
+        for _ in 0..<8 where !(start.exists && start.isHittable) { nudgeUp() }
         XCTAssertTrue(start.exists && start.isHittable, "드릴 카드의 지금 시작 버튼이 없다")
         start.tap(); sleep(2)
         XCTAssertTrue(app.staticTexts["스틱핸들링 볼 (집)"].waitForExistence(timeout: 5), "드릴 러너가 추천 드릴로 안 열렸다")
