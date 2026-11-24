@@ -230,6 +230,20 @@ final class ComponentDriveTests: XCTestCase {
         XCTAssertFalse(app.buttons["팀 펭귄스"].exists, "지운 팀이 고르기에 남아 있다")
     }
 
+    // MARK: 설정: 짧은 줄로 보이고, 자세한 안내는 '자세히'를 눌러야 나온다
+
+    func test_settings_short_rows_and_details() {
+        XCTAssertTrue(tapButton("설정"), "홈에 설정 버튼이 없다")
+        sleep(1)
+        snap("settings-1-top")
+        XCTAssertNotNil(find("이 아이폰에만 저장"), "보관 안내 첫 줄이 없다")
+        snap("settings-2-storage")
+        XCTAssertNil(find("링크장 검색어", swipes: 0), "자세한 안내가 처음부터 펼쳐져 있다")
+        XCTAssertTrue(tapText("자세히"), "자세히 줄이 없다")
+        XCTAssertNotNil(find("링크장 검색어"), "자세히를 눌러도 안내가 안 나온다")
+        snap("settings-3-details")
+    }
+
     // MARK: - 도우미 (ScreenTourTests와 같은 규칙)
 
     private func snap(_ name: String) {
