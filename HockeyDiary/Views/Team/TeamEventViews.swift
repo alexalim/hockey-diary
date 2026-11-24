@@ -15,6 +15,8 @@ struct TeamEventView: View {
     @State private var editingLineup = false
     @State private var toast: String?
     @State private var openSession: Session?
+    /// 참석 목록에서 볼 상태. nil이면 전체.
+    @State private var attendanceFilter: Attendance?
 
     private var members: [TeamMember] {
         // 명단에서 뺀 사람도 이 일정에 이미 들어가 있으면 보여준다.
@@ -69,7 +71,8 @@ struct TeamEventView: View {
             if members.isEmpty {
                 EmptyHint(text: "우리 팀 화면에서 팀원을 먼저 넣어 주세요.", link: EmptyLink("우리 팀으로") { TeamView() })
             }
-            ForEach(members) { m in
+            if members.count > 1 { attendanceTools(sheet) }
+            ForEach(members.filter { attendanceFilter == nil || sheet[$0.id] == attendanceFilter }) { m in
                 HStack(spacing: 8) {
                     Text(m.display).font(.subheadline).foregroundStyle(Theme.title).lineLimit(1)
                         .frame(minWidth: 72, alignment: .leading)
@@ -99,6 +102,50 @@ struct TeamEventView: View {
                 Text("카톡 답을 보고 체크해요. 한 번 더 누르면 '답 없음'으로 돌아가요.").font(.caption).foregroundStyle(Theme.inkSecondary)
             }
         }
+    }
+
+    /// 상태별로 골라 보기와, 답 없는 사람 한꺼번에 채우기.
+    private func attendanceTools(_ sheet: AttendanceSheet) -> some View {
+        let unanswered = sheet.count(.unknown, among: ids)
+        return VStack(alignment: .leading, spacing: 8) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 6) {
+                    filterChip("전체 \(ids.count)", nil)
+                    ForEach([Attendance.going, .maybe, .notGoing, .unknown], id: \.self) { a in
+                        filterChip("\(a.title) \(sheet.count(a, among: ids))", a)
+                    }
+                }
+            }
+            if unanswered > 0 {
+                Menu {
+                    Button("답 없는 \(unanswered)명 모두 참석") { fillUnanswered(.going) }
+                    Button("답 없는 \(unanswered)명 모두 불참") { fillUnanswered(.notGoing) }
+                } label: {
+                    Label("답 없는 사람 한꺼번에", icon: "checklist").font(.subheadline)
+                }
+            }
+        }
+    }
+
+    private func filterChip(_ text: String, _ a: Attendance?) -> some View {
+        let on = attendanceFilter == a
+        return Button { attendanceFilter = a } label: {
+            Text(text).font(.caption.bold())
+                .padding(.horizontal, 10).frame(minHeight: 32)
+                .foregroundStyle(on ? Color.white : Theme.cobalt)
+                .background(on ? Theme.cobalt : Theme.cobaltSoft, in: Capsule())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("보기 \(text)")
+        .accessibilityAddTraits(on ? .isSelected : [])
+    }
+
+    private func fillUnanswered(_ a: Attendance) {
+        var s = event.attendance
+        let n = s.fillUnanswered(with: a, among: ids)
+        event.attendance = s
+        context.saveOrReport()
+        toast = "\(n)명을 \(a.title)으로 바꿨어요."
     }
 
     // MARK: - 라인업

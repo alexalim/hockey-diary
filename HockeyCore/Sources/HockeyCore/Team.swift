@@ -139,6 +139,14 @@ public struct AttendanceSheet: Codable, Equatable, Sendable {
         members.filter { self[$0] == a }.count
     }
 
+    /// 아직 답이 없는 사람만 한꺼번에 채운다. 이미 정한 사람은 건드리지 않는다. 바뀐 사람 수를 돌려준다.
+    @discardableResult
+    public mutating func fillUnanswered(with a: Attendance, among members: [UUID]) -> Int {
+        let targets = members.filter { self[$0] == .unknown }
+        for m in targets { self[m] = a }
+        return a == .unknown ? 0 : targets.count
+    }
+
     public func encode() -> String { (try? String(data: JSONEncoder().encode(self), encoding: .utf8)) ?? "{}" }
     public static func decode(_ json: String) -> AttendanceSheet { (try? JSONDecoder().decode(AttendanceSheet.self, from: Data(json.utf8))) ?? AttendanceSheet() }
 }
