@@ -149,7 +149,7 @@ struct ReportCard: View {
     private func stat(_ title: String, _ n: Int) -> some View {
         VStack(spacing: 2) {
             Text("\(n)").font(.title2.bold())
-            Text(title).font(.caption2).opacity(0.85)
+            Text(title).font(.caption).opacity(0.85)
         }
         .frame(maxWidth: .infinity, minHeight: 58)
         .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 12, style: .continuous))

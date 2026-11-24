@@ -96,7 +96,7 @@ struct TeamEventView: View {
                 .frame(minHeight: Theme.touch)
             }
             if !members.isEmpty {
-                Text("카톡 답을 보고 체크해요. 한 번 더 누르면 '답 없음'으로 돌아가요.").font(.caption2).foregroundStyle(Theme.inkSecondary)
+                Text("카톡 답을 보고 체크해요. 한 번 더 누르면 '답 없음'으로 돌아가요.").font(.caption).foregroundStyle(Theme.inkSecondary)
             }
         }
     }
@@ -148,7 +148,7 @@ struct TeamEventView: View {
                 }
                 .buttonStyle(.bordered)
             }
-            Text("이미지에는 팀 로고, 일정, 참석 인원, 라인업 이름이 들어가요. 일기나 개인 기록은 안 들어가요.").font(.caption2).foregroundStyle(Theme.inkSecondary)
+            Text("이미지에는 팀 로고, 일정, 참석 인원, 라인업 이름이 들어가요. 일기나 개인 기록은 안 들어가요.").font(.caption).foregroundStyle(Theme.inkSecondary)
         }
     }
 
@@ -267,7 +267,7 @@ struct LineupEditor: View {
                                     Text(m.display).foregroundStyle(.primary)
                                     Spacer()
                                     if event.attendance[m.id] == .going { StatusTag(text: "참석", kind: .success) }
-                                    if lineup.assignedMembers.contains(m.id) { Text("배정됨").font(.caption2).foregroundStyle(Theme.inkSecondary) }
+                                    if lineup.assignedMembers.contains(m.id) { Text("배정됨").font(.caption).foregroundStyle(Theme.inkSecondary) }
                                 }
                                 .frame(minHeight: Theme.touch)
                             }
@@ -332,7 +332,7 @@ struct TeamShareCard: View {
                 if let logo { PhotoThumb(data: logo, size: 28, corner: 14) }
                 Text(teamName).font(.system(.headline, design: .rounded).weight(.heavy)).foregroundStyle(.white)
                 Spacer()
-                Text("마하다").font(.caption2).foregroundStyle(.white.opacity(0.7))
+                Text("마하다").font(.caption).foregroundStyle(.white.opacity(0.7))
             }
             Text(title).font(.title.bold()).foregroundStyle(.white)
             VStack(alignment: .leading, spacing: 4) {

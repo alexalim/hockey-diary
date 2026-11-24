@@ -140,7 +140,7 @@ struct SessionHealthCard: View {
                             row("arrow.left.arrow.right", "심박으로 짐작한 쉬프트 (실험)",
                                 "\(spans.count)번", "얼음 위 약 \(minutesText(ShiftDetector.onIceSeconds(spans) / 60))")
                             Text("심박이 높게 이어진 구간을 얼음 위로 본 거예요. 워치에서 직접 누른 쉬프트가 더 정확해요.")
-                                .font(.caption2).foregroundStyle(Theme.inkSecondary)
+                                .font(.caption).foregroundStyle(Theme.inkSecondary)
                         }
                     }
                 } else {
@@ -198,7 +198,7 @@ struct SleepGrowthCard: View {
                     Text("기록을 나란히 놓은 거예요. 잠 때문이라고 말하는 건 아니에요.").font(.caption).foregroundStyle(Theme.inkSecondary)
                 }
                 Text(Insights.footnote(periodTitle: periodTitle, count: pairs.count, source: "잠: Apple 건강 · 기분: 직접 입력"))
-                    .font(.caption2).foregroundStyle(Theme.inkSecondary)
+                    .font(.caption).foregroundStyle(Theme.inkSecondary)
             }
         }
         .task(id: "\(enabled)-\(samples.map(\.sessionID))") { loaded = false; await load() }
@@ -261,7 +261,7 @@ struct CycleGrowthCard: View {
                     }
                     Text("피로도는 내가 직접 고른 값이에요. 운동 강도를 정해 주지는 않아요.").font(.caption).foregroundStyle(Theme.inkSecondary)
                     Text(Insights.footnote(periodTitle: periodTitle, count: c.periodCount + c.otherCount, source: "생리: Apple 건강 · 피로도: 직접 입력"))
-                        .font(.caption2).foregroundStyle(Theme.inkSecondary)
+                        .font(.caption).foregroundStyle(Theme.inkSecondary)
                 } else {
                     ProgressView().frame(maxWidth: .infinity)
                 }
@@ -293,7 +293,7 @@ struct HeartZoneBar: View {
                 AppIcon("waveform.path.ecg").foregroundStyle(Theme.danger).frame(width: 24)
                 Text("심박 구간").font(.subheadline)
                 Spacer()
-                Text("최고 \(maxHR) 기준").font(.caption2).foregroundStyle(Theme.inkSecondary)
+                Text("최고 \(maxHR) 기준").font(.caption).foregroundStyle(Theme.inkSecondary)
             }
             GeometryReader { g in
                 HStack(spacing: 2) {
@@ -311,7 +311,7 @@ struct HeartZoneBar: View {
                     if seconds[i] >= 60 {
                         HStack(spacing: 3) {
                             Circle().fill(colors[i]).frame(width: 7, height: 7)
-                            Text("\(HeartZones.titles[i]) \(seconds[i] / 60)분").font(.caption2).foregroundStyle(Theme.inkSecondary)
+                            Text("\(HeartZones.titles[i]) \(seconds[i] / 60)분").font(.caption).foregroundStyle(Theme.inkSecondary)
                         }
                     }
                 }

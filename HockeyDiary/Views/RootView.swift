@@ -193,7 +193,7 @@ struct MahadaTabBar: View {
         } label: {
             VStack(spacing: 3) {
                 AppIcon(t.symbol, size: 23)
-                Text(t.title).font(.system(size: 10.5, weight: on ? .semibold : .regular)).lineLimit(1).minimumScaleFactor(0.8)
+                Text(t.title).font(.system(size: 11.5, weight: on ? .semibold : .regular)).lineLimit(1).minimumScaleFactor(0.8)
             }
             .foregroundStyle(on ? Theme.accent : Theme.inkSecondary)
             .frame(maxWidth: .infinity, minHeight: Self.itemHeight)
@@ -221,7 +221,7 @@ struct MahadaTabBar: View {
                 }
                 .frame(width: 58, height: 58)
                 .offset(y: -Self.raise)
-                Text("홈").font(.system(size: 11, weight: .semibold))
+                Text("홈").font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(on ? Theme.accent : Theme.inkSecondary)
                     .offset(y: -12)
             }

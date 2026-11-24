@@ -145,7 +145,7 @@ struct TacticPlayCard: View {
         HStack(spacing: 4) {
             Capsule().stroke(Theme.accent, style: StrokeStyle(lineWidth: 2, dash: dash ? [4, 3] : []))
                 .frame(width: 22, height: 2)
-            Text(title).font(.caption2).foregroundStyle(Theme.inkSecondary)
+            Text(title).font(.caption).foregroundStyle(Theme.inkSecondary)
         }
     }
 

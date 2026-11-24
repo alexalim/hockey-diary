@@ -38,7 +38,7 @@ struct PhotoPickerRow: View {
                 }
             }
             Text("사진은 앱 안에 따로 저장돼요. 여기서 지워도 사진 앱 원본은 그대로예요.")
-                .font(.caption2).foregroundStyle(Theme.inkSecondary)
+                .font(.caption).foregroundStyle(Theme.inkSecondary)
         }
         .onChange(of: items) { _, newItems in
             guard !newItems.isEmpty else { return }

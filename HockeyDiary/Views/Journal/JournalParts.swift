@@ -212,7 +212,7 @@ struct JournalNote: View {
                             Text(Mood.label(mood)).font(.system(.caption, design: .rounded)).foregroundStyle(Theme.paperInkSoft)
                         }
                         if !journal.isPrivate {
-                            AppIcon("square.and.arrow.up").font(.caption2).foregroundStyle(Theme.paperInkSoft)
+                            AppIcon("square.and.arrow.up").font(.caption).foregroundStyle(Theme.paperInkSoft)
                                 .accessibilityLabel("리포트 공유")
                         }
                     }

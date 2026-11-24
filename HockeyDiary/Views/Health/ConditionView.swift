@@ -186,14 +186,14 @@ struct ConditionView: View {
                     HStack(spacing: 6) {
                         Text(d.day.formatted(.dateTime.month(.defaultDigits).day().weekday(.abbreviated))).font(.subheadline.bold()).foregroundStyle(Theme.title)
                         if d.skated { AppIcon("figure.hockey").font(.caption).foregroundStyle(Theme.neonPink) }
-                        if cycleOn && d.period { AppIcon("drop.fill").font(.caption2).foregroundStyle(Theme.neonPink.opacity(0.6)) }
+                        if cycleOn && d.period { AppIcon("drop.fill").font(.caption).foregroundStyle(Theme.neonPink.opacity(0.6)) }
                         Spacer()
                     }
                     HStack(spacing: 10) {
                         ForEach(enabledMetrics, id: \.self) { m in
                             if let v = m.value(d) {
                                 VStack(alignment: .leading, spacing: 0) {
-                                    Text(m.title).font(.caption2).foregroundStyle(Theme.inkSecondary)
+                                    Text(m.title).font(.caption).foregroundStyle(Theme.inkSecondary)
                                     if m == .mood {
                                         MoodFace(level: Int(v), size: 18, label: Mood.label(Int(v)))
                                     } else {
@@ -220,7 +220,7 @@ struct ConditionView: View {
                 Toggle(isOn: Binding(get: { ConditionPrefs.isOn(m) }, set: { on in toggle(m, on) })) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(m.title).font(.subheadline)
-                        Text(m.help).font(.caption2).foregroundStyle(Theme.inkSecondary)
+                        Text(m.help).font(.caption).foregroundStyle(Theme.inkSecondary)
                     }
                 }
             }
@@ -310,7 +310,7 @@ struct BodyCheckRow: View {
                 Button { onPick(on ? nil : v) } label: {
                     VStack(spacing: 2) {
                         Text("\(v)").font(.headline)
-                        Text(BodyWords.short(v)).font(.caption2)
+                        Text(BodyWords.short(v)).font(.caption)
                     }
                     .frame(maxWidth: .infinity, minHeight: 52)
                     .foregroundStyle(on ? .white : Theme.title)
@@ -357,7 +357,7 @@ struct CycleConsentToggle: View {
         })) {
             VStack(alignment: .leading, spacing: 2) {
                 Text("생리 기간 같이 보기").font(.subheadline)
-                Text("그래프에 옅은 띠로만 표시해요. 리포트·공유·AI 요약엔 절대 안 넣어요.").font(.caption2).foregroundStyle(Theme.inkSecondary)
+                Text("그래프에 옅은 띠로만 표시해요. 리포트·공유·AI 요약엔 절대 안 넣어요.").font(.caption).foregroundStyle(Theme.inkSecondary)
             }
         }
         if let errorText { Text(errorText).font(.footnote).foregroundStyle(Theme.danger) }

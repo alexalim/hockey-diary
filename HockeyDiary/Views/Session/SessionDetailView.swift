@@ -133,7 +133,7 @@ struct SessionDetailView: View {
                 }
             }
             if session.distanceMeters != nil {
-                Text("거리는 야외·폰드에서 GPS로 잰 총거리예요. 어디를 지났는지는 남기지 않았어요.").font(.caption2).foregroundStyle(Theme.inkSecondary)
+                Text("거리는 야외·폰드에서 GPS로 잰 총거리예요. 어디를 지났는지는 남기지 않았어요.").font(.caption).foregroundStyle(Theme.inkSecondary)
             }
         }
     }

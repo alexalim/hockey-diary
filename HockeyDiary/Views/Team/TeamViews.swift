@@ -228,7 +228,7 @@ struct TeamView: View {
         return HStack(spacing: 12) {
             VStack(spacing: 0) {
                 Text("\(day)").font(.title3.bold()).monospacedDigit().foregroundStyle(Theme.title)
-                Text(weekday).font(.caption2).foregroundStyle(Theme.inkSecondary)
+                Text(weekday).font(.caption).foregroundStyle(Theme.inkSecondary)
             }
             .lineLimit(1).fixedSize()
             .frame(width: 40)

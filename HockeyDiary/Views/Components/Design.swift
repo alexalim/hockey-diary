@@ -71,7 +71,7 @@ struct MetricRow: View {
             Spacer()
             VStack(alignment: .trailing, spacing: 0) {
                 Text(value).font(.subheadline.bold())
-                if let detail { Text(detail).font(.caption2).foregroundStyle(Theme.inkSecondary) }
+                if let detail { Text(detail).font(.caption).foregroundStyle(Theme.inkSecondary) }
             }
         }
         .frame(minHeight: 32)
@@ -98,7 +98,7 @@ struct Legend: View {
                     } else {
                         Circle().fill(it.color).frame(width: 9, height: 9)
                     }
-                    Text(it.title).font(.caption2).foregroundStyle(Theme.inkSecondary)
+                    Text(it.title).font(.caption).foregroundStyle(Theme.inkSecondary)
                 }
             }
         }

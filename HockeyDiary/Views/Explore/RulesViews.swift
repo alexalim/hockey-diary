@@ -22,7 +22,7 @@ struct RuleDetailView: View {
                         RuleArt(id: topic.id)
                             .frame(height: RuleArt.detailHeight(topic.id))
                             .accessibilityHidden(true)
-                        Text("그림은 이해를 돕는 도식이에요.").font(.caption2).foregroundStyle(Theme.inkSecondary)
+                        Text("그림은 이해를 돕는 도식이에요.").font(.caption).foregroundStyle(Theme.inkSecondary)
                     }
                 }
                 if topic.id == "fouls" {
@@ -176,7 +176,7 @@ struct RuleSceneCard: View {
             if !reduceMotion {
                 Button { play() } label: { Label("다시 보기", icon: "play.circle") }.font(.footnote)
             }
-            Text("그림은 이해를 돕는 도식이에요.").font(.caption2).foregroundStyle(Theme.inkSecondary)
+            Text("그림은 이해를 돕는 도식이에요.").font(.caption).foregroundStyle(Theme.inkSecondary)
         }
         .onAppear(perform: play)
         .onChange(of: index) { _, _ in play() }
@@ -211,13 +211,13 @@ struct RinkSketch: View, Animatable {
                     RoundedRectangle(cornerRadius: 6).fill(Theme.inkTertiary.opacity(0.25))
                         .frame(width: w * 0.5, height: h * 0.16)
                         .position(x: w * 0.4, y: h * 0.08)
-                    Text("벤치").font(.caption2).foregroundStyle(Theme.inkSecondary).position(x: w * 0.4, y: h * 0.08)
+                    Text("벤치").font(.caption).foregroundStyle(Theme.inkSecondary).position(x: w * 0.4, y: h * 0.08)
                 }
                 ForEach(Array(scene.lines.enumerated()), id: \.offset) { _, line in
                     Rectangle().fill(line.color).frame(width: 5, height: h)
                         .position(x: line.x * w, y: h / 2)
                     if labels {
-                        Text(line.label).font(.caption2).foregroundStyle(line.color)
+                        Text(line.label).font(.caption).foregroundStyle(line.color)
                             .padding(3).background(.background.opacity(0.8), in: Capsule())
                             .position(x: min(max(line.x * w, 44), w - 44), y: 12)
                     }
@@ -438,7 +438,7 @@ struct FoulCards: View {
     private func legend(_ c: Color, _ t: String) -> some View {
         HStack(spacing: 4) {
             AppIcon("figure.hockey").foregroundStyle(c)
-            Text(t).font(.caption2).foregroundStyle(Theme.inkSecondary)
+            Text(t).font(.caption).foregroundStyle(Theme.inkSecondary)
         }
     }
 }

@@ -52,7 +52,7 @@ struct RinkNameField: View {
                 AppIcon(icon).foregroundStyle(Theme.accent).frame(width: 20)
                 VStack(alignment: .leading, spacing: 1) {
                     Text(title).font(.subheadline).foregroundStyle(.primary)
-                    if !subtitle.isEmpty { Text(subtitle).font(.caption2).foregroundStyle(Theme.inkSecondary).lineLimit(1) }
+                    if !subtitle.isEmpty { Text(subtitle).font(.caption).foregroundStyle(Theme.inkSecondary).lineLimit(1) }
                 }
                 Spacer()
             }
@@ -236,7 +236,7 @@ struct RinkFinderView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title).foregroundStyle(.primary)
                 if !subtitle.isEmpty { Text(subtitle).font(.caption).foregroundStyle(Theme.inkSecondary).lineLimit(1) }
-                if needsCheck { Text("운영 중인지 가기 전에 확인해 주세요").font(.caption2).foregroundStyle(Theme.warning) }
+                if needsCheck { Text("운영 중인지 가기 전에 확인해 주세요").font(.caption).foregroundStyle(Theme.warning) }
             }
             Spacer()
             AppIcon(saved ? "checkmark.circle.fill" : "plus.circle").foregroundStyle(saved ? Theme.neonPink : Theme.accent)

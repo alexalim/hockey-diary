@@ -168,7 +168,7 @@ struct SessionShareCard: View {
     private func moodStat(_ m: Int) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             MoodFace(level: m, size: 22, label: Mood.label(m))
-            Text("끝나고 기분").font(.caption2).foregroundStyle(.white.opacity(0.75))
+            Text("끝나고 기분").font(.caption).foregroundStyle(.white.opacity(0.75))
         }
         .padding(10)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -178,7 +178,7 @@ struct SessionShareCard: View {
     private func stat(_ value: String, _ label: String) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(value).font(.headline).foregroundStyle(.white).lineLimit(1).minimumScaleFactor(0.7)
-            Text(label).font(.caption2).foregroundStyle(.white.opacity(0.75))
+            Text(label).font(.caption).foregroundStyle(.white.opacity(0.75))
         }
         .padding(10)
         .frame(maxWidth: .infinity, alignment: .leading)

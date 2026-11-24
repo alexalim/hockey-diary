@@ -48,7 +48,7 @@ struct ScalePicker: View {
             HStack {
                 Text(title).font(.subheadline).foregroundStyle(Theme.inkSecondary)
                 Spacer()
-                Text("\(low) ← → \(high)").font(.caption2).foregroundStyle(Theme.inkSecondary)
+                Text("\(low) ← → \(high)").font(.caption).foregroundStyle(Theme.inkSecondary)
             }
             HStack(spacing: 6) {
                 ForEach(1...5, id: \.self) { v in
@@ -107,7 +107,7 @@ struct EffortPicker: View {
             HStack {
                 Text(Self.words[0]); Spacer(); Text(Self.words[4])
             }
-            .font(.caption2).foregroundStyle(Theme.inkSecondary)
+            .font(.caption).foregroundStyle(Theme.inkSecondary)
         }
         .padding(.vertical, 4)
     }
@@ -315,7 +315,7 @@ struct ChoiceCards<T: Hashable>: View {
                         Text(o.title).font(.footnote.weight(.semibold))
                             .multilineTextAlignment(.center).lineLimit(2).minimumScaleFactor(0.8)
                         if let s = o.subtitle {
-                            Text(s).font(.caption2).foregroundStyle(Theme.inkSecondary).lineLimit(1)
+                            Text(s).font(.caption).foregroundStyle(Theme.inkSecondary).lineLimit(1)
                         }
                     }
                     .padding(.horizontal, 4).padding(.vertical, 8)

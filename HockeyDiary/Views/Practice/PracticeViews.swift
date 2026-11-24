@@ -464,7 +464,7 @@ struct RoutineTemplatePicker: View {
                             Text("\(t.items.count)개 드릴 · 약 \(StarterRoutine.estimatedMinutes(t.items))분")
                                 .font(.caption).foregroundStyle(Theme.inkSecondary)
                             Text(t.items.compactMap { DrillCatalog.drill($0.drillKey)?.title }.joined(separator: ", "))
-                                .font(.caption2).foregroundStyle(Theme.inkSecondary)
+                                .font(.caption).foregroundStyle(Theme.inkSecondary)
                         }
                         Spacer()
                         if have {

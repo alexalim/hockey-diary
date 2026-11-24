@@ -96,11 +96,11 @@ struct RinkLayoutArt: View {
                 .offset(y: top)
                 if !compact {
                     HStack {
-                        Text("골라인 4m").font(.caption2).foregroundStyle(redLine)
+                        Text("골라인 4m").font(.caption).foregroundStyle(redLine)
                         Spacer()
                         Text("길이 60m · 폭 26~30m").font(.caption2.bold()).foregroundStyle(Theme.title)
                         Spacer()
-                        Text("블루라인").font(.caption2).foregroundStyle(blueLine)
+                        Text("블루라인").font(.caption).foregroundStyle(blueLine)
                     }
                     .offset(y: top + rinkH + 6)
                 }
@@ -181,13 +181,13 @@ struct PenaltyBarsArt: View {
                         }
                     }
                     .frame(height: compact ? 8 : 16)
-                    if !compact { Text(caption).font(.caption2).foregroundStyle(Theme.inkSecondary).frame(width: 96, alignment: .leading) }
+                    if !compact { Text(caption).font(.caption).foregroundStyle(Theme.inkSecondary).frame(width: 96, alignment: .leading) }
                 }
             }
             if !compact {
                 HStack(spacing: 6) {
                     AppIcon("person.fill").foregroundStyle(Theme.accent)
-                    Text("마이너는 상대가 골을 넣으면 바로 끝나요. 메이저는 끝까지 채워야 해요.").font(.caption2).foregroundStyle(Theme.inkSecondary)
+                    Text("마이너는 상대가 골을 넣으면 바로 끝나요. 메이저는 끝까지 채워야 해요.").font(.caption).foregroundStyle(Theme.inkSecondary)
                 }
             }
         }
@@ -217,7 +217,7 @@ struct GameClockArt: View {
                 block("슛아웃", "5명씩", Theme.danger, 3)
             }
             if !compact {
-                Text("비기면 연장, 연장에서 먼저 넣으면 끝. 그래도 안 나면 슛아웃.").font(.caption2).foregroundStyle(Theme.inkSecondary)
+                Text("비기면 연장, 연장에서 먼저 넣으면 끝. 그래도 안 나면 슛아웃.").font(.caption).foregroundStyle(Theme.inkSecondary)
             }
         }
         .padding(compact ? 6 : 12)
@@ -312,7 +312,7 @@ struct GoalieArt: View {
                 // 페널티 박스
                 RoundedRectangle(cornerRadius: 6).stroke(Theme.inkTertiary, style: StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
                     .frame(width: w * 0.26, height: h * 0.42).position(x: w * 0.82, y: h * 0.42)
-                if !compact { Text("페널티 박스").font(.caption2).foregroundStyle(Theme.inkSecondary).position(x: w * 0.82, y: h * 0.14) }
+                if !compact { Text("페널티 박스").font(.caption).foregroundStyle(Theme.inkSecondary).position(x: w * 0.82, y: h * 0.14) }
                 AppIcon("figure.hockey", size: (compact ? 16 : 28) * 1.15).foregroundStyle(Theme.danger)
                     .position(x: w * 0.82, y: h * 0.44)
                 // 다른 선수가 대신 감
@@ -364,7 +364,7 @@ struct PowerPlayArt: View {
             content()
             if !compact {
                 Text(title).font(.caption.bold()).foregroundStyle(Theme.title)
-                Text(sub).font(.caption2).foregroundStyle(Theme.inkSecondary)
+                Text(sub).font(.caption).foregroundStyle(Theme.inkSecondary)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

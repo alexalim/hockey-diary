@@ -156,7 +156,7 @@ struct GrowthView: View {
                     BarMark(x: .value("횟수", row.1.count), y: .value("종류", row.0.title))
                         .foregroundStyle(row.0.color)
                         .annotation(position: .trailing) {
-                            Text("\(row.1.count)").font(.caption2).foregroundStyle(Theme.inkSecondary)
+                            Text("\(row.1.count)").font(.caption).foregroundStyle(Theme.inkSecondary)
                         }
                 }
                 .chartXAxis(.hidden)
@@ -281,7 +281,7 @@ struct GrowthView: View {
                         .buttonStyle(.plain)
                     }
                 }
-                Text("골로 찍은 표시만 세요. 성공률은 골 ÷ 전체 슛이에요.").font(.caption2).foregroundStyle(Theme.inkSecondary)
+                Text("골로 찍은 표시만 세요. 성공률은 골 ÷ 전체 슛이에요.").font(.caption).foregroundStyle(Theme.inkSecondary)
             }
             footnote(shots.count)
         }
@@ -359,14 +359,14 @@ struct GrowthView: View {
                     .buttonStyle(.plain)
             }
             if !used.isEmpty {
-                Text("전체 기간 · 직접 남긴 기록").font(.caption2).foregroundStyle(Theme.inkSecondary)
+                Text("전체 기간 · 직접 남긴 기록").font(.caption).foregroundStyle(Theme.inkSecondary)
             }
         }
     }
 
     private func footnote(_ count: Int, note: String? = nil) -> some View {
         Text(Insights.footnote(periodTitle: period.longTitle, count: count) + (note.map { " · \($0)" } ?? ""))
-            .font(.caption2).foregroundStyle(Theme.inkSecondary)
+            .font(.caption).foregroundStyle(Theme.inkSecondary)
     }
 }
 
@@ -470,7 +470,7 @@ struct SkillDetailView: View {
                         .frame(minHeight: 32)
                     }
                 }
-                Text("경기는 성공한 날이 앞, 그다음 시도 횟수 순이에요.").font(.caption2).foregroundStyle(Theme.inkSecondary)
+                Text("경기는 성공한 날이 앞, 그다음 시도 횟수 순이에요.").font(.caption).foregroundStyle(Theme.inkSecondary)
             }
         }
     }
@@ -534,7 +534,7 @@ struct SkillDetailView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("\(s.startsAt.dayTitle) 수업에서 배움").font(.subheadline.bold())
                     if !l.feedback.isEmpty { Text(l.feedback).font(.caption).foregroundStyle(Theme.inkSecondary) }
-                    if let d = l.difficulty { Text("체감 난도 \(d)").font(.caption2).foregroundStyle(Theme.inkSecondary) }
+                    if let d = l.difficulty { Text("체감 난도 \(d)").font(.caption).foregroundStyle(Theme.inkSecondary) }
                 }
             case .attempted(let a, let s):
                 AppIcon("figure.hockey").foregroundStyle(Theme.accent).frame(width: 24)

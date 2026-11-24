@@ -197,7 +197,7 @@ struct QuestView: View {
                     ForEach(badges, id: \.stickerKey) { b in
                         VStack(spacing: 4) {
                             StickerView(key: b.stickerKey, photo: nil, side: 56)
-                            Text(badgeLabel(b.stickerKey)).font(.caption2).foregroundStyle(Theme.inkSecondary)
+                            Text(badgeLabel(b.stickerKey)).font(.caption).foregroundStyle(Theme.inkSecondary)
                         }
                     }
                 }

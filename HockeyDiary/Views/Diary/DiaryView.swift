@@ -112,7 +112,7 @@ struct DiaryView: View {
             let shifted = Array(symbols[(calendar.firstWeekday - 1)...] + symbols[..<(calendar.firstWeekday - 1)])
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: 7), spacing: 6) {
                 ForEach(Array(shifted.enumerated()), id: \.offset) { _, s in
-                    Text(s).font(.caption2).foregroundStyle(Theme.inkSecondary)
+                    Text(s).font(.caption).foregroundStyle(Theme.inkSecondary)
                 }
                 ForEach(Array(gridDays.enumerated()), id: \.offset) { _, day in
                     if let day { dayCell(day) } else { Color.clear.frame(height: 48) }
