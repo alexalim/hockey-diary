@@ -11,7 +11,7 @@ struct HealthConnectView: View {
     private let items: [(String, String, String)] = [
         ("bed.double.fill", "수면", "하키 전날 밤 잠이 그날 기록 옆에 같이 나와요."),
         ("heart.fill", "심박수", "수업이나 경기 중 평균·최고 심박이 보여요."),
-        ("figure.hockey", "운동", "워치나 가민이 잰 운동을 내 기록과 맞춰 볼 수 있어요. 여러 기기로 재도 시간은 한 번만 세요."),
+        ("figure.hockey", "운동", "워치나 가민이 잰 운동 시간을 기록에 가져와요."),
     ]
 
     var body: some View {
@@ -30,7 +30,7 @@ struct HealthConnectView: View {
             } header: {
                 Text("읽는 데이터")
             } footer: {
-                Text("아이폰 앱은 읽기만 해요. 워치로 잰 하키 운동만 건강 앱에 저장돼요. 읽은 값은 따로 저장하지 않고 볼 때마다 다시 가져와요. 어디에도 안 보내요.")
+                Text("읽기만 하고, 저장하거나 보내지 않아요. 워치로 잰 하키 운동만 건강 앱에 저장돼요.")
             }
 
             Section {
@@ -52,7 +52,7 @@ struct HealthConnectView: View {
                 }
                 if let errorText { Text(errorText).font(.footnote).foregroundStyle(Theme.danger) }
             } footer: {
-                Text("연결 안 해도 기록은 다 쓸 수 있어요. 허용 항목은 설정 → 건강 → 데이터 접근 및 기기 → 마하다에서 바꿔요.")
+                Text("연결 안 해도 기록은 다 쓸 수 있어요. 허용 항목은 아이폰 설정 > 건강에서 바꿔요.")
             }
 
             if enabled {
@@ -65,13 +65,22 @@ struct HealthConnectView: View {
                 } header: {
                     Text("심박 구간 기준")
                 } footer: {
-                    Text("심박 구간(가볍게~전력)은 이 값 대비 %로 나눠요. 보통 220에서 나이를 뺀 값 근처예요. 운동 중 본 최고 심박이 더 높으면 그걸로 올려 주세요.")
+                    Text("보통 220에서 나이를 뺀 값이에요. 운동 중 더 높게 나온 적이 있으면 그 값으로 올려 주세요.")
                 }
             }
 
-            Section("가민을 쓰고 있다면") {
-                Text("Garmin Connect 앱 → 설정 → 연결된 앱 → Apple 건강에서 동기화를 켜 주세요. 그러면 가민의 수면·심박·운동도 볼 수 있어요. 기기에 따라 일부만 보일 수 있어요. 가민 앱이 동기화한 뒤에 보여요.")
-                    .font(.subheadline).foregroundStyle(Theme.inkSecondary)
+            Section {
+                ForEach(Array(["Garmin Connect 앱 열기", "설정 > 연결된 앱", "Apple 건강 켜기"].enumerated()), id: \.offset) { i, step in
+                    HStack(spacing: 12) {
+                        Text("\(i + 1)").font(.caption.bold()).foregroundStyle(.white)
+                            .frame(width: 24, height: 24).background(Theme.cobalt, in: Circle())
+                        Text(step).font(.subheadline)
+                    }
+                }
+            } header: {
+                Text("가민을 쓴다면")
+            } footer: {
+                Text("운동이 끝나면 Garmin Connect를 한 번 열어 주세요. 가민이 동기화한 뒤에 마하다에 보여요.")
             }
         }
         .navigationTitle("Apple 건강")

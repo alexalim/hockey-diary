@@ -33,7 +33,7 @@ struct DrillSection: View {
     var body: some View {
         VStack(spacing: 12) {
             focusCard
-            SectionHeader(title: "나의 루틴", trailing: routines.isEmpty ? nil : "루틴 편집", action: routines.isEmpty ? nil : { editingRoutine = routines.first })
+            SectionHeader(title: "나의 루틴")
             Card {
                 ForEach(routines) { r in
                     HStack(spacing: 10) {

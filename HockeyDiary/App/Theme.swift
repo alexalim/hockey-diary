@@ -442,5 +442,8 @@ struct SectionHeader: View {
 extension View {
     func screenBackground() -> some View {
         background(Theme.background.ignoresSafeArea())
+            // 스크롤한 내용이 상태 표시줄(시계)과 위쪽 버튼 밑으로 비쳐 글자가 겹쳤다. 바를 화면 바탕색으로 채운다.
+            .toolbarBackground(Theme.background, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
     }
 }

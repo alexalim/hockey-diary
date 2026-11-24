@@ -306,6 +306,25 @@ final class ComponentDriveTests: XCTestCase {
         tapButton("닫기")
     }
 
+    // MARK: 화면 손질: 가민 안내는 단계로, 루틴 줄에만 고치기, 스크롤한 홈 캡처
+
+    func test_ux_health_steps_and_routine_header() {
+        XCTAssertTrue(tapButton("설정"), "홈에 설정 버튼이 없다")
+        XCTAssertTrue(tapText("Apple 건강"), "설정에 Apple 건강 줄이 없다")
+        XCTAssertNotNil(find("Garmin Connect 앱 열기"), "가민 안내가 단계로 안 나온다")
+        snap("ux-1-health")
+        tapButton("닫기")
+
+        tab("훈련"); branch("드릴")
+        XCTAssertNotNil(find("나의 루틴"), "나의 루틴 제목이 없다")
+        XCTAssertFalse(app.buttons["루틴 편집"].exists, "첫 루틴만 여는 '루틴 편집' 버튼이 남아 있다")
+
+        // 스크롤한 홈: 내용이 시계·위쪽 버튼과 겹치지 않는지 캡처로 본다.
+        tab("홈")
+        for _ in 0..<3 { nudgeUp() }
+        snap("ux-2-home-scrolled")
+    }
+
     // MARK: - 도우미 (ScreenTourTests와 같은 규칙)
 
     private func snap(_ name: String) {
