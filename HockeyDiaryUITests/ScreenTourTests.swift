@@ -280,9 +280,13 @@ final class ScreenTourTests: XCTestCase {
         if b.waitForExistence(timeout: 3) { b.tap() } else { XCTFail("탭 \(name)이 없다") }
     }
 
+    /// 숨은 탭 스택의 제목 줄 버튼이 먼저 잡힐 수 있다. 보이는 제목 줄의 첫 버튼(뒤로)을 누른다.
     private func back() {
-        let b = app.navigationBars.buttons.element(boundBy: 0)
-        if b.exists { b.tap() }
+        let all = app.navigationBars.buttons
+        for i in 0..<min(all.count, 12) {
+            let b = all.element(boundBy: i)
+            if b.exists && b.isHittable { b.tap(); sleep(1); return }
+        }
     }
 
     @discardableResult
