@@ -33,11 +33,11 @@ enum RecordPrefs {
         let m = resolved(defaults)
         let what: String
         switch m {
-        case .simple: what = "기술 난도, 시도 횟수, 경기 스탯, 코치 메모를 숨기고 짧게 적습니다."
-        case .detailed: what = "장소, 장비, 사진, 슛 차트, 경기 정보까지 처음부터 펼쳐 보여 줍니다."
-        case .normal, .auto: what = "기본 항목을 보여 주고, 나머지는 '더 적기'로 펼칩니다."
+        case .simple: what = "핵심만 짧게 적습니다."
+        case .detailed: what = "모든 항목을 처음부터 펼칩니다."
+        case .normal, .auto: what = "기본 항목만 보이고, 나머지는 '더 적기'로 펼칩니다."
         }
-        let from = mode(defaults) == .auto ? (level(defaults) == nil ? "실력 레벨을 정하지 않아 보통으로 적용 중입니다. " : "실력 레벨에 맞춰 적용 중입니다. ") : ""
-        return "\(from)지금 방식은 '\(m.title)'입니다. \(what)"
+        let hint = mode(defaults) == .auto && level(defaults) == nil ? " 실력 레벨을 정하면 거기에 맞춰집니다." : ""
+        return "지금은 '\(m.title)' 방식입니다. \(what)\(hint)"
     }
 }

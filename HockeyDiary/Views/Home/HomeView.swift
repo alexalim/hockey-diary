@@ -456,6 +456,19 @@ struct SettingsView: View {
     @AppStorage(RecordPrefs.levelKey) private var levelRaw = ""
     @AppStorage(RecordPrefs.modeKey) private var modeRaw = RecordMode.auto.rawValue
     @Environment(\.modelContext) private var context
+    @State private var showingStorageDetail = false
+
+    /// 안내 한 줄: 아이콘 + 굵은 한마디 + 짧은 설명.
+    private func fact(_ icon: String, _ title: String, _ detail: String) -> some View {
+        HStack(spacing: 12) {
+            AppIcon(icon).font(.body).foregroundStyle(Theme.accent).frame(width: 28)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.subheadline.bold()).foregroundStyle(Theme.title)
+                Text(detail).font(.caption).foregroundStyle(Theme.inkSecondary)
+            }
+        }
+        .accessibilityElement(children: .combine)
+    }
 
     var body: some View {
         List {
@@ -472,30 +485,39 @@ struct SettingsView: View {
             } footer: {
                 Text(RecordPrefs.settingsSummary())
             }
-            Section("내 기록 보관") {
-                Label("기록은 모두 이 아이폰에만 저장됩니다.", icon: "iphone")
-                Label("서버나 iCloud로 보내지 않습니다. 링크장 검색어만 Apple 지도로 전달됩니다.", icon: "icloud.slash")
-                Label("Apple 건강은 연결했을 때만 읽습니다. 읽은 값은 따로 저장하지 않습니다.", icon: "heart.text.square")
-                Label("AI 요약은 켰을 때만 동작하며, 아이폰 안에서 하키 기록만 사용합니다.", icon: "sparkles")
-                Label("Apple Watch로 잰 운동은 건강 앱에도 저장됩니다.", icon: "applewatch")
-                Label("일기는 '리포트 공유'를 켠 것만 시즌 리포트에 한 줄 들어갑니다. 내용을 따로 분석하지 않습니다.", icon: "lock.fill")
-                Label("사진은 고른 것만 복사해 두며, 위치 정보는 지웁니다.", icon: "photo")
-            }
             Section("연결") {
-                NavigationLink { HealthConnectView() } label: { Label("Apple 건강", icon: "heart.text.square.fill") }
+                NavigationLink { HealthConnectView() } label: {
+                    fact("heart.text.square.fill", "Apple 건강", "수면·심박·운동을 기록 옆에 보여 줍니다. 가민도 됩니다.")
+                }
             }
-            Section {
+            // 스위치 설명은 스위치 바로 아래 한 줄로 둔다(아래 문단으로 떼어 두면 어느 스위치 얘기인지 찾아 읽어야 한다).
+            Section("쉼·알림") {
                 Toggle(isOn: Binding(get: { RestPrefs.isResting(restJSON) }, set: { _ in restJSON = RestPrefs.toggled(restJSON) })) {
-                    Label("쉬는 중", icon: "moon.zzz.fill")
+                    fact("moon.zzz.fill", "쉬는 중", "켜 두면 주간 연속 기록이 끊기지 않습니다.")
                 }
                 Toggle(isOn: Binding(get: { teamReminder }, set: { on in
                     Task { @MainActor in
                         teamReminder = on ? await TeamReminder.requestPermission() : false
                         await TeamReminder.reschedule(context)
                     }
-                })) { Label("팀 경기 이틀 전 알림", icon: "bell.badge") }
-            } footer: {
-                Text("쉬는 동안에는 주간 연속 기록이 끊기지 않습니다. 팀 알림은 아직 참석을 정하지 않은 사람이 있을 때만 이 아이폰에서 울립니다.")
+                })) { fact("bell.badge", "팀 경기 이틀 전 알림", "참석을 안 정한 사람이 있을 때만 울립니다.") }
+            }
+            // 한눈에 볼 세 가지만 먼저, 나머지 안내는 '자세히'로 접는다. 내용은 빼지 않는다.
+            Section("내 기록 보관") {
+                fact("iphone", "이 아이폰에만 저장", "서버나 iCloud로 보내지 않습니다.")
+                fact("heart.text.square", "건강·AI는 켰을 때만", "읽은 건강 값은 따로 저장하지 않습니다.")
+                fact("photo", "사진은 고른 것만", "복사해 두고 위치 정보는 지웁니다.")
+                DisclosureGroup("자세히", isExpanded: $showingStorageDetail) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("• 링크장 검색어만 Apple 지도로 전달됩니다.")
+                        Text("• AI 요약은 아이폰 안에서 하키 기록만 사용합니다.")
+                        Text("• Apple Watch로 잰 운동은 건강 앱에도 저장됩니다.")
+                        Text("• 일기는 '리포트 공유'를 켠 것만 시즌 리포트에 한 줄 들어갑니다. 내용을 따로 분석하지 않습니다.")
+                        Text("• 분석은 내 기록의 흐름만 보여 줍니다. 의료 조언이나 실력 예측은 하지 않습니다.")
+                    }
+                    .font(.footnote).foregroundStyle(Theme.inkSecondary)
+                }
+                .font(.subheadline)
             }
             Section("앱 정보") {
                 HStack {
@@ -504,8 +526,6 @@ struct SettingsView: View {
                     Text(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "-")
                         .foregroundStyle(Theme.inkSecondary)
                 }
-                Text("분석은 내 기록의 흐름만 보여 줍니다. 의료 조언이나 실력 예측은 하지 않습니다.")
-                    .font(.footnote).foregroundStyle(Theme.inkSecondary)
                 Link(destination: URL(string: "https://alexalim.github.io/hockey-diary/")!) { Label("개인정보 처리방침", icon: "lock.fill") }
                 Link(destination: URL(string: "mailto:esl2dev@gmail.com")!) { Label("문의하기", icon: "envelope.fill") }
             }
