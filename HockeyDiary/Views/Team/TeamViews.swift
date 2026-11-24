@@ -161,6 +161,8 @@ struct TeamView: View {
             AppIcon("chevron.right").font(.caption).foregroundStyle(Theme.inkSecondary)
         }
         .frame(minHeight: Theme.touch)
+        // 제목 오른쪽 빈 자리도 눌리게 한다(.plain 버튼은 그려진 곳만 눌린다).
+        .contentShape(Rectangle())
     }
 }
 

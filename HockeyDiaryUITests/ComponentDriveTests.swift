@@ -169,10 +169,8 @@ final class ComponentDriveTests: XCTestCase {
         XCTAssertTrue(tapText("일정 추가"), "일정 추가 버튼이 없다")
         XCTAssertTrue(tapButton("저장"), "일정 저장 버튼이 없다")
         sleep(1)
-        // 줄 한가운데는 빈 자리라 눌리지 않는다. 글자를 누른다.
-        let rowTitle = app.staticTexts.matching(NSPredicate(format: "label == %@", "정규게임")).allElementsBoundByIndex.first { $0.isHittable }
-        XCTAssertNotNil(rowTitle, "만든 일정이 목록에 없다")
-        rowTitle?.tap(); sleep(1)
+        // 줄 한가운데(제목 오른쪽 빈 자리)를 누른다. 글자만 눌리던 때는 여기서 화면이 안 열렸다.
+        XCTAssertTrue(tapText("정규게임"), "만든 일정이 목록에 없다")
         XCTAssertTrue(app.navigationBars["일정"].waitForExistence(timeout: 5), "일정 화면이 안 열렸다")
         XCTAssertTrue(tapText("이 일정으로 기록 만들기"), "기록 만들기 버튼이 없다")
         snap("link-1-team-record-open")
