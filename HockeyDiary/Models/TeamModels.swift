@@ -9,6 +9,8 @@ final class Team {
     var id: UUID = UUID()
     var name: String = ""
     var createdAt: Date = Date()
+    /// 팀 로고(축소본). 사진 선택기로 고른 것만, 이 아이폰 안에만 저장한다.
+    @Attribute(.externalStorage) var logoData: Data?
 
     init(name: String) {
         self.id = UUID()
@@ -89,6 +91,20 @@ final class TeamEvent {
 enum TeamStore {
     static func team(_ context: ModelContext) -> Team? {
         try? context.fetch(FetchDescriptor<Team>(sortBy: [SortDescriptor(\.createdAt)])).first
+    }
+
+    static func teams(_ context: ModelContext) -> [Team] {
+        (try? context.fetch(FetchDescriptor<Team>(sortBy: [SortDescriptor(\.createdAt)]))) ?? []
+    }
+
+    /// 팀을 지운다. 그 팀의 팀원(명단에서 뺀 사람 포함)과 일정도 같이 지운다. 일정으로 만든 기록은 남는다.
+    static func deleteTeam(_ team: Team, context: ModelContext) {
+        let id = team.id
+        let members = (try? context.fetch(FetchDescriptor<TeamMember>())) ?? []
+        for m in members where m.teamID == id { context.delete(m) }
+        for e in events(of: team, context: context) { context.delete(e) }
+        context.delete(team)
+        context.saveOrReport()
     }
 
     static func members(of team: Team, context: ModelContext) -> [TeamMember] {

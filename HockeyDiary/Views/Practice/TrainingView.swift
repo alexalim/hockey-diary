@@ -109,7 +109,8 @@ struct GameBranch: View {
         }
         Card {
             CardHeader(title: "다음 경기", systemImage: "calendar.badge.clock")
-            if let team = teams.first, let next = teamEvents.first(where: { $0.at >= Calendar.current.startOfDay(for: Date()) }) {
+            if let next = teamEvents.first(where: { $0.at >= Calendar.current.startOfDay(for: Date()) }),
+               let team = teams.first(where: { $0.id == next.teamID }) {
                 NavigationLink { TeamEventView(event: next, team: team) } label: {
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {

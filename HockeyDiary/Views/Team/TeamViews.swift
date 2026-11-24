@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import PhotosUI
 import HockeyCore
 
 /// 우리 팀 홈: 팀 이름, 다음 일정, 명단. 모든 것은 이 아이폰 안에만 있고, 공유는 이미지·글로 한다.
@@ -14,8 +15,14 @@ struct TeamView: View {
     @State private var addingMember = false
     @State private var addingEvent = false
     @State private var renaming = false
+    @State private var addingTeam = false
+    @State private var addedTeamName = ""
+    @State private var confirmingDeleteTeam = false
+    @State private var logoItem: PhotosPickerItem?
+    /// 지금 보고 있는 팀. 홈에서 들어온 팀 화면과 팀 탭이 같은 팀을 본다.
+    @AppStorage("selectedTeamID") private var selectedTeamID = ""
 
-    private var team: Team? { teams.first }
+    private var team: Team? { teams.first { $0.id.uuidString == selectedTeamID } ?? teams.first }
     private var members: [TeamMember] { allMembers.filter { $0.teamID == team?.id && $0.isActive } }
     private var events: [TeamEvent] { allEvents.filter { $0.teamID == team?.id } }
     private var upcoming: [TeamEvent] { events.filter { $0.at >= Calendar.current.startOfDay(for: Date()) } }
@@ -67,16 +74,32 @@ struct TeamView: View {
         ScrollView {
             VStack(spacing: 12) {
                 header
+                teamPicker(team)
                 // 이름표: 팀 이름은 여기서 보고 여기서 바꾼다.
                 Card {
                     HStack(spacing: 10) {
-                        AppIcon("person.3.fill").font(.title3).foregroundStyle(Theme.accent)
+                        if let logo = team.logoData {
+                            PhotoThumb(data: logo, size: 44, corner: 22).accessibilityLabel("팀 로고")
+                        } else {
+                            AppIcon("person.3.fill").font(.title3).foregroundStyle(Theme.accent)
+                        }
                         Text(team.name).font(.title3.bold()).foregroundStyle(Theme.title).lineLimit(1)
                         Spacer()
                         Button("이름 바꾸기") { newTeamName = team.name; renaming = true }
                             .font(.subheadline).foregroundStyle(Theme.accent)
                     }
                     .frame(minHeight: Theme.touch)
+                    // 로고는 사진 선택기로 고른 한 장만 받는다(앨범 권한을 묻지 않는다).
+                    HStack(spacing: 16) {
+                        PhotosPicker(selection: $logoItem, matching: .images) {
+                            Label(team.logoData == nil ? "로고 넣기" : "로고 바꾸기", icon: "photo")
+                        }
+                        if team.logoData != nil {
+                            Button("로고 빼기", role: .destructive) { team.logoData = nil; context.saveOrReport() }
+                        }
+                        Spacer()
+                    }
+                    .font(.subheadline)
                 }
                 Card {
                     CardHeader(title: "다음 일정", systemImage: "calendar", trailing: upcoming.isEmpty ? nil : "\(upcoming.count)개")
@@ -119,8 +142,42 @@ struct TeamView: View {
                 }
                 Text("팀 정보는 이 아이폰에만 있어요. 공유하려면 일정 화면에서 이미지나 글로 올려요.")
                     .font(.caption).foregroundStyle(Theme.inkSecondary).frame(maxWidth: .infinity, alignment: .leading)
+                Button(role: .destructive) { confirmingDeleteTeam = true } label: {
+                    Label("이 팀 지우기", icon: "trash").frame(maxWidth: .infinity, minHeight: Theme.touch)
+                }
             }
             .padding(16)
+        }
+        .onChange(of: logoItem) { _, item in
+            guard let item else { return }
+            Task {
+                if let data = try? await item.loadTransferable(type: Data.self),
+                   let small = ImageShrinker.jpeg(from: data, maxSide: 512) {
+                    team.logoData = small
+                    context.saveOrReport()
+                }
+                logoItem = nil
+            }
+        }
+        .alert("새 팀", isPresented: $addingTeam) {
+            TextField("팀 이름", text: $addedTeamName)
+            Button("만들기") {
+                let name = addedTeamName.trimmingCharacters(in: .whitespaces)
+                guard !name.isEmpty else { return }
+                let t = Team(name: name)
+                context.insert(t)
+                context.saveOrReport()
+                selectedTeamID = t.id.uuidString
+            }
+            Button("취소", role: .cancel) {}
+        }
+        .confirmationDialog("\(team.name) 팀을 지울까요?", isPresented: $confirmingDeleteTeam, titleVisibility: .visible) {
+            Button("지우기", role: .destructive) {
+                selectedTeamID = teams.first { $0.id != team.id }?.id.uuidString ?? ""
+                TeamStore.deleteTeam(team, context: context)
+            }
+        } message: {
+            Text("이 팀의 명단과 일정 \(events.count)개가 같이 지워져요. 일정으로 만든 기록은 남아요.")
         }
         .alert("팀 이름", isPresented: $renaming) {
             TextField("팀 이름", text: $newTeamName)
@@ -130,6 +187,33 @@ struct TeamView: View {
         .sheet(isPresented: $addingMember) { NavigationStack { TeamMemberEditor(team: team, member: nil) } }
         .sheet(item: $editingMember) { m in NavigationStack { TeamMemberEditor(team: team, member: m) } }
         .sheet(isPresented: $addingEvent) { NavigationStack { TeamEventEditor(team: team, event: nil) } }
+    }
+
+    /// 팀 고르기. 팀이 여럿이면 여기서 바꾸고, 새 팀도 여기서 더한다.
+    private func teamPicker(_ current: Team) -> some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(teams) { t in
+                    let on = t.id == current.id
+                    Button { selectedTeamID = t.id.uuidString } label: {
+                        Text(t.name).font(.subheadline.bold()).lineLimit(1)
+                            .foregroundStyle(on ? Color.white : Theme.cobalt)
+                            .padding(.horizontal, 14).frame(minHeight: 36)
+                            .background(on ? Theme.cobalt : Theme.cobaltSoft, in: Capsule())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("팀 \(t.name)")
+                    .accessibilityAddTraits(on ? .isSelected : [])
+                }
+                Button { addedTeamName = ""; addingTeam = true } label: {
+                    Label("팀 추가", icon: "plus").font(.subheadline.bold())
+                        .padding(.horizontal, 14).frame(minHeight: 36)
+                        .overlay(Capsule().strokeBorder(Theme.cobalt.opacity(0.4)))
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(Theme.cobalt)
+            }
+        }
     }
 
     private func eventRow(_ e: TeamEvent) -> some View {

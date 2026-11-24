@@ -204,7 +204,8 @@ struct HomeView: View {
     /// 다음 경기(팀 일정) 히어로. 일정이 없으면 보이지 않는다.
     @ViewBuilder
     private var nextGameHero: some View {
-        if let team = teams.first, let next = teamEvents.first(where: { $0.at >= Calendar.current.startOfDay(for: Date()) }) {
+        if let next = teamEvents.first(where: { $0.at >= Calendar.current.startOfDay(for: Date()) }),
+           let team = teams.first(where: { $0.id == next.teamID }) {
             let members = TeamStore.members(of: team, context: context)
             let sheet = next.attendance
             let going = sheet.count(.going, among: members.map(\.id)), maybe = sheet.count(.maybe, among: members.map(\.id))
@@ -218,7 +219,7 @@ struct HomeView: View {
                         Text(next.at.formatted(.dateTime.month(.defaultDigits).day().weekday(.abbreviated).hour().minute())).font(.caption.bold())
                     }
                     .foregroundStyle(.white.opacity(0.9))
-                    Text(next.opponent.isEmpty ? next.title : "\(teams.first?.name ?? "우리 팀") vs \(next.opponent)")
+                    Text(next.opponent.isEmpty ? next.title : "\(team.name) vs \(next.opponent)")
                         .font(.system(size: 22, weight: .bold)).foregroundStyle(.white)
                     if !next.rinkName.isEmpty || !next.memo.isEmpty {
                         Label([next.rinkName, next.memo].filter { !$0.isEmpty }.joined(separator: " · "), icon: "mappin")
@@ -416,7 +417,8 @@ struct HomeView: View {
         let next = teamEvents.first { $0.at >= Calendar.current.startOfDay(for: Date()) }
         NavigationLink { TeamView() } label: {
             Card {
-                CardHeader(title: teams.first?.name ?? "우리 팀", systemImage: "person.3.fill",
+                // 팀이 여럿이면 다음 일정이 속한 팀 이름을 적는다.
+                CardHeader(title: next.flatMap { n in teams.first { $0.id == n.teamID } }?.name ?? (teams.count == 1 ? teams[0].name : "우리 팀"), systemImage: "person.3.fill",
                            trailing: next.map { $0.at.formatted(.dateTime.month().day().weekday(.abbreviated)) })
                 if let next {
                     Text("\(next.title) · \(next.at.formatted(.dateTime.hour().minute()))\(next.rinkName.isEmpty ? "" : " · \(next.rinkName)")")

@@ -12,7 +12,7 @@ enum WidgetBridge {
         let checks = (try? context.fetch(FetchDescriptor<BodyCheck>())) ?? []
         let journals = (try? context.fetch(FetchDescriptor<DailyJournal>())) ?? []
         let events = (try? context.fetch(FetchDescriptor<TeamEvent>(sortBy: [SortDescriptor(\.at)]))) ?? []
-        let team = (try? context.fetch(FetchDescriptor<Team>()))?.first
+        let teams = (try? context.fetch(FetchDescriptor<Team>())) ?? []
         let defaults = UserDefaults.standard
         let restJSON = defaults.string(forKey: RestPrefs.key) ?? "[]"
 
@@ -29,7 +29,7 @@ enum WidgetBridge {
                                        facts: QuestStore.facts(sessions: sessions, drills: drills, checks: checks, journals: journals),
                                        level: RecordPrefs.level(), targetOverride: defaults.integer(forKey: QuestStore.targetKey))
         let next = events.first { $0.at >= cal.startOfDay(for: now) }
-        let nextTitle = next.map { e in e.opponent.isEmpty ? e.title : "\(team?.name ?? "우리 팀") vs \(e.opponent)" }
+        let nextTitle = next.map { e in e.opponent.isEmpty ? e.title : "\(teams.first { $0.id == e.teamID }?.name ?? "우리 팀") vs \(e.opponent)" }
 
         let snap = WidgetSnapshot(weekDays: days, todayIndex: todayIndex, streakWeeks: streak.current,
                                   monthDone: quest.monthDone, monthTarget: quest.monthTarget, points: quest.points,

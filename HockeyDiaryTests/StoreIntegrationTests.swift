@@ -280,4 +280,23 @@ final class StoreIntegrationTests: XCTestCase {
         XCTAssertEqual(try context.fetch(FetchDescriptor<Session>()).map(\.id), [kept.id])
         XCTAssertEqual(try context.fetchCount(FetchDescriptor<ShotMark>()), 0)
     }
+
+    // 팀을 지우면 그 팀의 명단(뺀 사람 포함)과 일정만 지워진다. 다른 팀과, 일정으로 만든 기록은 남는다.
+    func testDeletingTeamRemovesOnlyItsMembersAndEvents() throws {
+        let a = Team(name: "펭귄스"), b = Team(name: "베어스"); context.insert(a); context.insert(b)
+        let gone = TeamMember(teamID: a.id, name: "김하키"), left = TeamMember(teamID: a.id, name: "뺀 사람"); left.isActive = false
+        let stays = TeamMember(teamID: b.id, name: "박수비")
+        [gone, left, stays].forEach(context.insert)
+        let evA = TeamEvent(teamID: a.id, at: Date().addingTimeInterval(3_600)), evB = TeamEvent(teamID: b.id, at: Date().addingTimeInterval(7_200))
+        context.insert(evA); context.insert(evB)
+        let record = TeamStore.makeSession(for: evA, context: context)
+        try context.save()
+
+        TeamStore.deleteTeam(a, context: context)
+
+        XCTAssertEqual(TeamStore.teams(context).map(\.name), ["베어스"])
+        XCTAssertEqual(try context.fetch(FetchDescriptor<TeamMember>()).map(\.name), ["박수비"])
+        XCTAssertEqual(try context.fetch(FetchDescriptor<TeamEvent>()).map(\.id), [evB.id])
+        XCTAssertEqual(try context.fetch(FetchDescriptor<Session>()).map(\.id), [record.id], "일정으로 만든 기록은 내 기록이라 남는다")
+    }
 }

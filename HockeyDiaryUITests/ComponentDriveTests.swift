@@ -192,6 +192,44 @@ final class ComponentDriveTests: XCTestCase {
         snap("link-5-event-button-back")
     }
 
+    // MARK: 팀 여러 개: 두 번째 팀 추가 → 팀마다 자기 일정만 보임 → 팀 지우면 남은 팀으로
+
+    func test_two_teams_switch_and_delete() {
+        tab("팀")
+        guard let name = formField("팀 이름 (예: 목동 펭귄스)") else { XCTFail("팀 이름 칸이 없다"); return }
+        name.tap(); name.typeText("펭귄스")
+        XCTAssertTrue(tapButton("만들기"))
+        XCTAssertTrue(tapText("일정 추가"), "일정 추가 버튼이 없다")
+        XCTAssertTrue(tapButton("저장"), "일정 저장 버튼이 없다")
+        sleep(1)
+        XCTAssertNotNil(find("정규게임", swipes: 0), "첫 팀에 만든 일정이 없다")
+
+        // 두 번째 팀: 만들면 그 팀으로 바뀌고, 첫 팀의 일정은 안 보인다.
+        XCTAssertTrue(tapButton("팀 추가"), "팀 추가 버튼이 없다")
+        let field = app.alerts.textFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 3), "새 팀 이름 칸이 없다")
+        field.typeText("베어스")
+        app.alerts.buttons["만들기"].tap(); sleep(1)
+        snap("teams-1-second-team")
+        XCTAssertTrue(app.buttons["팀 베어스"].isSelected, "새 팀이 골라지지 않았다")
+        XCTAssertNil(find("정규게임", swipes: 0), "두 번째 팀에 첫 팀의 일정이 보인다")
+
+        // 첫 팀으로 돌아가면 일정이 다시 보인다.
+        XCTAssertTrue(tapButton("팀 펭귄스"), "팀 고르기에 첫 팀이 없다")
+        sleep(1)
+        snap("teams-2-back-to-first")
+        XCTAssertNotNil(find("정규게임", swipes: 0), "첫 팀으로 돌아왔는데 일정이 없다")
+
+        // 첫 팀을 지우면 남은 팀이 보이고, 지운 팀은 고르기에서 사라진다.
+        XCTAssertTrue(tapText("이 팀 지우기"), "팀 지우기 버튼이 없다")
+        let confirm = app.sheets.buttons["지우기"].firstMatch
+        XCTAssertTrue(confirm.waitForExistence(timeout: 3), "팀 지우기 확인창이 없다"); confirm.tap()
+        sleep(2)
+        snap("teams-3-after-delete")
+        XCTAssertTrue(app.buttons["팀 베어스"].waitForExistence(timeout: 3), "남은 팀이 안 보인다")
+        XCTAssertFalse(app.buttons["팀 펭귄스"].exists, "지운 팀이 고르기에 남아 있다")
+    }
+
     // MARK: - 도우미 (ScreenTourTests와 같은 규칙)
 
     private func snap(_ name: String) {

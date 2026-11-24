@@ -6,6 +6,7 @@ import UIKit
 /// 일정 하나: 참석 체크, 라인업, 공유(이미지·글), 경기 기록 만들기.
 struct TeamEventView: View {
     @Environment(\.modelContext) private var context
+    @Environment(\.dismiss) private var dismiss
     @Bindable var event: TeamEvent
     let team: Team
     @Query(sort: \TeamMember.createdAt) private var allMembers: [TeamMember]
@@ -25,6 +26,15 @@ struct TeamEventView: View {
     private var ids: [UUID] { members.map(\.id) }
 
     var body: some View {
+        // 일정이나 팀이 지워졌으면(다른 탭에서 지운 경우 포함) 빈 화면으로 남지 않게 닫는다.
+        if event.isDeleted || event.modelContext == nil {
+            Color.clear.onAppear { dismiss() }
+        } else {
+            detail
+        }
+    }
+
+    private var detail: some View {
         ScrollView {
             VStack(spacing: 12) {
                 Card(tint: Theme.cobalt) {
@@ -138,7 +148,7 @@ struct TeamEventView: View {
                 }
                 .buttonStyle(.bordered)
             }
-            Text("이미지에는 일정, 참석 인원, 라인업 이름이 들어가요. 일기나 개인 기록은 안 들어가요.").font(.caption2).foregroundStyle(Theme.inkSecondary)
+            Text("이미지에는 팀 로고, 일정, 참석 인원, 라인업 이름이 들어가요. 일기나 개인 기록은 안 들어가요.").font(.caption2).foregroundStyle(Theme.inkSecondary)
         }
     }
 
@@ -148,7 +158,7 @@ struct TeamEventView: View {
         let card = TeamShareCard(teamName: team.name, title: event.title, when: event.whenText, rink: event.rinkName,
                                  opponent: event.opponent, memo: event.memo,
                                  going: sheet.count(.going, among: ids), maybe: sheet.count(.maybe, among: ids), total: ids.count,
-                                 lineup: event.lineup, names: names)
+                                 lineup: event.lineup, names: names, logo: team.logoData)
         // 공유 이미지는 항상 라이트 색으로 그린다(다크 모드에서 흰 바탕에 밝은 글자가 되지 않게).
         let renderer = ImageRenderer(content: card.frame(width: 390).environment(\.colorScheme, .light))
         renderer.scale = 3
@@ -314,10 +324,12 @@ struct TeamShareCard: View {
     let going: Int, maybe: Int, total: Int
     let lineup: Lineup
     let names: [UUID: String]
+    var logo: Data? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
+                if let logo { PhotoThumb(data: logo, size: 28, corner: 14) }
                 Text(teamName).font(.system(.headline, design: .rounded).weight(.heavy)).foregroundStyle(.white)
                 Spacer()
                 Text("마하다").font(.caption2).foregroundStyle(.white.opacity(0.7))

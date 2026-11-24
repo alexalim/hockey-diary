@@ -22,23 +22,25 @@ enum TeamReminder {
         let center = UNUserNotificationCenter.current()
         let pending = await center.pendingNotificationRequests().map(\.identifier).filter { $0.hasPrefix(prefix) }
         center.removePendingNotificationRequests(withIdentifiers: pending)
-        guard isEnabled, let team = TeamStore.team(context) else { return }
-        let members = TeamStore.members(of: team, context: context).map(\.id)
+        guard isEnabled else { return }
         let cal = Calendar.current
-        for e in TeamStore.events(of: team, context: context) where e.at > now {
-            let sheet = e.attendance
-            let undecided = members.filter { [.maybe, .unknown].contains(sheet[$0]) }.count
-            guard undecided > 0,
-                  let day = cal.date(byAdding: .day, value: -2, to: cal.startOfDay(for: e.at)),
-                  let fire = cal.date(bySettingHour: 19, minute: 0, second: 0, of: day), fire > now else { continue }
-            let content = UNMutableNotificationContent()
-            content.title = "\(e.at.formatted(.dateTime.weekday(.wide))) \(e.title)"
-            content.body = "아직 참석 여부를 안 정한 사람이 \(undecided)명 있어요. 확인해 볼래요?"
-            content.sound = .default
-            let comps = cal.dateComponents([.year, .month, .day, .hour, .minute], from: fire)
-            let req = UNNotificationRequest(identifier: prefix + e.id.uuidString, content: content,
-                                            trigger: UNCalendarNotificationTrigger(dateMatching: comps, repeats: false))
-            try? await center.add(req)
+        for team in TeamStore.teams(context) {
+            let members = TeamStore.members(of: team, context: context).map(\.id)
+            for e in TeamStore.events(of: team, context: context) where e.at > now {
+                let sheet = e.attendance
+                let undecided = members.filter { [.maybe, .unknown].contains(sheet[$0]) }.count
+                guard undecided > 0,
+                      let day = cal.date(byAdding: .day, value: -2, to: cal.startOfDay(for: e.at)),
+                      let fire = cal.date(bySettingHour: 19, minute: 0, second: 0, of: day), fire > now else { continue }
+                let content = UNMutableNotificationContent()
+                content.title = "\(e.at.formatted(.dateTime.weekday(.wide))) \(e.title)"
+                content.body = "아직 참석 여부를 안 정한 사람이 \(undecided)명 있어요. 확인해 볼래요?"
+                content.sound = .default
+                let comps = cal.dateComponents([.year, .month, .day, .hour, .minute], from: fire)
+                let req = UNNotificationRequest(identifier: prefix + e.id.uuidString, content: content,
+                                                trigger: UNCalendarNotificationTrigger(dateMatching: comps, repeats: false))
+                try? await center.add(req)
+            }
         }
     }
 }
