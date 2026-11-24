@@ -244,6 +244,28 @@ final class ComponentDriveTests: XCTestCase {
         snap("settings-3-details")
     }
 
+    // MARK: 닉네임: 설정에서 적으면 홈 인사말에 나온다
+
+    func test_nickname_shows_in_home_greeting() {
+        // 설정값은 테스트 사이에 남는다. 앞뒤로 칸을 비운다.
+        let wipe = String(repeating: XCUIKeyboardKey.delete.rawValue, count: 12)
+        XCTAssertTrue(tapButton("설정"), "홈에 설정 버튼이 없다")
+        guard let field = formField("닉네임") else { XCTFail("닉네임 칸이 없다"); return }
+        field.tap(); field.typeText(wipe + "하키왕")
+        snap("nickname-1-settings")
+        XCTAssertTrue(tapButton("닫기"))
+        sleep(1)
+        snap("nickname-2-home")
+        XCTAssertNotNil(find("하키왕, 오늘도 빙판 위에서.", swipes: 0), "홈 인사말에 닉네임이 없다")
+
+        XCTAssertTrue(tapButton("설정"))
+        guard let again = formField("닉네임") else { XCTFail("닉네임 칸이 없다"); return }
+        again.tap(); again.typeText(wipe)
+        XCTAssertTrue(tapButton("닫기"))
+        sleep(1)
+        XCTAssertNotNil(find("오늘도, 빙판 위에서.", swipes: 0), "닉네임을 지워도 인사말이 안 돌아온다")
+    }
+
     // MARK: - 도우미 (ScreenTourTests와 같은 규칙)
 
     private func snap(_ name: String) {

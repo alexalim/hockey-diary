@@ -16,6 +16,7 @@ struct HomeView: View {
     @Query(sort: \BodyCheck.day, order: .reverse) private var checks: [BodyCheck]
 
     @State private var showingSettings = false
+    @AppStorage(MyPrefs.nicknameKey) private var nickname = ""
     @Environment(AppJumper.self) private var jumper: AppJumper?
     @State private var showingEdit = false
     @AppStorage(RestPrefs.key) private var restJSON = "[]"
@@ -42,7 +43,7 @@ struct HomeView: View {
         ScrollView {
             VStack(spacing: 12) {
                 ScreenHeader(eyebrow: Date().formatted(.dateTime.weekday(.wide).month().day()).uppercased(),
-                             title: "오늘도, 빙판 위에서.", subtitle: "작은 기록이 나의 플레이를 바꿔요.")
+                             title: nickname.isEmpty ? "오늘도, 빙판 위에서." : "\(nickname), 오늘도 빙판 위에서.", subtitle: "작은 기록이 나의 플레이를 바꿔요.")
                     .toolbar { BarAction(icon: "gearshape.fill", label: "설정") { showingSettings = true } }
                 if health.openFailed || health.lastSaveFailed { storeWarning }
                 promptCard
@@ -457,6 +458,7 @@ struct SettingsView: View {
     @AppStorage(RecordPrefs.modeKey) private var modeRaw = RecordMode.auto.rawValue
     @Environment(\.modelContext) private var context
     @State private var showingStorageDetail = false
+    @AppStorage(MyPrefs.nicknameKey) private var nickname = ""
 
     /// 안내 한 줄: 아이콘 + 굵은 한마디 + 짧은 설명.
     private func fact(_ icon: String, _ title: String, _ detail: String) -> some View {
@@ -472,6 +474,14 @@ struct SettingsView: View {
 
     var body: some View {
         List {
+            Section {
+                TextField("닉네임 (예: 하키왕)", text: Binding(get: { nickname }, set: { nickname = MyPrefs.clean($0) }))
+                    .accessibilityIdentifier("닉네임")
+            } header: {
+                Text("나")
+            } footer: {
+                Text("홈 인사말에 나옵니다. 이 아이폰에만 저장됩니다.")
+            }
             Section {
                 Picker("실력 레벨", selection: $levelRaw) {
                     Text("정하지 않음").tag("")
