@@ -254,6 +254,15 @@ struct SessionEditorView: View {
 
     private var basicsSection: some View {
         Section {
+            if isNew {
+                // 운동 직후에는 짧게, 여유 있을 때는 자세히. 설정의 입력 방식이 처음 값을 정한다.
+                Picker("기록 길이", selection: Binding(get: { expanded }, set: { on in withAnimation { expanded = on } })) {
+                    Text("빠른 기록").tag(false)
+                    Text("상세 기록").tag(true)
+                }
+                .pickerStyle(.segmented)
+                .accessibilityIdentifier("기록 길이")
+            }
             if isNew && !templates.isEmpty {
                 Menu {
                     ForEach(templates) { t in
@@ -424,9 +433,10 @@ struct SessionEditorView: View {
 
     private var moodSection: some View {
         Section("기분·컨디션") {
-            MoodPicker(title: "운동 전 기분", value: $moodBefore)
+            // 빠른 기록에서는 '운동 후 기분' 하나만 묻는다.
+            if expanded { MoodPicker(title: "운동 전 기분", value: $moodBefore) }
             MoodPicker(title: "운동 후 기분", value: $moodAfter)
-            EffortPicker(value: $fatigue)
+            if expanded { EffortPicker(value: $fatigue) }
         }
     }
 

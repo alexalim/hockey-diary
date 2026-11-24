@@ -325,6 +325,21 @@ final class ComponentDriveTests: XCTestCase {
         snap("ux-2-home-scrolled")
     }
 
+    // MARK: 기록 길이: 빠른 기록은 운동 후 기분만, 상세 기록은 운동 전 기분도 묻는다
+
+    func test_record_quick_and_detailed_switch() {
+        snap("redesign-1-home-top")
+        XCTAssertTrue(newRecord("수업 기록"))
+        XCTAssertNotNil(find("운동 후 기분"), "빠른 기록에 운동 후 기분이 없다")
+        XCTAssertNil(find("운동 전 기분", swipes: 0), "빠른 기록인데 운동 전 기분을 묻는다")
+        for _ in 0..<4 { app.swipeDown() }
+        snap("redesign-2-record-quick")
+        branch("상세 기록")
+        XCTAssertNotNil(find("운동 전 기분"), "상세 기록으로 바꿔도 운동 전 기분이 안 나온다")
+        snap("redesign-3-record-detailed")
+        tapButton("닫기")
+    }
+
     // MARK: - 도우미 (ScreenTourTests와 같은 규칙)
 
     private func snap(_ name: String) {
