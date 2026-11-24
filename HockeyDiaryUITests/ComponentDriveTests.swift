@@ -162,7 +162,7 @@ final class ComponentDriveTests: XCTestCase {
     // MARK: 팀 일정으로 만든 기록을 기록 탭에서 지움 → 팀 탭이 빈 화면이 아니라 일정으로 돌아옴
 
     func test_deleting_event_record_elsewhere_does_not_blank_team_tab() {
-        XCTAssertTrue(tapText("우리 팀"), "홈에 우리 팀 카드가 없다")
+        tab("팀")
         guard let name = formField("팀 이름 (예: 목동 펭귄스)") else { XCTFail("팀 이름 칸이 없다"); return }
         name.tap(); name.typeText("테스트 펭귄스")
         XCTAssertTrue(tapButton("만들기"))
