@@ -449,6 +449,34 @@ struct HomeView: View {
     }
 }
 
+/// 기록 템플릿 목록(설정 > 나). 만들기는 기록 상세의 '템플릿으로 저장'에서 한다.
+struct RecordTemplatesView: View {
+    @Environment(\.modelContext) private var context
+    @Query(sort: \RecordTemplate.createdAt) private var templates: [RecordTemplate]
+
+    var body: some View {
+        List {
+            if templates.isEmpty {
+                Text("아직 템플릿이 없습니다. 기록을 열고 아래의 '템플릿으로 저장'을 누르면 여기에 생깁니다.")
+                    .font(.subheadline).foregroundStyle(Theme.inkSecondary)
+            }
+            ForEach(templates) { t in
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(t.name).font(.subheadline.bold()).foregroundStyle(Theme.title)
+                    Text(t.summary).font(.caption).foregroundStyle(Theme.inkSecondary)
+                }
+            }
+            .onDelete { idx in
+                for i in idx { context.delete(templates[i]) }
+                context.saveOrReport()
+            }
+        }
+        .navigationTitle("기록 템플릿")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar { if !templates.isEmpty { EditButton() } }
+    }
+}
+
 /// 설정 (홈 아바타). 개인정보 원칙과 앱 정보.
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
@@ -477,6 +505,9 @@ struct SettingsView: View {
             Section {
                 TextField("닉네임 (예: 하키왕)", text: Binding(get: { nickname }, set: { nickname = MyPrefs.clean($0) }))
                     .accessibilityIdentifier("닉네임")
+                NavigationLink { RecordTemplatesView() } label: {
+                    fact("square.on.square", "기록 템플릿", "자주 적는 기록의 종류·시간·장소를 저장해 둡니다.")
+                }
             } header: {
                 Text("나")
             } footer: {

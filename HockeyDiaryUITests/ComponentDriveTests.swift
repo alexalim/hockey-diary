@@ -266,6 +266,46 @@ final class ComponentDriveTests: XCTestCase {
         XCTAssertNotNil(find("오늘도, 빙판 위에서.", swipes: 0), "닉네임을 지워도 인사말이 안 돌아온다")
     }
 
+    // MARK: 루틴 템플릿: 가져오면 나의 루틴에 생긴다
+
+    func test_routine_template_import() {
+        tab("훈련"); branch("드릴")
+        XCTAssertTrue(tapText("템플릿에서 가져오기"), "템플릿에서 가져오기 버튼이 없다")
+        snap("template-1-routine-picker")
+        XCTAssertTrue(tapButton("슈팅 집중 가져오기"), "슈팅 집중 템플릿이 없다")
+        sleep(1)
+        XCTAssertNotNil(find("슈팅 집중"), "가져온 루틴이 나의 루틴에 없다")
+        snap("template-2-routine-imported")
+    }
+
+    // MARK: 기록 템플릿: 기록에서 저장 → 새 기록에서 골라 채움
+
+    func test_record_template_save_and_apply() {
+        XCTAssertTrue(newRecord("수업 기록"))
+        XCTAssertTrue(tapButton("저장"), "저장 버튼이 없다")
+        XCTAssertTrue(app.staticTexts["저장했어요"].waitForExistence(timeout: 5), "저장 완료 화면이 안 나왔다")
+        tapButton("닫기")
+        tab("기록")
+        XCTAssertTrue(tapText("수업"), "수업 기록을 못 눌렀다")
+        XCTAssertTrue(tapText("템플릿으로 저장"), "템플릿으로 저장 버튼이 없다")
+        let field = app.alerts.textFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 3), "템플릿 이름 칸이 없다")
+        field.typeText(" 화요일")
+        snap("template-3-record-name")
+        app.alerts.buttons["저장"].tap(); sleep(1)
+
+        // 새 기록(정규게임)을 열어 템플릿을 고르면 종류가 수업으로 바뀐다.
+        XCTAssertTrue(newRecord("정규게임 리뷰"))
+        XCTAssertTrue(tapText("템플릿으로 채우기"), "새 기록에 템플릿 줄이 없다")
+        snap("template-4-record-menu")
+        let item = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "화요일")).firstMatch
+        XCTAssertTrue(item.waitForExistence(timeout: 3), "메뉴에 만든 템플릿이 없다"); item.tap(); sleep(1)
+        snap("template-5-record-filled")
+        XCTAssertNotNil(find("템플릿으로 채웠어요"), "템플릿으로 채웠다는 안내가 없다")
+        XCTAssertTrue(app.navigationBars["수업 기록"].exists, "종류가 템플릿의 수업으로 바뀌지 않았다")
+        tapButton("닫기")
+    }
+
     // MARK: - 도우미 (ScreenTourTests와 같은 규칙)
 
     private func snap(_ name: String) {

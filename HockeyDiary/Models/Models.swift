@@ -410,6 +410,7 @@ enum AppSchema {
         ShotMark.self, DrillLog.self, PracticeRoutine.self,
         Team.self, TeamMember.self, TeamEvent.self,
         BodyCheck.self,
+        RecordTemplate.self,
     ]
 
     static func container(inMemory: Bool = false) throws -> ModelContainer {

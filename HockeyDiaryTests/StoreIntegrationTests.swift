@@ -299,4 +299,31 @@ final class StoreIntegrationTests: XCTestCase {
         XCTAssertEqual(try context.fetch(FetchDescriptor<TeamEvent>()).map(\.id), [evB.id])
         XCTAssertEqual(try context.fetch(FetchDescriptor<Session>()).map(\.id), [record.id], "일정으로 만든 기록은 내 기록이라 남는다")
     }
+
+    // 루틴 템플릿을 가져오면 내 루틴으로 복사된다. 같은 이름을 두 번 가져와도 하나만 있다.
+    func testImportingRoutineTemplateCopiesOnce() throws {
+        let t = StarterRoutine.templates.last!
+        let first = PracticeStore.importTemplate(t, context: context)
+        let again = PracticeStore.importTemplate(t, context: context)
+        XCTAssertEqual(first.id, again.id)
+        let mine = try context.fetch(FetchDescriptor<PracticeRoutine>())
+        XCTAssertEqual(mine.map(\.name), [t.name])
+        XCTAssertEqual(mine[0].items, t.items)
+    }
+
+    // 기록에서 템플릿을 만들면 종류·시간·장소만 담긴다. 이름을 비우면 '종류 · 링크장'.
+    func testRecordTemplateFromSession() throws {
+        let s = Session(type: .lesson, startsAt: Date().addingTimeInterval(-7_200), minutes: 50)
+        s.rinkName = "목동"; s.surface = .indoorRink; s.coachNotes = "비밀 메모"
+        context.insert(s); try context.save()
+
+        let named = RecordTemplateStore.make(from: s, name: " 화요일 수업 ", context: context)
+        let unnamed = RecordTemplateStore.make(from: s, name: "  ", context: context)
+
+        XCTAssertEqual(named.name, "화요일 수업")
+        XCTAssertEqual(unnamed.name, "수업 · 목동")
+        XCTAssertEqual(named.type, .lesson); XCTAssertEqual(named.minutes, 50)
+        XCTAssertEqual(named.rinkName, "목동"); XCTAssertEqual(named.surface, .indoorRink)
+        XCTAssertEqual(try context.fetchCount(FetchDescriptor<RecordTemplate>()), 2)
+    }
 }

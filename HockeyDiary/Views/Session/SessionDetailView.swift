@@ -14,6 +14,9 @@ struct SessionDetailView: View {
 
     @State private var editing = false
     @State private var confirmingDelete = false
+    @State private var namingTemplate = false
+    @State private var templateName = ""
+    @State private var toast: String?
     /// 이 화면에서 지우는 중(이미 닫고 있으니 한 번 더 닫지 않는다).
     @State private var deleting = false
 
@@ -42,6 +45,14 @@ struct SessionDetailView: View {
                 if !effort.lines.isEmpty { effortCard }
                 if let usage = session.usages.first { equipmentCard(usage) }
                 if !session.photos.isEmpty { photosCard }
+                Button {
+                    templateName = RecordTemplateStore.defaultName(for: session)
+                    namingTemplate = true
+                } label: {
+                    Label("템플릿으로 저장", icon: "square.on.square").frame(maxWidth: .infinity, minHeight: Theme.touch)
+                }
+                .buttonStyle(.bordered)
+                .padding(.top, 8)
                 Button(role: .destructive) {
                     confirmingDelete = true
                 } label: {
@@ -60,6 +71,17 @@ struct SessionDetailView: View {
         .sheet(isPresented: $editing) {
             NavigationStack { SessionEditorView(session: session) }
         }
+        .alert("템플릿 이름", isPresented: $namingTemplate) {
+            TextField("예: 화요일 수업", text: $templateName)
+            Button("저장") {
+                let t = RecordTemplateStore.make(from: session, name: templateName, context: context)
+                toast = "'\(t.name)' 템플릿을 만들었어요. 새 기록에서 골라 쓸 수 있어요."
+            }
+            Button("취소", role: .cancel) {}
+        } message: {
+            Text("종류, 활동 시간, 장소를 저장해요. 메모나 기분은 들어가지 않아요.")
+        }
+        .toast($toast)
         .confirmationDialog("이 기록을 지울까요?", isPresented: $confirmingDelete, titleVisibility: .visible) {
             Button("지우기", role: .destructive) { delete() }
         } message: {

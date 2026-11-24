@@ -32,6 +32,7 @@ struct SessionEditorView: View {
     @Query(sort: \Skate.createdAt) private var skates: [Skate]
     @Query(sort: \Session.startsAt, order: .reverse) private var allSessions: [Session]
     @Query(sort: \TeamEvent.at) private var teamEvents: [TeamEvent]
+    @Query(sort: \RecordTemplate.createdAt) private var templates: [RecordTemplate]
 
     private let session: Session?
     /// 방금 끝난 운동을 적는 경우(+ 버튼·홈 바로가기). 달력에서 고른 날이면 false.
@@ -253,6 +254,22 @@ struct SessionEditorView: View {
 
     private var basicsSection: some View {
         Section {
+            if isNew && !templates.isEmpty {
+                Menu {
+                    ForEach(templates) { t in
+                        Button {
+                            type = t.type
+                            minutes = t.minutes
+                            if !iceMinutesEdited { iceMinutes = t.minutes }
+                            rinkName = t.rinkName
+                            surface = t.surface
+                            prefillNote = "'\(t.name)' 템플릿으로 채웠어요. 시작 시각만 봐 주세요."
+                        } label: { Text("\(t.name) — \(t.summary)") }
+                    }
+                } label: {
+                    Label("템플릿으로 채우기 (\(templates.count))", icon: "square.on.square")
+                }
+            }
             LabeledChoice(title: "종류",
                           options: ActivityType.allCases.map { ChoiceOption(value: $0, title: $0.title, art: .symbol($0.systemImage)) },
                           selection: $type, columns: 4, minHeight: 68)
