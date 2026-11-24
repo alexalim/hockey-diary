@@ -122,11 +122,18 @@ struct SessionShareCard: View {
     let shotCount: Int
 
     private var triedCount: Int { session.attempts.filter(\.tried).count }
+    private var nickname: String { UserDefaults.standard.string(forKey: MyPrefs.nicknameKey) ?? "" }
+    /// 배웠거나 써본 기술 이름(최대 3개).
+    private var skillNames: [String] {
+        let learned = session.learnings.compactMap { $0.skill?.name }
+        let tried = session.attempts.filter(\.tried).compactMap { $0.skill?.name }
+        return Array((session.type == .lesson ? learned : tried).prefix(3))
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("마하다").font(.system(.headline, design: .rounded).weight(.heavy))
+                Text(nickname.isEmpty ? "마하다" : "마하다 · \(nickname)").font(.system(.headline, design: .rounded).weight(.heavy))
                 Spacer()
                 Text(session.startsAt.formatted(.dateTime.month().day().weekday(.abbreviated))).font(.caption.bold())
             }
@@ -151,6 +158,9 @@ struct SessionShareCard: View {
                     stat("\(shotCount)", "슛")
                 }
                 if let m = session.moodAfter { moodStat(m) }
+            }
+            if !skillNames.isEmpty {
+                Text(skillNames.joined(separator: " · ")).font(.footnote.bold()).foregroundStyle(.white.opacity(0.9)).lineLimit(1)
             }
             if let b = bests.first {
                 Label("새 기록 · \(b.title) \(b.value)", icon: "rosette")
