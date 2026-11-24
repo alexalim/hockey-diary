@@ -282,6 +282,9 @@ final class ComponentDriveTests: XCTestCase {
 
     func test_record_template_save_and_apply() {
         XCTAssertTrue(newRecord("수업 기록"))
+        // 내용이 하나는 있어야 저장된다.
+        guard let memo = formField("오늘의 배움 한 줄") else { XCTFail("오늘의 배움 칸이 없다"); return }
+        memo.tap(); memo.typeText("템플릿 테스트")
         XCTAssertTrue(tapButton("저장"), "저장 버튼이 없다")
         XCTAssertTrue(app.staticTexts["저장했어요"].waitForExistence(timeout: 5), "저장 완료 화면이 안 나왔다")
         tapButton("닫기")
@@ -313,7 +316,8 @@ final class ComponentDriveTests: XCTestCase {
         XCTAssertTrue(tapText("Apple 건강"), "설정에 Apple 건강 줄이 없다")
         XCTAssertNotNil(find("Garmin Connect 앱 열기"), "가민 안내가 단계로 안 나온다")
         snap("ux-1-health")
-        tapButton("닫기")
+        back()
+        XCTAssertTrue(tapButton("닫기"), "설정으로 돌아오지 못했다")
 
         tab("훈련"); branch("드릴")
         XCTAssertNotNil(find("나의 루틴"), "나의 루틴 제목이 없다")
@@ -434,9 +438,13 @@ final class ComponentDriveTests: XCTestCase {
         XCTFail("훈련 갈래 \(name)이 없다")
     }
 
+    /// 숨은 탭 스택의 제목 줄 버튼이 먼저 잡힐 수 있다. 보이는 제목 줄의 첫 버튼(뒤로)을 누른다.
     private func back() {
-        let b = app.navigationBars.buttons.element(boundBy: 0)
-        if b.exists { b.tap(); sleep(1) }
+        let all = app.navigationBars.buttons
+        for i in 0..<min(all.count, 12) {
+            let b = all.element(boundBy: i)
+            if b.exists && b.isHittable { b.tap(); sleep(1); return }
+        }
     }
 
     /// 같은 라벨의 버튼이 숨은 탭 스택에도 있을 수 있다(팀 탭의 '만들기'). 보이는 것을 누른다.
