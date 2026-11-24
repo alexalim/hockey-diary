@@ -608,6 +608,14 @@ final class DrillTests: XCTestCase {
         for r in StarterRoutine.all {
             XCTAssertTrue(r.items.allSatisfy { DrillCatalog.drill($0.drillKey) != nil }, r.name)
         }
+        // 테스트 계층: Unit — 템플릿은 사전에 있는 드릴만 쓰고, 이름이 겹치지 않고, 처음 넣어 주는 두 개를 포함한다.
+        for t in StarterRoutine.templates {
+            XCTAssertFalse(t.items.isEmpty, t.name)
+            XCTAssertTrue(t.items.allSatisfy { DrillCatalog.drill($0.drillKey) != nil }, t.name)
+        }
+        XCTAssertEqual(Set(StarterRoutine.templates.map(\.name)).count, StarterRoutine.templates.count, "템플릿 이름 중복 없음")
+        XCTAssertEqual(StarterRoutine.all.count, 2, "처음 넣어 주는 루틴은 두 개 그대로")
+        XCTAssertEqual(Array(StarterRoutine.templates.prefix(2)).map(\.name), StarterRoutine.all.map(\.name))
         let items = StarterRoutine.all[1].items
         XCTAssertEqual(RoutineItem.decode(RoutineItem.encode(items)), items)
         XCTAssertEqual(RoutineItem.decode("깨진 값"), [])

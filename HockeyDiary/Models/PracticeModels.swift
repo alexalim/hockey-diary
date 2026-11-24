@@ -82,6 +82,17 @@ enum PracticeStore {
         DrillStats.bySkill(logs(from: from, to: to, context: context).compactMap(\.entry))
     }
 
+    /// 템플릿을 내 루틴으로 복사한다. 같은 이름이 이미 있으면 만들지 않고 그 루틴을 돌려준다.
+    @discardableResult
+    static func importTemplate(_ template: StarterRoutine, context: ModelContext) -> PracticeRoutine {
+        let mine = (try? context.fetch(FetchDescriptor<PracticeRoutine>())) ?? []
+        if let same = mine.first(where: { $0.name == template.name }) { return same }
+        let r = PracticeRoutine(name: template.name, items: template.items)
+        context.insert(r)
+        context.saveOrReport()
+        return r
+    }
+
     /// 처음 한 번, 기본 루틴 두 개를 내 루틴으로 넣어준다.
     static func seedRoutinesIfNeeded(_ context: ModelContext) {
         let count = (try? context.fetchCount(FetchDescriptor<PracticeRoutine>())) ?? 0

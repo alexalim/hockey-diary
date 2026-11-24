@@ -28,6 +28,7 @@ struct DrillSection: View {
     @State private var pickingDrill = false
     @State private var editingRoutine: PracticeRoutine?
     @State private var creatingRoutine = false
+    @State private var pickingTemplate = false
 
     var body: some View {
         VStack(spacing: 12) {
@@ -57,6 +58,7 @@ struct DrillSection: View {
                     .frame(minHeight: Theme.touch)
                 }
                 Button { creatingRoutine = true } label: { Label("새 루틴 만들기", icon: "plus") }
+                Button { pickingTemplate = true } label: { Label("템플릿에서 가져오기", icon: "square.on.square") }
             }
             SectionHeader(title: "하키 아카데미")
             AcademyGrid { pickingDrill = true }
@@ -84,6 +86,7 @@ struct DrillSection: View {
         }
         .sheet(item: $editingRoutine) { r in NavigationStack { RoutineEditorView(routine: r) } }
         .sheet(isPresented: $creatingRoutine) { NavigationStack { RoutineEditorView(routine: nil) } }
+        .sheet(isPresented: $pickingTemplate) { NavigationStack { RoutineTemplatePicker(mine: Set(routines.map(\.name))) } }
     }
 
     /// 오늘의 집중: 마지막 기록의 '다음 목표'를 오늘 연습으로 잇는다. 목표가 없으면 첫 루틴을 권한다.
@@ -438,6 +441,46 @@ struct DrillPickerView: View {
         }
         .searchable(text: $search, placement: .navigationBarDrawer(displayMode: .always), prompt: "드릴·기술 이름으로 찾기")
         .navigationTitle(title)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar { ToolbarItem(placement: .cancellationAction) { Button("닫기") { dismiss() } } }
+    }
+}
+
+/// 루틴 템플릿 고르기: 가져오면 내 루틴으로 복사되고, 그 뒤로는 마음대로 고칠 수 있다.
+struct RoutineTemplatePicker: View {
+    @Environment(\.modelContext) private var context
+    @Environment(\.dismiss) private var dismiss
+    /// 내 루틴 이름들(이미 가져온 템플릿 표시용).
+    let mine: Set<String>
+
+    var body: some View {
+        List {
+            Section {
+                ForEach(StarterRoutine.templates, id: \.name) { t in
+                    let have = mine.contains(t.name)
+                    HStack(spacing: 10) {
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(t.name).font(.subheadline.bold()).foregroundStyle(Theme.title)
+                            Text("\(t.items.count)개 드릴 · 약 \(StarterRoutine.estimatedMinutes(t.items))분")
+                                .font(.caption).foregroundStyle(Theme.inkSecondary)
+                            Text(t.items.compactMap { DrillCatalog.drill($0.drillKey)?.title }.joined(separator: ", "))
+                                .font(.caption2).foregroundStyle(Theme.inkSecondary)
+                        }
+                        Spacer()
+                        if have {
+                            StatusTag(text: "내 루틴에 있음")
+                        } else {
+                            Button("가져오기") { PracticeStore.importTemplate(t, context: context); dismiss() }
+                                .buttonStyle(.borderedProminent).tint(Theme.cobalt)
+                                .accessibilityLabel("\(t.name) 가져오기")
+                        }
+                    }
+                }
+            } footer: {
+                Text("가져온 루틴은 내 것이에요. 드릴과 목표량을 마음대로 고칠 수 있어요.")
+            }
+        }
+        .navigationTitle("루틴 템플릿")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { ToolbarItem(placement: .cancellationAction) { Button("닫기") { dismiss() } } }
     }

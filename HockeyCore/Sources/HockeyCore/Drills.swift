@@ -112,6 +112,34 @@ public struct StarterRoutine: Sendable {
         ]),
     ]
 
+    /// 골라서 내 루틴으로 가져오는 템플릿. 처음 넣어 주는 두 개(all)도 다시 가져올 수 있게 포함한다.
+    public static let templates: [StarterRoutine] = all + [
+        StarterRoutine(name: "스케이팅 기본기 20분", items: [
+            RoutineItem(drillKey: "stop-lines", target: 10),
+            RoutineItem(drillKey: "crossover-circle", target: 10),
+            RoutineItem(drillKey: "edge-slalom", target: 3),
+            RoutineItem(drillKey: "backward-c", target: 6),
+            RoutineItem(drillKey: "pivot-line", target: 6),
+        ]),
+        StarterRoutine(name: "퍽 컨트롤·패스", items: [
+            RoutineItem(drillKey: "stickhandle-8", target: 2),
+            RoutineItem(drillKey: "stickhandle-wide", target: 2),
+            RoutineItem(drillKey: "wall-pass-fh", target: 50),
+            RoutineItem(drillKey: "wall-pass-bh", target: 30),
+        ]),
+        StarterRoutine(name: "슈팅 집중", items: [
+            RoutineItem(drillKey: "wrist-target", target: 25),
+            RoutineItem(drillKey: "snap-quick", target: 20),
+            RoutineItem(drillKey: "slap-form", target: 15),
+        ]),
+        StarterRoutine(name: "경기 전 몸풀기", items: [
+            RoutineItem(drillKey: "crossover-circle", target: 6),
+            RoutineItem(drillKey: "stop-lines", target: 6),
+            RoutineItem(drillKey: "stickhandle-8", target: 2),
+            RoutineItem(drillKey: "wrist-target", target: 10),
+        ]),
+    ]
+
     /// 루틴에 걸리는 시간(분). 횟수 드릴은 1번당 약 6초로 어림한다.
     public static func estimatedMinutes(_ items: [RoutineItem]) -> Int {
         items.reduce(0) { sum, it in
