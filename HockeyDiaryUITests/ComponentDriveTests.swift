@@ -175,6 +175,7 @@ final class ComponentDriveTests: XCTestCase {
         rowTitle?.tap(); sleep(1)
         XCTAssertTrue(app.navigationBars["일정"].waitForExistence(timeout: 5), "일정 화면이 안 열렸다")
         XCTAssertTrue(tapText("이 일정으로 기록 만들기"), "기록 만들기 버튼이 없다")
+        snap("link-1-team-record-open")
         XCTAssertNotNil(find("이 기록 지우기"), "팀 탭에 기록 상세가 안 열렸다")
 
         // 팀 탭에 상세를 열어 둔 채로 기록 탭에서 같은 기록을 지운다.
@@ -182,15 +183,25 @@ final class ComponentDriveTests: XCTestCase {
         XCTAssertTrue(tapText("정규게임"), "기록 탭에 일정으로 만든 기록이 없다")
         XCTAssertTrue(tapText("이 기록 지우기"), "지우기 버튼이 없다")
         let confirm = app.sheets.buttons["지우기"].firstMatch
-        XCTAssertTrue(confirm.waitForExistence(timeout: 3), "지우기 확인창이 없다"); confirm.tap()
+        XCTAssertTrue(confirm.waitForExistence(timeout: 3), "지우기 확인창이 없다"); snap("link-2-delete-in-record-tab"); confirm.tap()
         sleep(2)
+        snap("link-3-record-tab-after-delete")
 
         // 한 번만 누른다(두 번 누르면 탭이 처음 화면으로 돌아가 버려 증상이 가려진다).
         app.buttons["tab-팀"].tap(); sleep(2)
+        snap("link-4-team-tab-after-delete")
         XCTAssertNotNil(find("이 일정으로 기록 만들기"), "팀 탭이 일정 화면으로 돌아오지 않았다(빈 화면)")
+        snap("link-5-event-button-back")
     }
 
     // MARK: - 도우미 (ScreenTourTests와 같은 규칙)
+
+    private func snap(_ name: String) {
+        let a = XCTAttachment(screenshot: app.screenshot())
+        a.name = name
+        a.lifetime = .keepAlways
+        add(a)
+    }
 
     /// 하단 바가 보일 때만 그 윗선 아래를 버린다(바 뒤를 누르면 탭이 대신 눌린다). 시트 안에서는 화면 끝까지 본다.
     private var barTop: CGFloat {
