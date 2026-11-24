@@ -14,11 +14,14 @@ struct SessionDetailView: View {
 
     @State private var editing = false
     @State private var confirmingDelete = false
+    /// 이 화면에서 지우는 중(이미 닫고 있으니 한 번 더 닫지 않는다).
+    @State private var deleting = false
 
     var body: some View {
         // 지운 직후 화면이 닫히는 동안 삭제된 기록을 읽지 않게 한다.
         if session.isDeleted || session.modelContext == nil {
-            Color.clear
+            // 다른 탭에서 지운 기록이 이 탭에 열려 있었으면 빈 화면으로 남지 않게 닫는다.
+            Color.clear.onAppear { if !deleting { dismiss() } }
         } else {
             detail
         }
@@ -266,6 +269,7 @@ struct SessionDetailView: View {
     private func delete() {
         // 화면을 먼저 닫고, 닫힌 뒤에 지운다(지운 기록을 다시 그리다 멈추는 것 방지).
         let target = session, ctx = context
+        deleting = true
         dismiss()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
             DiaryStore.deleteSession(target, context: ctx)
