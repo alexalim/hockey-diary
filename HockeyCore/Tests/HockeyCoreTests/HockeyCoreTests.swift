@@ -1021,6 +1021,48 @@ final class WhatNowTests: XCTestCase {
     func d(_ day: Int, _ h: Int, _ m: Int = 0) -> Date { cal.date(from: DateComponents(year: 2026, month: 11, day: day, hour: h, minute: m))! }
     func kinds(_ f: WhatNow.Facts) -> [WhatNow.Kind] { WhatNow.suggest(f, calendar: cal).map(\.kind) }
 
+    // 테스트 계층: Unit — 몸이 무거운 날은 가벼운 집 드릴로 바뀌고, 남은 시간에 맞는 루틴·드릴을 고른다.
+    func testWhatNowFollowsBodyAndFreeTime() {
+        func drillCard(_ f: WhatNow.Facts) -> WhatNow.Suggestion? {
+            WhatNow.suggest(f, calendar: cal).first { $0.kind == .drill || $0.kind == .routine }
+        }
+        let routines = [WhatNow.RoutineFact(name: "짧은 루틴", minutes: 10), WhatNow.RoutineFact(name: "긴 루틴", minutes: 25)]
+
+        var low = WhatNow.Facts(now: d(20, 10), bodyCheckedToday: true)
+        low.bodyToday = 2; low.minutesFree = 30; low.routines = routines
+        XCTAssertEqual(drillCard(low)?.key, "office-balance", "몸이 무거우면 시간이 있어도 가벼운 드릴")
+        XCTAssertEqual(drillCard(low)?.kind, .drill)
+
+        var fine = WhatNow.Facts(now: d(20, 10), bodyCheckedToday: true)
+        fine.bodyToday = 4; fine.minutesFree = 15; fine.routines = routines
+        XCTAssertEqual(drillCard(fine)?.kind, .routine)
+        XCTAssertEqual(drillCard(fine)?.key, "짧은 루틴", "15분 안에 드는 것 중 가장 긴 루틴")
+        fine.minutesFree = 30
+        XCTAssertEqual(drillCard(fine)?.key, "긴 루틴")
+
+        fine.minutesFree = 5
+        let short = drillCard(fine)
+        XCTAssertEqual(short?.kind, .drill, "5분이면 루틴 대신 드릴 하나")
+        if let k = short?.key, let drill = DrillCatalog.drill(k) {
+            XCTAssertLessThanOrEqual(StarterRoutine.estimatedMinutes([RoutineItem(drillKey: drill.key, target: drill.defaultTarget)]), 5)
+        } else { XCTFail("드릴 카드가 없다") }
+
+        var plain = WhatNow.Facts(now: d(20, 10), bodyCheckedToday: true)
+        plain.routines = routines
+        XCTAssertEqual(drillCard(plain)?.kind, .drill, "시간을 안 고르면 예전처럼 드릴 하나")
+    }
+
+    // 테스트 계층: Unit — 답 없는 사람만 한꺼번에 채우고, 이미 정한 사람은 그대로 둔다.
+    func testFillUnansweredAttendance() {
+        let a = UUID(), b = UUID(), c = UUID()
+        var sheet = AttendanceSheet()
+        sheet[a] = .notGoing
+        XCTAssertEqual(sheet.fillUnanswered(with: .going, among: [a, b, c]), 2)
+        XCTAssertEqual(sheet[a], .notGoing)
+        XCTAssertEqual(sheet[b], .going); XCTAssertEqual(sheet[c], .going)
+        XCTAssertEqual(sheet.fillUnanswered(with: .maybe, among: [a, b, c]), 0, "남은 사람이 없으면 아무도 안 바뀐다")
+    }
+
     func testRestingShowsOnlyRest() {
         let f = WhatNow.Facts(now: d(20, 10), resting: true, lastGoal: "스톱", sharpenDue: true)
         XCTAssertEqual(kinds(f), [.rest])

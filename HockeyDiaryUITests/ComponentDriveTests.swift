@@ -117,7 +117,10 @@ final class ComponentDriveTests: XCTestCase {
         XCTAssertTrue(three.waitForExistence(timeout: 5), "몸 상태 버튼이 없다")
         three.tap(); sleep(1)
         XCTAssertTrue(three.isSelected, "몸 상태가 선택 상태로 안 바뀐다")
-        XCTAssertNotNil(find("1/3일"), "몸 상태 퀘스트가 1/3로 오르지 않았다")
+        // 주간 퀘스트는 주마다 다섯 가지 중 셋이 돌아가며 나온다. 몸 상태 퀘스트가 있는 주에만 진행을 확인한다.
+        if find("몸 상태 3일 체크하기") != nil {
+            XCTAssertNotNil(find("1/3일"), "몸 상태 퀘스트가 1/3로 오르지 않았다")
+        }
     }
 
     // MARK: 락커: 스케이트 등록 → 목록에 보임 → 락커 칸이 1켤레
@@ -348,6 +351,45 @@ final class ComponentDriveTests: XCTestCase {
         XCTAssertNotNil(find("운동 전 기분"), "상세 기록으로 바꿔도 운동 전 기분이 안 나온다")
         snap("redesign-3-record-detailed")
         tapButton("닫기")
+    }
+
+    // MARK: 뭐할까: 남은 시간을 고르면 그 안에 끝나는 것을 권한다
+
+    func test_whatnow_free_time() {
+        tab("뭐할까")
+        XCTAssertNotNil(find("시간이 얼마나 있어요?"), "시간 고르기 카드가 없다")
+        XCTAssertTrue(tapButton("시간 5분"), "5분 버튼이 없다")
+        sleep(1)
+        XCTAssertNotNil(find("5분 안에 끝나요"), "5분을 골라도 추천이 안 바뀐다")
+        snap("whatnow-1-five-minutes")
+    }
+
+    // MARK: 참석: 답 없는 사람 한꺼번에 채우고 상태별로 본다
+
+    func test_attendance_fill_and_filter() {
+        tab("팀")
+        guard let name = formField("팀 이름 (예: 목동 펭귄스)") else { XCTFail("팀 이름 칸이 없다"); return }
+        name.tap(); name.typeText("펭귄스")
+        XCTAssertTrue(tapButton("만들기"))
+        for who in ["김하키", "박수비"] {
+            XCTAssertTrue(tapText("팀원 추가"))
+            guard let member = formField("이름 또는 별명") else { XCTFail("팀원 이름 칸이 없다"); return }
+            member.tap(); member.typeText(who)
+            XCTAssertTrue(tapButton("저장")); sleep(1)
+        }
+        for _ in 0..<3 { app.swipeDown() }
+        XCTAssertTrue(tapText("일정 추가"), "일정 추가 버튼이 없다")
+        XCTAssertTrue(tapButton("저장"), "일정 저장 버튼이 없다")
+        sleep(1)
+        XCTAssertTrue(tapText("정규게임"), "만든 일정이 목록에 없다")
+        XCTAssertTrue(app.buttons["보기 답 없음 2"].waitForExistence(timeout: 5), "답 없음 2명이 안 보인다")
+        XCTAssertTrue(tapText("답 없는 사람 한꺼번에"), "한꺼번에 메뉴가 없다")
+        let all = app.buttons["답 없는 2명 모두 참석"].firstMatch
+        XCTAssertTrue(all.waitForExistence(timeout: 3), "모두 참석 항목이 없다"); all.tap(); sleep(1)
+        snap("attendance-1-filled")
+        XCTAssertTrue(app.buttons["보기 참석 2"].exists, "두 명이 참석으로 안 바뀌었다")
+        XCTAssertTrue(tapButton("보기 불참 0"), "불참 보기 버튼이 없다")
+        XCTAssertNil(find("김하키", swipes: 0), "불참만 보는데 참석한 사람이 보인다")
     }
 
     // MARK: - 도우미 (ScreenTourTests와 같은 규칙)
