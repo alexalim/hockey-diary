@@ -46,13 +46,14 @@ struct HomeView: View {
                              title: nickname.isEmpty ? "오늘도, 빙판 위에서." : "\(nickname), 오늘도 빙판 위에서.", subtitle: "작은 기록이 나의 플레이를 바꿔요.")
                     .toolbar { BarAction(icon: "gearshape.fill", label: "설정") { showingSettings = true } }
                 if health.openFailed || health.lastSaveFailed { storeWarning }
-                promptCard
-                levelCard
+                // 매일 여는 화면이라 '다음 경기 → 오늘 할 일 → 바로 기록'을 먼저 둔다. 한 번만 묻는 실력 질문은 아래로.
                 nextGameHero
-                weekCard
+                promptCard
                 SectionHeader(title: "빠른 시작")
                 quickButtons
                 bodyCard
+                weekCard
+                levelCard
                 ForEach(visibleBlocks) { b in block(b) }
                 Button { showingEdit = true } label: {
                     Label("홈 꾸미기", icon: "slider.horizontal.3").font(.footnote.weight(.semibold))
@@ -311,7 +312,7 @@ struct HomeView: View {
                 }
             }
             rings
-            Text("이번 주는 두 번 타면 원이 다 차요.").font(.caption2).foregroundStyle(.white.opacity(0.7))
+            Text("이번 주는 두 번 타면 원이 다 차요.").font(.caption).foregroundStyle(.white.opacity(0.7))
         }
     }
 
