@@ -40,8 +40,9 @@ struct LockerView: View {
                         LockerDoor(profile: profiles.first, placements: placements)
                             // 문이 돌수록 빛을 덜 받아 어두워진다.
                             .overlay(Color.black.opacity(0.4 * progress).clipShape(RoundedRectangle(cornerRadius: LockerDoorBase.corner, style: .continuous)))
-                            .rotation3DEffect(.degrees(-angle), axis: (x: 0, y: 1, z: 0), anchor: .leading, perspective: 0.45)
-                            .shadow(color: .black.opacity(0.35 * progress), radius: 18 * progress, x: -10 * progress)
+                            // 경첩은 오른쪽(열린 락커 그림에서 문이 오른쪽에 달려 있다). 왼쪽 손잡이를 오른쪽으로 끌어 연다.
+                            .rotation3DEffect(.degrees(angle), axis: (x: 0, y: 1, z: 0), anchor: .trailing, perspective: 0.45)
+                            .shadow(color: .black.opacity(0.35 * progress), radius: 18 * progress, x: 10 * progress)
                             .opacity(angle > 88 ? 0 : 1)
                             .allowsHitTesting(angle < 1)
                             .onTapGesture(perform: toggle)
@@ -109,7 +110,7 @@ struct LockerView: View {
                 if reduceMotion { return }
                 let base = dragBase ?? angle
                 if dragBase == nil { dragBase = base }
-                let next = DoorSwing.angle(from: base, translation: value.translation.width, width: width)
+                let next = DoorSwing.angle(from: base, translation: -value.translation.width, width: width)
                 // 문고리가 풀리는 순간 가볍게 한 번 '딸깍'.
                 if (angle < DoorSwing.latchAngle) != (next < DoorSwing.latchAngle) { latchTick += 1 }
                 angle = next
@@ -118,10 +119,10 @@ struct LockerView: View {
                 defer { dragBase = nil; horizontalDrag = nil }
                 guard horizontalDrag == true else { return }
                 let base = dragBase ?? angle
-                let predicted = DoorSwing.angle(from: base, translation: value.predictedEndTranslation.width, width: width)
+                let predicted = DoorSwing.angle(from: base, translation: -value.predictedEndTranslation.width, width: width)
                 if reduceMotion {
                     // 동작 줄이기: 쓸어넘긴 방향으로 바로 여닫는다.
-                    setOpen(value.translation.width < 0)
+                    setOpen(value.translation.width > 0)
                     return
                 }
                 setOpen(DoorSwing.shouldOpen(current: angle, predicted: predicted, wasOpen: isOpen))
@@ -251,6 +252,7 @@ struct LockerDoorBase: View {
     private func artDoor(_ theme: LockerTheme) -> some View {
         Image(Self.artName(theme))
             .resizable()
+            .scaleEffect(x: -1, y: 1)
             .clipShape(RoundedRectangle(cornerRadius: Self.corner, style: .continuous))
             .overlay(alignment: .top) { plates.padding(.top, 34) }
     }
@@ -274,13 +276,13 @@ struct LockerDoorBase: View {
                 }
                 .padding(.top, 34)
             }
-            .overlay(alignment: .trailing) {
-                // 손잡이: 파스텔 사탕
+            .overlay(alignment: .leading) {
+                // 손잡이: 파스텔 사탕(경첩이 오른쪽이라 왼쪽에)
                 Capsule().fill(theme.isPastel ? Color.white : Theme.stickers[0])
                     .frame(width: 16, height: 72)
                     .overlay(Capsule().stroke(.white, lineWidth: 3))
                     .shadow(color: .black.opacity(0.2), radius: 2, y: 1)
-                    .padding(.trailing, 22)
+                    .padding(.leading, 22)
             }
     }
 
@@ -333,7 +335,7 @@ struct LockerDoor: View {
             }
         }
         .overlay(alignment: .bottom) {
-            Label("손잡이를 밀어서 열기", icon: "chevron.left.2").font(.caption)
+            Label("손잡이를 밀어서 열기", icon: "chevron.right.2").font(.caption)
                 .foregroundStyle((profile?.theme.isPastel ?? false) ? Theme.doorInk.opacity(0.7) : Color.white.opacity(0.8))
                 .padding(.bottom, 16)
         }
