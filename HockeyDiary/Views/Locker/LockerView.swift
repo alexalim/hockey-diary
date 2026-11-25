@@ -69,7 +69,7 @@ struct LockerView: View {
 
                 PaperCard(tape: Theme.tapeMint, tapeAngle: -4) {
                     PaperTitle(text: "바로 가기", systemImage: "list.bullet")
-                    NavigationLink { SkateListView() } label: { shortcut("스케이트", "shoeprints.fill", "\(skates.count)켤레", 0) }
+                    NavigationLink { SkateListView() } label: { shortcut("스케이트", "shoeprints.fill", "\(skates.count)켤레", 0, art: "gear-skate") }
                         .buttonStyle(.plain)
                     NavigationLink { RunnerListView() } label: { shortcut("러너(날)", "skateblade", nil, 1) }
                         .buttonStyle(.plain)
@@ -77,7 +77,7 @@ struct LockerView: View {
                         .buttonStyle(.plain)
                     ForEach(Array(GearKind.Zone.allCases.enumerated()), id: \.element) { i, zone in
                         let count = gear.filter { zone.kinds.contains($0.kind) }.count
-                        NavigationLink { GearListView(zone: zone) } label: { shortcut(zone.title, zone.symbol, "\(count)개", 3 + i) }
+                        NavigationLink { GearListView(zone: zone) } label: { shortcut(zone.title, zone.symbol, "\(count)개", 3 + i, art: zone.art) }
                             .buttonStyle(.plain)
                     }
                 }
@@ -174,12 +174,16 @@ struct LockerView: View {
     }
 
     /// 바로 가기 한 줄. 파스텔 동그라미 아이콘, 오른쪽 개수는 작은 스티커.
-    private func shortcut(_ title: String, _ icon: String, _ trailing: String?, _ index: Int) -> some View {
+    private func shortcut(_ title: String, _ icon: String, _ trailing: String?, _ index: Int, art: String? = nil) -> some View {
         HStack(spacing: 12) {
-            AppIcon(icon, size: 20)
-                .foregroundStyle(Theme.paperInk)
-                .frame(width: 40, height: 40)
-                .background(Theme.stickers[index % Theme.stickers.count], in: Circle())
+            if let art {
+                Image(art).resizable().scaledToFit().frame(width: 44, height: 44).accessibilityHidden(true)
+            } else {
+                AppIcon(icon, size: 20)
+                    .foregroundStyle(Theme.paperInk)
+                    .frame(width: 40, height: 40)
+                    .background(Theme.stickers[index % Theme.stickers.count], in: Circle())
+            }
             Text(title)
                 .font(.system(.body, design: .rounded).weight(.semibold))
                 .foregroundStyle(Theme.paperInk)
@@ -195,6 +199,17 @@ struct LockerView: View {
         // 드래그 중의 탭은 무시한다.
         guard dragBase == nil else { return }
         setOpen(!isOpen)
+    }
+}
+
+extension GearKind.Zone {
+    /// 칸을 대표하는 장비 그림.
+    var art: String {
+        switch self {
+        case .top: return "gear-helmet"
+        case .middle: return "gear-jersey"
+        case .side: return "gear-stick"
+        }
     }
 }
 
@@ -338,60 +353,74 @@ struct StickerView: View {
 struct LockerInside: View {
     var skateCount: Int
     var gear: [GearItem]
-    private let tapes = [Theme.tapePink, Theme.tapeMint, Theme.tapeYellow]
+
+    /// 그림 안에서 칸이 차지하는 자리(가로·세로 0~1). 그림을 바꾸면 여기도 맞춘다.
+    private enum Spot {
+        static let helmet = CGRect(x: 0.05, y: 0.07, width: 0.55, height: 0.19)
+        static let uniform = CGRect(x: 0.05, y: 0.27, width: 0.55, height: 0.32)
+        static let gloves = CGRect(x: 0.05, y: 0.60, width: 0.55, height: 0.14)
+        static let skates = CGRect(x: 0.05, y: 0.75, width: 0.55, height: 0.19)
+        static let stick = CGRect(x: 0.61, y: 0.13, width: 0.13, height: 0.72)
+    }
 
     var body: some View {
-        let shape = RoundedRectangle(cornerRadius: LockerDoorBase.corner, style: .continuous)
-        VStack(spacing: 12) {
-            zoneLink(.top, 0)
-            zoneLink(.middle, 1)
-            NavigationLink { SkateListView() } label: {
-                // UI 테스트가 "스케이트 1켤레"를 글자 하나로 찾는다. 나누지 말 것.
-                zoneLabel(skateCount == 0 ? "스케이트" : "스케이트 \(skateCount)켤레", empty: skateCount == 0, "shoeprints.fill", 2)
-            }
-            .buttonStyle(.plain)
-            zoneLink(.side, 3)
-        }
-        .padding(.horizontal, 12).padding(.vertical, 14)
-        .background { ZStack { shape.fill(Theme.paper); DotGrid().clipShape(shape) } }
-        .overlay(shape.stroke(Theme.paperDot, lineWidth: 1))
-    }
-
-    private func zoneLink(_ zone: GearKind.Zone, _ i: Int) -> some View {
-        let count = gear.filter { zone.kinds.contains($0.kind) }.count
-        return NavigationLink { GearListView(zone: zone) } label: {
-            zoneLabel(count == 0 ? zone.title : "\(zone.title) \(count)개", empty: count == 0, zone.symbol, i)
-        }
-        .buttonStyle(.plain)
-    }
-
-    /// 칸 이름은 한 줄, 비어 있으면 아래에 작게 안내. 오른쪽 알약은 비었을 땐 '등록', 아니면 '열기'.
-    private func zoneLabel(_ title: String, empty: Bool, _ icon: String, _ i: Int) -> some View {
-        HStack(spacing: 12) {
-            AppIcon(icon, size: 24)
-                .foregroundStyle(Theme.paperInk)
-                .frame(width: 48, height: 48)
-                .background(Theme.stickers[i % Theme.stickers.count], in: Circle())
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.system(.headline, design: .rounded)).foregroundStyle(Theme.paperInk)
-                    .lineLimit(1).minimumScaleFactor(0.85)
-                if empty {
-                    Text("아직 비어 있어요").font(.system(.caption, design: .rounded)).foregroundStyle(Theme.paperInkSoft)
+        // 열린 락커 그림 위에 칸마다 투명한 버튼을 얹는다. 칸 이름은 그림에 적혀 있고, 개수만 알약으로 붙인다.
+        Image("locker-open")
+            .resizable().scaledToFit()
+            .overlay {
+                GeometryReader { g in
+                    ZStack(alignment: .topLeading) {
+                        zone(.top, Spot.helmet, in: g.size)
+                        zone(.middle, Spot.uniform, in: g.size)
+                        zone(.top, Spot.gloves, in: g.size, showBadge: false)
+                        skates(in: g.size)
+                        zone(.side, Spot.stick, in: g.size)
+                    }
                 }
             }
-            Spacer(minLength: 8)
-            Text(empty ? "등록" : "열기").font(.system(.caption, design: .rounded).bold())
-                .foregroundStyle(.white)
-                .padding(.horizontal, 10).padding(.vertical, 5)
-                .background(Theme.neonPink, in: Capsule())
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func zone(_ zone: GearKind.Zone, _ spot: CGRect, in size: CGSize, showBadge: Bool = true) -> some View {
+        let count = gear.filter { zone.kinds.contains($0.kind) }.count
+        return NavigationLink { GearListView(zone: zone) } label: {
+            hitArea(badge: showBadge ? (count == 0 ? "등록" : "\(count)개") : nil)
         }
-        .frame(maxWidth: .infinity, minHeight: 84)
-        .padding(.horizontal, 14)
-        .background(Theme.card, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .overlay(alignment: .topLeading) {
-            WashiTape(color: tapes[i % tapes.count], angle: i.isMultiple(of: 2) ? -6 : 5, width: 44).offset(x: 16, y: -8)
+        .buttonStyle(.plain)
+        .accessibilityLabel(count == 0 ? "\(zone.title), 아직 비어 있어요" : "\(zone.title) \(count)개")
+        .placed(spot, in: size)
+    }
+
+    private func skates(in size: CGSize) -> some View {
+        NavigationLink { SkateListView() } label: {
+            hitArea(badge: skateCount == 0 ? "등록" : "\(skateCount)켤레")
         }
-        .shadow(color: Theme.deepNavy.opacity(0.07), radius: 4, y: 2)
+        .buttonStyle(.plain)
+        // UI 테스트가 "스케이트 1켤레"를 글자 하나로 찾는다. 나누지 말 것.
+        .accessibilityLabel(skateCount == 0 ? "스케이트, 아직 비어 있어요" : "스케이트 \(skateCount)켤레")
+        .placed(Spot.skates, in: size)
+    }
+
+    private func hitArea(badge: String?) -> some View {
+        Color.clear
+            .contentShape(Rectangle())
+            .overlay(alignment: .topTrailing) {
+                if let badge {
+                    Text(badge).font(.system(.caption2, design: .rounded).bold())
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 7).padding(.vertical, 3)
+                        .background(Theme.neonPink, in: Capsule())
+                        .padding(4)
+                }
+            }
+    }
+}
+
+private extension View {
+    /// 그림 안의 비율 자리에 놓는다.
+    func placed(_ spot: CGRect, in size: CGSize) -> some View {
+        frame(width: spot.width * size.width, height: spot.height * size.height)
+            .position(x: spot.midX * size.width, y: spot.midY * size.height)
     }
 }
 
