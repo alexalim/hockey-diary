@@ -26,13 +26,17 @@ struct DiaryView: View {
                     .toolbar { BarAction(icon: "square.and.pencil", label: "일기 쓰기") { newEntry = .journal(selectedDay) } }
                 if search.isEmpty {
                     streakCard
+                    // 필터는 달력과 '이날' 카드 둘 다에 건다. 예전엔 아래 카드에만 걸려서(하루 기록 0~2개) 눌러도 바뀌는 게 안 보였다.
+                    Picker("보기", selection: $filter) {
+                        ForEach(Filter.allCases, id: \.self) { f in Text(filterTitle(f)).tag(f) }
+                    }
+                    .pickerStyle(.segmented)
                     calendarCard
                     SectionHeader(title: "이날의 기록")
-                    Picker("보기", selection: $filter) { ForEach(Filter.allCases, id: \.self) { Text($0.rawValue).tag($0) } }
-                        .pickerStyle(.segmented)
                     DayTimeline(day: selectedDay,
                                 sessions: filter == .journal ? [] : sessionsOn(selectedDay),
                                 journals: filter == .hockey ? [] : journalsOn(selectedDay),
+                                filter: filter.rawValue,
                                 newEntry: $newEntry)
                     SectionHeader(title: "나의 기록 도구")
                     HStack(spacing: 10) {
@@ -48,6 +52,14 @@ struct DiaryView: View {
         .screenBackground()
         .navigationTitle("").navigationBarTitleDisplayMode(.inline)
         .searchable(text: $search, prompt: "일기·메모·기술 찾기")
+    }
+
+    /// "하키 5": 보고 있는 달의 개수. 전체는 글자만.
+    private func filterTitle(_ f: Filter) -> String {
+        guard f != .all, let range = calendar.dateInterval(of: .month, for: month) else { return f.rawValue }
+        let n = f == .hockey ? sessions.filter { range.contains($0.startsAt) }.count
+                             : journals.filter { range.contains($0.entryDate) }.count
+        return "\(f.rawValue) \(n)"
     }
 
     private func tool(_ title: String, _ symbol: String) -> some View {
@@ -133,8 +145,8 @@ struct DiaryView: View {
     }
 
     private func dayCell(_ day: Date) -> some View {
-        let daySessions = sessionsOn(day)
-        let dayJournals = journalsOn(day)
+        let daySessions = filter == .journal ? [] : sessionsOn(day)
+        let dayJournals = filter == .hockey ? [] : journalsOn(day)
         let mood = dayJournals.compactMap(\.mood).first ?? daySessions.compactMap(\.moodAfter).first
         let selected = calendar.isDate(day, inSameDayAs: selectedDay)
         let isToday = calendar.isDateInToday(day)
@@ -221,14 +233,24 @@ struct DayTimeline: View {
     let day: Date
     let sessions: [Session]
     let journals: [DailyJournal]
+    /// "전체" · "하키" · "일기"
+    var filter: String = "전체"
     @Binding var newEntry: NewEntry?
 
     var body: some View {
         Card {
             CardHeader(title: day.dayTitle, systemImage: "list.bullet.below.rectangle")
             if sessions.isEmpty && journals.isEmpty {
-                EmptyHint(text: "이날은 비어 있어요. 하키는 훈련 탭에서, 한 줄 일기는 여기서 남겨요.",
-                          action: EmptyAction(title: "훈련 탭으로") { jumper?.go(.tab(.practice)) })
+                switch filter {
+                case "하키":
+                    EmptyHint(text: "이날은 하키 기록이 없어요.",
+                              action: EmptyAction(title: "하키 기록하기") { newEntry = .session(.lesson, DayTimeline.sameTime(on: day)) })
+                case "일기":
+                    EmptyHint(text: "이날은 일기가 없어요.")
+                default:
+                    EmptyHint(text: "이날은 비어 있어요. 하키는 훈련 탭에서, 한 줄 일기는 여기서 남겨요.",
+                              action: EmptyAction(title: "훈련 탭으로") { jumper?.go(.tab(.practice)) })
+                }
             }
             ForEach(journals) { j in JournalRow(journal: j) }
             ForEach(sessions) { s in
@@ -241,7 +263,7 @@ struct DayTimeline: View {
                     HStack { ForEach(photos) { p in PhotoThumb(data: p.imageData, size: 64) } }
                 }
             }
-            if journals.isEmpty {
+            if journals.isEmpty && filter != "하키" {
                 Button { newEntry = .journal(day) } label: {
                     Label("일기 쓰기", icon: "pencil.and.scribble")
                         .font(.system(.subheadline, design: .rounded).bold())

@@ -469,6 +469,25 @@ final class ComponentDriveTests: XCTestCase {
         snap("skill-search-2-added")
     }
 
+    // MARK: 기록 탭 전체·하키·일기: 고르면 이날 카드가 눈에 띄게 바뀐다(예전엔 눌러도 같아 보였다)
+
+    func test_diary_filter_changes_day_card() {
+        let body = "필터 확인용 일기"
+        XCTAssertTrue(newRecord("하루 일기"))
+        guard let field = formField("오늘 하루 어땠어요?") else { XCTFail("일기 칸이 없다"); return }
+        field.tap(); field.typeText(body)
+        XCTAssertTrue(tapButton("저장"))
+        sleep(1)
+        tab("기록")
+        XCTAssertTrue(app.buttons["일기 1"].waitForExistence(timeout: 5), "필터에 이번 달 일기 개수가 없다")
+        XCTAssertTrue(tapButton("하키 0"), "하키 필터가 없다")
+        XCTAssertNotNil(find("이날은 하키 기록이 없어요", swipes: 3), "하키만 볼 때 안내가 안 바뀐다")
+        XCTAssertNil(find(body, swipes: 0), "하키만 볼 때도 일기가 보인다")
+        snap("diary-filter-hockey")
+        XCTAssertTrue(tapButton("일기 1"))
+        XCTAssertNotNil(find(body, swipes: 3), "일기만 볼 때 일기가 안 보인다")
+    }
+
     private func relaunch(with args: String...) {
         app.terminate()
         app.launchArguments += args
