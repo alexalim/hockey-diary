@@ -196,14 +196,12 @@ struct DiaryView: View {
 
     private var searchResults: some View {
         let q = search
-        let js = journals.filter { j in
-            j.body.localizedCaseInsensitiveContains(q) || j.tags.contains { $0.localizedCaseInsensitiveContains(q) }
-        }
+        // 기술·링크장·상대·태그는 이름이라 초성까지, 일기·메모 본문은 글자 그대로(띄어쓰기 무시).
+        let js = journals.filter { j in SkillSearch.matches(q, names: j.tags, texts: [j.body]) }
         let ss = sessions.filter { s in
-            [s.learnedToday, s.coachNotes, s.review, s.nextGoal, s.rinkName, s.opponent]
-                .contains { $0.localizedCaseInsensitiveContains(q) }
-                || s.learnings.contains { ($0.skill?.name ?? "").localizedCaseInsensitiveContains(q) || $0.feedback.localizedCaseInsensitiveContains(q) }
-                || s.attempts.contains { ($0.skill?.name ?? "").localizedCaseInsensitiveContains(q) || $0.notes.localizedCaseInsensitiveContains(q) }
+            SkillSearch.matches(q,
+                                names: [s.rinkName, s.opponent] + s.learnings.map { $0.skill?.name ?? "" } + s.attempts.map { $0.skill?.name ?? "" },
+                                texts: [s.learnedToday, s.coachNotes, s.review, s.nextGoal] + s.learnings.map(\.feedback) + s.attempts.map(\.notes))
         }
         return VStack(spacing: 12) {
             if js.isEmpty && ss.isEmpty {

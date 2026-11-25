@@ -400,11 +400,9 @@ struct DrillPickerView: View {
     var onPick: (Drill) -> Void
     @State private var search = ""
 
-    /// 드릴 이름·기술 이름·하는 법에서 찾는다. 띄어쓰기는 무시.
+    /// 드릴 이름·기술 이름(초성 가능)·하는 법에서 찾는다. 띄어쓰기는 무시.
     private func matches(_ d: Drill) -> Bool {
-        let q = search.replacingOccurrences(of: " ", with: "")
-        guard !q.isEmpty else { return true }
-        return [d.title, d.skillName, d.howTo].contains { $0.replacingOccurrences(of: " ", with: "").localizedCaseInsensitiveContains(q) }
+        SkillSearch.matches(search, names: [d.title, d.skillName], texts: [d.howTo])
     }
 
     private var groups: [(String, [Drill])] {

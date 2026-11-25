@@ -520,6 +520,19 @@ final class ComponentDriveTests: XCTestCase {
         XCTAssertNotNil(find(body, swipes: 3), "일기만 볼 때 일기가 안 보인다")
     }
 
+    // MARK: 드릴 찾기도 초성으로 찾는다(빌드 77 피드백: 'ㅋㄹㅅ'에 맞는 드릴이 없어요)
+
+    func test_drill_search_initials() {
+        tab("훈련"); branch("드릴")
+        XCTAssertTrue(tapText("드릴 고르기"))
+        let field = app.searchFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 5), "드릴 검색 창이 없다")
+        field.tap(); field.typeText("ㅋㄹㅅ")
+        XCTAssertNotNil(find("서클 크로스오버", swipes: 0), "드릴 찾기에서 초성 ㅋㄹㅅ로 크로스오버 드릴이 안 나온다")
+        XCTAssertNil(find("맞는 드릴이 없어요", swipes: 0), "초성 검색에 '없어요'가 뜬다")
+        snap("drill-search-initials")
+    }
+
     private func relaunch(with args: String...) {
         app.terminate()
         app.launchArguments += args

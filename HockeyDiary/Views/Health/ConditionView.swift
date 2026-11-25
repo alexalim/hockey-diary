@@ -64,10 +64,21 @@ struct ConditionView: View {
             if enabledMetrics.isEmpty {
                 EmptyHint(text: "아래에서 볼 항목을 하나 이상 켜 주세요.")
             } else {
-                Picker("항목", selection: $metric) {
-                    ForEach(enabledMetrics, id: \.self) { Text($0.title).tag($0) }
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 6) {
+                        ForEach(enabledMetrics, id: \.self) { m in
+                            let on = metric == m
+                            Button { metric = m } label: {
+                                Text(m.title).font(.subheadline.weight(on ? .bold : .regular)).lineLimit(1).fixedSize()
+                                    .padding(.horizontal, 12).frame(minHeight: 36)
+                                    .foregroundStyle(on ? .white : Theme.title)
+                                    .background(on ? Theme.cobalt : Theme.cobaltSoft, in: Capsule())
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityAddTraits(on ? .isSelected : [])
+                        }
+                    }
                 }
-                .pickerStyle(.segmented)
                 Text(metric.help).font(.caption).foregroundStyle(Theme.inkSecondary)
                 if points.isEmpty {
                     EmptyHint(text: loading ? "불러오는 중…" : emptyReason,

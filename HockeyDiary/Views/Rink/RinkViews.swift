@@ -17,7 +17,7 @@ struct RinkNameField: View {
     private var localMatches: [Rink] {
         let q = text.trimmingCharacters(in: .whitespaces)
         let sorted = rinks.sorted { ($0.isFavorite ? 1 : 0, $0.lastUsedAt) > ($1.isFavorite ? 1 : 0, $1.lastUsedAt) }
-        let list = q.isEmpty ? sorted : sorted.filter { $0.name.localizedCaseInsensitiveContains(q) || $0.address.localizedCaseInsensitiveContains(q) }
+        let list = sorted.filter { SkillSearch.matches(q, names: [$0.name], texts: [$0.address]) }
         return Array(list.filter { $0.name != q }.prefix(5))
     }
 

@@ -1,20 +1,25 @@
 import Foundation
 
-/// 기술 고르기 검색. 띄어쓰기·대소문자를 무시하고, 한글 초성만 쳐도 찾는다("ㅋㄹㅅ" → 크로스오버).
+/// 앱 검색 창 공통 규칙. 띄어쓰기·대소문자를 무시하고, 이름 칸은 한글 초성만 쳐도 찾는다("ㅋㄹㅅ" → 크로스오버).
+/// 기술 고르기·드릴 찾기·기술 도감·링크장·기록 검색이 같이 쓴다.
 public enum SkillSearch {
+    /// names: 이름처럼 짧은 칸(초성 검색 허용). texts: 설명·본문처럼 긴 칸(글자 그대로만).
+    public static func matches(_ query: String, names: [String], texts: [String] = []) -> Bool {
+        let q = normalized(query)
+        guard !q.isEmpty else { return true }
+        let initialsQuery = q.allSatisfy { initials.contains($0) }
+        for n in names {
+            let t = normalized(n)
+            if t.contains(q) || (initialsQuery && initialsOf(t).contains(q)) { return true }
+        }
+        return texts.contains { normalized($0).contains(q) }
+    }
+
     private static let initials: [Character] = Array("ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ")
 
     /// 이름이나 분류가 검색어에 맞는가. 빈 검색어는 모두 맞다.
     public static func matches(_ query: String, name: String, category: String = "") -> Bool {
-        let q = normalized(query)
-        guard !q.isEmpty else { return true }
-        for text in [name, category] {
-            let t = normalized(text)
-            if t.contains(q) { return true }
-            // 검색어가 초성으로만 되어 있으면 초성끼리 비교한다.
-            if q.allSatisfy({ initials.contains($0) }), initialsOf(t).contains(q) { return true }
-        }
-        return false
+        matches(query, names: [name, category])
     }
 
     /// 초성만 친 검색어인가("ㅋㄹㅅ"). 이건 찾는 중이지 새 기술 이름이 아니다.

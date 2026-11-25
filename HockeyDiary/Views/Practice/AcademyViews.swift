@@ -39,8 +39,7 @@ struct SkillGuideListView: View {
     @Query private var skills: [Skill]
 
     private var groups: [(String, [SkillGuide.Entry])] {
-        let q = search.replacingOccurrences(of: " ", with: "")
-        let list = SkillGuide.entries.filter { q.isEmpty || ($0.name + $0.summary).replacingOccurrences(of: " ", with: "").localizedCaseInsensitiveContains(q) }
+        let list = SkillGuide.entries.filter { SkillSearch.matches(search, names: [$0.name, $0.category], texts: [$0.summary]) }
         let dict = Dictionary(grouping: list, by: \.category)
         let order = ["스케이팅", "퍽 컨트롤", "슈팅", "게임 운영"]
         return order.compactMap { k in dict[k].map { (k, $0) } } + dict.keys.filter { !order.contains($0) }.sorted().map { ($0, dict[$0]!) }

@@ -1271,6 +1271,15 @@ final class SkillSearchTests: XCTestCase {
         XCTAssertTrue(SkillSearch.matches("tight", name: "Tight Turn"))
     }
 
+    // 드릴 찾기 피드백(빌드 77): "ㅋㄹㅅ"가 드릴 이름엔 맞고, 긴 설명문 초성으로는 걸리지 않는다.
+    func testNamesUseInitialsTextsDoNot() {
+        XCTAssertTrue(SkillSearch.matches("ㅋㄹㅅ", names: ["크로스오버 8자", "크로스오버"]))
+        XCTAssertFalse(SkillSearch.matches("ㅋㄹㅅ", names: ["토 드래그"], texts: ["콘 사이를 크게 리듬 살려 스케이팅"]),
+                       "설명문은 초성으로 비교하지 않는다")
+        XCTAssertTrue(SkillSearch.matches("리듬", names: ["토 드래그"], texts: ["콘 사이를 크게 리듬 살려"]))
+        XCTAssertTrue(SkillSearch.matches("역삼", names: ["역삼 아이스링크"], texts: []))
+    }
+
     func testInitialsOnlyIsNotANewName() {
         XCTAssertTrue(SkillSearch.isInitialsOnly("ㅋㄹㅅ"))
         XCTAssertTrue(SkillSearch.isInitialsOnly(" ㅋ ㄹ "))
