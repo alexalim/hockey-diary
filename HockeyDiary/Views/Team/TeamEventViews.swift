@@ -17,6 +17,8 @@ struct TeamEventView: View {
     @State private var openSession: Session?
     /// 참석 목록에서 볼 상태. nil이면 전체.
     @State private var attendanceFilter: Attendance?
+    /// 라인업을 표로 볼지 링크 모양으로 볼지(다음에 열어도 그대로).
+    @AppStorage("lineupAsRink") private var lineupAsRink = false
 
     private var members: [TeamMember] {
         // 명단에서 뺀 사람도 이 일정에 이미 들어가 있으면 보여준다.
@@ -157,7 +159,16 @@ struct TeamEventView: View {
             if text.isEmpty {
                 EmptyHint(text: "포워드 3라인, 수비 3조, 골리를 자리에 넣어 보세요. 참석한 사람만 골라도 돼요.", systemImage: "rectangle.split.3x3")
             } else {
-                LineupBoard(lineup: event.lineup, names: names)
+                Picker("라인업 모양", selection: $lineupAsRink) {
+                    Text("표").tag(false)
+                    Text("링크").tag(true)
+                }
+                .pickerStyle(.segmented)
+                if lineupAsRink {
+                    LineupRink(lineup: event.lineup, names: names)
+                } else {
+                    LineupBoard(lineup: event.lineup, names: names)
+                }
             }
             Button { editingLineup = true } label: {
                 Label(text.isEmpty ? "라인업 짜기" : "라인업 고치기", icon: "pencil").frame(maxWidth: .infinity, minHeight: Theme.touch)
@@ -230,6 +241,71 @@ struct TeamEventView: View {
             }
             .buttonStyle(.bordered)
         }
+    }
+}
+
+/// 링크 모양 라인업. 고른 라인의 공격 셋·수비 둘·골리를 실제 서는 자리에 놓는다(위가 상대 골대 쪽).
+struct LineupRink: View {
+    let lineup: Lineup
+    let names: [UUID: String]
+    @State private var line = 0
+
+    /// 누가 한 명이라도 들어 있는 라인만 고르게 한다. 1라인은 늘 보인다.
+    private var lines: [Int] {
+        (0..<3).filter { i in
+            i == 0 || (LineupSlot.forwardLines[i] + LineupSlot.defensePairs[i]).contains { lineup[$0] != nil }
+        }
+    }
+
+    var body: some View {
+        let fw = LineupSlot.forwardLines[line], df = LineupSlot.defensePairs[line]
+        VStack(spacing: 8) {
+            if lines.count > 1 {
+                Picker("라인", selection: $line) {
+                    ForEach(lines, id: \.self) { Text("\($0 + 1)라인").tag($0) }
+                }
+                .pickerStyle(.segmented)
+            }
+            VStack(spacing: 16) {
+                HStack(spacing: 8) { ForEach(fw, id: \.self) { spot($0) } }
+                HStack(spacing: 8) { ForEach(df, id: \.self) { spot($0) } }.padding(.horizontal, 36)
+                spot(.g1).frame(maxWidth: 130)
+            }
+            .padding(.horizontal, 12).padding(.top, 26).padding(.bottom, 22)
+            .frame(maxWidth: .infinity)
+            .background { rink }
+        }
+    }
+
+    /// 수비 지역 쪽 반 링크: 위에 빨간 중앙선, 가운데 파란 선, 아래 골 크리스.
+    private var rink: some View {
+        GeometryReader { g in
+            let w = g.size.width, h = g.size.height
+            ZStack {
+                RoundedRectangle(cornerRadius: 26, style: .continuous).fill(Theme.cobaltSoft.opacity(0.55))
+                RoundedRectangle(cornerRadius: 26, style: .continuous).stroke(Theme.cobalt.opacity(0.35), lineWidth: 2)
+                Rectangle().fill(Theme.danger.opacity(0.55)).frame(width: w - 4, height: 3).position(x: w / 2, y: 10)
+                Rectangle().fill(Theme.cobalt.opacity(0.45)).frame(width: w - 4, height: 3).position(x: w / 2, y: h * 0.44)
+                Circle().trim(from: 0.5, to: 1).stroke(Theme.danger.opacity(0.5), lineWidth: 2)
+                    .frame(width: 96, height: 96).position(x: w / 2, y: h - 4)
+            }
+        }
+        .accessibilityHidden(true)
+    }
+
+    private func spot(_ s: LineupSlot) -> some View {
+        let name = lineup[s].flatMap { names[$0] }
+        return VStack(spacing: 2) {
+            Text(s.short.replacingOccurrences(of: "G2", with: "G")).font(.caption2.bold())
+                .foregroundStyle(s.position == .goalie ? Theme.neonPink : Theme.accent)
+            Text(name ?? "—").font(.subheadline.weight(.semibold)).lineLimit(1).minimumScaleFactor(0.7)
+                .foregroundStyle(name == nil ? Theme.inkTertiary : Theme.title)
+        }
+        .frame(maxWidth: .infinity, minHeight: 46)
+        .background(Theme.card, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(s.position == .goalie ? Theme.neonPink.opacity(0.5) : Theme.cobalt.opacity(0.25)))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(s.short) \(name ?? "비어 있음")")
     }
 }
 
