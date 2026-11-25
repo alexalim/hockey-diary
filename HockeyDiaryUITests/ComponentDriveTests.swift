@@ -484,7 +484,11 @@ final class ComponentDriveTests: XCTestCase {
         XCTAssertNotNil(find("이날은 하키 기록이 없어요", swipes: 3), "하키만 볼 때 안내가 안 바뀐다")
         XCTAssertNil(find(body, swipes: 0), "하키만 볼 때도 일기가 보인다")
         snap("diary-filter-hockey")
-        XCTAssertTrue(tapButton("일기 1"))
+        // 안내를 찾느라 내려간 화면을 필터가 보이는 위로 되돌린다.
+        let journalChip = app.buttons["일기 1"]
+        for _ in 0..<4 where !journalChip.isHittable { app.swipeDown() }
+        XCTAssertTrue(journalChip.isHittable, "일기 필터가 화면에 없다")
+        journalChip.tap()
         XCTAssertNotNil(find(body, swipes: 3), "일기만 볼 때 일기가 안 보인다")
     }
 
