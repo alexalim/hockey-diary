@@ -1,0 +1,35 @@
+# TestFlight 피드백(테스터가 보낸 스크린샷·글, 충돌 제보)을 읽어 결과 파일(feedback)로 남긴다. 읽기 전용.
+# 기본 브랜치에 없어도 돌게, 이 파일이나 스크립트를 올리면 한 번 돈다. 이후엔 Actions에서 수동 실행.
+name: TestFlight feedback
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/testflight-feedback.yml
+      - scripts/asc_feedback.py
+
+permissions:
+  contents: read
+
+jobs:
+  read:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: 피드백 읽기
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+        run: |
+          pip install --quiet "pyjwt[crypto]"
+          echo "$ASC_KEY_P8_BASE64" | base64 --decode > "$RUNNER_TEMP/AuthKey.p8"
+          ASC_KEY_PATH="$RUNNER_TEMP/AuthKey.p8" python3 scripts/asc_feedback.py out
+          rm -f "$RUNNER_TEMP/AuthKey.p8"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: feedback
+          path: out
+          retention-days: 7
