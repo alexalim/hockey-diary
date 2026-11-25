@@ -32,8 +32,8 @@ final class ScreenTourTests: XCTestCase {
         tab("성장"); snap("E04-growth"); app.swipeUp(); snap("E04b-growth-bottom")
         tab("락커"); snap("E05-locker"); if tapButton("문 열기") { sleep(1); snap("E05b-locker-open") }
         app.swipeUp(); snap("E05c-locker-bottom")
-        tab("팀"); snap("E07-team")
-        tab("뭐할까"); snap("E08-whatnow"); app.swipeUp(); snap("E08b-whatnow-bottom")
+        tab("홈"); if tapButton("home-팀") { sleep(1); snap("E07-team") }
+        tab("홈"); if tapButton("home-뭐할까") { sleep(1); snap("E08-whatnow"); app.swipeUp(); snap("E08b-whatnow-bottom") }
         // 설정 맨 아래: 앱 정보, 처리방침·문의 링크.
         tab("홈")
         if tapButton("설정") { sleep(1); snap("E06-settings"); app.swipeUp(); app.swipeUp(); snap("E06b-settings-bottom"); tapButton("닫기") }
@@ -77,7 +77,13 @@ final class ScreenTourTests: XCTestCase {
         tab("홈")
         if tapText("목동 펭귄스") {
             snap("01c-team")
-            if tapText("강남 베어스") { snap("01d-team-event"); app.swipeUp(); snap("01e-team-event-bottom"); back() }
+            if tapText("강남 베어스") {
+                snap("01d-team-event"); app.swipeUp(); snap("01e-team-event-bottom")
+                // 라인업을 링크 모양으로 바꿔 찍는다.
+                let rink = app.segmentedControls.buttons.matching(NSPredicate(format: "label == %@", "링크")).allElementsBoundByIndex.first { $0.isHittable }
+                if let rink { rink.tap(); sleep(1); snap("01e2-lineup-rink") }
+                back()
+            }
             back()
         }
 
@@ -142,8 +148,8 @@ final class ScreenTourTests: XCTestCase {
         app.swipeUp(); snap("04b-growth-mid")
         app.swipeUp(); snap("04c-growth-bottom")
         // 팀·뭐할까는 성장 스크롤을 다 찍은 뒤에(앞에 끼우면 성장 중간·아래 캡처가 뭐할까 화면이 된다)
-        tab("팀"); snap("07-team")
-        tab("뭐할까"); snap("08-whatnow"); app.swipeUp(); snap("08b-whatnow-bottom")
+        tab("홈"); if tapButton("home-팀") { sleep(1); snap("07-team") }
+        tab("홈"); if tapButton("home-뭐할까") { sleep(1); snap("08-whatnow"); app.swipeUp(); snap("08b-whatnow-bottom") }
 
         // 훈련(드릴) → 하키 아카데미 → 규칙·전술: 목록, 반칙 그림, 링크 구조, 전술
         drills(); snap("04n-practice-academy")

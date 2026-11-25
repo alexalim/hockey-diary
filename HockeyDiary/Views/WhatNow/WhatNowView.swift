@@ -135,7 +135,7 @@ struct WhatNowView: View {
             let kind = teamEvents.first { $0.title == s.key && $0.sessionID == nil }.flatMap { ActivityType(rawValue: $0.kindRaw) } ?? .regularGame
             newEntry = .session(kind)
         case .prepareEvent:
-            jumper?.go(.tab(.team))
+            jumper?.go(.homeScreen(.team))
         case .bodyCheck:
             break
         case .quest:
@@ -155,7 +155,7 @@ struct WhatNowView: View {
         case .journal:
             newEntry = .journal(Date())
         case .firstIce:
-            if teams.isEmpty { jumper?.go(.training(.drill)) } else { jumper?.go(.tab(.team)) }
+            if teams.isEmpty { jumper?.go(.training(.drill)) } else { jumper?.go(.homeScreen(.team)) }
         }
     }
 

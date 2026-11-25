@@ -94,10 +94,10 @@ final class ComponentDriveTests: XCTestCase {
     // MARK: 팀 탭 → 만들기 화면이 바로 보인다 / 뭐할까 탭 → 드릴 카드의 '지금 시작'이 러너를 띄운다
 
     func test_team_tab_and_whatNow_drill() {
-        tab("팀")
+        openTeam()
         XCTAssertTrue(app.staticTexts["우리 팀 만들기"].waitForExistence(timeout: 5), "팀 탭에 만들기 화면이 없다")
 
-        tab("뭐할까")
+        openWhatNow()
         XCTAssertNotNil(find("지금 하나", swipes: 0), "뭐할까 첫 묶음 제목이 없다")
         // 빈 저장소: 몸 상태 카드가 먼저, 드릴 카드는 집에서 하는 첫 드릴이어야 한다.
         XCTAssertNotNil(find("오늘 몸 상태 남기기", swipes: 0), "몸 상태 카드가 없다")
@@ -167,7 +167,7 @@ final class ComponentDriveTests: XCTestCase {
     // MARK: 팀 일정으로 만든 기록을 기록 탭에서 지움 → 팀 탭이 빈 화면이 아니라 일정으로 돌아옴
 
     func test_deleting_event_record_elsewhere_does_not_blank_team_tab() {
-        tab("팀")
+        openTeam()
         guard let name = formField("팀 이름 (예: 목동 펭귄스)") else { XCTFail("팀 이름 칸이 없다"); return }
         name.tap(); name.typeText("테스트 펭귄스")
         XCTAssertTrue(tapButton("만들기"))
@@ -191,7 +191,7 @@ final class ComponentDriveTests: XCTestCase {
         snap("link-3-record-tab-after-delete")
 
         // 한 번만 누른다(두 번 누르면 탭이 처음 화면으로 돌아가 버려 증상이 가려진다).
-        app.buttons["tab-팀"].tap(); sleep(2)
+        app.buttons["tab-홈"].tap(); sleep(2)
         snap("link-4-team-tab-after-delete")
         XCTAssertNotNil(find("이 일정으로 기록 만들기"), "팀 탭이 일정 화면으로 돌아오지 않았다(빈 화면)")
         snap("link-5-event-button-back")
@@ -200,7 +200,7 @@ final class ComponentDriveTests: XCTestCase {
     // MARK: 팀 여러 개: 두 번째 팀 추가 → 팀마다 자기 일정만 보임 → 팀 지우면 남은 팀으로
 
     func test_two_teams_switch_and_delete() {
-        tab("팀")
+        openTeam()
         guard let name = formField("팀 이름 (예: 목동 펭귄스)") else { XCTFail("팀 이름 칸이 없다"); return }
         name.tap(); name.typeText("펭귄스")
         XCTAssertTrue(tapButton("만들기"))
@@ -358,7 +358,7 @@ final class ComponentDriveTests: XCTestCase {
     // MARK: 뭐할까: 남은 시간을 고르면 그 안에 끝나는 것을 권한다
 
     func test_whatnow_free_time() {
-        tab("뭐할까")
+        openWhatNow()
         XCTAssertNotNil(find("시간이 얼마나 있어요?"), "시간 고르기 카드가 없다")
         XCTAssertTrue(tapButton("시간 5분"), "5분 버튼이 없다")
         sleep(1)
@@ -369,7 +369,7 @@ final class ComponentDriveTests: XCTestCase {
     // MARK: 참석: 답 없는 사람 한꺼번에 채우고 상태별로 본다
 
     func test_attendance_fill_and_filter() {
-        tab("팀")
+        openTeam()
         guard let name = formField("팀 이름 (예: 목동 펭귄스)") else { XCTFail("팀 이름 칸이 없다"); return }
         name.tap(); name.typeText("펭귄스")
         XCTAssertTrue(tapButton("만들기"))
@@ -392,6 +392,22 @@ final class ComponentDriveTests: XCTestCase {
         XCTAssertTrue(app.buttons["보기 참석 2"].exists, "두 명이 참석으로 안 바뀌었다")
         XCTAssertTrue(tapButton("보기 불참 0"), "불참 보기 버튼이 없다")
         XCTAssertNil(find("김하키", swipes: 0), "불참만 보는데 참석한 사람이 보인다")
+    }
+
+    // MARK: 하단 메뉴는 다섯 개: 팀·뭐할까는 메뉴에 없고 홈에서 열린다
+
+    func test_five_tabs_and_home_shortcuts() {
+        for name in ["기록", "훈련", "홈", "성장", "락커"] {
+            XCTAssertTrue(app.buttons["tab-\(name)"].exists, "하단 메뉴에 \(name)이 없다")
+        }
+        XCTAssertFalse(app.buttons["tab-팀"].exists, "팀이 하단 메뉴에 남아 있다")
+        XCTAssertFalse(app.buttons["tab-뭐할까"].exists, "뭐할까가 하단 메뉴에 남아 있다")
+        snap("tabs-1-home")
+        openWhatNow()
+        XCTAssertNotNil(find("지금 하나", swipes: 0), "홈에서 뭐할까가 안 열린다")
+        snap("tabs-2-whatnow")
+        openTeam()
+        XCTAssertTrue(app.staticTexts["우리 팀 만들기"].waitForExistence(timeout: 5), "홈에서 팀 화면이 안 열린다")
     }
 
     // MARK: - 도우미 (ScreenTourTests와 같은 규칙)
@@ -470,6 +486,17 @@ final class ComponentDriveTests: XCTestCase {
             if b.exists && b.isHittable { b.tap(); return true }
         }
         return false
+    }
+
+    /// 팀과 뭐할까는 하단 메뉴가 아니라 홈의 바로가기로 들어간다. 홈을 첫 화면으로 되돌린 뒤 누른다.
+    private func openTeam() {
+        tab("홈")
+        XCTAssertTrue(tapButton("home-팀"), "홈에 팀 바로가기가 없다"); sleep(1)
+    }
+
+    private func openWhatNow() {
+        tab("홈")
+        XCTAssertTrue(tapButton("home-뭐할까"), "홈에 뭐할까 바로가기가 없다"); sleep(1)
     }
 
     private func tab(_ name: String) {

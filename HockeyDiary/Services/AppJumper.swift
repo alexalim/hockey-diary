@@ -11,6 +11,14 @@ enum AppJump: Hashable {
     case entry(NewEntry)
     /// 홈의 설정 시트를 연다.
     case settings
+    /// 홈 탭으로 가서 그 안의 화면(팀·뭐할까)을 연다.
+    case homeScreen(HomeScreen)
+}
+
+/// 하단 메뉴에서 빠지고 홈에서 들어가는 화면.
+enum HomeScreen: String, Hashable, Identifiable {
+    case team, whatNow
+    var id: String { rawValue }
 }
 
 @Observable
@@ -21,6 +29,8 @@ final class AppJumper {
     var pendingBranch: TrainingView.Branch?
     /// 홈이 설정 시트를 열어야 하는지.
     var pendingSettings = false
+    /// 홈이 다음에 열어야 할 화면.
+    var pendingHome: HomeScreen?
 
     func go(_ jump: AppJump) { request = jump }
 }

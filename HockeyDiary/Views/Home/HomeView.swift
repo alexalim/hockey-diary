@@ -16,6 +16,8 @@ struct HomeView: View {
     @Query(sort: \BodyCheck.day, order: .reverse) private var checks: [BodyCheck]
 
     @State private var showingSettings = false
+    /// 홈에서 밀어 여는 화면(팀·뭐할까).
+    @State private var homeScreen: HomeScreen?
     @AppStorage(MyPrefs.nicknameKey) private var nickname = ""
     @Environment(AppJumper.self) private var jumper: AppJumper?
     @State private var showingEdit = false
@@ -49,6 +51,7 @@ struct HomeView: View {
                 // 매일 여는 화면이라 '다음 경기 → 오늘 할 일 → 바로 기록'을 먼저 둔다. 한 번만 묻는 실력 질문은 아래로.
                 nextGameHero
                 promptCard
+                shortcutRow
                 SectionHeader(title: "빠른 시작")
                 quickButtons
                 bodyCard
@@ -67,7 +70,45 @@ struct HomeView: View {
         .navigationTitle("").navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showingSettings) { NavigationStack { SettingsView() } }
         .onChange(of: jumper?.pendingSettings) { _, on in if on == true { showingSettings = true; jumper?.pendingSettings = false } }
+        .navigationDestination(item: $homeScreen) { d in
+            switch d {
+            case .team: TeamView()
+            case .whatNow: WhatNowView(newEntry: $newEntry)
+            }
+        }
+        .onChange(of: jumper?.pendingHome) { _, d in if let d { homeScreen = d; jumper?.pendingHome = nil } }
         .sheet(isPresented: $showingEdit) { NavigationStack { HomeEditView() } }
+    }
+
+    /// 팀과 뭐할까는 하단 메뉴에서 빠졌다. 홈에서 들어간다.
+    private var shortcutRow: some View {
+        HStack(spacing: 10) {
+            shortcut("팀", "person.3.fill", "일정·참석·라인업", .team)
+            shortcut("뭐할까", "sparkles", "지금 할 것 추천", .whatNow)
+        }
+    }
+
+    private func shortcut(_ title: String, _ icon: String, _ detail: String, _ to: HomeScreen) -> some View {
+        Button { homeScreen = to } label: {
+            HStack(spacing: 10) {
+                AppIcon(icon).font(.title3).foregroundStyle(Theme.accent).frame(width: 30)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title).font(.subheadline.bold()).foregroundStyle(Theme.title)
+                    Text(detail).font(.caption).foregroundStyle(Theme.inkSecondary).lineLimit(1).minimumScaleFactor(0.8)
+                }
+                Spacer(minLength: 0)
+                AppIcon("chevron.right").font(.caption).foregroundStyle(Theme.inkTertiary)
+            }
+            .padding(.horizontal, 12)
+            .frame(maxWidth: .infinity, minHeight: 60)
+            .background(Theme.card, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(title), \(detail)")
+        .accessibilityIdentifier("home-\(title)")
+        .accessibilityAddTraits(.isButton)
     }
 
     /// 실력 레벨을 아직 안 정했을 때 한 번 묻는다. 고르면 기록 입력 방식이 거기에 맞춰진다.
