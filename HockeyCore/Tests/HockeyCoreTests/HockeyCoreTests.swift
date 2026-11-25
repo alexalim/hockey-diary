@@ -1271,6 +1271,14 @@ final class SkillSearchTests: XCTestCase {
         XCTAssertTrue(SkillSearch.matches("tight", name: "Tight Turn"))
     }
 
+    func testInitialsOnlyIsNotANewName() {
+        XCTAssertTrue(SkillSearch.isInitialsOnly("ㅋㄹㅅ"))
+        XCTAssertTrue(SkillSearch.isInitialsOnly(" ㅋ ㄹ "))
+        XCTAssertFalse(SkillSearch.isInitialsOnly("크로스"))
+        XCTAssertFalse(SkillSearch.isInitialsOnly("ㅋ로"))
+        XCTAssertFalse(SkillSearch.isInitialsOnly(""))
+    }
+
     func testSame() {
         XCTAssertTrue(SkillSearch.isSame(" 크로스 오버", "크로스오버"))
         XCTAssertFalse(SkillSearch.isSame("크로스", "크로스오버"))

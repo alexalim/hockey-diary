@@ -478,6 +478,7 @@ final class ComponentDriveTests: XCTestCase {
         XCTAssertTrue(field.waitForExistence(timeout: 5) && field.isHittable, "검색 창이 당기지 않아도 보여야 한다")
         field.tap(); field.typeText("ㅋㄹㅅ")
         XCTAssertNotNil(find("크로스오버", swipes: 0), "초성 ㅋㄹㅅ로 크로스오버가 안 찾아진다")
+        XCTAssertFalse(app.buttons["'ㅋㄹㅅ' 새 기술로 추가"].exists, "초성 검색어를 새 기술로 추가하라고 한다")
         snap("skill-search-1-initials")
         field.buttons.firstMatch.tap() // 지우기(x)
         field.typeText("토드래그연습")

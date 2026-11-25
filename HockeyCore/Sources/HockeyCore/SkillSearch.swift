@@ -17,6 +17,12 @@ public enum SkillSearch {
         return false
     }
 
+    /// 초성만 친 검색어인가("ㅋㄹㅅ"). 이건 찾는 중이지 새 기술 이름이 아니다.
+    public static func isInitialsOnly(_ query: String) -> Bool {
+        let q = normalized(query)
+        return !q.isEmpty && q.allSatisfy { initials.contains($0) }
+    }
+
     /// 검색어와 이름이 사실상 같은가(새 기술 추가 버튼을 숨길지 판단).
     public static func isSame(_ query: String, _ name: String) -> Bool { normalized(query) == normalized(name) }
 

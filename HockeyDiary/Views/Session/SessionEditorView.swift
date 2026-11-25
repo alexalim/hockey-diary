@@ -846,7 +846,7 @@ struct SkillPickerView: View {
     /// 검색어 그대로의 기술이 없으면 바로 새 기술로 추가하게 한다.
     private var canAddSearch: Bool {
         let q = search.trimmingCharacters(in: .whitespaces)
-        return !q.isEmpty && !skills.contains { SkillSearch.isSame(q, $0.name) }
+        return !q.isEmpty && !SkillSearch.isInitialsOnly(q) && !skills.contains { SkillSearch.isSame(q, $0.name) }
     }
 
     var body: some View {
