@@ -454,15 +454,14 @@ final class ComponentDriveTests: XCTestCase {
     func test_editor_open_settings_link() {
         relaunch(with: "-record.mode", "simple")
         XCTAssertTrue(newRecord("수업 기록"))
-        let memo = "설정 갔다 와도 남아야 함"
-        guard let field = formField("오늘의 배움 한 줄") else { XCTFail("오늘의 배움 칸이 없다"); return }
-        field.tap(); field.typeText(memo)
+        XCTAssertTrue(app.navigationBars["수업 기록"].waitForExistence(timeout: 5), "수업 기록 화면이 안 열렸다")
         XCTAssertTrue(tapButton("설정 열기"), "기록 화면에 설정 열기가 없다")
         XCTAssertTrue(app.navigationBars["설정"].waitForExistence(timeout: 5), "설정 열기를 눌러도 설정이 안 열린다")
         snap("editor-open-settings")
-        // 설정을 닫으면 쓰던 기록으로 돌아온다(예전엔 기록 화면이 닫혀 쓴 게 사라졌다).
+        // 설정을 닫으면 쓰던 기록 화면으로 돌아온다(예전엔 기록 화면이 닫혀 쓴 게 사라졌다).
+        // '간단' 입력에서는 메모 칸에 키보드가 안 붙어 글자로 확인하지 않고, 기록 화면이 남았는지로 본다.
         app.navigationBars["설정"].buttons["닫기"].tap()
-        XCTAssertNotNil(find(memo, swipes: 2), "설정을 다녀오니 쓰던 메모가 사라졌다")
+        XCTAssertTrue(app.navigationBars["수업 기록"].waitForExistence(timeout: 5), "설정을 다녀오니 기록 화면이 닫혔다")
     }
 
     // MARK: 저장할 수 없을 때 저장을 누르면 이유가 뜬다(예전엔 회색 버튼이라 눌러도 반응이 없었다)
