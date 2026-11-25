@@ -21,6 +21,7 @@ struct WhatNowView: View {
     @AppStorage(QuestStore.targetKey) private var targetOverride = 0
     @Query(sort: \PracticeRoutine.createdAt) private var routines: [PracticeRoutine]
     @State private var running: RoutineRun?
+    @State private var showingRinks = false
     /// 지금 쓸 수 있는 시간(분). 고르면 그 안에 끝나는 드릴·루틴을 권한다. 다시 누르면 해제.
     @State private var minutesFree: Int?
 
@@ -96,6 +97,7 @@ struct WhatNowView: View {
         }
         .screenBackground()
         .navigationTitle("").navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(isPresented: $showingRinks) { RinkFinderView() }
         .fullScreenCover(item: $running) { run in
             NavigationStack { RoutineRunView(run: run) }
         }
@@ -159,7 +161,7 @@ struct WhatNowView: View {
         case .journal:
             newEntry = .journal(Date())
         case .firstIce:
-            if teams.isEmpty { jumper?.go(.training(.drill)) } else { jumper?.go(.homeScreen(.team)) }
+            if teams.isEmpty { showingRinks = true } else { jumper?.go(.homeScreen(.team)) }
         }
     }
 

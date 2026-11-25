@@ -353,7 +353,8 @@ struct RoutineRunView: View {
 
     private func doneMinutes(_ item: RoutineItem) -> Int {
         let used = item.target * 60 - secondsLeft
-        return max(0, Int((Double(used) / 60).rounded()))
+        guard used >= 15 else { return 0 }
+        return max(1, Int((Double(used) / 60).rounded()))
     }
 
     private func resetForCurrent() {

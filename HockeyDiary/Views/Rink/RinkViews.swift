@@ -211,6 +211,7 @@ struct RinkFinderView: View {
                 manualName = ""
                 query = ""
             }
+            .disabled(manualName.trimmingCharacters(in: .whitespaces).isEmpty)
             Button("취소", role: .cancel) { manualName = "" }
         } message: {
             Text("지도에 없는 곳도 이름만 적으면 기록할 때 고를 수 있어요. 주소와 시설 정보는 다음 화면에서 적어요.")

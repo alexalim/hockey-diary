@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 import HockeyCore
 
 /// 훈련 탭 드릴 갈래의 '하키 아카데미' 진입 타일 4개: 드릴 찾기 · 기술 도감 · 규칙·전술 · 링크장 찾기.
@@ -35,6 +36,7 @@ struct AcademyGrid: View {
 /// 기술 도감: SkillGuide 설명을 갈래별로 모아 본다. 내 기록이 있는 기술은 성장의 기술 상세로 이어진다.
 struct SkillGuideListView: View {
     @State private var search = ""
+    @Query private var skills: [Skill]
 
     private var groups: [(String, [SkillGuide.Entry])] {
         let q = search.replacingOccurrences(of: " ", with: "")
@@ -49,11 +51,13 @@ struct SkillGuideListView: View {
             ForEach(groups, id: \.0) { name, items in
                 Section(name) {
                     ForEach(items, id: \.name) { e in
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(e.name).font(.subheadline.bold()).foregroundStyle(Theme.title)
-                            Text(e.summary).font(.caption).foregroundStyle(Theme.inkSecondary)
+                        if let s = skills.first(where: { $0.name == e.name }), !(s.learnings.isEmpty && s.attempts.isEmpty) {
+                            NavigationLink { SkillDetailView(skill: s) } label: {
+                                guideRow(e, records: s.learnings.count + s.attempts.count)
+                            }
+                        } else {
+                            guideRow(e, records: 0)
                         }
-                        .padding(.vertical, 4)
                     }
                 }
             }
@@ -64,5 +68,16 @@ struct SkillGuideListView: View {
         .searchable(text: $search, placement: .navigationBarDrawer(displayMode: .always), prompt: "기술 이름으로 찾기")
         .navigationTitle("기술 도감")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func guideRow(_ e: SkillGuide.Entry, records: Int) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(e.name).font(.subheadline.bold()).foregroundStyle(Theme.title)
+                if records > 0 { Text("내 기록 \(records)").font(.caption2.bold()).foregroundStyle(Theme.accentText) }
+            }
+            Text(e.summary).font(.caption).foregroundStyle(Theme.inkSecondary)
+        }
+        .padding(.vertical, 4)
     }
 }

@@ -542,6 +542,11 @@ struct RecordTemplatesView: View {
                 Text("아직 템플릿이 없습니다. 기록을 열고 아래의 '템플릿으로 저장'을 누르면 여기에 생깁니다.")
                     .font(.subheadline).foregroundStyle(Theme.inkSecondary)
             }
+            if !templates.isEmpty {
+                // 줄을 눌러도 아무 일이 없어 헷갈렸다. 어디서 쓰는지 먼저 적는다.
+                Text("기록 화면 위쪽 '템플릿으로 채우기'에서 골라 써요. 왼쪽으로 밀면 지워요.")
+                    .font(.footnote).foregroundStyle(Theme.inkSecondary)
+            }
             ForEach(templates) { t in
                 VStack(alignment: .leading, spacing: 2) {
                     Text(t.name).font(.subheadline.bold()).foregroundStyle(Theme.title)

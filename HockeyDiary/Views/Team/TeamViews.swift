@@ -19,6 +19,7 @@ struct TeamView: View {
     @State private var addedTeamName = ""
     @State private var confirmingDeleteTeam = false
     @State private var logoItem: PhotosPickerItem?
+    @State private var logoFailed = false
     /// 지금 보고 있는 팀. 홈에서 들어온 팀 화면과 팀 탭이 같은 팀을 본다.
     @AppStorage("selectedTeamID") private var selectedTeamID = ""
 
@@ -155,10 +156,13 @@ struct TeamView: View {
                    let small = ImageShrinker.jpeg(from: data, maxSide: 512) {
                     team.logoData = small
                     context.saveOrReport()
+                } else {
+                    logoFailed = true
                 }
                 logoItem = nil
             }
         }
+        .alert("로고를 불러오지 못했어요", isPresented: $logoFailed) { Button("확인", role: .cancel) {} } message: { Text("다른 사진을 골라 주세요.") }
         .alert("새 팀", isPresented: $addingTeam) {
             TextField("팀 이름", text: $addedTeamName)
             Button("만들기") {
@@ -169,6 +173,7 @@ struct TeamView: View {
                 context.saveOrReport()
                 selectedTeamID = t.id.uuidString
             }
+            .disabled(addedTeamName.trimmingCharacters(in: .whitespaces).isEmpty)
             Button("취소", role: .cancel) {}
         }
         .confirmationDialog("\(team.name) 팀을 지울까요?", isPresented: $confirmingDeleteTeam, titleVisibility: .visible) {

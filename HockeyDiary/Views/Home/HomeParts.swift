@@ -36,6 +36,9 @@ enum HomeBlock: String, CaseIterable, Identifiable {
         }
     }
 
+    /// 기록이 있어야 홈에 보이는 칸. 켜도 바로 안 보일 수 있다.
+    var needsData: Bool { [.goal, .feedback, .sharpening, .recent].contains(self) }
+
     var systemImage: String {
         switch self {
         case .quest: return "flag.checkered"
@@ -80,7 +83,12 @@ struct HomeEditView: View {
                             if on { h.remove(b.rawValue) } else { h.insert(b.rawValue) }
                             hiddenRaw = h.sorted().joined(separator: ",")
                         })) {
-                        Label(b.title, icon: b.systemImage)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Label(b.title, icon: b.systemImage)
+                            if b.needsData {
+                                Text("기록이 생기면 홈에 보여요").font(.caption).foregroundStyle(Theme.inkSecondary)
+                            }
+                        }
                     }
                 }
                 .onMove { from, to in

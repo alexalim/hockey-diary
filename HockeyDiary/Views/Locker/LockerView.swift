@@ -715,6 +715,7 @@ struct StickerLibraryView: View {
     @Query private var earned: [EarnedSticker]
     var onPick: (String, Data?) -> Void
     @State private var photoItem: PhotosPickerItem?
+    @State private var photoFailed = false
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 4)
 
@@ -740,9 +741,12 @@ struct StickerLibraryView: View {
                    let small = ImageShrinker.jpeg(from: data, maxSide: 400) {
                     onPick("photo", small)
                     dismiss()
+                } else {
+                    photoFailed = true
                 }
             }
         }
+        .alert("사진을 불러오지 못했어요", isPresented: $photoFailed) { Button("확인", role: .cancel) {} } message: { Text("다른 사진을 골라 주세요.") }
     }
 
     private func group(_ title: String, _ kind: StickerDef.Kind, _ tape: Color) -> some View {

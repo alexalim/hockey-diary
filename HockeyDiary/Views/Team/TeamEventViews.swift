@@ -7,6 +7,7 @@ import UIKit
 struct TeamEventView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
+    @Environment(AppJumper.self) private var jumper: AppJumper?
     @Bindable var event: TeamEvent
     let team: Team
     @Query(sort: \TeamMember.createdAt) private var allMembers: [TeamMember]
@@ -175,6 +176,9 @@ struct TeamEventView: View {
             }
             .buttonStyle(.bordered)
             .disabled(members.filter(\.isActive).isEmpty)
+            if members.filter(\.isActive).isEmpty {
+                Text("팀원을 먼저 추가하면 라인업을 짤 수 있어요.").font(.caption).foregroundStyle(Theme.inkSecondary)
+            }
         }
     }
 
@@ -235,7 +239,12 @@ struct TeamEventView: View {
                 Text("경기가 끝나면 이 일정으로 기록을 만들어 보세요. 상대·링크장·시간이 미리 채워져요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
             }
             Button {
-                openSession = TeamStore.makeSession(for: event, context: context)
+                // 예전엔 누르자마자 빈 기록을 저장하고 읽기 화면을 열어, 그냥 나가도 빈 기록이 주간 횟수에 잡혔다.
+                if event.sessionID != nil {
+                    openSession = TeamStore.makeSession(for: event, context: context)
+                } else {
+                    jumper?.go(.entry(.event(event.id)))
+                }
             } label: {
                 Label(event.sessionID == nil ? "이 일정으로 기록 만들기" : "기록 보기", icon: "square.and.pencil").frame(maxWidth: .infinity, minHeight: Theme.touch)
             }

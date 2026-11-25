@@ -10,6 +10,8 @@ enum NewEntry: Identifiable, Hashable {
     case practice
     /// 건강 앱에 있는데 아직 기록 안 한 운동(알림·홈 카드).
     case workout(UnloggedWorkout)
+    /// 팀 일정으로 기록 쓰기(상대·링크장·시간을 채우고 저장하면 일정과 잇는다).
+    case event(UUID)
 
     var id: String {
         switch self {
@@ -17,6 +19,7 @@ enum NewEntry: Identifiable, Hashable {
         case .journal(let d): return "journal-\(d.timeIntervalSince1970)"
         case .practice: return "practice"
         case .workout(let w): return "workout-\(w.id)"
+        case .event(let id): return "event-\(id)"
         }
     }
 }
@@ -135,6 +138,8 @@ struct RootView: View {
                 NavigationStack { JournalEditorView(newDate: date) }
             case .workout(let w):
                 NavigationStack { SessionEditorView(newType: lastType, startsAt: w.start, workout: w) }
+            case .event(let id):
+                NavigationStack { SessionEditorView(newType: .regularGame, eventID: id) }
             case .practice:
                 NavigationStack {
                     PracticeView().toolbar { ToolbarItem(placement: .cancellationAction) { Button("닫기") { newEntry = nil } } }

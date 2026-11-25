@@ -39,6 +39,8 @@ struct SessionEditorView: View {
     private let fromNow: Bool
     /// 알림·홈 카드에서 고른 건강 앱 운동. 시작 시각·시간을 그 운동으로 채운다.
     private let workout: UnloggedWorkout?
+    /// 팀 일정에서 연 기록. 그 일정 값으로 채우고 저장하면 일정과 잇는다.
+    private let eventID: UUID?
 
     @State private var type: ActivityType
     @State private var startsAt: Date
@@ -96,10 +98,11 @@ struct SessionEditorView: View {
     @State private var saved: Session?
     @State private var bests: [PersonalBest] = []
 
-    init(newType: ActivityType, startsAt: Date = Date(), fromNow: Bool = false, workout: UnloggedWorkout? = nil) {
+    init(newType: ActivityType, startsAt: Date = Date(), fromNow: Bool = false, workout: UnloggedWorkout? = nil, eventID: UUID? = nil) {
         session = nil
-        self.fromNow = fromNow && workout == nil
+        self.fromNow = fromNow && workout == nil && eventID == nil
         self.workout = workout
+        self.eventID = eventID
         let preset = RecordPrefs.preset()
         self.preset = preset
         _expanded = State(initialValue: preset.expandedByDefault)
@@ -137,6 +140,7 @@ struct SessionEditorView: View {
         self.session = session
         self.fromNow = false
         self.workout = nil
+        self.eventID = nil
         self.preset = RecordPrefs.preset()
         _expanded = State(initialValue: true)
         _type = State(initialValue: session.type)
@@ -633,6 +637,16 @@ struct SessionEditorView: View {
                                          events: open.map { .init(start: $0.at, minutes: $0.minutes) }, workouts: [])
             apply(plan, events: open)
             Task { await prefillFromHealth(open) }
+        } else if let eventID, let e = teamEvents.first(where: { $0.id == eventID }) {
+            linkedEventID = e.id
+            if let k = ActivityType(rawValue: e.kindRaw) { type = k }
+            startsAt = e.at
+            minutes = max(e.minutes, 1)
+            if !iceMinutesEdited { iceMinutes = minutes }
+            if !e.rinkName.isEmpty { rinkName = e.rinkName; surface = .indoorRink }
+            opponent = e.opponent
+            userTouchedTime = true
+            prefillNote = "팀 일정 '\(e.title)'으로 채웠어요. 저장하면 일정과 이어져요."
         } else if let workout {
             userTouchedTime = true
             prefillNote = "\(workout.source.isEmpty ? "건강 앱" : workout.source) '\(workout.activityName)' 운동 시간으로 채웠어요. 종류만 골라 주세요."

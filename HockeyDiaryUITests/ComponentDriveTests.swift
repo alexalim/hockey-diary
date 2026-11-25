@@ -177,7 +177,17 @@ final class ComponentDriveTests: XCTestCase {
         // 줄 한가운데(제목 오른쪽 빈 자리)를 누른다. 글자만 눌리던 때는 여기서 화면이 안 열렸다.
         XCTAssertTrue(tapText("정규게임"), "만든 일정이 목록에 없다")
         XCTAssertTrue(app.navigationBars["일정"].waitForExistence(timeout: 5), "일정 화면이 안 열렸다")
+        // 열었다 그냥 닫으면 기록이 생기지 않는다(예전엔 누르자마자 빈 기록이 저장됐다).
         XCTAssertTrue(tapText("이 일정으로 기록 만들기"), "기록 만들기 버튼이 없다")
+        XCTAssertNotNil(find("팀 일정", swipes: 0), "일정 값으로 채운 쓰기 화면이 안 열렸다")
+        XCTAssertTrue(tapButton("닫기")); sleep(1)
+        XCTAssertNotNil(find("이 일정으로 기록 만들기"), "쓰지 않고 닫았는데 기록이 생겼다")
+        // 이번엔 저장한다 → 일정과 이어진다.
+        XCTAssertTrue(tapText("이 일정으로 기록 만들기"))
+        XCTAssertTrue(tapButton("저장"), "저장 버튼이 없다")
+        XCTAssertTrue(app.staticTexts["저장했어요"].waitForExistence(timeout: 5), "저장 완료 화면이 안 나왔다")
+        tapButton("닫기"); sleep(1)
+        XCTAssertTrue(tapText("기록 보기"), "저장 뒤 일정에 기록 보기가 없다")
         snap("link-1-team-record-open")
         XCTAssertNotNil(find("이 기록 지우기"), "팀 탭에 기록 상세가 안 열렸다")
 
