@@ -438,9 +438,20 @@ final class ComponentDriveTests: XCTestCase {
         XCTAssertNil(find("하키 운동, 기록할까요?", swipes: 0), "넘겼는데 카드가 남아 있다")
     }
 
-    private func relaunch(with arg: String) {
+    // MARK: 기록 화면 안내의 '설정 열기'를 누르면 설정이 열린다(버그: 눌러도 반응 없음)
+    // 안내는 입력 방식이 '보통'이 아닐 때만 나와서 '간단'으로 띄운다.
+
+    func test_editor_open_settings_link() {
+        relaunch(with: "-record.mode", "simple")
+        XCTAssertTrue(newRecord("수업 기록"))
+        XCTAssertTrue(tapButton("설정 열기"), "기록 화면에 설정 열기가 없다")
+        XCTAssertTrue(app.navigationBars["설정"].waitForExistence(timeout: 5), "설정 열기를 눌러도 설정이 안 열린다")
+        snap("editor-open-settings")
+    }
+
+    private func relaunch(with args: String...) {
         app.terminate()
-        app.launchArguments.append(arg)
+        app.launchArguments += args
         app.launch()
         XCTAssertTrue(app.buttons["tab-홈"].waitForExistence(timeout: 15), "홈 탭이 보여야 한다")
     }
