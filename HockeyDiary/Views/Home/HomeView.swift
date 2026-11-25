@@ -395,7 +395,8 @@ struct HomeView: View {
 
     private var quickButtons: some View {
         HStack(spacing: 8) {
-            QuickAction(title: "연습 기록", systemImage: "graduationcap.fill", bubble: Theme.stickers[3]) { newEntry = .session(.lesson) }
+            // 수업·자유 연습·게임 모두 여기서 적는다(기록 화면에서 종류를 고른다). 처음 종류는 가장 최근에 적은 것.
+            QuickAction(title: "기록", systemImage: "square.and.pencil", bubble: Theme.stickers[3]) { newEntry = .session(sessions.first?.type ?? .lesson) }
             QuickAction(title: "경기 리뷰", systemImage: "trophy.fill", bubble: Theme.stickers[1]) { newEntry = .session(.regularGame) }
             QuickAction(title: "하루 일기", systemImage: "book.fill", bubble: Theme.stickers[0]) {
                 if let todayJournal {
