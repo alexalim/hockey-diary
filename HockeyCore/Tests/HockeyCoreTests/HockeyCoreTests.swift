@@ -1248,3 +1248,31 @@ final class WorkoutNudgeTests: XCTestCase {
         XCTAssertEqual(r.map(\.id), ["b", "a"])
     }
 }
+
+// 테스트 계층: Unit — 기술 고르기 검색(초성·띄어쓰기·분류).
+final class SkillSearchTests: XCTestCase {
+    func testPlainAndSpacing() {
+        XCTAssertTrue(SkillSearch.matches("크로스", name: "크로스오버"))
+        XCTAssertTrue(SkillSearch.matches("백 크로스", name: "백크로스오버"))
+        XCTAssertTrue(SkillSearch.matches("", name: "아무거나"))
+        XCTAssertFalse(SkillSearch.matches("슈팅", name: "크로스오버"))
+    }
+
+    func testInitials() {
+        XCTAssertTrue(SkillSearch.matches("ㅋㄹㅅ", name: "크로스오버"))
+        XCTAssertTrue(SkillSearch.matches("ㅅㄴㅅ", name: "스냅샷"))
+        XCTAssertFalse(SkillSearch.matches("ㅅㅅ", name: "스냅샷"), "초성은 이어진 것만 맞춘다")
+        XCTAssertFalse(SkillSearch.matches("ㅋㄹㅅ", name: "백핸드"))
+        XCTAssertFalse(SkillSearch.matches("ㅋ로", name: "크로스오버"), "초성과 글자가 섞이면 초성 비교를 하지 않는다")
+    }
+
+    func testCategoryAndCase() {
+        XCTAssertTrue(SkillSearch.matches("스케이팅", name: "크로스오버", category: "스케이팅"))
+        XCTAssertTrue(SkillSearch.matches("tight", name: "Tight Turn"))
+    }
+
+    func testSame() {
+        XCTAssertTrue(SkillSearch.isSame(" 크로스 오버", "크로스오버"))
+        XCTAssertFalse(SkillSearch.isSame("크로스", "크로스오버"))
+    }
+}

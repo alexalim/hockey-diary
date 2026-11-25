@@ -828,13 +828,36 @@ struct SkillPickerView: View {
     @State private var newName = ""
 
     private var grouped: [(String, [Skill])] {
-        let filtered = search.isEmpty ? skills : skills.filter { $0.name.localizedCaseInsensitiveContains(search) }
+        // 이름·분류, 띄어쓰기 무시, 초성("ㅋㄹㅅ")까지 찾는다.
+        let filtered = skills.filter { SkillSearch.matches(search, name: $0.name, category: $0.category) }
         let dict = Dictionary(grouping: filtered, by: \.category)
         return dict.keys.sorted().map { ($0, dict[$0] ?? []) }
     }
 
+    /// 검색어 그대로의 기술이 없으면 바로 새 기술로 추가하게 한다.
+    private var canAddSearch: Bool {
+        let q = search.trimmingCharacters(in: .whitespaces)
+        return !q.isEmpty && !skills.contains { SkillSearch.isSame(q, $0.name) }
+    }
+
     var body: some View {
         List {
+            if canAddSearch {
+                Section {
+                    Button {
+                        if let s = DiaryStore.skill(named: search.trimmingCharacters(in: .whitespaces), context: context) {
+                            context.saveOrReport()
+                            selected.insert(s.id)
+                            search = ""
+                        }
+                    } label: {
+                        Label("'\(search.trimmingCharacters(in: .whitespaces))' 새 기술로 추가", icon: "plus.circle.fill")
+                            .frame(minHeight: Theme.touch)
+                    }
+                } footer: {
+                    if grouped.isEmpty { Text("찾는 기술이 없어요. 초성(ㅋㄹㅅ)으로도 찾을 수 있어요.") }
+                }
+            }
             Section {
                 HStack {
                     TextField("새 기술 이름", text: $newName)
@@ -874,7 +897,8 @@ struct SkillPickerView: View {
                 }
             }
         }
-        .searchable(text: $search, prompt: "기술 찾기")
+        // 기본은 목록을 당겨야 검색 창이 나와서 없는 기능처럼 보였다. 항상 보이게 고정한다.
+        .searchable(text: $search, placement: .navigationBarDrawer(displayMode: .always), prompt: "기술 찾기 (초성도 돼요)")
         .navigationTitle("기술 고르기")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

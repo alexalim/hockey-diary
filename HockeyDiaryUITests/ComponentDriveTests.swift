@@ -449,6 +449,26 @@ final class ComponentDriveTests: XCTestCase {
         snap("editor-open-settings")
     }
 
+    // MARK: 기술 고르기: 검색 창이 처음부터 보이고, 초성으로 찾고, 없는 기술은 검색어로 바로 추가
+
+    func test_skill_picker_search() {
+        XCTAssertTrue(newRecord("수업 기록"))
+        if app.buttons["상세 기록"].exists { app.buttons["상세 기록"].tap() }
+        guard let open = find("오늘 배운 기술 고르기") else { XCTFail("기술 고르기 버튼이 없다"); return }
+        open.tap()
+        let field = app.searchFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 5) && field.isHittable, "검색 창이 당기지 않아도 보여야 한다")
+        field.tap(); field.typeText("ㅋㄹㅅ")
+        XCTAssertNotNil(find("크로스오버", swipes: 0), "초성 ㅋㄹㅅ로 크로스오버가 안 찾아진다")
+        snap("skill-search-1-initials")
+        field.buttons.firstMatch.tap() // 지우기(x)
+        field.typeText("토드래그연습")
+        XCTAssertTrue(tapButton("'토드래그연습' 새 기술로 추가"), "없는 기술을 검색어로 추가하는 버튼이 없다")
+        XCTAssertNotNil(app.buttons.matching(NSPredicate(format: "label BEGINSWITH '완료 1'")).firstMatch.waitForExistence(timeout: 3) ? true : nil,
+                        "추가한 기술이 선택되지 않았다")
+        snap("skill-search-2-added")
+    }
+
     private func relaunch(with args: String...) {
         app.terminate()
         app.launchArguments += args
