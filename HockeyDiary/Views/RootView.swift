@@ -122,6 +122,9 @@ struct RootView: View {
             Button("하루 일기") { newEntry = .journal(Date()) }
         }
         .sheet(item: $newEntry) { entry in
+            // 시트는 위에 건 .environment(jumper)를 못 받는다(시트가 그보다 바깥 수식어라서).
+            // 없으면 기록 화면의 '설정 열기' 같은 바로 가기가 jumper == nil로 아무 일도 안 했다. 시트 안에도 다시 건다.
+            Group {
             switch entry {
             case .session(let type, let date):
                 NavigationStack { SessionEditorView(newType: type, startsAt: date ?? Date(), fromNow: date == nil) }
@@ -134,6 +137,8 @@ struct RootView: View {
                     PracticeView().toolbar { ToolbarItem(placement: .cancellationAction) { Button("닫기") { newEntry = nil } } }
                 }
             }
+            }
+            .environment(jumper)
         }
     }
 
