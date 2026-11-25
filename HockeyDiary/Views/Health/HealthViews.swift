@@ -5,6 +5,7 @@ import HockeyCore
 struct HealthConnectView: View {
     @AppStorage(HealthPrefs.enabledKey) private var enabled = false
     @AppStorage(HealthPrefs.maxHRKey) private var maxHRForSettings = HealthPrefs.defaultMaxHR
+    @AppStorage(WorkoutNudgeService.notifyKey) private var nudgeNotify = false
     @State private var requesting = false
     @State private var errorText: String?
 
@@ -56,6 +57,13 @@ struct HealthConnectView: View {
             }
 
             if enabled {
+                Section {
+                    Toggle("하키 운동이 들어오면 알려 주기", isOn: Binding(get: { nudgeNotify }, set: { on in
+                        if on { Task { nudgeNotify = await WorkoutNudgeService.requestPermission() } } else { nudgeNotify = false }
+                    }))
+                } footer: {
+                    Text("워치나 가민이 잰 하키·스케이팅이 건강 앱에 들어왔는데 기록이 없으면 알림을 보내요. 꺼도 홈에는 보여요.")
+                }
                 CycleConsentSection()
             }
 
@@ -94,6 +102,10 @@ struct HealthConnectView: View {
             do {
                 try await HealthService.shared.requestAccess()
                 enabled = true
+                // 연결하면 '기록할까요?' 알림도 같이 켠다(이 앱이 가장 많이 도와줄 수 있는 순간이라).
+                nudgeNotify = await WorkoutNudgeService.requestPermission()
+                WorkoutNudgeService.shared.observe()
+                await WorkoutNudgeService.shared.refresh()
             } catch {
                 errorText = "권한 화면을 열지 못했어요. 잠시 뒤 다시 해 주세요."
             }

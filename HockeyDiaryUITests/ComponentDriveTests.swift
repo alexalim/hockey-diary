@@ -410,6 +410,41 @@ final class ComponentDriveTests: XCTestCase {
         XCTAssertTrue(app.staticTexts["우리 팀 만들기"].waitForExistence(timeout: 5), "홈에서 팀 화면이 안 열린다")
     }
 
+    // MARK: 기록 안 된 가민 운동: 홈 카드 → 기록하기 → 시간이 채워짐 → 저장하면 카드가 사라짐
+    // 건강 앱은 시뮬레이터 밖이라 -demoUnloggedWorkout(어제 20:10 가민 하키 80분)으로 대신한다.
+    // 판정 규칙 자체는 HockeyCore WorkoutNudgeTests(Unit)가, 여기서는 화면 흐름만 본다.
+
+    func test_unlogged_garmin_workout_card_records_it() {
+        relaunch(with: "-demoUnloggedWorkout")
+        XCTAssertNotNil(find("하키 운동, 기록할까요?", swipes: 0), "홈 맨 위에 기록 안 된 운동 카드가 없다")
+        XCTAssertNotNil(find("어제", swipes: 0), "카드에 언제 한 운동인지가 없다")
+        snap("nudge-1-home-card")
+        XCTAssertTrue(tapButton("기록하기"), "기록하기 버튼이 없다")
+        XCTAssertNotNil(find("운동 시간으로 채웠어요", swipes: 0), "가민 운동으로 채웠다는 안내가 없다")
+        XCTAssertNotNil(find("1시간 20분", swipes: 2), "활동 시간이 운동 시간(80분)으로 안 채워졌다")
+        snap("nudge-2-editor")
+        XCTAssertTrue(tapButton("저장"), "저장 버튼이 없다")
+        XCTAssertTrue(app.staticTexts["저장했어요"].waitForExistence(timeout: 5), "저장 완료 화면이 안 나왔다")
+        tapButton("닫기")
+        sleep(1)
+        XCTAssertNil(find("하키 운동, 기록할까요?", swipes: 0), "기록했는데도 카드가 남아 있다")
+    }
+
+    func test_unlogged_workout_skip_hides_card() {
+        relaunch(with: "-demoUnloggedWorkout")
+        XCTAssertNotNil(find("하키 운동, 기록할까요?", swipes: 0), "카드가 없다")
+        XCTAssertTrue(tapButton("아니에요"), "아니에요 버튼이 없다")
+        sleep(1)
+        XCTAssertNil(find("하키 운동, 기록할까요?", swipes: 0), "넘겼는데 카드가 남아 있다")
+    }
+
+    private func relaunch(with arg: String) {
+        app.terminate()
+        app.launchArguments.append(arg)
+        app.launch()
+        XCTAssertTrue(app.buttons["tab-홈"].waitForExistence(timeout: 15), "홈 탭이 보여야 한다")
+    }
+
     // MARK: - 도우미 (ScreenTourTests와 같은 규칙)
 
     private func snap(_ name: String) {

@@ -37,6 +37,8 @@ struct SessionEditorView: View {
     private let session: Session?
     /// 방금 끝난 운동을 적는 경우(+ 버튼·홈 바로가기). 달력에서 고른 날이면 false.
     private let fromNow: Bool
+    /// 알림·홈 카드에서 고른 건강 앱 운동. 시작 시각·시간을 그 운동으로 채운다.
+    private let workout: UnloggedWorkout?
 
     @State private var type: ActivityType
     @State private var startsAt: Date
@@ -92,16 +94,17 @@ struct SessionEditorView: View {
     @State private var saved: Session?
     @State private var bests: [PersonalBest] = []
 
-    init(newType: ActivityType, startsAt: Date = Date(), fromNow: Bool = false) {
+    init(newType: ActivityType, startsAt: Date = Date(), fromNow: Bool = false, workout: UnloggedWorkout? = nil) {
         session = nil
-        self.fromNow = fromNow
+        self.fromNow = fromNow && workout == nil
+        self.workout = workout
         let preset = RecordPrefs.preset()
         self.preset = preset
         _expanded = State(initialValue: preset.expandedByDefault)
         _showingMore = State(initialValue: preset.gameDetailsOpen)
         _type = State(initialValue: newType)
-        _startsAt = State(initialValue: startsAt)
-        _minutes = State(initialValue: preset.defaultMinutes(for: newType))
+        _startsAt = State(initialValue: workout?.start ?? startsAt)
+        _minutes = State(initialValue: workout?.minutes ?? preset.defaultMinutes(for: newType))
         _surface = State(initialValue: .unknown)
         _rinkName = State(initialValue: "")
         _iceFeel = State(initialValue: nil)
@@ -124,13 +127,14 @@ struct SessionEditorView: View {
         _attempts = State(initialValue: [])
         _skateID = State(initialValue: nil)
         _runnerID = State(initialValue: nil)
-        _iceMinutes = State(initialValue: preset.defaultMinutes(for: newType))
+        _iceMinutes = State(initialValue: workout?.minutes ?? preset.defaultMinutes(for: newType))
         _iceMinutesEdited = State(initialValue: false)
     }
 
     init(session: Session) {
         self.session = session
         self.fromNow = false
+        self.workout = nil
         self.preset = RecordPrefs.preset()
         _expanded = State(initialValue: true)
         _type = State(initialValue: session.type)
@@ -622,6 +626,9 @@ struct SessionEditorView: View {
                                          events: open.map { .init(start: $0.at, minutes: $0.minutes) }, workouts: [])
             apply(plan, events: open)
             Task { await prefillFromHealth(open) }
+        } else if let workout {
+            userTouchedTime = true
+            prefillNote = "\(workout.source.isEmpty ? "건강 앱" : workout.source) '\(workout.activityName)' 운동 시간으로 채웠어요. 종류만 골라 주세요."
         } else if let lastSame {
             minutes = max(lastSame.minutes, 1)
         }

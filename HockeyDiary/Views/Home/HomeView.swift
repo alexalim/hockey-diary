@@ -31,6 +31,8 @@ struct HomeView: View {
         return HomeBlock.order(orderRaw).filter { !hidden.contains($0.rawValue) }
     }
     private var health = StoreHealth.shared
+    private var nudge = WorkoutNudgeService.shared
+    @AppStorage(WorkoutNudgeService.notifyKey) private var nudgeNotify = false
 
     init(newEntry: Binding<NewEntry?>) {
         _newEntry = newEntry
@@ -49,6 +51,8 @@ struct HomeView: View {
                     .toolbar { BarAction(icon: "gearshape.fill", label: "설정") { showingSettings = true } }
                 if health.openFailed || health.lastSaveFailed { storeWarning }
                 // 매일 여는 화면이라 '다음 경기 → 오늘 할 일 → 바로 기록'을 먼저 둔다. 한 번만 묻는 실력 질문은 아래로.
+                // 워치·가민이 잰 하키가 아직 기록에 없으면 가장 먼저 묻는다(알림을 놓친 경우에도 보이게).
+                unloggedWorkoutCard
                 nextGameHero
                 promptCard
                 shortcutRow
@@ -156,6 +160,38 @@ struct HomeView: View {
                         events: teamEvents.map { .init(title: $0.title, start: $0.at, minutes: $0.minutes, logged: $0.sessionID != nil) },
                         loggedToday: !todaySessions.isEmpty, journaledToday: todayJournal != nil,
                         goal: lastWithGoal?.nextGoal)
+    }
+
+    @ViewBuilder
+    private var unloggedWorkoutCard: some View {
+        if let w = nudge.pending.first {
+            Card(tint: Theme.neonPink.opacity(0.12)) {
+                Label("\(w.activityName) 운동, 기록할까요?", icon: "applewatch.radiowaves.left.and.right")
+                    .font(.headline).foregroundStyle(Theme.title)
+                Text("\(w.summary)\(w.source.isEmpty ? "" : " · \(w.source)")")
+                    .font(.subheadline).foregroundStyle(Theme.inkSecondary)
+                if nudge.pending.count > 1 {
+                    Text("기록 안 한 운동이 \(nudge.pending.count - 1)개 더 있어요.").font(.caption).foregroundStyle(Theme.inkSecondary)
+                }
+                HStack(spacing: 8) {
+                    Button { newEntry = .workout(w) } label: {
+                        Text("기록하기").frame(maxWidth: .infinity, minHeight: Theme.touch)
+                    }
+                    .buttonStyle(PinkButtonStyle())
+                    Button("아니에요") { withAnimation { nudge.skip(w) } }
+                        .buttonStyle(.bordered)
+                        .frame(minHeight: Theme.touch)
+                }
+                if !nudgeNotify {
+                    Button("다음부터 알림으로 받기") {
+                        Task { if await WorkoutNudgeService.requestPermission() { nudgeNotify = true } }
+                    }
+                    .font(.footnote.weight(.semibold))
+                }
+            }
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("기록 안 된 운동")
+        }
     }
 
     @ViewBuilder

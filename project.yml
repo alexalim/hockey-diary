@@ -35,6 +35,8 @@ targets:
       path: HockeyDiary/HockeyDiary.entitlements
       properties:
         com.apple.developer.healthkit: true
+        # 워치·가민 운동이 건강 앱에 들어오면 앱이 꺼져 있어도 깨워 '기록할까요?' 알림을 띄운다.
+        com.apple.developer.healthkit.background-delivery: true
         com.apple.developer.healthkit.access: []
         # 위젯과 숫자를 나누는 키체인 그룹(앱 그룹 대신, 포털 설정 없이 됨).
         keychain-access-groups: ["$(AppIdentifierPrefix)com.aspynlim.hockeydiary.shared"]

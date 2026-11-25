@@ -1198,3 +1198,53 @@ final class CountdownTests: XCTestCase {
         XCTAssertNil(Countdown.cue(from: 0, to: 0), "이미 끝난 타이머는 다시 알리지 않음")
     }
 }
+
+// 테스트 계층: Unit — 기록 안 된 건강 앱 하키 운동 찾기(알림·홈 카드가 같은 판정을 쓴다).
+final class WorkoutNudgeTests: XCTestCase {
+    let now = Date(timeIntervalSince1970: 1_800_000_000)
+    func w(_ id: String, hoursAgo: Double, minutes: Double, hockey: Bool = true) -> WorkoutNudge.Workout {
+        let start = now.addingTimeInterval(-hoursAgo * 3600)
+        return .init(id: id, span: TimeSpan(start: start, end: start.addingTimeInterval(minutes * 60)), isHockey: hockey)
+    }
+
+    // 어제 가민으로 잰 하키가 기록에 없으면 묻는다.
+    func testYesterdayGarminHockeyIsAsked() {
+        let r = WorkoutNudge.unlogged([w("g", hoursAgo: 20, minutes: 80)], sessions: [], skipped: [], now: now)
+        XCTAssertEqual(r.map(\.id), ["g"])
+    }
+
+    // 이미 같은 시간대 기록이 있으면(30% 이상 겹침) 묻지 않는다.
+    func testLoggedSessionSilences() {
+        let g = w("g", hoursAgo: 20, minutes: 80)
+        let s = TimeSpan(start: g.span.start.addingTimeInterval(600), end: g.span.end)
+        XCTAssertTrue(WorkoutNudge.unlogged([g], sessions: [s], skipped: [], now: now).isEmpty)
+    }
+
+    // 하키가 아닌 운동, 15분 미만, 3일 넘은 것, 아직 안 끝난 것, 넘긴 것은 묻지 않는다.
+    func testFiltersNoise() {
+        let r = WorkoutNudge.unlogged([
+            w("run", hoursAgo: 5, minutes: 40, hockey: false),
+            w("short", hoursAgo: 5, minutes: 10),
+            w("old", hoursAgo: 80, minutes: 60),
+            w("live", hoursAgo: 0.5, minutes: 60),
+            w("skip", hoursAgo: 30, minutes: 60),
+        ], sessions: [], skipped: ["skip"], now: now)
+        XCTAssertTrue(r.isEmpty, "\(r.map(\.id))")
+    }
+
+    // 워치와 가민이 같은 경기를 함께 쟀으면 한 번만 묻고, 긴 쪽 시간을 쓴다. 하나를 넘기면 둘 다 넘긴다.
+    func testTwoDevicesOneGame() {
+        let watch = w("watch", hoursAgo: 20, minutes: 70)
+        let garmin = w("garmin", hoursAgo: 20.1, minutes: 85)
+        let r = WorkoutNudge.unlogged([watch, garmin], sessions: [], skipped: [], now: now)
+        XCTAssertEqual(r.map(\.id), ["garmin"])
+        XCTAssertTrue(WorkoutNudge.unlogged([watch, garmin], sessions: [], skipped: ["watch"], now: now).isEmpty)
+    }
+
+    // 여러 날이면 최근 것부터.
+    func testNewestFirst() {
+        let r = WorkoutNudge.unlogged([w("a", hoursAgo: 50, minutes: 60), w("b", hoursAgo: 20, minutes: 60)],
+                                      sessions: [], skipped: [], now: now)
+        XCTAssertEqual(r.map(\.id), ["b", "a"])
+    }
+}

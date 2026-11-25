@@ -23,6 +23,7 @@ struct HockeyDiaryApp: App {
         DiaryStore.seedIfNeeded(container.mainContext)
         if DemoData.isEnabled { DemoData.seed(container.mainContext) }
         WatchBridge.shared.activate(container: container)
+        WorkoutNudgeService.shared.start(container: container)
     }
 
     var body: some Scene {

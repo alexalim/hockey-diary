@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 import HockeyCore
 
 /// 무엇을 새로 기록할지.
@@ -7,12 +8,15 @@ enum NewEntry: Identifiable, Hashable {
     case session(ActivityType, Date? = nil)
     case journal(Date)
     case practice
+    /// 건강 앱에 있는데 아직 기록 안 한 운동(알림·홈 카드).
+    case workout(UnloggedWorkout)
 
     var id: String {
         switch self {
         case .session(let t, let d): return "session-\(t.rawValue)-\(d?.timeIntervalSince1970 ?? 0)"
         case .journal(let d): return "journal-\(d.timeIntervalSince1970)"
         case .practice: return "practice"
+        case .workout(let w): return "workout-\(w.id)"
         }
     }
 }
@@ -73,6 +77,10 @@ struct RootView: View {
     @State private var newEntry: NewEntry?
     @State private var showingQuickMenu = false
     @State private var jumper = AppJumper()
+    @State private var nudge = WorkoutNudgeService.shared
+    @Query(sort: \Session.startsAt, order: .reverse) private var sessions: [Session]
+    /// 운동만으로는 수업인지 경기인지 모른다. 가장 최근에 적은 종류로 시작하고 사용자가 바꾼다.
+    private var lastType: ActivityType { sessions.first?.type ?? .freePractice }
     @Environment(\.modelContext) private var context
     @Environment(\.scenePhase) private var scenePhase
 
@@ -95,9 +103,16 @@ struct RootView: View {
         .environment(jumper)
         .onChange(of: jumper.request) { _, r in if let r { handle(r); jumper.request = nil } }
         .task { await TeamReminder.reschedule(context); WidgetBridge.refresh(context) }
-        .onChange(of: scenePhase) { _, p in if p == .active { Task { await TeamReminder.reschedule(context) }; WidgetBridge.refresh(context) } }
+        .onChange(of: scenePhase) { _, p in if p == .active { Task { await TeamReminder.reschedule(context); await nudge.refresh() }; WidgetBridge.refresh(context) } }
         // 기록 시트를 닫으면 위젯 숫자를 바로 맞춘다.
-        .onChange(of: newEntry == nil) { _, closed in if closed { WidgetBridge.refresh(context) } }
+        .onChange(of: newEntry == nil) { _, closed in if closed { WidgetBridge.refresh(context); nudge.recheck() } }
+        // 기록 안 된 운동 알림을 누르면 그 운동으로 기록 화면을 연다.
+        .onChange(of: nudge.opened) { _, w in
+            guard let w else { return }
+            nudge.opened = nil
+            jumper.request = .entry(.workout(w))
+        }
+        .task { await nudge.refresh() }
         .confirmationDialog("무엇을 기록할까요?", isPresented: $showingQuickMenu, titleVisibility: .visible) {
             Button("수업 기록") { newEntry = .session(.lesson) }
             Button("자유 연습") { newEntry = .session(.freePractice) }
@@ -112,6 +127,8 @@ struct RootView: View {
                 NavigationStack { SessionEditorView(newType: type, startsAt: date ?? Date(), fromNow: date == nil) }
             case .journal(let date):
                 NavigationStack { JournalEditorView(newDate: date) }
+            case .workout(let w):
+                NavigationStack { SessionEditorView(newType: lastType, startsAt: w.start, workout: w) }
             case .practice:
                 NavigationStack {
                     PracticeView().toolbar { ToolbarItem(placement: .cancellationAction) { Button("닫기") { newEntry = nil } } }
