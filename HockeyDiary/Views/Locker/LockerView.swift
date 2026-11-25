@@ -407,6 +407,7 @@ struct LockerInside: View {
             .overlay(alignment: .topTrailing) {
                 if let badge {
                     Text(badge).font(.system(.caption2, design: .rounded).bold())
+                        .lineLimit(1).fixedSize()   // 좁은 스틱 칸에서 글자가 세로로 꺾이지 않게
                         .foregroundStyle(.white)
                         .padding(.horizontal, 7).padding(.vertical, 3)
                         .background(Theme.neonPink, in: Capsule())
