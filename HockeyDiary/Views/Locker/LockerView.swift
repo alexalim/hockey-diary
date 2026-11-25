@@ -234,15 +234,58 @@ struct LockerDoorBase: View {
     /// 문·안쪽·스윙 그림자가 같이 쓰는 모서리. 하나만 바꾸면 문이 돌 때 귀퉁이가 어긋난다.
     static let corner: CGFloat = 22
 
+    /// 테마별 문 그림 이름. 그림이 들어오면 자동으로 그림을 쓰고, 없으면 코드로 그린 문을 쓴다.
+    static func artName(_ theme: LockerTheme) -> String { "locker-door-\(theme.rawValue)" }
+
     var body: some View {
         let theme = profile?.theme ?? .cobalt
+        if UIImage(named: Self.artName(theme)) != nil {
+            artDoor(theme)
+        } else {
+            drawnDoor(theme)
+        }
+    }
+
+    /// 그림 문: 문·손잡이·통풍구·질감은 그림에, 이름표와 번호만 코드로 얹는다.
+    /// 스티커 좌표는 문 크기 대비 비율이라 그림이 틀을 꽉 채워야 한다(늘려서 채운다).
+    private func artDoor(_ theme: LockerTheme) -> some View {
+        Image(Self.artName(theme))
+            .resizable()
+            .clipShape(RoundedRectangle(cornerRadius: Self.corner, style: .continuous))
+            .overlay(alignment: .top) { plates.padding(.top, 34) }
+    }
+
+    private func drawnDoor(_ theme: LockerTheme) -> some View {
         let shape = RoundedRectangle(cornerRadius: Self.corner, style: .continuous)
         let line: Color = theme.isPastel ? Theme.doorInk : .white
-        shape
+        return shape
             .fill(LinearGradient(colors: theme.colors, startPoint: .top, endPoint: .bottom))
             // 가장자리 바느질 선
             .overlay(shape.inset(by: 7).stroke(line.opacity(theme.isPastel ? 0.22 : 0.35), style: StrokeStyle(lineWidth: 2, lineCap: .round, dash: [6, 6])))
             .overlay(alignment: .top) {
+                VStack(spacing: 18) {
+                    plates
+                    // 통풍구: 말랑한 캡슐
+                    VStack(spacing: 8) {
+                        ForEach(0..<5, id: \.self) { _ in
+                            Capsule().fill(line.opacity(theme.isPastel ? 0.12 : 0.22)).frame(width: 128, height: 8)
+                        }
+                    }
+                }
+                .padding(.top, 34)
+            }
+            .overlay(alignment: .trailing) {
+                // 손잡이: 파스텔 사탕
+                Capsule().fill(theme.isPastel ? Color.white : Theme.stickers[0])
+                    .frame(width: 16, height: 72)
+                    .overlay(Capsule().stroke(.white, lineWidth: 3))
+                    .shadow(color: .black.opacity(0.2), radius: 2, y: 1)
+                    .padding(.trailing, 22)
+            }
+    }
+
+    /// 이름표와 번호. 그림 문과 코드 문이 같이 쓴다.
+    private var plates: some View {
                 VStack(spacing: 18) {
                     // 이름표: 테이프로 붙인 종이 쪽지
                     Text((profile?.nameplate.isEmpty == false ? profile!.nameplate : "MY LOCKER"))
@@ -267,23 +310,7 @@ struct LockerDoorBase: View {
                             .rotationEffect(.degrees(6))
                             .shadow(color: .black.opacity(0.18), radius: 3, y: 2)
                     }
-                    // 통풍구: 말랑한 캡슐
-                    VStack(spacing: 8) {
-                        ForEach(0..<5, id: \.self) { _ in
-                            Capsule().fill(line.opacity(theme.isPastel ? 0.12 : 0.22)).frame(width: 128, height: 8)
-                        }
-                    }
                 }
-                .padding(.top, 34)
-            }
-            .overlay(alignment: .trailing) {
-                // 손잡이: 파스텔 사탕
-                Capsule().fill(theme.isPastel ? Color.white : Theme.stickers[0])
-                    .frame(width: 16, height: 72)
-                    .overlay(Capsule().stroke(.white, lineWidth: 3))
-                    .shadow(color: .black.opacity(0.2), radius: 2, y: 1)
-                    .padding(.trailing, 22)
-            }
     }
 }
 
