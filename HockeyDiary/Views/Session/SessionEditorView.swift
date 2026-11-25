@@ -825,6 +825,8 @@ struct SkillPickerView: View {
     var onDone: ([Skill]) -> Void
 
     @State private var search = ""
+    /// 검색 중에는 위 막대가 검색 창으로 바뀌어 '완료'가 가려진다(iOS 26). 고르면 검색을 닫아 '완료'가 보이게 한다.
+    @State private var searching = false
     @State private var newName = ""
 
     private var grouped: [(String, [Skill])] {
@@ -849,6 +851,7 @@ struct SkillPickerView: View {
                             context.saveOrReport()
                             selected.insert(s.id)
                             search = ""
+                            searching = false
                         }
                     } label: {
                         Label("'\(search.trimmingCharacters(in: .whitespaces))' 새 기술로 추가", icon: "plus.circle.fill")
@@ -898,7 +901,7 @@ struct SkillPickerView: View {
             }
         }
         // 기본은 목록을 당겨야 검색 창이 나와서 없는 기능처럼 보였다. 항상 보이게 고정한다.
-        .searchable(text: $search, placement: .navigationBarDrawer(displayMode: .always), prompt: "기술 찾기 (초성도 돼요)")
+        .searchable(text: $search, isPresented: $searching, placement: .navigationBarDrawer(displayMode: .always), prompt: "기술 찾기 (초성도 돼요)")
         .navigationTitle("기술 고르기")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
