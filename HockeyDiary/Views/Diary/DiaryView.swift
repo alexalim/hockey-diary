@@ -229,7 +229,6 @@ struct DiaryView: View {
 
 /// 선택한 날짜의 일기·하키 활동·사진 타임라인 (3.3).
 struct DayTimeline: View {
-    @Environment(AppJumper.self) private var jumper: AppJumper?
     let day: Date
     let sessions: [Session]
     let journals: [DailyJournal]
@@ -248,8 +247,9 @@ struct DayTimeline: View {
                 case "일기":
                     EmptyHint(text: "이날은 일기가 없어요.")
                 default:
-                    EmptyHint(text: "이날은 비어 있어요. 하키는 훈련 탭에서, 한 줄 일기는 여기서 남겨요.",
-                              action: EmptyAction(title: "훈련 탭으로") { jumper?.go(.tab(.practice)) })
+                    // 훈련 탭으로 보내면 고른 날짜를 잃어 오늘로 기록됐다. 이날 날짜로 바로 기록을 연다.
+                    EmptyHint(text: "이날은 비어 있어요. 하키 기록이나 한 줄 일기를 남겨 보세요.",
+                              action: EmptyAction(title: "하키 기록하기") { newEntry = .session(.lesson, DayTimeline.sameTime(on: day)) })
                 }
             }
             ForEach(journals) { j in JournalRow(journal: j) }

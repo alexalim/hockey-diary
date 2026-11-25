@@ -6,6 +6,7 @@ struct HealthConnectView: View {
     @AppStorage(HealthPrefs.enabledKey) private var enabled = false
     @AppStorage(HealthPrefs.maxHRKey) private var maxHRForSettings = HealthPrefs.defaultMaxHR
     @AppStorage(WorkoutNudgeService.notifyKey) private var nudgeNotify = false
+    @State private var notifyDenied = false
     @State private var requesting = false
     @State private var errorText: String?
 
@@ -59,8 +60,9 @@ struct HealthConnectView: View {
             if enabled {
                 Section {
                     Toggle("하키 운동이 들어오면 알려 주기", isOn: Binding(get: { nudgeNotify }, set: { on in
-                        if on { Task { nudgeNotify = await WorkoutNudgeService.requestPermission() } } else { nudgeNotify = false }
+                        if on { Task { nudgeNotify = await WorkoutNudgeService.requestPermission(); notifyDenied = !nudgeNotify } } else { nudgeNotify = false }
                     }))
+                    if notifyDenied { NotificationDeniedNote() }
                 } footer: {
                     Text("워치나 가민이 잰 하키·스케이팅이 건강 앱에 들어왔는데 기록이 없으면 알림을 보내요. 꺼도 홈에는 보여요.")
                 }

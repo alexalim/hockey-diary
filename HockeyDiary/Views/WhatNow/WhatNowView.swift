@@ -8,6 +8,7 @@ struct WhatNowView: View {
     @Binding var newEntry: NewEntry?
     @Environment(\.modelContext) private var context
     @Environment(AppJumper.self) private var jumper: AppJumper?
+    @Environment(\.dismiss) private var dismiss
     @Query(sort: \Session.startsAt, order: .reverse) private var sessions: [Session]
     @Query(sort: \DailyJournal.entryDate, order: .reverse) private var journals: [DailyJournal]
     @Query(sort: \DrillLog.at, order: .reverse) private var drills: [DrillLog]
@@ -142,6 +143,9 @@ struct WhatNowView: View {
             switch QuestKind(rawValue: s.key) {
             case .journals?: newEntry = .journal(Date())
             case .drills?: newEntry = .practice
+            // '기록하기'는 기록 화면을, '몸 상태 남기기'는 몸 상태 카드가 있는 홈을 연다(예전엔 둘 다 훈련 탭으로 가 아무것도 못 했다).
+            case .sessions?: newEntry = .session(sessions.first?.type ?? .lesson)
+            case .conditions?: dismiss()
             default: jumper?.go(.training(.practice))
             }
         case .drill:

@@ -33,6 +33,7 @@ struct HomeView: View {
     private var health = StoreHealth.shared
     private var nudge = WorkoutNudgeService.shared
     @AppStorage(WorkoutNudgeService.notifyKey) private var nudgeNotify = false
+    @State private var nudgeDenied = false
 
     init(newEntry: Binding<NewEntry?>) {
         _newEntry = newEntry
@@ -182,9 +183,11 @@ struct HomeView: View {
                         .buttonStyle(.bordered)
                         .frame(minHeight: Theme.touch)
                 }
-                if !nudgeNotify {
+                if nudgeDenied {
+                    NotificationDeniedNote()
+                } else if !nudgeNotify {
                     Button("다음부터 알림으로 받기") {
-                        Task { if await WorkoutNudgeService.requestPermission() { nudgeNotify = true } }
+                        Task { nudgeNotify = await WorkoutNudgeService.requestPermission(); nudgeDenied = !nudgeNotify }
                     }
                     .font(.footnote.weight(.semibold))
                 }
@@ -561,6 +564,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @AppStorage(RestPrefs.key) private var restJSON = "[]"
     @AppStorage(TeamReminder.enabledKey) private var teamReminder = false
+    @State private var reminderDenied = false
     @AppStorage(RecordPrefs.levelKey) private var levelRaw = ""
     @AppStorage(RecordPrefs.modeKey) private var modeRaw = RecordMode.auto.rawValue
     @Environment(\.modelContext) private var context
@@ -618,9 +622,11 @@ struct SettingsView: View {
                 Toggle(isOn: Binding(get: { teamReminder }, set: { on in
                     Task { @MainActor in
                         teamReminder = on ? await TeamReminder.requestPermission() : false
+                        reminderDenied = on && !teamReminder
                         await TeamReminder.reschedule(context)
                     }
                 })) { fact("bell.badge", "팀 경기 이틀 전 알림", "참석을 안 정한 사람이 있을 때만 울립니다.") }
+                if reminderDenied { NotificationDeniedNote() }
             }
             // 한눈에 볼 세 가지만 먼저, 나머지 안내는 '자세히'로 접는다. 내용은 빼지 않는다.
             Section("내 기록 보관") {

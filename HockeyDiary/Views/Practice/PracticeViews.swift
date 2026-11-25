@@ -524,7 +524,8 @@ struct RoutineEditorView: View {
             } header: {
                 Text("드릴 순서 · 약 \(StarterRoutine.estimatedMinutes(items))분")
             } footer: {
-                Text("길게 눌러 순서를 바꾸고, 왼쪽으로 밀어 빼요.")
+                // 저장은 이름과 드릴 하나가 있어야 된다. 회색 저장 버튼만 보면 이유를 모른다.
+                Text(items.isEmpty ? "드릴을 하나 이상 넣어야 저장돼요." : "길게 눌러 순서를 바꾸고, 왼쪽으로 밀어 빼요.")
             }
             if routine != nil {
                 Section { Button("이 루틴 지우기", role: .destructive) { confirmingDelete = true } }

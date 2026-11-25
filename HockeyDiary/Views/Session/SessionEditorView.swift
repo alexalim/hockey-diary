@@ -89,6 +89,8 @@ struct SessionEditorView: View {
     @State private var prefillNote: String?
     /// 그날 건강 앱 운동(종류 상관없이). 직접 골라 시간을 채운다.
     @State private var dayWorkouts: [HealthWorkout] = []
+    @State private var showingSettings = false
+    @State private var showingSaveHint = false
     @State private var userTouchedTime = false
     @State private var linkedEventID: UUID?
     @State private var saved: Session?
@@ -238,9 +240,13 @@ struct SessionEditorView: View {
         .toolbar {
             ToolbarItem(placement: .cancellationAction) { Button("닫기") { dismiss() } }
             ToolbarItem(placement: .confirmationAction) {
-                Button("저장") { save() }.disabled(!canSave).fontWeight(.semibold)
+                Button("저장") { if canSave { save() } else { showingSaveHint = true } }.fontWeight(.semibold)
             }
         }
+        .alert("아직 저장할 수 없어요", isPresented: $showingSaveHint) {
+            Button("확인", role: .cancel) {}
+        } message: { Text(saveHint ?? "") }
+        .sheet(isPresented: $showingSettings) { NavigationStack { SettingsView() } }
         .sheet(isPresented: $showingSkillPicker) {
             NavigationStack {
                 SkillPickerView(selected: Set(type == .lesson ? learnings.map(\.skillID) : attempts.map(\.skillID))) { picked in
@@ -310,7 +316,8 @@ struct SessionEditorView: View {
                 if let prefillNote { Text(prefillNote) }
                 if isNew, let note = RecordPrefs.editorNote() {
                     Text(note)
-                    Button("설정 열기") { jumper?.go(.settings) }.font(.footnote.bold()).tint(Theme.accentText)
+                    // 기록 화면을 닫고 홈 설정으로 가면 쓰던 기록이 묻지 않고 사라진다. 이 위에 설정을 띄운다.
+                    Button("설정 열기") { showingSettings = true }.font(.footnote.bold()).tint(Theme.accentText)
                 }
             }
         }

@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import HealthKit
 import SwiftData
 import UIKit
@@ -158,6 +159,19 @@ final class WorkoutNudgeService {
         let demo = UnloggedWorkout(id: "demo-garmin", start: start, end: start.addingTimeInterval(80 * 60),
                                    activityName: "하키", source: "Garmin Connect")
         return Self.judge([demo], context: container.mainContext, now: Date())
+    }
+}
+
+/// 알림 권한을 거절해 둔 사람에게 보이는 한 줄. iOS는 한 번 거절하면 다시 묻지 않아 스위치가 그냥 꺼진 채 튕긴다.
+struct NotificationDeniedNote: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("아이폰에서 마하다 알림이 꺼져 있어요.").font(.footnote).foregroundStyle(Theme.danger)
+            Button("아이폰 설정에서 켜기") {
+                if let url = URL(string: UIApplication.openNotificationSettingsURLString) { UIApplication.shared.open(url) }
+            }
+            .font(.footnote.bold())
+        }
     }
 }
 

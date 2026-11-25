@@ -444,9 +444,27 @@ final class ComponentDriveTests: XCTestCase {
     func test_editor_open_settings_link() {
         relaunch(with: "-record.mode", "simple")
         XCTAssertTrue(newRecord("수업 기록"))
+        let memo = "설정 갔다 와도 남아야 함"
+        guard let field = formField("오늘의 배움 한 줄") else { XCTFail("오늘의 배움 칸이 없다"); return }
+        field.tap(); field.typeText(memo)
         XCTAssertTrue(tapButton("설정 열기"), "기록 화면에 설정 열기가 없다")
         XCTAssertTrue(app.navigationBars["설정"].waitForExistence(timeout: 5), "설정 열기를 눌러도 설정이 안 열린다")
         snap("editor-open-settings")
+        // 설정을 닫으면 쓰던 기록으로 돌아온다(예전엔 기록 화면이 닫혀 쓴 게 사라졌다).
+        app.navigationBars["설정"].buttons["닫기"].tap()
+        XCTAssertNotNil(find(memo, swipes: 2), "설정을 다녀오니 쓰던 메모가 사라졌다")
+    }
+
+    // MARK: 저장할 수 없을 때 저장을 누르면 이유가 뜬다(예전엔 회색 버튼이라 눌러도 반응이 없었다)
+
+    func test_save_explains_why_it_cannot_save() {
+        XCTAssertTrue(newRecord("수업 기록"))
+        XCTAssertTrue(tapButton("저장"), "저장 버튼이 없다")
+        let alert = app.alerts["아직 저장할 수 없어요"]
+        XCTAssertTrue(alert.waitForExistence(timeout: 3), "저장할 수 없는 이유가 안 뜬다")
+        XCTAssertTrue(alert.staticTexts.matching(NSPredicate(format: "label CONTAINS '메모를 한 줄'")).firstMatch.exists, "이유 문구가 없다")
+        alert.buttons["확인"].tap()
+        XCTAssertFalse(app.staticTexts["저장했어요"].exists, "빈 수업 기록이 저장됐다")
     }
 
     // MARK: 기술 고르기: 검색 창이 처음부터 보이고, 초성으로 찾고, 없는 기술은 검색어로 바로 추가

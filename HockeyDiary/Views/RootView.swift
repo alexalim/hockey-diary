@@ -59,9 +59,12 @@ struct RootView: View {
         newEntry = nil
         let wait: TimeInterval = hadSheet ? 0.45 : 0
         switch jump {
+        // 바로 가기는 그 탭의 첫 화면으로 간다. 전에 밀어 들어간 화면이 남아 있으면 요청한 화면이 그 밑에 가려졌다.
         case .tab(let t):
+            resets[t, default: 0] += 1
             tab = t
         case .training(let b):
+            resets[.practice, default: 0] += 1
             tab = .practice
             jumper.pendingBranch = b
         case .entry(let e):
