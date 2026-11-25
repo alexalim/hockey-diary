@@ -206,7 +206,7 @@ extension GearKind.Zone {
     /// 칸을 대표하는 장비 그림.
     var art: String {
         switch self {
-        case .top: return "gear-helmet"
+        case .top: return "gear-gloves"
         case .middle: return "gear-jersey"
         case .side: return "gear-stick"
         }
