@@ -43,8 +43,8 @@ struct TeamEventView: View {
         ScrollView {
             VStack(spacing: 12) {
                 Card(tint: Theme.cobalt) {
-                    Text(event.title).font(.title3.bold()).foregroundStyle(.white)
-                    Text(event.whenText + (event.rinkName.isEmpty ? "" : " · \(event.rinkName)")).font(.subheadline).foregroundStyle(.white.opacity(0.9))
+                    Text(event.matchTitle(teamName: team.name)).font(.title3.bold()).foregroundStyle(.white)
+                    Text((event.opponent.isEmpty ? "" : "\(event.kind.title) · ") + event.whenText + (event.rinkName.isEmpty ? "" : " · \(event.rinkName)")).font(.subheadline).foregroundStyle(.white.opacity(0.9))
                     if !event.memo.isEmpty { Text(event.memo).font(.subheadline).foregroundStyle(.white.opacity(0.85)) }
                 }
                 attendanceCard

@@ -85,6 +85,9 @@ final class TeamEvent {
     }
 
     var title: String { kind.title + (opponent.isEmpty ? "" : " vs \(opponent)") }
+    /// 화면에 보이는 경기 제목. 같은 경기가 화면마다 다른 이름으로 나오지 않게 모든 화면이 이것만 쓴다.
+    /// 상대가 있으면 "목동 펭귄스 vs 강남 베어스", 없으면 종류("정규게임"). 종류는 따로 작게 적는다.
+    func matchTitle(teamName: String) -> String { opponent.isEmpty ? kind.title : "\(teamName) vs \(opponent)" }
     var whenText: String { at.formatted(.dateTime.month().day().weekday(.abbreviated).hour().minute()) }
 }
 

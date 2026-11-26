@@ -43,7 +43,7 @@ struct TeamView: View {
     }
 
     private var header: some View {
-        ScreenHeader(eyebrow: "OUR TEAM", title: "팀", subtitle: "일정·참석·라인업, 여기서 다 챙겨요.")
+        ScreenHeader(eyebrow: "", title: "팀", subtitle: "일정·참석·라인업, 여기서 다 챙겨요.")
     }
 
     private var createBody: some View {
@@ -108,7 +108,7 @@ struct TeamView: View {
                         EmptyHint(text: "다음 경기나 연습 일정을 넣어 보세요. 일정마다 참석 체크와 라인업을 짤 수 있어요.", systemImage: "calendar.badge.plus")
                     }
                     ForEach(upcoming) { e in
-                        NavigationLink { TeamEventView(event: e, team: team) } label: { eventRow(e) }.buttonStyle(.plain)
+                        NavigationLink { TeamEventView(event: e, team: team) } label: { eventRow(e, teamName: team.name) }.buttonStyle(.plain)
                     }
                     Button { addingEvent = true } label: { Label("일정 추가", icon: "plus") }
                 }
@@ -137,7 +137,7 @@ struct TeamView: View {
                     Card {
                         CardHeader(title: "지난 일정", systemImage: "clock.arrow.circlepath")
                         ForEach(past.prefix(10)) { e in
-                            NavigationLink { TeamEventView(event: e, team: team) } label: { eventRow(e) }.buttonStyle(.plain)
+                            NavigationLink { TeamEventView(event: e, team: team) } label: { eventRow(e, teamName: team.name) }.buttonStyle(.plain)
                         }
                     }
                 }
@@ -221,7 +221,7 @@ struct TeamView: View {
         }
     }
 
-    private func eventRow(_ e: TeamEvent) -> some View {
+    private func eventRow(_ e: TeamEvent, teamName: String) -> some View {
         let going = e.attendance.count(.going, among: members.map(\.id))
         let cal = Calendar.current
         // 날짜 칸은 숫자와 요일 두 줄만. '20일'을 좁은 칸에 넣으면 '20 / 일 / 금' 세 줄로 갈라졌다(피드백 2026-11-20).
@@ -240,8 +240,9 @@ struct TeamView: View {
             .accessibilityElement(children: .combine)
             .accessibilityLabel("\(day)일 \(weekday)요일")
             VStack(alignment: .leading, spacing: 2) {
-                Text(e.title).font(.subheadline.bold()).foregroundStyle(Theme.title)
-                Text("\(when)\(e.rinkName.isEmpty ? "" : " · \(e.rinkName)")").font(.caption).foregroundStyle(Theme.inkSecondary)
+                Text(e.matchTitle(teamName: teamName)).font(.subheadline.bold()).foregroundStyle(Theme.title)
+                // 종류는 제목에서 빼고 여기 적는다(상대가 없으면 제목이 곧 종류라 겹치지 않게 뺀다).
+                Text("\(e.opponent.isEmpty ? "" : "\(e.kind.title) · ")\(when)\(e.rinkName.isEmpty ? "" : " · \(e.rinkName)")").font(.caption).foregroundStyle(Theme.inkSecondary)
             }
             Spacer()
             if !members.isEmpty {

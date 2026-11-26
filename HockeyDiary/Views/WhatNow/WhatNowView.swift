@@ -78,7 +78,7 @@ struct WhatNowView: View {
         let list = WhatNow.suggest(facts)
         ScrollView {
             VStack(spacing: 12) {
-                ScreenHeader(eyebrow: "WHAT NOW", title: "뭐할까", subtitle: "지금 하면 좋은 것부터 골라 봤어요.")
+                ScreenHeader(eyebrow: "", title: "뭐할까", subtitle: "지금 하면 좋은 것부터 골라 봤어요.")
                 if list.isEmpty {
                     EmptyHint(text: "오늘 할 건 다 했어요. 푹 쉬어도 돼요.", systemImage: "sparkles")
                 }

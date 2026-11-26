@@ -26,7 +26,7 @@ struct GrowthView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
-                ScreenHeader(eyebrow: "YOUR PROGRESS", title: "성장", subtitle: "얼마나 탔는지, 뭐가 늘었는지 봐요.")
+                ScreenHeader(eyebrow: "", title: "성장", subtitle: "얼마나 탔는지, 뭐가 늘었는지 봐요.")
                     .toolbar { BarLink(icon: "square.and.arrow.up", label: "시즌 리포트") { SeasonReportView() } }
                 Picker("기간", selection: $period) {
                     ForEach(Period.allCases, id: \.self) { p in Text(p.title).tag(p) }

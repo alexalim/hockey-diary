@@ -309,21 +309,24 @@ struct GoalieArt: View {
                 // 골대와 골키퍼(그대로 남음)
                 RoundedRectangle(cornerRadius: 3).stroke(redLine, lineWidth: 2)
                     .frame(width: w * 0.08, height: h * 0.3).position(x: w * 0.08, y: h * 0.5)
-                AppIcon("figure.hockey", size: (compact ? 18 : 34) * 1.15).foregroundStyle(Theme.cobalt)
+                AppIcon("figure.hockey", size: (compact ? 18 : 34) * 1.15).foregroundStyle(Theme.danger)
                     .scaleEffect(x: -1, y: 1).position(x: w * 0.2, y: h * 0.5)
-                if !compact { Text("골키퍼는 그대로").font(.caption2.bold()).foregroundStyle(Theme.title).position(x: w * 0.2, y: h * 0.8) }
+                if !compact { Text("반칙한 골키퍼는 그대로").font(.caption2.bold()).foregroundStyle(Theme.danger).position(x: w * 0.22, y: h * 0.8) }
+                // 대신 갈 우리 선수(출발점)
+                AppIcon("figure.hockey", size: (compact ? 14 : 24) * 1.15).foregroundStyle(Theme.cobalt)
+                    .position(x: w * 0.38, y: h * 0.62)
                 // 페널티 박스
                 RoundedRectangle(cornerRadius: 6).stroke(Theme.inkTertiary, style: StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
                     .frame(width: w * 0.26, height: h * 0.42).position(x: w * 0.82, y: h * 0.42)
                 if !compact { Text("페널티 박스").font(.caption).foregroundStyle(Theme.inkSecondary).position(x: w * 0.82, y: h * 0.14) }
-                AppIcon("figure.hockey", size: (compact ? 16 : 28) * 1.15).foregroundStyle(Theme.danger)
+                AppIcon("figure.hockey", size: (compact ? 16 : 28) * 1.15).foregroundStyle(Theme.cobalt)
                     .position(x: w * 0.82, y: h * 0.44)
                 // 다른 선수가 대신 감
-                Path { p in p.move(to: CGPoint(x: w * 0.38, y: h * 0.6)); p.addLine(to: CGPoint(x: w * 0.66, y: h * 0.48)) }
-                    .stroke(Theme.danger, style: StrokeStyle(lineWidth: 2, dash: [5, 3]))
-                AppIcon("arrowtriangle.right.fill", size: 10.35).foregroundStyle(Theme.danger)
+                Path { p in p.move(to: CGPoint(x: w * 0.44, y: h * 0.59)); p.addLine(to: CGPoint(x: w * 0.66, y: h * 0.48)) }
+                    .stroke(Theme.cobalt, style: StrokeStyle(lineWidth: 2, dash: [5, 3]))
+                AppIcon("arrowtriangle.right.fill", size: 10.35).foregroundStyle(Theme.cobalt)
                     .position(x: w * 0.66, y: h * 0.48)
-                if !compact { Text("다른 선수가 대신").font(.caption2.bold()).foregroundStyle(Theme.danger).position(x: w * 0.52, y: h * 0.75) }
+                if !compact { Text("다른 선수가 대신").font(.caption2.bold()).foregroundStyle(Theme.cobalt).position(x: w * 0.56, y: h * 0.78) }
             }
         }
     }

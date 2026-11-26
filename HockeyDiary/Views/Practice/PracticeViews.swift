@@ -7,7 +7,7 @@ struct PracticeView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
-                ScreenHeader(eyebrow: "TRAINING STUDIO", title: "드릴", subtitle: "루틴 하나, 드릴 하나.")
+                ScreenHeader(eyebrow: "", title: "드릴", subtitle: "루틴 하나, 드릴 하나.")
                 DrillSection()
             }
             .padding(.horizontal, Theme.screenPadding).padding(.vertical, 12)
@@ -95,7 +95,7 @@ struct DrillSection: View {
         let goal = sessions.first { !$0.nextGoal.isEmpty }?.nextGoal
         let first = routines.first { !$0.items.isEmpty }
         Card(tint: Theme.cobalt) {
-            Text("TODAY'S FOCUS").font(.system(size: 12, weight: .semibold)).tracking(0.6).foregroundStyle(.white.opacity(0.75))
+            Text("오늘 할 것").font(.system(size: 12, weight: .semibold)).tracking(0.6).foregroundStyle(.white.opacity(0.75))
             Text(goal ?? "오늘은 뭘 다듬을까요?").font(.title3.bold()).foregroundStyle(.white)
             Text(goal == nil ? "수업 기록에 '다음 목표'를 적어 두면 다음 연습 때 그 목표가 먼저 보여요." : "지난 수업에서 정한 목표, 오늘 드릴로 이어 가요.")
                 .font(.subheadline).foregroundStyle(.white.opacity(0.85))
@@ -257,8 +257,12 @@ struct RoutineRunView: View {
             HStack(spacing: 10) {
                 Button {
                     saveAndNext(drill, amount: drill.unit == .minutes ? max(0, item.target - secondsLeft / 60 - (secondsLeft % 60 > 0 ? 1 : 0)) : count, skipped: true)
-                } label: { Text("건너뛰기").frame(maxWidth: .infinity, minHeight: Theme.touch) }
-                    .buttonStyle(.bordered)
+                } label: {
+                    Text("건너뛰기").font(.headline).foregroundStyle(Theme.accentText)
+                        .frame(maxWidth: .infinity, minHeight: Theme.touch)
+                        .background(Theme.cobaltSoft, in: RoundedRectangle(cornerRadius: Theme.buttonCorner, style: .continuous))
+                }
+                    .buttonStyle(.plain)
                 Button {
                     saveAndNext(drill, amount: drill.unit == .minutes ? doneMinutes(item) : count, skipped: false)
                 } label: { Text(run.index + 1 < run.items.count ? "다음 드릴" : "끝내고 저장").frame(maxWidth: .infinity, minHeight: Theme.touch) }

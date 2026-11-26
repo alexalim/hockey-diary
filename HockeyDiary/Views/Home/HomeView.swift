@@ -295,13 +295,13 @@ struct HomeView: View {
             NavigationLink { TeamEventView(event: next, team: team) } label: {
                 VStack(alignment: .leading, spacing: 10) {
                     HStack {
-                        Text("NEXT GAME").font(.system(size: 11, weight: .bold)).tracking(0.6)
+                        Text("다음 경기").font(.system(size: 11, weight: .bold)).tracking(0.6)
                             .padding(.horizontal, 8).padding(.vertical, 4).background(.white.opacity(0.18), in: Capsule())
                         Spacer()
                         Text(next.at.formatted(.dateTime.month(.defaultDigits).day().weekday(.abbreviated).hour().minute())).font(.caption.bold())
                     }
                     .foregroundStyle(.white.opacity(0.9))
-                    Text(next.opponent.isEmpty ? next.title : "\(team.name) vs \(next.opponent)")
+                    Text(next.matchTitle(teamName: team.name))
                         .font(.system(size: 22, weight: .bold)).foregroundStyle(.white)
                     if !next.rinkName.isEmpty || !next.memo.isEmpty {
                         Label([next.rinkName, next.memo].filter { !$0.isEmpty }.joined(separator: " · "), icon: "mappin")
@@ -504,7 +504,7 @@ struct HomeView: View {
                 CardHeader(title: next.flatMap { n in teams.first { $0.id == n.teamID } }?.name ?? (teams.count == 1 ? teams[0].name : "우리 팀"), systemImage: "person.3.fill",
                            trailing: next.map { $0.at.formatted(.dateTime.month().day().weekday(.abbreviated)) })
                 if let next {
-                    Text("\(next.title) · \(next.at.formatted(.dateTime.hour().minute()))\(next.rinkName.isEmpty ? "" : " · \(next.rinkName)")")
+                    Text("\(next.matchTitle(teamName: teams.first { $0.id == next.teamID }?.name ?? "우리 팀")) · \(next.at.formatted(.dateTime.hour().minute()))\(next.rinkName.isEmpty ? "" : " · \(next.rinkName)")")
                         .font(.subheadline).foregroundStyle(Theme.title)
                 } else if teams.isEmpty {
                     Text("팀 일정·참석·라인업을 정리하고 카톡에 올려 보세요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)

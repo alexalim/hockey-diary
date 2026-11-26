@@ -22,7 +22,7 @@ struct DiaryView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
-                ScreenHeader(eyebrow: "MY ICE LOG", title: "기록", subtitle: "달력, 일기, 컨디션을 한눈에.")
+                ScreenHeader(eyebrow: "", title: "기록", subtitle: "달력, 일기, 컨디션을 한눈에.")
                     .toolbar { BarAction(icon: "square.and.pencil", label: "일기 쓰기") { newEntry = .journal(selectedDay) } }
                 if search.isEmpty {
                     streakCard

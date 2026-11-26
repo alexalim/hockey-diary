@@ -154,7 +154,12 @@ final class ScreenTourTests: XCTestCase {
         // 훈련(드릴) → 하키 아카데미 → 규칙·전술: 목록, 반칙 그림, 링크 구조, 전술
         drills(); snap("04n-practice-academy")
         openRules(); snap("05-explore")
-        if tapText("자주 나오는 반칙") { snap("05b-fouls"); app.swipeUp(); snap("05c-fouls-bottom"); back() }
+        if tapText("자주 나오는 반칙") {
+            snap("05b-fouls"); app.swipeUp(); snap("05c-fouls-bottom")
+            // 끝까지 내렸을 때 마지막 줄이 하단 바·홈 버튼에 가리지 않는지 본다.
+            for _ in 0..<3 { app.swipeUp() }
+            snap("05c2-fouls-end"); back()
+        }
         for (name, shot) in [("링크 구조", "05d-rink-rule"), ("선수 장비", "05d2-equipment"), ("주요 페널티", "05d3-penalties"),
                              ("경기 시간·연장", "05e-gametime"), ("골 무효", "05f-nogoal"), ("골키퍼가 반칙하면", "05f2-goalie"),
                              ("자주 듣는 말", "05f3-terms")] {

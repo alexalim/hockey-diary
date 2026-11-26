@@ -332,7 +332,9 @@ struct ScreenHeader<Trailing: View>: View {
     var body: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 4) {
-                Text(eyebrow).font(.system(size: 12, weight: .semibold)).tracking(0.6).foregroundStyle(Theme.inkSecondary)
+                if !eyebrow.isEmpty {
+                    Text(eyebrow).font(.system(size: 12, weight: .semibold)).tracking(0.6).foregroundStyle(Theme.inkSecondary)
+                }
                 Text(title).font(.system(size: 30, weight: .bold)).foregroundStyle(Theme.title)
                 Text(subtitle).font(.system(size: 14)).foregroundStyle(Theme.inkSecondary)
             }

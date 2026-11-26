@@ -25,7 +25,7 @@ struct TrainingView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
-                ScreenHeader(eyebrow: "TRAINING STUDIO", title: "훈련", subtitle: "연습·경기·드릴, 여기서 다 챙겨요.")
+                ScreenHeader(eyebrow: "", title: "훈련", subtitle: "연습·경기·드릴, 여기서 다 챙겨요.")
                     .toolbar { BarLink(icon: "book.pages", label: "기술 도감") { SkillGuideListView() } }
                 Picker("갈래", selection: $branch) {
                     ForEach(Branch.allCases, id: \.self) { Text($0.rawValue).tag($0) }
@@ -60,7 +60,7 @@ struct PracticeBranch: View {
 
     var body: some View {
         Card(tint: Theme.cobalt) {
-            Text("PRACTICE").font(.system(size: 12, weight: .semibold)).tracking(0.6).foregroundStyle(.white.opacity(0.75))
+            Text("연습").font(.system(size: 12, weight: .semibold)).tracking(0.6).foregroundStyle(.white.opacity(0.75))
             Text("이번 달 연습 \(thisMonth.count)회").font(.title3.bold()).foregroundStyle(.white)
             Text(thisMonth.isEmpty ? "이번 달 첫 연습을 남겨 보세요." : "\(TrainingText.hours(thisMonth.map(\.minutes).reduce(0, +))) 탔어요.")
                 .font(.subheadline).foregroundStyle(.white.opacity(0.85))
@@ -98,7 +98,7 @@ struct GameBranch: View {
     var body: some View {
         let goals = thisYear.compactMap(\.goals).reduce(0, +), assists = thisYear.compactMap(\.assists).reduce(0, +)
         Card(tint: Theme.cobalt) {
-            Text("GAME DAY").font(.system(size: 12, weight: .semibold)).tracking(0.6).foregroundStyle(.white.opacity(0.75))
+            Text("경기").font(.system(size: 12, weight: .semibold)).tracking(0.6).foregroundStyle(.white.opacity(0.75))
             Text("올해 경기 \(thisYear.count)회").font(.title3.bold()).foregroundStyle(.white)
             Text(thisYear.isEmpty ? "첫 경기 리뷰를 남기면 골과 어시스트가 여기 쌓여요." : "골 \(goals) · 어시스트 \(assists)")
                 .font(.subheadline).foregroundStyle(.white.opacity(0.85))
@@ -114,7 +114,7 @@ struct GameBranch: View {
                 NavigationLink { TeamEventView(event: next, team: team) } label: {
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(next.opponent.isEmpty ? next.title : "\(team.name) vs \(next.opponent)")
+                            Text(next.matchTitle(teamName: team.name))
                                 .font(.subheadline.bold()).foregroundStyle(Theme.title)
                             Text([next.at.dayTitle + " " + next.at.timeTitle, next.rinkName].filter { !$0.isEmpty }.joined(separator: " · "))
                                 .font(.caption).foregroundStyle(Theme.inkSecondary)

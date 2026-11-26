@@ -29,7 +29,7 @@ enum WidgetBridge {
                                        facts: QuestStore.facts(sessions: sessions, drills: drills, checks: checks, journals: journals),
                                        level: RecordPrefs.level(), targetOverride: defaults.integer(forKey: QuestStore.targetKey))
         let next = events.first { $0.at >= cal.startOfDay(for: now) }
-        let nextTitle = next.map { e in e.opponent.isEmpty ? e.title : "\(teams.first { $0.id == e.teamID }?.name ?? "우리 팀") vs \(e.opponent)" }
+        let nextTitle = next.map { e in e.matchTitle(teamName: teams.first { $0.id == e.teamID }?.name ?? "우리 팀") }
 
         let snap = WidgetSnapshot(weekDays: days, todayIndex: todayIndex, streakWeeks: streak.current,
                                   monthDone: quest.monthDone, monthTarget: quest.monthTarget, points: quest.points,

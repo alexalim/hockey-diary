@@ -27,7 +27,7 @@ struct LockerView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                ScreenHeader(eyebrow: "EQUIPMENT & IDENTITY", title: "내 락커", subtitle: "장비도 추억도 여기 다 있어요.")
+                ScreenHeader(eyebrow: "", title: "내 락커", subtitle: "장비도 추억도 여기 다 있어요.")
                     .toolbar { BarAction(icon: "pencil", label: "꾸미기") { editingProfile = LockerStore.profile(context) } }
                 if !newStickers.isEmpty { earnedBanner }
                 GeometryReader { geo in
@@ -492,6 +492,7 @@ struct LockerCustomizeView: View {
                 Button { showingLibrary = true } label: {
                     Label("스티커 붙이기", icon: "plus.circle.fill")
                         .font(.system(.headline, design: .rounded))
+                        .foregroundStyle(.white)
                         .frame(maxWidth: .infinity, minHeight: Theme.touch)
                 }
                 .buttonStyle(.borderedProminent).tint(Theme.neonPink).buttonBorderShape(.capsule)

@@ -93,7 +93,7 @@ struct ReportCard: View {
     var body: some View {
         ZStack {
             Theme.heroGradient
-            VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 11) {
                 HStack {
                     Text("마하다").font(.system(.headline, design: .rounded).weight(.heavy))
                     Spacer()
@@ -103,7 +103,7 @@ struct ReportCard: View {
                 }
                 Text(rangeText).font(.caption).opacity(0.8)
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    Text("\(report.sessions)").font(.system(size: 54, weight: .black, design: .rounded))
+                    Text("\(report.sessions)").font(.system(size: 46, weight: .black, design: .rounded))
                     Text("번 탔어요").font(.headline)
                 }
                 Text("총 \(minutesText(report.minutes))").font(.title3.bold())
@@ -138,6 +138,7 @@ struct ReportCard: View {
             }
             .foregroundStyle(.white)
             .padding(24)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
     }
 

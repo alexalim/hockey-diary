@@ -15,6 +15,8 @@ struct ConditionView: View {
 
     @State private var period: Period = .month
     @State private var metric: ConditionMetric = .sleep
+    /// 사용자가 직접 칩을 골랐는지. 고른 뒤에는 자동으로 바꾸지 않는다.
+    @State private var userPickedMetric = false
     @State private var days: [ConditionDay] = []
     @State private var loading = false
     /// 토글을 바꾸면 다시 읽게 하는 신호.
@@ -68,7 +70,7 @@ struct ConditionView: View {
                     HStack(spacing: 6) {
                         ForEach(enabledMetrics, id: \.self) { m in
                             let on = metric == m
-                            Button { metric = m } label: {
+                            Button { metric = m; userPickedMetric = true } label: {
                                 Text(m.title).font(.subheadline.weight(on ? .bold : .regular)).lineLimit(1).fixedSize()
                                     .padding(.horizontal, 12).frame(minHeight: 36)
                                     .foregroundStyle(on ? .white : Theme.title)
@@ -299,6 +301,10 @@ struct ConditionView: View {
             }
         }
         days = map.values.sorted { $0.day < $1.day }
+        if !userPickedMetric, !days.contains(where: { metric.value($0) != nil }),
+           let withData = enabledMetrics.first(where: { m in days.contains { m.value($0) != nil } }) {
+            metric = withData
+        }
     }
 }
 
