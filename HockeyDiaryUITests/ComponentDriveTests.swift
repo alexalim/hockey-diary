@@ -565,6 +565,8 @@ final class ComponentDriveTests: XCTestCase {
         them.press(forDuration: 1.0)   // 잘못 누른 것 되돌리기
         XCTAssertTrue(app.staticTexts["score-us"].label == "2" || us.label.contains("2점"), "우리 점수가 2가 아니다: \(us.label)")
         XCTAssertTrue(them.label.contains("1점"), "길게 눌러도 상대 점수가 안 줄었다: \(them.label)")
+        // 두 번째 우리 골은 '다른 사람'으로 답한다. 묻는 줄이 닫히면 내 골 합계가 보인다.
+        if app.buttons["다른 사람"].exists { app.buttons["다른 사람"].tap() }
         XCTAssertNotNil(find("내 골 1", swipes: 0), "내 골이 안 세어졌다")
         snap("score-1-board")
 
