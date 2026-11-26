@@ -16,6 +16,8 @@ struct HomeView: View {
     @Query(sort: \BodyCheck.day, order: .reverse) private var checks: [BodyCheck]
 
     @State private var showingSettings = false
+    @State private var editingNickname = false
+    @State private var nicknameDraft = ""
     /// 홈에서 밀어 여는 화면(팀·뭐할까).
     @State private var homeScreen: HomeScreen?
     @AppStorage(MyPrefs.nicknameKey) private var nickname = ""
@@ -47,8 +49,7 @@ struct HomeView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
-                ScreenHeader(eyebrow: Date().formatted(.dateTime.weekday(.wide).month().day()).uppercased(),
-                             title: nickname.isEmpty ? "오늘도 즐겁게 타요." : "\(nickname)님, 오늘도 즐겁게 타요.", subtitle: "한 줄씩 적다 보면 실력이 늘어요.")
+                greetingHeader
                     .toolbar { BarAction(icon: "gearshape.fill", label: "설정") { showingSettings = true } }
                 if health.openFailed || health.lastSaveFailed { storeWarning }
                 // 매일 여는 화면이라 '다음 경기 → 오늘 할 일 → 바로 기록'을 먼저 둔다. 한 번만 묻는 실력 질문은 아래로.
@@ -88,6 +89,50 @@ struct HomeView: View {
     }
 
     /// 팀과 뭐할까는 하단 메뉴에서 빠졌다. 홈에서 들어간다.
+    // MARK: - 인사말(닉네임 바로 고치기)
+
+    /// 닉네임에 꼬불 밑줄과 연필을 달아, 누르면 그 자리에서 고친다(설정까지 안 가도 되게).
+    /// 닉네임이 길어도 깨지지 않게 '닉네임님,' / '오늘도 즐겁게 타요.' 두 줄로 둔다.
+    private var greetingHeader: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(Date().formatted(.dateTime.weekday(.wide).month().day()).uppercased())
+                .font(.system(size: 12, weight: .semibold)).tracking(0.6).foregroundStyle(Theme.inkSecondary)
+            HStack(alignment: .firstTextBaseline, spacing: 0) {
+                Button {
+                    nicknameDraft = nickname
+                    editingNickname = true
+                } label: {
+                    Text(nickname.isEmpty ? "닉네임" : nickname)
+                        .foregroundStyle(nickname.isEmpty ? Theme.inkTertiary : Theme.title)
+                        .padding(.bottom, 4)
+                        .background(alignment: .bottom) {
+                            SquiggleLine().stroke(Theme.neonPink, style: StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
+                                .frame(height: 6)
+                        }
+                        .overlay(alignment: .topTrailing) {
+                            AppIcon("pencil").font(.system(size: 13, weight: .bold)).foregroundStyle(Theme.neonPink)
+                                .offset(x: 14, y: -6)
+                        }
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(nickname.isEmpty ? "닉네임 정하기" : "닉네임 \(nickname), 고치기")
+                Text("님,").foregroundStyle(Theme.title).padding(.leading, nickname.isEmpty ? 16 : 16)
+            }
+            .font(.system(size: 30, weight: .bold))
+            Text("오늘도 즐겁게 타요.").font(.system(size: 30, weight: .bold)).foregroundStyle(Theme.title)
+            Text("한 줄씩 적다 보면 실력이 늘어요.").font(.system(size: 14)).foregroundStyle(Theme.inkSecondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.top, 4)
+        .alert("닉네임", isPresented: $editingNickname) {
+            TextField("예: 하키왕", text: $nicknameDraft)
+            Button("저장") { nickname = MyPrefs.clean(nicknameDraft) }
+            Button("취소", role: .cancel) {}
+        } message: {
+            Text("홈 인사말에 나와요. \(MyPrefs.maxLength)자까지.")
+        }
+    }
+
     private var shortcutRow: some View {
         HStack(spacing: 10) {
             shortcut("팀", "person.3.fill", "일정·참석·라인업", .team)

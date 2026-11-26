@@ -319,6 +319,25 @@ struct CobaltButtonStyle: ButtonStyle {
     }
 }
 
+/// 손으로 그은 듯한 꼬불 밑줄(SwiftUI 밑줄에는 물결 모양이 없다).
+struct SquiggleLine: Shape {
+    var wavelength: CGFloat = 10
+    func path(in rect: CGRect) -> Path {
+        var p = Path()
+        let mid = rect.midY, amp = rect.height / 2
+        p.move(to: CGPoint(x: rect.minX, y: mid))
+        var x = rect.minX
+        var up = true
+        while x < rect.maxX {
+            let next = min(x + wavelength, rect.maxX)
+            p.addQuadCurve(to: CGPoint(x: next, y: mid), control: CGPoint(x: (x + next) / 2, y: up ? mid - amp * 2 : mid + amp * 2))
+            up.toggle()
+            x = next
+        }
+        return p
+    }
+}
+
 /// 탭 루트 화면 머리: 작은 영문 라벨 + 큰 제목(30pt) + 한 줄 부제. 오른쪽엔 행동 버튼 하나.
 struct ScreenHeader<Trailing: View>: View {
     var eyebrow: String

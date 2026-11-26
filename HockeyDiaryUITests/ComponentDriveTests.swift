@@ -271,14 +271,23 @@ final class ComponentDriveTests: XCTestCase {
         XCTAssertTrue(tapButton("닫기"))
         sleep(1)
         snap("nickname-2-home")
-        XCTAssertNotNil(find("하키왕님, 오늘도 즐겁게 타요.", swipes: 0), "홈 인사말에 닉네임이 없다")
+        XCTAssertTrue(app.buttons["닉네임 하키왕, 고치기"].waitForExistence(timeout: 3), "홈 인사말에 닉네임이 없다")
 
         XCTAssertTrue(tapButton("설정"))
         guard let again = formField("닉네임") else { XCTFail("닉네임 칸이 없다"); return }
         again.tap(); again.typeText(wipe)
         XCTAssertTrue(tapButton("닫기"))
         sleep(1)
-        XCTAssertNotNil(find("오늘도 즐겁게 타요.", swipes: 0), "닉네임을 지워도 인사말이 안 돌아온다")
+        XCTAssertTrue(app.buttons["닉네임 정하기"].waitForExistence(timeout: 3), "닉네임을 지우면 '닉네임 정하기'가 보여야 한다")
+
+        // 홈에서 바로 고치기: 꼬불 밑줄 닉네임을 누르면 입력창이 뜬다.
+        app.buttons["닉네임 정하기"].tap()
+        let input = app.alerts.textFields.firstMatch
+        XCTAssertTrue(input.waitForExistence(timeout: 3), "닉네임을 눌러도 입력창이 안 뜬다")
+        input.typeText("빙판요정")
+        app.alerts.buttons["저장"].tap()
+        XCTAssertTrue(app.buttons["닉네임 빙판요정, 고치기"].waitForExistence(timeout: 3), "홈에서 고친 닉네임이 안 보인다")
+        snap("nickname-3-home-edit")
     }
 
     // MARK: 루틴 템플릿: 가져오면 내 루틴에 생긴다
