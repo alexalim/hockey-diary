@@ -125,6 +125,11 @@ struct RootView: View {
             jumper.request = .entry(.workout(w))
         }
         .task { await nudge.refresh() }
+        // 잠금 화면·다이내믹 아일랜드의 점수판을 누르면 점수판으로 바로 연다.
+        .onOpenURL { url in
+            guard url.scheme == "mahada" else { return }
+            if url.host == "scoreboard" { jumper.request = .entry(.scoreboard(nil)) }
+        }
         .confirmationDialog("무엇을 기록할까요?", isPresented: $showingQuickMenu, titleVisibility: .visible) {
             Button("수업 기록") { newEntry = .session(.lesson) }
             Button("자유 연습") { newEntry = .session(.freePractice) }

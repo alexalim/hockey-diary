@@ -51,6 +51,10 @@ targets:
         # 앱은 세로 고정. 경기 점수판만 가로를 허용한다(AppDelegate가 그때만 연다).
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight]
         ITSAppUsesNonExemptEncryption: false
+        # 잠금 화면·다이내믹 아일랜드를 누르면 해당 화면으로 바로 연다(mahada://scoreboard).
+        CFBundleURLTypes:
+          - CFBundleURLName: com.aspynlim.hockeydiary
+            CFBundleURLSchemes: [mahada]
         # 루틴 러너를 잠금 화면·다이내믹 아일랜드에 띄운다.
         NSSupportsLiveActivities: true
         # 시즌 리포트 이미지를 공유 시트에서 '이미지 저장'할 때 필요(없으면 저장 순간 앱이 꺼진다).

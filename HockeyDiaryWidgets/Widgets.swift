@@ -208,6 +208,8 @@ struct ScoreLiveActivity: Widget {
         ActivityConfiguration(for: ScoreActivityAttributes.self) { context in
             lockScreen(context.attributes, context.state)
                 .padding(14)
+                // 누르면 앱의 마지막 화면이 아니라 점수판으로 바로 간다.
+                .widgetURL(ScoreLiveActivity.openURL)
                 // 루틴 카드와 같은 이유로 살짝 비치게 둔다(iOS 26 유리 합성).
                 .activityBackgroundTint(WColor.deepNavy.opacity(0.85))
                 .activitySystemActionForegroundColor(.white)
@@ -233,8 +235,11 @@ struct ScoreLiveActivity: Widget {
             } minimal: {
                 Text("\(context.state.us):\(context.state.them)").font(.caption2.bold().monospacedDigit()).foregroundStyle(WColor.pink)
             }
+            .widgetURL(ScoreLiveActivity.openURL)
         }
     }
+
+    static let openURL = URL(string: "mahada://scoreboard")!
 
     private func lockScreen(_ a: ScoreActivityAttributes, _ s: ScoreActivityAttributes.ContentState) -> some View {
         HStack(spacing: 12) {
