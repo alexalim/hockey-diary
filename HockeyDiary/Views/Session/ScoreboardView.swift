@@ -47,13 +47,9 @@ struct ScoreboardView: View {
         // 경기 중 화면이 꺼지지 않게. 나가면 원래대로.
         .onAppear { UIApplication.shared.isIdleTimerDisabled = true }
         .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
-        .confirmationDialog("누가 넣었어요?", isPresented: $askingCredit, titleVisibility: .visible) {
-            Button("내가 넣었어요") { store.change { $0.creditLastGoal(.myGoal) } }
-            Button("내가 어시했어요") { store.change { $0.creditLastGoal(.myAssist) } }
-            Button("다른 사람", role: .cancel) {}
-        }
         .confirmationDialog("경기를 끝내고 기록할까요?", isPresented: $confirmingFinish, titleVisibility: .visible) {
-            Button("끝내고 기록하기") { finish() }
+            // 아래 버튼과 이름이 같으면 무엇을 눌렀는지 헷갈린다(시험도 아래 버튼을 다시 눌렀다).
+            Button("네, 끝내기") { finish() }
             Button("계속하기", role: .cancel) {}
         }
         .confirmationDialog("이 경기 점수를 버릴까요? 기록은 남지 않아요.", isPresented: $confirmingDiscard, titleVisibility: .visible) {
@@ -125,14 +121,44 @@ struct ScoreboardView: View {
                 side(.them, name: b.opponent.isEmpty ? "상대" : b.opponent, score: b.them, color: Theme.inkSecondary)
             }
             .frame(maxHeight: .infinity)
-            if b.myGoals + b.myAssists > 0 {
-                Text("내 골 \(b.myGoals) · 내 어시 \(b.myAssists)").font(.subheadline.bold()).foregroundStyle(Theme.title)
+            if askingCredit {
+                creditBar
+            } else {
+                if b.myGoals + b.myAssists > 0 {
+                    Text("내 골 \(b.myGoals) · 내 어시 \(b.myAssists)").font(.subheadline.bold()).foregroundStyle(Theme.title)
+                }
+                Text("칸을 누르면 +1, 길게 누르면 하나 빼요.").font(.caption).foregroundStyle(Theme.inkSecondary)
             }
-            Text("칸을 누르면 +1, 길게 누르면 하나 빼요.").font(.caption).foregroundStyle(Theme.inkSecondary)
             Button { confirmingFinish = true } label: { Text("끝내고 기록하기") }
                 .buttonStyle(PinkButtonStyle())
         }
         .padding(Theme.screenPadding)
+    }
+
+    /// 방금 들어간 우리 골에 누가 넣었는지. 화면을 덮는 창이면 그동안 상대 칸을 눌러도 창만 닫혀 점수가 사라졌다.
+    /// 그래서 점수판 아래 한 줄로 두고, 안 고르고 계속 눌러도 된다(다음 우리 골이면 그 골을 다시 묻는다).
+    private var creditBar: some View {
+        VStack(spacing: 6) {
+            Text("방금 우리 골, 누가 넣었어요?").font(.caption.bold()).foregroundStyle(Theme.title)
+            HStack(spacing: 8) {
+                creditButton("내가 넣음", .myGoal)
+                creditButton("내 어시", .myAssist)
+                creditButton("다른 사람", .other)
+            }
+        }
+        .transition(.opacity)
+    }
+
+    private func creditButton(_ title: String, _ credit: Scoreboard.Credit) -> some View {
+        Button {
+            store.change { $0.creditLastGoal(credit) }
+            withAnimation { askingCredit = false }
+        } label: {
+            Text(title).font(.subheadline.bold()).frame(maxWidth: .infinity, minHeight: 40)
+                .foregroundStyle(credit == .other ? Theme.title : .white)
+                .background(credit == .other ? Theme.cobaltSoft : Theme.cobalt, in: Capsule())
+        }
+        .buttonStyle(.plain)
     }
 
     private func side(_ side: Scoreboard.Side, name: String, score: Int, color: Color) -> some View {
@@ -153,6 +179,7 @@ struct ScoreboardView: View {
         }
         .onLongPressGesture(minimumDuration: 0.6) {
             store.change { $0.undo(side) }
+            if side == .us { askingCredit = false }
             UINotificationFeedbackGenerator().notificationOccurred(.warning)
         }
         .accessibilityElement(children: .combine)

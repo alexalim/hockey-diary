@@ -557,11 +557,10 @@ final class ComponentDriveTests: XCTestCase {
         XCTAssertTrue(us.waitForExistence(timeout: 5), "우리 점수 칸이 없다")
         XCTAssertTrue(us.isHittable && them.isHittable, "점수 칸을 누를 수 없다")
         us.tap()
-        let mine = app.buttons["내가 넣었어요"]
+        let mine = app.buttons["내가 넣음"]
         XCTAssertTrue(mine.waitForExistence(timeout: 3), "누가 넣었는지 묻지 않는다"); mine.tap()
         us.tap()
-        let other = app.buttons["다른 사람"]
-        if other.waitForExistence(timeout: 3) { other.tap() }
+        // 묻는 줄이 떠 있어도 상대 칸이 바로 눌려야 한다(예전엔 창을 닫는 데 한 번이 쓰였다).
         them.tap(); them.tap()
         them.press(forDuration: 1.0)   // 잘못 누른 것 되돌리기
         XCTAssertTrue(app.staticTexts["score-us"].label == "2" || us.label.contains("2점"), "우리 점수가 2가 아니다: \(us.label)")
@@ -575,8 +574,9 @@ final class ComponentDriveTests: XCTestCase {
         XCTAssertTrue(us.waitForExistence(timeout: 5) && us.label.contains("2점"), "다시 열었더니 점수가 사라졌다")
 
         XCTAssertTrue(tapButton("끝내고 기록하기"))
-        let confirm = app.buttons["끝내고 기록하기"].firstMatch
-        if confirm.waitForExistence(timeout: 3) { confirm.tap() }
+        let confirm = app.buttons["네, 끝내기"]
+        XCTAssertTrue(confirm.waitForExistence(timeout: 3), "끝낼지 묻지 않는다"); confirm.tap()
+        sleep(1)
         XCTAssertNotNil(find("점수판으로 채웠어요(2 : 1)", swipes: 0), "경기 리뷰에 점수판 값이 안 채워졌다")
         snap("score-2-review")
     }
