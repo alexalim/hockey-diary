@@ -86,7 +86,9 @@ enum PracticeStore {
     @discardableResult
     static func importTemplate(_ template: StarterRoutine, context: ModelContext) -> PracticeRoutine {
         let mine = (try? context.fetch(FetchDescriptor<PracticeRoutine>())) ?? []
-        if let same = mine.first(where: { $0.name == template.name }) { return same }
+        // 예전 이름(분 수가 붙어 있던 때)으로 이미 가져온 루틴도 같은 것으로 본다. 두 번 생기지 않게.
+        let legacy = ["자유 연습 기본": "자유 연습 30분", "스케이팅 기본기": "스케이팅 기본기 20분"][template.name]
+        if let same = mine.first(where: { $0.name == template.name || $0.name == legacy }) { return same }
         let r = PracticeRoutine(name: template.name, items: template.items)
         context.insert(r)
         context.saveOrReport()

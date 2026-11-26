@@ -103,7 +103,7 @@ public struct StarterRoutine: Sendable {
             RoutineItem(drillKey: "office-balance", target: 3),
             RoutineItem(drillKey: "office-shoot", target: 20),
         ]),
-        StarterRoutine(name: "자유 연습 30분", items: [
+        StarterRoutine(name: "자유 연습 기본", items: [
             RoutineItem(drillKey: "stop-lines", target: 10),
             RoutineItem(drillKey: "crossover-circle", target: 10),
             RoutineItem(drillKey: "stickhandle-8", target: 3),
@@ -114,7 +114,7 @@ public struct StarterRoutine: Sendable {
 
     /// 골라서 내 루틴으로 가져오는 템플릿. 처음 넣어 주는 두 개(all)도 다시 가져올 수 있게 포함한다.
     public static let templates: [StarterRoutine] = all + [
-        StarterRoutine(name: "스케이팅 기본기 20분", items: [
+        StarterRoutine(name: "스케이팅 기본기", items: [
             RoutineItem(drillKey: "stop-lines", target: 10),
             RoutineItem(drillKey: "crossover-circle", target: 10),
             RoutineItem(drillKey: "edge-slalom", target: 3),

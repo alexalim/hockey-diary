@@ -324,7 +324,7 @@ struct RunnerDetailView: View {
                     } else if let t = runner.checkThresholdMinutes {
                         ProgressTrack(value: Double(since), total: Double(t), label: "\(minutesText(t)) 타면 홈에 표시", trailing: minutesText(since))
                     }
-                    RunnerNote(text: "기록할 때 이 러너를 고른 활동만 세요. 시간은 '실제로 탄 시간'으로 더해요.")
+                    RunnerNote(text: "기록할 때 이 러너를 고른 활동만 세어요. 시간은 '실제로 탄 시간'으로 더해요.")
                 }
 
                 PaperCard(tape: Theme.tapeMint, tapeAngle: 3) {
@@ -430,7 +430,7 @@ struct SharpeningEditorView: View {
         ScrollView {
             VStack(spacing: 16) {
                 PaperCard(tape: Theme.tapePink, tapeAngle: -4) {
-                    DatePicker("연마한 때", selection: $at, displayedComponents: [.date, .hourAndMinute])
+                    DatePicker("연마한 날", selection: $at, displayedComponents: [.date, .hourAndMinute])
                         .font(.system(.headline, design: .rounded)).foregroundStyle(Theme.paperInk)
                         .tint(Theme.accentText)
                 }

@@ -120,9 +120,12 @@ struct RinkLayoutArt: View {
 
 struct EquipmentArt: View {
     var compact = false
-    private let items: [(String, CGFloat, Bool)] = [
-        ("헬멧", 0.1, true), ("목 보호대", 0.2, false), ("어깨·가슴", 0.3, true), ("팔꿈치", 0.4, false),
-        ("장갑", 0.5, true), ("하키 바지", 0.58, false), ("정강이", 0.74, true), ("스케이트", 0.92, false),
+    /// (이름, 이름표 높이, 왼쪽에 둘지, 가리킬 부위 x, y) — 비율. 부위 좌표는 figure.stand 그림 기준.
+    private let items: [(String, CGFloat, Bool, CGFloat, CGFloat)] = [
+        ("헬멧", 0.10, true, 0.47, 0.14), ("목 보호대", 0.20, false, 0.53, 0.32),
+        ("어깨·가슴", 0.30, true, 0.45, 0.42), ("팔꿈치", 0.40, false, 0.69, 0.44),
+        ("장갑", 0.50, true, 0.27, 0.47), ("하키 바지", 0.58, false, 0.56, 0.60),
+        ("정강이", 0.74, true, 0.43, 0.76), ("스케이트", 0.92, false, 0.57, 0.86),
     ]
 
     var body: some View {
@@ -136,8 +139,8 @@ struct EquipmentArt: View {
                 Path { p in p.move(to: CGPoint(x: w * 0.62, y: h * 0.45)); p.addLine(to: CGPoint(x: w * 0.68, y: h * 0.95)) }
                     .stroke(Color.brown, style: StrokeStyle(lineWidth: compact ? 2 : 4, lineCap: .round))
                 if !compact {
-                    ForEach(items, id: \.0) { name, y, left in
-                        let anchor = CGPoint(x: w * (left ? 0.45 : 0.55), y: h * y)
+                    ForEach(items, id: \.0) { name, y, left, ax, ay in
+                        let anchor = CGPoint(x: w * ax, y: h * ay)
                         let label = CGPoint(x: w * (left ? 0.16 : 0.84), y: h * y)
                         Path { p in p.move(to: anchor); p.addLine(to: label) }
                             .stroke(Theme.accent.opacity(0.7), lineWidth: 1)
@@ -161,7 +164,7 @@ struct PenaltyBarsArt: View {
     private let rows: [(String, Double, String, Color)] = [
         ("마이너", 2, "2분 · 한 명 적게", Theme.accent),
         ("메이저", 5, "5분 · 한 명 적게", Theme.danger),
-        ("미스컨덕트", 10, "10분 · 대신 들어가", Theme.warningFill),
+        ("미스컨덕트", 10, "10분 · 인원 유지", Theme.warningFill),
         ("게임 미스컨덕트", 12, "경기 끝까지 퇴장", Theme.inkTertiary),
     ]
 
@@ -181,7 +184,7 @@ struct PenaltyBarsArt: View {
                         }
                     }
                     .frame(height: compact ? 8 : 16)
-                    if !compact { Text(caption).font(.caption).foregroundStyle(Theme.inkSecondary).frame(width: 96, alignment: .leading) }
+                    if !compact { Text(caption).font(.caption).foregroundStyle(Theme.inkSecondary).lineLimit(1).minimumScaleFactor(0.8).frame(width: 96, alignment: .leading) }
                 }
             }
             if !compact {

@@ -309,7 +309,7 @@ struct HomeView: View {
                     }
                     if !members.isEmpty {
                         HStack(spacing: 6) {
-                            pill("참석 \(going)명"); pill("미정 \(maybe)명"); pill("미응답 \(unanswered)명")
+                            pill("참석 \(going)명"); pill("미정 \(maybe)명"); pill("답 없음 \(unanswered)명")
                         }
                     }
                     Text("경기 일정 · 출석 확인 ›").font(.subheadline.bold()).foregroundStyle(Theme.cobalt)

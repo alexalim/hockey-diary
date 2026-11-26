@@ -64,7 +64,7 @@ struct DrillSection: View {
             AcademyGrid { pickingDrill = true }
             Card {
                 CardHeader(title: "드릴 하나만", systemImage: "figure.hockey")
-                Text("루틴 없이 지금 하고 싶은 드릴만 골라서 세요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
+                Text("루틴 없이 지금 하고 싶은 드릴만 골라서 해요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                 Button { pickingDrill = true } label: {
                     Label("드릴 고르기", icon: "magnifyingglass").frame(maxWidth: .infinity, minHeight: Theme.touch)
                 }
@@ -115,7 +115,7 @@ struct DrillSection: View {
         let recent = Array(logs.prefix(8))
         Card {
             CardHeader(title: "최근 드릴", systemImage: "clock.arrow.circlepath",
-                       trailing: logs.isEmpty ? nil : "드릴 한 날 \(DrillStats.practiceDays(logs.compactMap(\.entry)))일")
+                       trailing: logs.isEmpty ? nil : "드릴 \(DrillStats.practiceDays(logs.compactMap(\.entry)))일 함")
             if recent.isEmpty {
                 EmptyHint(text: "아직 드릴 기록이 없어요. 위에서 루틴을 시작해 보세요.")
             }

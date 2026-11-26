@@ -162,7 +162,7 @@ struct TeamEventView: View {
             } else {
                 Picker("라인업 모양", selection: $lineupAsRink) {
                     Text("표").tag(false)
-                    Text("링크").tag(true)
+                    Text("링크장").tag(true)
                 }
                 .pickerStyle(.segmented)
                 if lineupAsRink {

@@ -281,7 +281,7 @@ struct GrowthView: View {
                         .buttonStyle(.plain)
                     }
                 }
-                Text("골로 찍은 표시만 세요. 성공률은 골 ÷ 전체 슛이에요.").font(.caption).foregroundStyle(Theme.inkSecondary)
+                Text("골로 찍은 표시만 골로 쳐요. 성공률은 골 ÷ 전체 슛이에요.").font(.caption).foregroundStyle(Theme.inkSecondary)
             }
             footnote(shots.count)
         }
@@ -458,6 +458,9 @@ struct SkillDetailView: View {
                         .buttonStyle(.plain)
                     }
                 }
+                if !games.isEmpty {
+                    Text("경기는 성공한 날이 앞, 그다음 시도 횟수 순이에요.").font(.caption).foregroundStyle(Theme.inkSecondary)
+                }
                 if !days.isEmpty {
                     Text("연습 많이 한 날").font(.caption.bold()).foregroundStyle(Theme.inkSecondary).padding(.top, 4)
                     ForEach(Array(days.enumerated()), id: \.offset) { i, d in
@@ -470,7 +473,6 @@ struct SkillDetailView: View {
                         .frame(minHeight: 32)
                     }
                 }
-                Text("경기는 성공한 날이 앞, 그다음 시도 횟수 순이에요.").font(.caption).foregroundStyle(Theme.inkSecondary)
             }
         }
     }

@@ -80,7 +80,7 @@ final class ScreenTourTests: XCTestCase {
             if tapText("강남 베어스") {
                 snap("01d-team-event"); app.swipeUp(); snap("01e-team-event-bottom")
                 // 라인업을 링크 모양으로 바꿔 찍는다.
-                let rink = app.segmentedControls.buttons.matching(NSPredicate(format: "label == %@", "링크")).allElementsBoundByIndex.first { $0.isHittable }
+                let rink = app.segmentedControls.buttons.matching(NSPredicate(format: "label == %@", "링크장")).allElementsBoundByIndex.first { $0.isHittable }
                 if let rink { rink.tap(); sleep(1); snap("01e2-lineup-rink") }
                 back()
             }
@@ -261,8 +261,11 @@ final class ScreenTourTests: XCTestCase {
     @discardableResult
     private func newRecord(_ label: String) -> Bool {
         // 숨은 탭에도 같은 이름의 버튼이 있다. 보이는(누를 수 있는) 것만 누른다.
-        guard tapVisible("새 기록") else { snap("miss-새 기록"); return false }
-        sleep(1)
+        // 앞 단계에서 '무엇을 기록할까요?' 메뉴가 열린 채 남으면 (+)가 가려져 못 누른다. 그때는 바로 고른다.
+        if !app.staticTexts["무엇을 기록할까요?"].exists {
+            guard tapVisible("새 기록") else { snap("miss-새 기록"); return false }
+            sleep(1)
+        }
         guard tapVisible(label) else { snap("miss-\(label)"); return false }
         sleep(1); return true
     }
