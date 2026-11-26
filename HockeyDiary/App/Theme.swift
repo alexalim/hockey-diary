@@ -7,10 +7,11 @@ import HockeyCore
 enum Theme {
     static let deepNavy = Color(hex: 0x172B4D)
     /// 채움용(흰 글자를 얹는 카드·버튼). 글자색으로 쓰지 않는다.
-    static let cobalt = Color(hex: 0x0047AB)
-    static let cobaltPressed = Color(hex: 0x0A3380)
+    /// 기본 파랑: 팬톤 프린세스 블루(19-4150 TCX) 근사값. 흰 바탕 글자 대비 약 7.6:1.
+    static let cobalt = Color(hex: 0x00539C)
+    static let cobaltPressed = Color(hex: 0x003F78)
     /// 글자·아이콘·틴트용. 다크 모드에서는 밝은 코발트로 바꿔 대비를 지킨다.
-    static let accent = Color(light: 0x0047AB, dark: 0x7AA7FF)
+    static let accent = Color(light: 0x00539C, dark: 0x7AA7FF)
     /// 선택된 칸 배경.
     static let cobaltSoft = Color(light: 0xE8F3FF, dark: 0x1B2D4D)
     static let iceBlue = Color(light: 0xD4EBFA, dark: 0x16303A)

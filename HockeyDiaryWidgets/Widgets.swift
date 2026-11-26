@@ -8,7 +8,7 @@ enum WColor {
     static func hex(_ v: UInt32) -> Color {
         Color(.sRGB, red: Double((v >> 16) & 0xFF) / 255, green: Double((v >> 8) & 0xFF) / 255, blue: Double(v & 0xFF) / 255, opacity: 1)
     }
-    static let cobalt = hex(0x0047AB)
+    static let cobalt = hex(0x00539C)   // 앱과 같은 프린세스 블루
     static let deepNavy = hex(0x172B4D)
     static let pink = hex(0xFF2D8C)
     static let ice = hex(0xE8F3FF)
