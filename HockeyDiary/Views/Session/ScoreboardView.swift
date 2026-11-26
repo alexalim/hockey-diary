@@ -22,7 +22,8 @@ struct ScoreboardView: View {
 
     @State private var askingCredit = false
     /// 가로로 보기. iOS 회전을 쓰지 않고 점수판만 90도 돌려 그린다(회전을 쓰면 화면이 반만 그려졌다, 빌드 83~85).
-    @AppStorage("scoreboard.landscape") private var landscape = false
+    /// 기본은 가로(벤치에서 옆으로 들고 보는 점수판). '세로로'를 누르면 그 선택을 기억한다.
+    @AppStorage("scoreboard.landscape") private var landscape = true
     @State private var confirmingFinish = false
     @State private var confirmingDiscard = false
 

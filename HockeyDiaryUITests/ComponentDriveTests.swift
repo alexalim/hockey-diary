@@ -588,10 +588,9 @@ final class ComponentDriveTests: XCTestCase {
     func test_scoreboard_landscape_view() {
         XCTAssertTrue(newRecord("경기 점수판"))
         XCTAssertTrue(tapButton("경기 시작"), "경기 시작 버튼이 없다")
-        let more = app.buttons["더 보기"]
-        XCTAssertTrue(more.waitForExistence(timeout: 5), "더 보기 메뉴가 없다"); more.tap()
-        XCTAssertTrue(tapButton("가로로 보기"), "가로로 보기가 없다")
         sleep(1)
+        // 기본이 가로: 위 막대 없이 돌린 화면에 '세로로'가 있다.
+        XCTAssertTrue(app.buttons["세로로"].waitForExistence(timeout: 3), "시작하자마자 가로로 보이지 않는다")
         let them = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH '상대 '")).firstMatch
         XCTAssertTrue(them.waitForExistence(timeout: 3) && them.isHittable, "가로에서 상대 칸을 누를 수 없다")
         them.tap()
@@ -599,6 +598,11 @@ final class ComponentDriveTests: XCTestCase {
         snap("score-landscape-view")
         XCTAssertTrue(tapButton("세로로"), "세로로 돌아가는 버튼이 없다")
         XCTAssertTrue(app.navigationBars["점수판"].waitForExistence(timeout: 3), "세로로 돌아오지 않았다")
+        // 세로에서 다시 가로로
+        let more = app.buttons["더 보기"]
+        XCTAssertTrue(more.waitForExistence(timeout: 3)); more.tap()
+        XCTAssertTrue(tapButton("가로로 보기"), "가로로 보기가 없다")
+        XCTAssertTrue(app.buttons["세로로"].waitForExistence(timeout: 3), "다시 가로로 바뀌지 않았다")
     }
 
     // MARK: 잠금 화면·다이내믹 아일랜드를 누른 것과 같은 주소(mahada://scoreboard)로 점수판이 바로 열린다
