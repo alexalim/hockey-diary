@@ -443,8 +443,9 @@ final class ComponentDriveTests: XCTestCase {
     // MARK: 홈 카드가 많아도 팀·뭐할까가 스크롤 없이 첫 화면에 보인다(빌드 80: 뭐할까 어디 갔음?)
 
     func test_whatnow_visible_without_scrolling() {
-        relaunch(with: "-demoUnloggedWorkout", "-ui-demo")
-        XCTAssertNotNil(find("하키 운동, 기록할까요?", swipes: 0), "카드가 많은 상태를 만들지 못했다")
+        // 예시 데이터(-ui-demo)에는 다음 경기·오늘 할 일 카드가 있다. (가짜 가민 운동은 예시 기록과 시간이 겹쳐 카드가 안 뜬다.)
+        relaunch(with: "-ui-demo")
+        XCTAssertNotNil(find("다음 경기", swipes: 0), "카드가 많은 상태를 만들지 못했다")
         XCTAssertNotNil(find("뭐할까", swipes: 0), "홈 첫 화면에 뭐할까가 없다")
         XCTAssertNotNil(find("일정·참석·라인업", swipes: 0), "홈 첫 화면에 팀이 없다")
         snap("home-shortcuts-on-top")
