@@ -26,7 +26,7 @@ struct GrowthView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
-                ScreenHeader(eyebrow: "YOUR PROGRESS", title: "성장", subtitle: "활동과 실력은 따로, 변화는 함께.")
+                ScreenHeader(eyebrow: "YOUR PROGRESS", title: "성장", subtitle: "얼마나 탔는지, 뭐가 늘었는지 봐요.")
                     .toolbar { BarLink(icon: "square.and.arrow.up", label: "시즌 리포트") { SeasonReportView() } }
                 Picker("기간", selection: $period) {
                     ForEach(Period.allCases, id: \.self) { p in Text(p.title).tag(p) }
@@ -126,7 +126,7 @@ struct GrowthView: View {
                 .accessibilityLabel("\(period.longTitle) \(metric.title) 합계 \(t.total)\(metric.unit)")
                 HStack {
                     if t.previousTotal != nil {
-                        Legend(items: [.init(color: Theme.cobalt, title: "이번 기간"), .init(color: Theme.inkTertiary.opacity(0.35), title: "앞선 기간")])
+                        Legend(items: [.init(color: Theme.cobalt, title: "이번 기간"), .init(color: Theme.inkTertiary.opacity(0.35), title: "지난 기간")])
                     }
                     Spacer()
                 }

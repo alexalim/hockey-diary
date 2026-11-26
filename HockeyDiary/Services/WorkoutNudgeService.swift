@@ -127,7 +127,7 @@ final class WorkoutNudgeService {
         for w in pending where !notified.contains(w.id) {
             let c = UNMutableNotificationContent()
             c.title = "\(w.activityName) 운동, 기록할까요?"
-            c.body = "\(w.summary) (\(w.source)). 누르면 시간이 채워진 기록 화면이 열려요."
+            c.body = "\(w.summary) (\(w.source)). 누르면 시간까지 채워서 바로 기록할 수 있어요."
             c.sound = .default
             c.userInfo = ["id": w.id, "start": w.start.timeIntervalSince1970, "end": w.end.timeIntervalSince1970,
                           "name": w.activityName, "source": w.source]

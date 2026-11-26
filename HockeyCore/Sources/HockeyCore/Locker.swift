@@ -109,7 +109,7 @@ public enum StickerCatalog {
         StickerDef(key: "first-lesson", title: "첫 수업", symbol: "graduationcap.fill", kind: .achievement, palette: 0),
         StickerDef(key: "first-game", title: "첫 경기", symbol: "flag.checkered", kind: .achievement, palette: 1),
         StickerDef(key: "first-goal", title: "첫 골", symbol: "target", kind: .achievement, palette: 0),
-        StickerDef(key: "ten-sessions", title: "빙판 10회", symbol: "10.circle.fill", kind: .achievement, palette: 3),
+        StickerDef(key: "ten-sessions", title: "하키 10번", symbol: "10.circle.fill", kind: .achievement, palette: 3),
         StickerDef(key: "first-pond", title: "첫 폰드", symbol: "water.waves", kind: .achievement, palette: 2),
         StickerDef(key: "first-sharpening", title: "첫 연마 기록", symbol: "wrench.and.screwdriver.fill", kind: .achievement, palette: 1),
     ]

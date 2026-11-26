@@ -43,7 +43,7 @@ struct TeamView: View {
     }
 
     private var header: some View {
-        ScreenHeader(eyebrow: "OUR TEAM", title: "팀", subtitle: "일정, 참석, 라인업을 한곳에.")
+        ScreenHeader(eyebrow: "OUR TEAM", title: "팀", subtitle: "일정·참석·라인업, 여기서 다 챙겨요.")
     }
 
     private var createBody: some View {

@@ -271,17 +271,17 @@ final class ComponentDriveTests: XCTestCase {
         XCTAssertTrue(tapButton("닫기"))
         sleep(1)
         snap("nickname-2-home")
-        XCTAssertNotNil(find("하키왕, 오늘도 빙판 위에서.", swipes: 0), "홈 인사말에 닉네임이 없다")
+        XCTAssertNotNil(find("하키왕님, 오늘도 즐겁게 타요.", swipes: 0), "홈 인사말에 닉네임이 없다")
 
         XCTAssertTrue(tapButton("설정"))
         guard let again = formField("닉네임") else { XCTFail("닉네임 칸이 없다"); return }
         again.tap(); again.typeText(wipe)
         XCTAssertTrue(tapButton("닫기"))
         sleep(1)
-        XCTAssertNotNil(find("오늘도, 빙판 위에서.", swipes: 0), "닉네임을 지워도 인사말이 안 돌아온다")
+        XCTAssertNotNil(find("오늘도 즐겁게 타요.", swipes: 0), "닉네임을 지워도 인사말이 안 돌아온다")
     }
 
-    // MARK: 루틴 템플릿: 가져오면 나의 루틴에 생긴다
+    // MARK: 루틴 템플릿: 가져오면 내 루틴에 생긴다
 
     func test_routine_template_import() {
         tab("훈련"); branch("드릴")
@@ -289,7 +289,7 @@ final class ComponentDriveTests: XCTestCase {
         snap("template-1-routine-picker")
         XCTAssertTrue(tapButton("슈팅 집중 가져오기"), "슈팅 집중 템플릿이 없다")
         sleep(1)
-        XCTAssertNotNil(find("슈팅 집중"), "가져온 루틴이 나의 루틴에 없다")
+        XCTAssertNotNil(find("슈팅 집중"), "가져온 루틴이 내 루틴에 없다")
         snap("template-2-routine-imported")
     }
 
@@ -336,7 +336,7 @@ final class ComponentDriveTests: XCTestCase {
         XCTAssertTrue(tapButton("닫기"), "설정으로 돌아오지 못했다")
 
         tab("훈련"); branch("드릴")
-        XCTAssertNotNil(find("나의 루틴"), "나의 루틴 제목이 없다")
+        XCTAssertNotNil(find("내 루틴"), "내 루틴 제목이 없다")
         XCTAssertFalse(app.buttons["루틴 편집"].exists, "첫 루틴만 여는 '루틴 편집' 버튼이 남아 있다")
 
         // 스크롤한 홈: 내용이 시계·위쪽 버튼과 겹치지 않는지 캡처로 본다.

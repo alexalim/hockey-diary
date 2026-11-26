@@ -541,7 +541,7 @@ final class EffortTests: XCTestCase {
 
     func testEffortLines() {
         XCTAssertEqual(EffortSummary(shifts: 9, onIceMinutes: 14, distanceMeters: 2340, kilocalories: 512.4).lines,
-                       ["쉬프트 9번", "얼음 위 14분", "2.3km", "512kcal"])
+                       ["쉬프트 9번", "뛴 시간 14분", "2.3km", "512kcal"])
         XCTAssertEqual(EffortSummary(distanceMeters: 50).lines, [], "100m 미만 거리는 안 보여줌")
     }
 }

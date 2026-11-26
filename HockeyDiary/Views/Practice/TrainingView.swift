@@ -25,7 +25,7 @@ struct TrainingView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
-                ScreenHeader(eyebrow: "TRAINING STUDIO", title: "훈련", subtitle: "연습, 경기, 드릴을 한곳에서.")
+                ScreenHeader(eyebrow: "TRAINING STUDIO", title: "훈련", subtitle: "연습·경기·드릴, 여기서 다 챙겨요.")
                     .toolbar { BarLink(icon: "book.pages", label: "기술 도감") { SkillGuideListView() } }
                 Picker("갈래", selection: $branch) {
                     ForEach(Branch.allCases, id: \.self) { Text($0.rawValue).tag($0) }
@@ -100,7 +100,7 @@ struct GameBranch: View {
         Card(tint: Theme.cobalt) {
             Text("GAME DAY").font(.system(size: 12, weight: .semibold)).tracking(0.6).foregroundStyle(.white.opacity(0.75))
             Text("올해 경기 \(thisYear.count)회").font(.title3.bold()).foregroundStyle(.white)
-            Text(thisYear.isEmpty ? "첫 경기를 리뷰하면 골과 어시스트가 보이기 시작해요." : "골 \(goals) · 어시스트 \(assists)")
+            Text(thisYear.isEmpty ? "첫 경기 리뷰를 남기면 골과 어시스트가 여기 쌓여요." : "골 \(goals) · 어시스트 \(assists)")
                 .font(.subheadline).foregroundStyle(.white.opacity(0.85))
             HStack(spacing: 8) {
                 HeroButton(title: "정규게임 리뷰", systemImage: "trophy.fill") { newEntry = .session(.regularGame) }

@@ -9,7 +9,7 @@ public enum Position: String, CaseIterable, Codable, Sendable {
         case .forward: return "포워드"
         case .defense: return "수비수"
         case .goalie: return "골리"
-        case .any: return "아무 데나"
+        case .any: return "상관없음"
         }
     }
 

@@ -33,7 +33,7 @@ struct DrillSection: View {
     var body: some View {
         VStack(spacing: 12) {
             focusCard
-            SectionHeader(title: "나의 루틴")
+            SectionHeader(title: "내 루틴")
             Card {
                 ForEach(routines) { r in
                     HStack(spacing: 10) {
@@ -97,11 +97,11 @@ struct DrillSection: View {
         Card(tint: Theme.cobalt) {
             Text("TODAY'S FOCUS").font(.system(size: 12, weight: .semibold)).tracking(0.6).foregroundStyle(.white.opacity(0.75))
             Text(goal ?? "오늘은 뭘 다듬을까요?").font(.title3.bold()).foregroundStyle(.white)
-            Text(goal == nil ? "수업 기록에 '다음 목표'를 적어 두면 다음 연습 때 그 목표가 먼저 보여요." : "지난 수업의 다음 목표를 오늘의 드릴로 이어가요.")
+            Text(goal == nil ? "수업 기록에 '다음 목표'를 적어 두면 다음 연습 때 그 목표가 먼저 보여요." : "지난 수업에서 정한 목표, 오늘 드릴로 이어 가요.")
                 .font(.subheadline).foregroundStyle(.white.opacity(0.85))
             if let first {
                 Button { running = RoutineRun(routine: first) } label: {
-                    Text("오늘의 훈련 시작").font(.headline).foregroundStyle(Theme.cobalt)
+                    Text("오늘 훈련 시작").font(.headline).foregroundStyle(Theme.cobalt)
                         .frame(maxWidth: .infinity, minHeight: Theme.touch)
                         .background(.white, in: RoundedRectangle(cornerRadius: Theme.buttonCorner, style: .continuous))
                 }
@@ -476,7 +476,7 @@ struct RoutineTemplatePicker: View {
                     }
                 }
             } footer: {
-                Text("가져온 루틴은 내 것이에요. 드릴과 목표량을 마음대로 고칠 수 있어요.")
+                Text("가져온 루틴은 드릴도 목표량도 마음대로 고쳐도 돼요.")
             }
         }
         .navigationTitle("루틴 템플릿")

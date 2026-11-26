@@ -236,7 +236,7 @@ struct TeamEventView: View {
             if event.sessionID != nil {
                 Text("이 일정으로 만든 기록이 있어요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
             } else {
-                Text("경기가 끝나면 이 일정으로 기록을 만들어 보세요. 상대·링크장·시간이 미리 채워져요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
+                Text("경기가 끝나면 이 일정으로 바로 기록해 보세요. 상대·링크장·시간은 미리 채워 둘게요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
             }
             Button {
                 // 예전엔 누르자마자 빈 기록을 저장하고 읽기 화면을 열어, 그냥 나가도 빈 기록이 주간 횟수에 잡혔다.

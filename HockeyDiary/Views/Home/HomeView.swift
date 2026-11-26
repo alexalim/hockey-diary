@@ -48,7 +48,7 @@ struct HomeView: View {
         ScrollView {
             VStack(spacing: 12) {
                 ScreenHeader(eyebrow: Date().formatted(.dateTime.weekday(.wide).month().day()).uppercased(),
-                             title: nickname.isEmpty ? "오늘도, 빙판 위에서." : "\(nickname), 오늘도 빙판 위에서.", subtitle: "작은 기록이 나의 플레이를 바꿔요.")
+                             title: nickname.isEmpty ? "오늘도 즐겁게 타요." : "\(nickname)님, 오늘도 즐겁게 타요.", subtitle: "한 줄씩 적다 보면 실력이 늘어요.")
                     .toolbar { BarAction(icon: "gearshape.fill", label: "설정") { showingSettings = true } }
                 if health.openFailed || health.lastSaveFailed { storeWarning }
                 // 매일 여는 화면이라 '다음 경기 → 오늘 할 일 → 바로 기록'을 먼저 둔다. 한 번만 묻는 실력 질문은 아래로.
@@ -208,7 +208,7 @@ struct HomeView: View {
                     Button("다시 탈래요") { restJSON = RestPrefs.toggled(restJSON) }.buttonStyle(.bordered)
                 case .logEvent(let title):
                     Label("\(title) 끝났죠? 바로 남겨요", icon: "pencil.and.list.clipboard").font(.headline).foregroundStyle(Theme.title)
-                    Text("시간과 장소는 팀 일정에서 가져와 미리 채워져요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
+                    Text("시간과 장소는 팀 일정에서 가져와 미리 채워 둘게요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     Button {
                         let kind = teamEvents.first { $0.title == title && $0.sessionID == nil }.flatMap { ActivityType(rawValue: $0.kindRaw) } ?? .regularGame
                         newEntry = .session(kind)
@@ -347,7 +347,7 @@ struct HomeView: View {
                 Text("\(min(100, weekCount * 100 / goal))% 달성").font(.caption).foregroundStyle(Theme.inkSecondary)
             }
             ProgressView(value: Double(min(weekCount, goal)), total: Double(goal)).tint(weekCount >= goal ? Theme.success : Theme.cobalt)
-            Text(weekCount >= goal ? "이번 주 목표 달성! 더 타면 보너스예요." : (weekCount == goal - 1 ? "한 번만 더 타면 주간 목표 달성이에요." : "하키는 매주 꾸준히가 제일 어려워요. 한 번부터요."))
+            Text(weekCount >= goal ? "이번 주 목표 달성! 더 타면 보너스예요." : (weekCount == goal - 1 ? "한 번만 더 타면 주간 목표 달성이에요." : "매주 꾸준히 타는 게 제일 어려워요. 일단 한 번부터요."))
                 .font(.caption).foregroundStyle(Theme.inkSecondary)
             if !todaySessions.isEmpty {
                 Divider()
@@ -476,9 +476,9 @@ struct HomeView: View {
             }
         } else if !due.isEmpty || !worn.isEmpty {
             Card(tint: Theme.iceBlue) {
-                CardHeader(title: "연마 점검해 볼까요?", systemImage: "wrench.and.screwdriver.fill")
+                CardHeader(title: "날 갈 때 됐나 볼까요?", systemImage: "wrench.and.screwdriver.fill")
                 ForEach(worn) { r in
-                    Text("러너 \(r.name): \(r.lifeSummary). 날 교체를 생각해 볼 때예요.").font(.subheadline)
+                    Text("러너 \(r.name): \(r.lifeSummary). 날을 바꿀 때가 됐어요.").font(.subheadline)
                 }
                 ForEach(due) { r in
                     Text("러너 \(r.name): \(DiaryStore.sharpeningSummary(r, context: context)). 정해 둔 만큼 탔어요.")

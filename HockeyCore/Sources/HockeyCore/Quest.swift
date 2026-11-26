@@ -29,7 +29,7 @@ public struct WeeklyQuest: Equatable, Identifiable, Sendable {
         case .drills: return "드릴 \(target)개 세기"
         case .conditions: return "몸 상태 \(target)일 체크하기"
         case .journals: return "일기 \(target)개 쓰기"
-        case .minutes: return "빙판 \(target)분 타기"
+        case .minutes: return "총 \(target)분 타기"
         }
     }
 

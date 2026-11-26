@@ -38,7 +38,7 @@ struct DiaryView: View {
                                 journals: filter == .hockey ? [] : journalsOn(selectedDay),
                                 filter: filter.rawValue,
                                 newEntry: $newEntry)
-                    SectionHeader(title: "나의 기록 도구")
+                    SectionHeader(title: "기록 도구")
                     HStack(spacing: 10) {
                         NavigationLink { ConditionView() } label: { tool("컨디션 흐름", "waveform.path.ecg") }.buttonStyle(.plain)
                         Button { newEntry = .journal(selectedDay) } label: { tool("한 줄 일기", "square.and.pencil") }.buttonStyle(.plain)

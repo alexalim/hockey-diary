@@ -30,7 +30,7 @@ enum HomeBlock: String, CaseIterable, Identifiable {
         case .quest: return "이달의 퀘스트"
         case .goal: return "다음 목표"
         case .feedback: return "최근 피드백"
-        case .sharpening: return "연마 점검"
+        case .sharpening: return "연마 알림"
         case .team: return "우리 팀"
         case .recent: return "최근 기록"
         }

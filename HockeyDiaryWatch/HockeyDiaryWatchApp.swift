@@ -103,7 +103,7 @@ struct RunningView: View {
                 VStack(spacing: 2) {
                     Text(model.onIce ? "벤치로" : "얼음으로").font(.headline)
                     TimelineView(.periodic(from: .now, by: 1)) { ctx in
-                        Text("쉬프트 \(model.shiftCount) · 얼음 위 \(model.onIceSeconds(at: ctx.date) / 60)분")
+                        Text("쉬프트 \(model.shiftCount) · 뛴 시간 \(model.onIceSeconds(at: ctx.date) / 60)분")
                             .font(.caption2).monospacedDigit()
                     }
                 }

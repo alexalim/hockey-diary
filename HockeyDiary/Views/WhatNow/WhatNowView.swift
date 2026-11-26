@@ -89,7 +89,7 @@ struct WhatNowView: View {
                     if i == 1 { SectionHeader(title: "그 다음") }
                     card(s, first: i == 0)
                 }
-                Text("기록이 쌓일수록 더 잘 골라요. 팀 일정, 몸 상태, 드릴, 수업 목표를 봐요.")
+                Text("팀 일정, 몸 상태, 드릴, 수업 목표를 보고 골라요. 기록이 쌓일수록 더 잘 맞춰요.")
                     .font(.caption).foregroundStyle(Theme.inkSecondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }

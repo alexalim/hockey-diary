@@ -30,7 +30,7 @@ struct SessionSavedView: View {
                     .frame(height: 110)
                     Text("저장했어요").font(.system(.title2, design: .rounded).bold()).foregroundStyle(Theme.title)
                     Text("기록 탭과 성장 탭에서 바로 볼 수 있어요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
-                    Sticker(text: "빙판 +1", index: 0)
+                    Sticker(text: "하키 +1", index: 0)
                         .rotationEffect(.degrees(-6))
                         .scaleEffect(popped ? 1 : 0.5).opacity(popped ? 1 : 0)
                         .animation(.spring(response: 0.4, dampingFraction: 0.55).delay(0.25), value: popped)
@@ -46,7 +46,7 @@ struct SessionSavedView: View {
 
                 if !bests.isEmpty {
                     Card {
-                        CardHeader(title: "새 기록", systemImage: "rosette")
+                        CardHeader(title: "신기록", systemImage: "rosette")
                         ForEach(bests, id: \.title) { b in
                             HStack {
                                 Text(b.title).font(.subheadline.bold()).foregroundStyle(Theme.title)
@@ -163,7 +163,7 @@ struct SessionShareCard: View {
                 Text(skillNames.joined(separator: " · ")).font(.footnote.bold()).foregroundStyle(.white.opacity(0.9)).lineLimit(1)
             }
             if let b = bests.first {
-                Label("새 기록 · \(b.title) \(b.value)", icon: "rosette")
+                Label("신기록 · \(b.title) \(b.value)", icon: "rosette")
                     .font(.footnote.bold())
                     .padding(.horizontal, 10).padding(.vertical, 6)
                     .background(Theme.neonPink, in: Capsule())

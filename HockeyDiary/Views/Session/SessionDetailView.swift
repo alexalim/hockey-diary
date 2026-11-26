@@ -176,7 +176,7 @@ struct SessionDetailView: View {
 
     private var attemptsCard: some View {
         Card {
-            CardHeader(title: "기술 적용", systemImage: "figure.hockey")
+            CardHeader(title: "써본 기술", systemImage: "figure.hockey")
             ForEach(session.attempts) { a in
                 VStack(alignment: .leading, spacing: 2) {
                     HStack {

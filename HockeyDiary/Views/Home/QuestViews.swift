@@ -29,7 +29,7 @@ struct QuestCard: View {
                 }
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
                     Text("\(s.monthDone)").font(.system(size: 30, weight: .bold)).foregroundStyle(Theme.title)
-                    Text("/ \(s.monthTarget)회 빙판").font(.subheadline).foregroundStyle(Theme.inkSecondary)
+                    Text("/ \(s.monthTarget)번").font(.subheadline).foregroundStyle(Theme.inkSecondary)
                     Spacer()
                     Text(s.monthReached ? "이달 배지 획득!" : "\(s.monthTarget - s.monthDone)번 남았어요").font(.caption).foregroundStyle(s.monthReached ? Theme.success : Theme.inkSecondary)
                 }
@@ -78,7 +78,7 @@ struct StampRow: View {
             }
             .onAppear { shown = true }
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel("이달 빙판 \(done) / \(target)회")
+            .accessibilityLabel("이달 \(done) / \(target)번 탔어요")
         } else {
             ProgressView(value: Double(min(done, target)), total: Double(max(target, 1)))
                 .tint(onDark ? .white : (done >= target ? Theme.success : Theme.neonPink))
@@ -161,7 +161,7 @@ struct QuestView: View {
                 Text("\(s.points)점").font(.caption.bold()).foregroundStyle(.white)
                     .padding(.horizontal, 8).padding(.vertical, 4).background(.white.opacity(0.18), in: Capsule())
             }
-            Text("이달 빙판 \(s.monthDone) / \(s.monthTarget)회").font(.title2.bold()).foregroundStyle(.white)
+            Text("이달 \(s.monthDone) / \(s.monthTarget)번 탔어요").font(.title2.bold()).foregroundStyle(.white)
             StampRow(done: s.monthDone, target: s.monthTarget, onDark: true)
             Text(s.monthReached ? "목표 달성! \(s.month.start.formatted(.dateTime.month())) 배지를 받았어요. 락커 문에 붙여 보세요."
                                 : "\(s.monthTarget - s.monthDone)번 더 타면 \(s.month.start.formatted(.dateTime.month())) 배지예요.")
@@ -176,7 +176,7 @@ struct QuestView: View {
         Card {
             CardHeader(title: "이달 목표", systemImage: "target",
                        trailing: targetOverride > 0 ? "직접 정함" : "레벨 기본값")
-            Stepper("빙판 \(s.monthTarget)회", value: Binding(get: { s.monthTarget }, set: { targetOverride = $0 }), in: 1...31)
+            Stepper("한 달 \(s.monthTarget)번", value: Binding(get: { s.monthTarget }, set: { targetOverride = $0 }), in: 1...31)
             if targetOverride > 0 {
                 Button("레벨 기본값(\(Quest.monthlyTarget(level: level))회)으로") { targetOverride = 0 }.font(.subheadline)
             } else {

@@ -27,7 +27,7 @@ struct LockerView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                ScreenHeader(eyebrow: "EQUIPMENT & IDENTITY", title: "나의 락커", subtitle: "장비와 추억을 한곳에.")
+                ScreenHeader(eyebrow: "EQUIPMENT & IDENTITY", title: "내 락커", subtitle: "장비도 추억도 여기 다 있어요.")
                     .toolbar { BarAction(icon: "pencil", label: "꾸미기") { editingProfile = LockerStore.profile(context) } }
                 if !newStickers.isEmpty { earnedBanner }
                 GeometryReader { geo in

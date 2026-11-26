@@ -82,7 +82,7 @@ public struct EffortSummary: Equatable, Sendable {
     public var lines: [String] {
         var out: [String] = []
         if let s = shifts, s > 0 { out.append("쉬프트 \(s)번") }
-        if let m = onIceMinutes, m > 0 { out.append("얼음 위 \(m)분") }
+        if let m = onIceMinutes, m > 0 { out.append("뛴 시간 \(m)분") }
         if let d = distanceMeters, d >= 100 { out.append(String(format: "%.1fkm", d / 1000)) }
         if let k = kilocalories, k > 0 { out.append("\(Int(k.rounded()))kcal") }
         return out

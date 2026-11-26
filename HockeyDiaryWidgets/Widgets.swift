@@ -44,7 +44,7 @@ struct WeekWidget: Widget {
             WeekView(snap: entry.snapshot).containerBackground(for: .widget) { Color(.systemBackground) }
         }
         .configurationDisplayName("이번 주 하키")
-        .description("이번 주 빙판에 선 날과 몇 주째 이어 왔는지 보여요.")
+        .description("이번 주 하키 탄 날과 몇 주 연속인지 보여 줘요.")
         .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular, .accessoryCircular])
     }
 }
@@ -112,7 +112,7 @@ struct WeekView: View {
 
     private var line: String {
         if snap.resting { return "쉬는 중이에요. 돌아오면 이어서 해요." }
-        if snap.weekCount == 0 { return "이번 주 첫 빙판은 언제예요?" }
+        if snap.weekCount == 0 { return "이번 주는 언제 타요?" }
         return "이번 주 \(snap.weekCount)회 · 이달 \(snap.monthLeft == 0 ? "목표 달성" : "\(snap.monthLeft)번 남음")"
     }
 

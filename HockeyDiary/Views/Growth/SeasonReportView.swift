@@ -104,9 +104,9 @@ struct ReportCard: View {
                 Text(rangeText).font(.caption).opacity(0.8)
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text("\(report.sessions)").font(.system(size: 54, weight: .black, design: .rounded))
-                    Text("번 빙판에 섰어요").font(.headline)
+                    Text("번 탔어요").font(.headline)
                 }
-                Text("모두 \(minutesText(report.minutes)) 탔어요").font(.title3.bold())
+                Text("총 \(minutesText(report.minutes))").font(.title3.bold())
                 HStack(spacing: 8) {
                     stat("수업", report.byType[.lesson] ?? 0)
                     stat("경기", (report.byType[.miniGame] ?? 0) + (report.byType[.regularGame] ?? 0))
@@ -114,7 +114,7 @@ struct ReportCard: View {
                 }
                 if !report.topSkills.isEmpty {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("많이 만난 기술").font(.caption.bold()).opacity(0.8)
+                        Text("많이 한 기술").font(.caption.bold()).opacity(0.8)
                         ForEach(Array(report.topSkills.prefix(report.sharedLines.isEmpty ? 3 : 2)), id: \.name) { s in
                             Text("· \(s.name)  수업 \(s.lessons) · 경기에서 써봄 \(s.tried)").font(.subheadline)
                         }
@@ -131,7 +131,7 @@ struct ReportCard: View {
                 Spacer(minLength: 0)
                 HStack {
                     if (report.bySurface[.pond] ?? 0) > 0 { Label("폰드 \(report.bySurface[.pond]!)번", icon: "water.waves").font(.caption) }
-                    if report.bestDays > 0 { Label("최고의 날 \(report.bestDays)번", icon: "heart.fill").font(.caption) }
+                    if report.bestDays > 0 { Label("기분 최고였던 날 \(report.bestDays)번", icon: "heart.fill").font(.caption) }
                     Spacer()
                     AppIcon("hockey.puck.fill").opacity(0.6)
                 }

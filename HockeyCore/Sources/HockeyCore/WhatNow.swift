@@ -88,7 +88,7 @@ public enum WhatNow {
             return end <= f.now && f.now.timeIntervalSince(end) <= 6 * 3600
         }) {
             out.append(Suggestion(kind: .logEvent, title: "\(e.title) 끝났죠? 바로 남겨요",
-                                  detail: "시간과 장소는 팀 일정에서 가져와 미리 채워져요.", action: "기록하기", key: e.title))
+                                  detail: "시간과 장소는 팀 일정에서 가져와 미리 채워 둘게요.", action: "기록하기", key: e.title))
         }
 
         // 2. 오늘 뒤에 있거나 사흘 안에 오는 일정.
@@ -155,7 +155,7 @@ public enum WhatNow {
 
         // 7. 연마.
         if f.sharpenDue {
-            out.append(Suggestion(kind: .sharpen, title: "연마 점검해 볼까요?",
+            out.append(Suggestion(kind: .sharpen, title: "날 갈 때 됐나 볼까요?",
                                   detail: "정해 둔 만큼 탔어요. 엣지가 밀리지 않으면 더 타도 돼요.", action: "락커 보기"))
         }
 
@@ -172,7 +172,7 @@ public enum WhatNow {
             idle = true
         }
         if idle {
-            out.append(Suggestion(kind: .firstIce, title: "다음 빙판은 언제예요?",
+            out.append(Suggestion(kind: .firstIce, title: "다음엔 언제 타요?",
                                   detail: f.hasTeam ? "팀 일정을 넣어 두면 전날 알려 드려요." : "링크장 자유 타기 시간이라도 하나 잡아 봐요.",
                                   action: f.hasTeam ? "팀 일정 넣기" : "링크장 찾기"))
         }

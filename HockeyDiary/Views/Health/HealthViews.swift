@@ -152,8 +152,8 @@ struct SessionHealthCard: View {
                         let spans = ShiftDetector.estimate(h.samples)
                         if !spans.isEmpty {
                             row("arrow.left.arrow.right", "심박으로 짐작한 쉬프트 (실험)",
-                                "\(spans.count)번", "얼음 위 약 \(minutesText(ShiftDetector.onIceSeconds(spans) / 60))")
-                            Text("심박이 높게 이어진 구간을 얼음 위로 본 거예요. 워치에서 직접 누른 쉬프트가 더 정확해요.")
+                                "\(spans.count)번", "뛴 시간 약 \(minutesText(ShiftDetector.onIceSeconds(spans) / 60))")
+                            Text("심박이 계속 높았던 구간을 뛴 시간으로 친 거예요. 워치에서 직접 누른 쉬프트가 더 정확해요.")
                                 .font(.caption).foregroundStyle(Theme.inkSecondary)
                         }
                     }

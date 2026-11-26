@@ -183,7 +183,7 @@ struct RunnerEditorView: View {
                 }
                 PaperCard(tape: Theme.tapeMint, tapeAngle: 3) {
                     PaperTitle(text: "연마 점검", systemImage: "wrench.and.screwdriver")
-                    Toggle("연마 점검 표시하기", isOn: $useThreshold)
+                    Toggle("연마할 때 알려 주기", isOn: $useThreshold)
                         .font(.system(.subheadline, design: .rounded)).foregroundStyle(Theme.paperInk)
                         .tint(Theme.neonPink)
                     if useThreshold {

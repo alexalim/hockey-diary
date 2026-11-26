@@ -44,8 +44,8 @@ public enum SurfaceType: String, CaseIterable, Codable, Sendable {
         switch self {
         case .indoorRink: return "지붕이 있는 실내 빙상장"
         case .outdoorRink: return "인공으로 관리하는 야외 빙상장"
-        case .pond: return "자연적으로 얼어붙은 수면 위 하키"
-        case .other: return "어디에도 안 맞는 곳"
+        case .pond: return "저수지·호수처럼 자연으로 언 얼음"
+        case .other: return "기타"
         case .unknown: return "장소 없이 저장하고 나중에 골라요"
         }
     }
