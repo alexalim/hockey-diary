@@ -21,6 +21,8 @@ struct ScoreboardView: View {
     @State private var didPrefill = false
 
     @State private var askingCredit = false
+    /// 가로로 보기. iOS 회전을 쓰지 않고 점수판만 90도 돌려 그린다(회전을 쓰면 화면이 반만 그려졌다, 빌드 83~85).
+    @AppStorage("scoreboard.landscape") private var landscape = false
     @State private var confirmingFinish = false
     @State private var confirmingDiscard = false
 
@@ -30,6 +32,8 @@ struct ScoreboardView: View {
         }
         .navigationTitle("점수판")
         .navigationBarTitleDisplayMode(.inline)
+        // 가로로 볼 때는 위 막대(닫기·제목)가 세로 방향에 남아 헷갈리므로 숨기고, 돌린 화면 안에 닫기를 둔다.
+        .toolbar(store.current != nil && landscape ? .hidden : .visible, for: .navigationBar)
         // 아래로 쓸어 닫히면 벤치에서 실수하기 쉽다. 닫기는 버튼으로만(닫아도 경기는 이어진다).
         .interactiveDismissDisabled(store.current != nil)
         .toolbar {
@@ -37,6 +41,7 @@ struct ScoreboardView: View {
             if store.current != nil {
                 ToolbarItem(placement: .primaryAction) {
                     Menu {
+                        Button("가로로 보기") { withAnimation { landscape = true } }
                         Button("이 경기 버리기", role: .destructive) { confirmingDiscard = true }
                     } label: { AppIcon("ellipsis.circle") }
                     .accessibilityLabel("더 보기")
@@ -102,7 +107,63 @@ struct ScoreboardView: View {
     // MARK: - 경기 중
 
     private func boardView(_ b: Scoreboard) -> some View {
-        portrait(b).screenBackground()
+        Group {
+            if landscape {
+                // 화면은 세로 그대로 두고 내용만 시계 방향으로 90도 돌린다. 폰을 왼쪽으로 눕혀(위가 왼쪽) 본다.
+                GeometryReader { g in
+                    landscapeContent(b)
+                        .frame(width: g.size.height, height: g.size.width)
+                        .rotationEffect(.degrees(90))
+                        .position(x: g.size.width / 2, y: g.size.height / 2)
+                }
+                .ignoresSafeArea()
+            } else {
+                portrait(b)
+            }
+        }
+        .screenBackground()
+    }
+
+    /// 가로: 왼쪽 우리, 오른쪽 상대를 크게. 가운데 좁은 기둥에 피리어드·시간·내 기록·끝내기·닫기.
+    private func landscapeContent(_ b: Scoreboard) -> some View {
+        HStack(spacing: 12) {
+            side(.us, name: b.teamName.isEmpty ? "우리" : b.teamName, score: b.us, color: Theme.cobalt)
+            VStack(spacing: 8) {
+                HStack(spacing: 6) {
+                    Button { dismiss() } label: { Text("닫기").font(.subheadline.bold()).frame(maxWidth: .infinity, minHeight: 36) }
+                        .buttonStyle(.bordered)
+                    Button { withAnimation { landscape = false } } label: {
+                        Text("세로로").font(.subheadline.bold()).frame(maxWidth: .infinity, minHeight: 36)
+                    }
+                    .buttonStyle(.bordered)
+                }
+                Picker("피리어드", selection: Binding(get: { b.period }, set: { p in store.change { $0.setPeriod(p) } })) {
+                    ForEach(1...Scoreboard.lastPeriod, id: \.self) { Text(Scoreboard.periodTitle($0)).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                Text(timerInterval: b.startedAt...b.startedAt.addingTimeInterval(6 * 3600), countsDown: false)
+                    .font(.title2.monospacedDigit().bold()).foregroundStyle(Theme.title)
+                if askingCredit {
+                    Text("방금 우리 골, 누가?").font(.caption.bold()).foregroundStyle(Theme.title)
+                    creditButton("내가 넣음", .myGoal)
+                    creditButton("내 어시", .myAssist)
+                    creditButton("다른 사람", .other)
+                } else {
+                    if b.myGoals + b.myAssists > 0 {
+                        Text("내 골 \(b.myGoals) · 어시 \(b.myAssists)").font(.subheadline.bold()).foregroundStyle(Theme.title)
+                    }
+                    Text("누르면 +1 · 길게 누르면 −1").font(.caption2).foregroundStyle(Theme.inkSecondary)
+                }
+                Spacer(minLength: 0)
+                Button { confirmingFinish = true } label: { Text("끝내고 기록하기").font(.subheadline.bold()) }
+                    .buttonStyle(PinkButtonStyle())
+            }
+            .frame(width: 220)
+            side(.them, name: b.opponent.isEmpty ? "상대" : b.opponent, score: b.them, color: Theme.inkSecondary)
+        }
+        // 돌린 뒤 위(=폰의 왼쪽 끝)에는 다이내믹 아일랜드, 아래(=오른쪽 끝)에는 홈 막대가 온다. 그만큼 비운다.
+        .padding(.horizontal, 56)
+        .padding(.vertical, 20)
     }
 
     private func portrait(_ b: Scoreboard) -> some View {

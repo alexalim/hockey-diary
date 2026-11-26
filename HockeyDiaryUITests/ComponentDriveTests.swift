@@ -583,6 +583,24 @@ final class ComponentDriveTests: XCTestCase {
         snap("score-2-review")
     }
 
+    // MARK: 가로로 보기: 점수판만 돌려 그린다. 캡처로 화면 전체가 그려지는지 보고, 돌린 화면에서도 누르면 오른다.
+
+    func test_scoreboard_landscape_view() {
+        XCTAssertTrue(newRecord("경기 점수판"))
+        XCTAssertTrue(tapButton("경기 시작"), "경기 시작 버튼이 없다")
+        let more = app.buttons["더 보기"]
+        XCTAssertTrue(more.waitForExistence(timeout: 5), "더 보기 메뉴가 없다"); more.tap()
+        XCTAssertTrue(tapButton("가로로 보기"), "가로로 보기가 없다")
+        sleep(1)
+        let them = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH '상대 '")).firstMatch
+        XCTAssertTrue(them.waitForExistence(timeout: 3) && them.isHittable, "가로에서 상대 칸을 누를 수 없다")
+        them.tap()
+        XCTAssertTrue(them.label.contains("1점"), "가로에서 눌렀는데 상대 점수가 안 올랐다: \(them.label)")
+        snap("score-landscape-view")
+        XCTAssertTrue(tapButton("세로로"), "세로로 돌아가는 버튼이 없다")
+        XCTAssertTrue(app.navigationBars["점수판"].waitForExistence(timeout: 3), "세로로 돌아오지 않았다")
+    }
+
     // MARK: 잠금 화면·다이내믹 아일랜드를 누른 것과 같은 주소(mahada://scoreboard)로 점수판이 바로 열린다
 
     func test_scoreboard_deep_link() {
