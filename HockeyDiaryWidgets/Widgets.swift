@@ -140,8 +140,9 @@ struct WeekView: View {
 struct RoutineLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: RoutineActivityAttributes.self) { context in
-            lockScreen(context.attributes, context.state)
-                .padding(14)
+            ActivityFamilySwitch(
+                medium: lockScreen(context.attributes, context.state).padding(14),
+                small: watchSmall(context.attributes, context.state))
                 // iOS 26 잠금 화면은 카드를 유리 재질 위에 올린다. 완전 불투명 틴트는 그 합성과 어긋나
                 // 카드 오른쪽 아래로 긴 유리 기둥이 남는 현상이 보고됐다(2026-11-19). 살짝 비치게 둔다.
                 .activityBackgroundTint(WColor.deepNavy.opacity(0.85))
@@ -168,6 +169,20 @@ struct RoutineLiveActivity: Widget {
                 AppIcon("figure.hockey").foregroundStyle(WColor.pink)
             }
         }
+        // 워치 스마트 스택에 따로 맞춘 화면을 쓴다. 없으면 다이내믹 아일랜드 조각을 늘어놓아 알아볼 수 없었다(빌드 82 피드백).
+        .supplementalActivityFamilies([.small])
+    }
+
+    /// 워치 스마트 스택: 드릴 이름 한 줄, 큰 숫자, 몇 번째 드릴인지.
+    private func watchSmall(_ a: RoutineActivityAttributes, _ s: RoutineActivityAttributes.ContentState) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(s.drillTitle).font(.headline).foregroundStyle(.white).lineLimit(1).minimumScaleFactor(0.7)
+            big(s).font(.system(size: 30, weight: .black, design: .rounded)).foregroundStyle(WColor.pink)
+                .lineLimit(1).minimumScaleFactor(0.6)
+            Text("\(a.routineName) · \(s.index)/\(s.total)").font(.caption2).foregroundStyle(.white.opacity(0.75)).lineLimit(1)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(10)
     }
 
     @ViewBuilder
@@ -206,8 +221,9 @@ struct RoutineLiveActivity: Widget {
 struct ScoreLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: ScoreActivityAttributes.self) { context in
-            lockScreen(context.attributes, context.state)
-                .padding(14)
+            ActivityFamilySwitch(
+                medium: lockScreen(context.attributes, context.state).padding(14),
+                small: watchSmall(context.attributes, context.state))
                 // 누르면 앱의 마지막 화면이 아니라 점수판으로 바로 간다.
                 .widgetURL(ScoreLiveActivity.openURL)
                 // 루틴 카드와 같은 이유로 살짝 비치게 둔다(iOS 26 유리 합성).
@@ -237,9 +253,28 @@ struct ScoreLiveActivity: Widget {
             }
             .widgetURL(ScoreLiveActivity.openURL)
         }
+        // 워치 스마트 스택에 따로 맞춘 화면(빌드 82 피드백: 0과 0만 양 끝에 떠 있었다).
+        .supplementalActivityFamilies([.small])
     }
 
     static let openURL = URL(string: "mahada://scoreboard")!
+
+    /// 워치 스마트 스택: 팀 이름 한 줄, 큰 점수, 피리어드·흐른 시간.
+    private func watchSmall(_ a: ScoreActivityAttributes, _ s: ScoreActivityAttributes.ContentState) -> some View {
+        VStack(spacing: 2) {
+            Text("\(a.teamName) vs \(a.opponent)").font(.caption2.bold()).foregroundStyle(.white.opacity(0.85))
+                .lineLimit(1).minimumScaleFactor(0.7)
+            Text("\(s.us) : \(s.them)").font(.system(size: 34, weight: .black, design: .rounded)).foregroundStyle(WColor.pink)
+                .monospacedDigit().lineLimit(1).minimumScaleFactor(0.6)
+            HStack(spacing: 6) {
+                Text(s.period).font(.caption2.bold()).foregroundStyle(.white)
+                Text(timerInterval: a.startedAt...a.startedAt.addingTimeInterval(6 * 3600), countsDown: false)
+                    .font(.caption2.monospacedDigit()).foregroundStyle(.white.opacity(0.7))
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(8)
+    }
 
     private func lockScreen(_ a: ScoreActivityAttributes, _ s: ScoreActivityAttributes.ContentState) -> some View {
         HStack(spacing: 12) {
@@ -259,6 +294,17 @@ struct ScoreLiveActivity: Widget {
                 .fixedSize()
         }
         .frame(maxWidth: .infinity)
+    }
+}
+
+/// 실시간 활동 크기에 따라 화면을 고른다. small = 워치 스마트 스택, 그 밖 = 폰 잠금 화면.
+struct ActivityFamilySwitch<Medium: View, Small: View>: View {
+    @Environment(\.activityFamily) private var family
+    let medium: Medium
+    let small: Small
+
+    var body: some View {
+        if family == .small { small } else { medium }
     }
 }
 

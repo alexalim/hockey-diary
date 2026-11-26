@@ -130,6 +130,9 @@ targets:
   HockeyDiaryWidgets:
     type: app-extension
     platform: iOS
+    # 워치 스마트 스택용 작은 실시간 활동(supplementalActivityFamilies)이 iOS 18부터라 위젯만 18로 올린다.
+    # 앱 본체는 iOS 17 그대로. iOS 17 기기에서는 위젯·실시간 활동만 안 보인다.
+    deploymentTarget: "18.0"
     sources:
       - path: HockeyDiaryWidgets
       - path: Shared
