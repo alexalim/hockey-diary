@@ -555,10 +555,7 @@ final class ComponentDriveTests: XCTestCase {
         let us = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH '우리 '")).firstMatch
         let them = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH '상대 '")).firstMatch
         XCTAssertTrue(us.waitForExistence(timeout: 5), "우리 점수 칸이 없다")
-        // 실제로 폰을 옆으로 든 것처럼 기기도 눕힌다(앱만 돌고 기기가 세로면 캡처가 반만 찍힌다).
-        XCUIDevice.shared.orientation = .landscapeLeft
-        sleep(2); snap("score-0-landscape")
-        XCTAssertTrue(us.isHittable && them.isHittable, "가로에서 점수 칸을 누를 수 없다")
+        XCTAssertTrue(us.isHittable && them.isHittable, "점수 칸을 누를 수 없다")
         us.tap()
         let mine = app.buttons["내가 넣었어요"]
         XCTAssertTrue(mine.waitForExistence(timeout: 3), "누가 넣었는지 묻지 않는다"); mine.tap()
@@ -580,8 +577,6 @@ final class ComponentDriveTests: XCTestCase {
         XCTAssertTrue(tapButton("끝내고 기록하기"))
         let confirm = app.buttons["끝내고 기록하기"].firstMatch
         if confirm.waitForExistence(timeout: 3) { confirm.tap() }
-        XCUIDevice.shared.orientation = .portrait
-        sleep(1)
         XCTAssertNotNil(find("점수판으로 채웠어요(2 : 1)", swipes: 0), "경기 리뷰에 점수판 값이 안 채워졌다")
         snap("score-2-review")
     }

@@ -48,8 +48,8 @@ targets:
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         UILaunchScreen:
           UIColorName: LaunchBackground
-        # 앱은 세로 고정. 경기 점수판만 가로를 허용한다(AppDelegate가 그때만 연다).
-        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight]
+        # 세로 고정. 점수판 가로 전환은 빌드 83~85에서 화면이 반만 그려져 뺐다(실기기에서 원인 확인 후 다시).
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         ITSAppUsesNonExemptEncryption: false
         # 잠금 화면·다이내믹 아일랜드를 누르면 해당 화면으로 바로 연다(mahada://scoreboard).
         CFBundleURLTypes:
