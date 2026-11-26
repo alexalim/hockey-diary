@@ -623,6 +623,16 @@ final class ComponentDriveTests: XCTestCase {
         snap("score-deeplink")
     }
 
+    // MARK: AI 돌아보기: 요약 중일 때 움직이는 표시(빌드 90 피드백: 번쩍번쩍 효과)
+
+    func test_ai_thinking_state_is_visible() {
+        relaunch(with: "-demoAIThinking")
+        tab("성장")
+        XCTAssertTrue(tapText("AI로 돌아보기"), "성장에 AI 돌아보기가 없다")
+        XCTAssertTrue(app.descendants(matching: .any)["요약하는 중"].waitForExistence(timeout: 5), "요약 중 표시가 없다")
+        sleep(1); snap("ai-thinking")
+    }
+
     private func relaunch(with args: String...) {
         app.terminate()
         app.launchArguments += args
