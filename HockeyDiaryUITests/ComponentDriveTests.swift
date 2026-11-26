@@ -598,10 +598,9 @@ final class ComponentDriveTests: XCTestCase {
         snap("score-landscape-view")
         XCTAssertTrue(tapButton("세로로"), "세로로 돌아가는 버튼이 없다")
         XCTAssertTrue(app.navigationBars["점수판"].waitForExistence(timeout: 3), "세로로 돌아오지 않았다")
-        // 세로에서 다시 가로로
-        let more = app.buttons["더 보기"]
-        XCTAssertTrue(more.waitForExistence(timeout: 3)); more.tap()
-        XCTAssertTrue(tapButton("가로로 보기"), "가로로 보기가 없다")
+        // 세로에서 다시 가로로: 메뉴가 아니라 위쪽 폰 돌리기 아이콘
+        XCTAssertTrue(tapButton("가로로 보기"), "가로로 돌리는 아이콘이 없다")
+        snap("score-portrait-rotate-icon")
         XCTAssertTrue(app.buttons["세로로"].waitForExistence(timeout: 3), "다시 가로로 바뀌지 않았다")
     }
 

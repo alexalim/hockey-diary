@@ -40,9 +40,13 @@ struct ScoreboardView: View {
         .toolbar {
             ToolbarItem(placement: .cancellationAction) { Button("닫기") { dismiss() } }
             if store.current != nil {
+                // 메뉴 안에 숨기지 않고 폰 돌리기 아이콘으로 바로 보인다.
+                ToolbarItem(placement: .primaryAction) {
+                    Button { withAnimation { landscape = true } } label: { AppIcon("rectangle.landscape.rotate") }
+                        .accessibilityLabel("가로로 보기")
+                }
                 ToolbarItem(placement: .primaryAction) {
                     Menu {
-                        Button("가로로 보기") { withAnimation { landscape = true } }
                         Button("이 경기 버리기", role: .destructive) { confirmingDiscard = true }
                     } label: { AppIcon("ellipsis.circle") }
                     .accessibilityLabel("더 보기")
@@ -134,9 +138,10 @@ struct ScoreboardView: View {
                     Button { dismiss() } label: { Text("닫기").font(.subheadline.bold()).frame(maxWidth: .infinity, minHeight: 36) }
                         .buttonStyle(.bordered)
                     Button { withAnimation { landscape = false } } label: {
-                        Text("세로로").font(.subheadline.bold()).frame(maxWidth: .infinity, minHeight: 36)
+                        AppIcon("rectangle.portrait.rotate").font(.title3).frame(maxWidth: .infinity, minHeight: 36)
                     }
                     .buttonStyle(.bordered)
+                    .accessibilityLabel("세로로")
                 }
                 Picker("피리어드", selection: Binding(get: { b.period }, set: { p in store.change { $0.setPeriod(p) } })) {
                     ForEach(1...Scoreboard.lastPeriod, id: \.self) { Text(Scoreboard.periodTitle($0)).tag($0) }
