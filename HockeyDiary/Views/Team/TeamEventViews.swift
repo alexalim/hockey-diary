@@ -135,7 +135,7 @@ struct TeamEventView: View {
         return Button { attendanceFilter = a } label: {
             Text(text).font(.caption.bold())
                 .padding(.horizontal, 10).frame(minHeight: 32)
-                .foregroundStyle(on ? Color.white : Theme.cobalt)
+                .foregroundStyle(on ? Color.white : Theme.accent)
                 .background(on ? Theme.cobalt : Theme.cobaltSoft, in: Capsule())
         }
         .buttonStyle(.plain)

@@ -13,7 +13,7 @@ enum Theme {
     static let accent = Color(light: 0x0047AB, dark: 0x7AA7FF)
     /// 선택된 칸 배경.
     static let cobaltSoft = Color(light: 0xE8F3FF, dark: 0x1B2D4D)
-    static let iceBlue = Color(light: 0xE8F3FF, dark: 0x16303A)
+    static let iceBlue = Color(light: 0xD4EBFA, dark: 0x16303A)
     /// 성취·골·주요 버튼. 흰 바탕의 작은 글자엔 쓰지 않는다(대비 부족) → accentText.
     static let neonPink = Color(hex: 0xFF2D8C)
     /// 핑크 계열 글자용(흰 바탕에서 읽히는 진한 핑크).

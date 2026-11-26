@@ -202,7 +202,7 @@ struct TeamView: View {
                     let on = t.id == current.id
                     Button { selectedTeamID = t.id.uuidString } label: {
                         Text(t.name).font(.subheadline.bold()).lineLimit(1)
-                            .foregroundStyle(on ? Color.white : Theme.cobalt)
+                            .foregroundStyle(on ? Color.white : Theme.accent)
                             .padding(.horizontal, 14).frame(minHeight: 36)
                             .background(on ? Theme.cobalt : Theme.cobaltSoft, in: Capsule())
                     }
@@ -213,10 +213,10 @@ struct TeamView: View {
                 Button { addedTeamName = ""; addingTeam = true } label: {
                     Label("팀 추가", icon: "plus").font(.subheadline.bold())
                         .padding(.horizontal, 14).frame(minHeight: 36)
-                        .overlay(Capsule().strokeBorder(Theme.cobalt.opacity(0.4)))
+                        .overlay(Capsule().strokeBorder(Theme.accent.opacity(0.4)))
                 }
                 .buttonStyle(.plain)
-                .foregroundStyle(Theme.cobalt)
+                .foregroundStyle(Theme.accent)
             }
         }
     }

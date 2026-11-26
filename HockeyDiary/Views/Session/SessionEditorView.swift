@@ -525,8 +525,10 @@ struct SessionEditorView: View {
     private var equipmentSection: some View {
         Section {
             if skates.isEmpty {
-                Text("락커 탭에 스케이트를 넣어 두면 연마한 뒤로 얼마나 탔는지 보여요.")
+                Text("스케이트를 넣어 두면 연마한 뒤로 얼마나 탔는지 보여요.")
                     .font(.footnote).foregroundStyle(Theme.inkSecondary)
+                // 락커 탭으로 보내면 쓰던 기록이 닫힌다. 이 화면 위로 밀어 넣고, 뒤로 오면 그대로 이어 쓴다.
+                NavigationLink { SkateListView() } label: { Label("스케이트 등록하기", icon: "plus") }
             } else {
                 LabeledChoice(title: "스케이트",
                               options: [ChoiceOption(value: UUID?.none, title: "안 고름", art: .symbol("minus"))]

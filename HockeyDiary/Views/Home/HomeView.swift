@@ -123,7 +123,7 @@ struct HomeView: View {
         if levelRaw.isEmpty {
             Card {
                 CardHeader(title: "내 하키 실력은 어느 정도예요?", systemImage: "person.crop.circle.badge.questionmark")
-                Text("레벨에 따라 입력 칸이 간단해지거나 자세해져요. 구력은 참고만 하세요. 설정에서 언제든 바꿀 수 있어요.")
+                Text("레벨에 따라 입력 칸이 간단해지거나 자세해져요. 구력은 참고만 하세요. 나중에 설정에서 바꿀 수 있어요.")
                     .font(.subheadline).foregroundStyle(Theme.inkSecondary)
                 HStack(spacing: 8) {
                     ForEach(PlayerLevel.allCases, id: \.rawValue) { l in
@@ -134,7 +134,7 @@ struct HomeView: View {
                             }
                             .frame(maxWidth: .infinity, minHeight: 56)
                         }
-                        .buttonStyle(.bordered).tint(Theme.cobalt)
+                        .buttonStyle(.bordered).tint(Theme.accent)
                         .accessibilityLabel("실력 \(l.title)")
                     }
                 }
@@ -472,7 +472,7 @@ struct HomeView: View {
                 Button { jumper?.go(.tab(.locker)) } label: {
                     Label("락커로 가기", icon: "arrow.right").font(.subheadline.bold())
                 }
-                .buttonStyle(.bordered).tint(Theme.cobalt)
+                .buttonStyle(.bordered).tint(Theme.accent)
             }
         } else if !due.isEmpty || !worn.isEmpty {
             Card(tint: Theme.iceBlue) {
@@ -489,7 +489,7 @@ struct HomeView: View {
                 Button { jumper?.go(.tab(.locker)) } label: {
                     Label("락커에서 보기", icon: "arrow.right").font(.subheadline.bold())
                 }
-                .buttonStyle(.bordered).tint(Theme.cobalt)
+                .buttonStyle(.bordered).tint(Theme.accent)
             }
         }
     }

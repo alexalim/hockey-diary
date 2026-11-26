@@ -241,7 +241,7 @@ struct RoutineRunView: View {
                 }
                 Spacer()
                 Toggle(isOn: $voiceOn) { Label("소리로 세기", icon: voiceOn ? "speaker.wave.2.fill" : "speaker.slash") }
-                    .toggleStyle(.button).font(.caption.bold()).tint(Theme.cobalt)
+                    .toggleStyle(.button).font(.caption.bold()).tint(Theme.accent)
             }
             Card(tint: Theme.cobalt) {
                 Text(drill.skillName).font(.caption.bold()).foregroundStyle(.white.opacity(0.85))

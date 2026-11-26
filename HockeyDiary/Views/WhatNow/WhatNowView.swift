@@ -63,7 +63,7 @@ struct WhatNowView: View {
                     Button { minutesFree = on ? nil : m } label: {
                         Text("\(m)분").font(.subheadline.bold())
                             .frame(maxWidth: .infinity, minHeight: Theme.touch)
-                            .foregroundStyle(on ? Color.white : Theme.cobalt)
+                            .foregroundStyle(on ? Color.white : Theme.accent)
                             .background(on ? Theme.cobalt : Theme.cobaltSoft, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                     }
                     .buttonStyle(.plain)
@@ -125,7 +125,7 @@ struct WhatNowView: View {
                 .accessibilityIdentifier("whatnow-\(s.kind.rawValue)")
         } else {
             Button { act(s) } label: { label }
-                .buttonStyle(.bordered).tint(Theme.cobalt)
+                .buttonStyle(.bordered).tint(Theme.accent)
                 .accessibilityIdentifier("whatnow-\(s.kind.rawValue)")
         }
     }
