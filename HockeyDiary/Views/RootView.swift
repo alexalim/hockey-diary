@@ -2,6 +2,12 @@ import SwiftUI
 import SwiftData
 import HockeyCore
 
+/// 전체 화면 점수판을 띄울 때 넘기는 값.
+struct ScoreCover: Identifiable {
+    let id = UUID()
+    var eventID: UUID?
+}
+
 /// 무엇을 새로 기록할지.
 enum NewEntry: Identifiable, Hashable {
     /// 날짜가 nil이면 방금 끝난 운동(시간을 미리 채운다). 달력에서 고른 날이면 그 날짜.
@@ -64,9 +70,15 @@ struct RootView: View {
 
     /// 안내문의 '바로 가기'. 열려 있던 기록 시트는 닫고, 시트를 다시 열어야 하면 닫히는 시간을 조금 기다린다.
     private func handle(_ jump: AppJump) {
-        let hadSheet = newEntry != nil
+        let hadSheet = newEntry != nil || scoreCover != nil
         newEntry = nil
+        scoreCover = nil
         let wait: TimeInterval = hadSheet ? 0.45 : 0
+        // 점수판은 시트가 아니라 전체 화면으로 띄운다(가로로 돌릴 수 있게).
+        if case .entry(.scoreboard(let id)) = jump {
+            DispatchQueue.main.asyncAfter(deadline: .now() + wait) { scoreCover = ScoreCover(eventID: id) }
+            return
+        }
         switch jump {
         // 바로 가기는 그 탭의 첫 화면으로 간다. 전에 밀어 들어간 화면이 남아 있으면 요청한 화면이 그 밑에 가려졌다.
         case .tab(let t):
@@ -87,6 +99,8 @@ struct RootView: View {
         }
     }
     @State private var newEntry: NewEntry?
+    /// 경기 점수판(전체 화면). 시트 안에서는 화면을 가로로 돌리면 내용이 세로인 채 반만 그려졌다(빌드 84).
+    @State private var scoreCover: ScoreCover?
     @State private var showingQuickMenu = false
     @State private var jumper = AppJumper()
     @State private var nudge = WorkoutNudgeService.shared
@@ -128,7 +142,7 @@ struct RootView: View {
         // 잠금 화면·다이내믹 아일랜드의 점수판을 누르면 점수판으로 바로 연다.
         .onOpenURL { url in
             guard url.scheme == "mahada" else { return }
-            if url.host == "scoreboard" { jumper.request = .entry(.scoreboard(nil)) }
+            if url.host == "scoreboard" { jumper.request = .entry(.scoreboard(nil)) }   // handle()이 전체 화면으로 연다
         }
         .confirmationDialog("무엇을 기록할까요?", isPresented: $showingQuickMenu, titleVisibility: .visible) {
             Button("수업 기록") { newEntry = .session(.lesson) }
@@ -136,9 +150,13 @@ struct RootView: View {
             Button("정규게임 리뷰") { newEntry = .session(.regularGame) }
             Button("미니게임 리뷰") { newEntry = .session(.miniGame) }
             // 진행 중인 경기가 있으면 이어서 연다(점수는 기기에 저장돼 있다).
-            Button(ScoreboardStore.shared.current == nil ? "경기 점수판" : "경기 점수판 (진행 중)") { newEntry = .scoreboard(nil) }
+            Button(ScoreboardStore.shared.current == nil ? "경기 점수판" : "경기 점수판 (진행 중)") { jumper.request = .entry(.scoreboard(nil)) }
             Button("드릴 시작") { newEntry = .practice }
             Button("하루 일기") { newEntry = .journal(Date()) }
+        }
+        .fullScreenCover(item: $scoreCover) { c in
+            NavigationStack { ScoreboardView(eventID: c.eventID) }
+                .environment(jumper)
         }
         .sheet(item: $newEntry) { entry in
             // 시트는 위에 건 .environment(jumper)를 못 받는다(시트가 그보다 바깥 수식어라서).
@@ -154,6 +172,7 @@ struct RootView: View {
             case .event(let id):
                 NavigationStack { SessionEditorView(newType: .regularGame, eventID: id) }
             case .scoreboard(let id):
+                // 실제로는 handle()이 전체 화면으로 돌려 보낸다. 혹시 시트로 오면 같은 화면을 띄운다.
                 NavigationStack { ScoreboardView(eventID: id) }
             case .scoreResult(let b):
                 NavigationStack { SessionEditorView(newType: b.kind, startsAt: b.startedAt, scoreboard: b) }

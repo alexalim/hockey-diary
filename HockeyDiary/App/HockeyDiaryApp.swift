@@ -14,7 +14,9 @@ final class OrientationDelegate: NSObject, UIApplicationDelegate {
     static func set(landscape: Bool) {
         allowLandscape = landscape
         guard let scene = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first else { return }
-        scene.windows.first?.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
+        // 떠 있는 화면(전체 화면 점수판 포함)마다 허용 방향을 다시 읽게 한다. 맨 아래 화면만 알리면 위 화면이 안 돈다.
+        var vc = scene.windows.first?.rootViewController
+        while let v = vc { v.setNeedsUpdateOfSupportedInterfaceOrientations(); vc = v.presentedViewController }
         scene.requestGeometryUpdate(.iOS(interfaceOrientations: landscape ? .landscapeRight : .portrait)) { _ in }
     }
 }
