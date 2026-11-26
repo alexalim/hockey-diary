@@ -829,10 +829,19 @@ struct GearListView: View {
                         if items.isEmpty {
                             EmptyHint(text: "아직 없어요.", systemImage: kind.symbol)
                         }
-                        ForEach(Array(items.enumerated()), id: \.element.id) { i, g in
-                            NavigationLink { GearEditorView(kind: kind, item: g) } label: { row(g, kind: kind, index: i) }
+                        // 등록한 장비는 스티커처럼: 두 칸 격자, 흰 테두리, 조금씩 기울여 붙인 모양.
+                        LazyVGrid(columns: [GridItem(.flexible(), spacing: 14), GridItem(.flexible(), spacing: 14)], spacing: 16) {
+                            ForEach(Array(items.enumerated()), id: \.element.id) { i, g in
+                                NavigationLink { GearEditorView(kind: kind, item: g) } label: {
+                                    GearStickerTile(index: i + k, title: g.name,
+                                                    detail: g.size.isEmpty ? nil : g.size, badge: g.status.title,
+                                                    photo: g.photo, art: GearKind.Zone.allCases.first { $0.kinds.contains(kind) }?.art,
+                                                    symbol: kind.symbol)
+                                }
                                 .buttonStyle(.plain)
+                            }
                         }
+                        .padding(.vertical, 6)
                         Button { adding = kind } label: {
                             Label("\(kind.title) 추가", icon: "plus")
                                 .font(.system(.subheadline, design: .rounded).bold())
@@ -854,34 +863,6 @@ struct GearListView: View {
     }
 
     /// 장비 한 줄. 사진은 폴라로이드, 없으면 파스텔 동그라미. 상태는 작은 스티커.
-    private func row(_ g: GearItem, kind: GearKind, index i: Int) -> some View {
-        HStack(spacing: 12) {
-            if let data = g.photo {
-                PolaroidThumb(data: data, size: 46, index: i)
-            } else {
-                AppIcon(kind.symbol, size: 22)
-                    .foregroundStyle(Theme.paperInk)
-                    .frame(width: 46, height: 46)
-                    .background(Theme.stickers[i % Theme.stickers.count], in: Circle())
-            }
-            VStack(alignment: .leading, spacing: 4) {
-                Text(g.name)
-                    .font(.system(.subheadline, design: .rounded).bold())
-                    .foregroundStyle(Theme.paperInk)
-                HStack(spacing: 6) {
-                    if !g.size.isEmpty {
-                        Text(g.size).font(.system(.caption, design: .rounded)).foregroundStyle(Theme.paperInkSoft)
-                    }
-                    Sticker(text: g.status.title, index: Self.stickerIndex(g.status), on: false, small: true)
-                }
-            }
-            Spacer(minLength: 0)
-            AppIcon("chevron.right").font(.caption).foregroundStyle(Theme.paperInkSoft)
-        }
-        .frame(minHeight: 56)
-        .contentShape(Rectangle())
-    }
-
     static func stickerIndex(_ status: SkateStatus) -> Int {
         switch status {
         case .main: return 0
@@ -992,5 +973,58 @@ struct GearEditorView: View {
         if let p = photos.last { target.photo = p } else if removePhoto { target.photo = nil }
         context.saveOrReport()
         dismiss()
+    }
+}
+
+
+/// 등록한 장비 한 개를 스티커처럼 보여 준다: 파스텔 바탕, 두꺼운 흰 테두리, 살짝 그림자, 조금씩 다른 기울기.
+/// 사진이 있으면 사진을 흰 테두리로 오려 붙이고, 없으면 장비 그림(없으면 아이콘)을 쓴다.
+struct GearStickerTile: View {
+    let index: Int
+    let title: String
+    var detail: String?
+    var badge: String?
+    var photo: Data?
+    var art: String?
+    var symbol: String
+
+    private static let tilts: [Double] = [-2.5, 1.8, -1.2, 2.4, -1.8, 1.2]
+
+    var body: some View {
+        VStack(spacing: 6) {
+            picture.frame(height: 76)
+            Text(title)
+                .font(.system(.subheadline, design: .rounded).bold())
+                .foregroundStyle(Theme.paperInk)
+                .lineLimit(2).multilineTextAlignment(.center).minimumScaleFactor(0.85)
+            if let detail {
+                Text(detail).font(.system(.caption, design: .rounded)).foregroundStyle(Theme.paperInkSoft).lineLimit(1)
+            }
+            if let badge { Sticker(text: badge, index: index, on: false, small: true) }
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, minHeight: 168)
+        .background(Theme.stickers[index % Theme.stickers.count], in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        // 오려 낸 스티커의 흰 가장자리
+        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).strokeBorder(.white, lineWidth: 5))
+        .shadow(color: .black.opacity(0.14), radius: 4, x: 0, y: 3)
+        .rotationEffect(.degrees(Self.tilts[index % Self.tilts.count]))
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
+    }
+
+    @ViewBuilder
+    private var picture: some View {
+        if let photo, let ui = UIImage(data: photo) {
+            Image(uiImage: ui).resizable().scaledToFill()
+                .frame(width: 76, height: 76)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(.white, lineWidth: 3))
+                .rotationEffect(.degrees(-3))
+        } else if let art {
+            Image(art).resizable().scaledToFit()
+        } else {
+            AppIcon(symbol, size: 34).foregroundStyle(Theme.paperInk)
+        }
     }
 }

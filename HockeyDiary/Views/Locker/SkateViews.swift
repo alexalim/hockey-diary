@@ -22,18 +22,20 @@ struct SkateListView: View {
                 ForEach(Array(groups.enumerated()), id: \.element.0) { gi, group in
                     PaperCard(tape: tapes[gi % tapes.count], tapeAngle: angles[gi % angles.count]) {
                         PaperTitle(text: group.0, systemImage: groupSymbol(group.0))
-                        ForEach(Array(group.1.enumerated()), id: \.element.id) { i, s in
-                            if i > 0 { Divider().overlay(Theme.paperDot) }
-                            NavigationLink { SkateDetailView(skate: s) } label: {
-                                HStack(spacing: 8) {
-                                    SkateRow(skate: s, index: i + gi)
-                                    Spacer(minLength: 0)
-                                    AppIcon("chevron.right").font(.caption.bold()).foregroundStyle(Theme.paperInkSoft)
+                        // 스티커처럼 두 칸 격자로(락커의 다른 장비 목록과 같은 모양).
+                        LazyVGrid(columns: [GridItem(.flexible(), spacing: 14), GridItem(.flexible(), spacing: 14)], spacing: 16) {
+                            ForEach(Array(group.1.enumerated()), id: \.element.id) { i, s in
+                                NavigationLink { SkateDetailView(skate: s) } label: {
+                                    GearStickerTile(index: i + gi, title: s.name,
+                                                    detail: [s.size.isEmpty ? nil : "사이즈 \(s.size)",
+                                                             s.currentRunner.map { "러너 \($0.name)" }].compactMap { $0 }.joined(separator: " · "),
+                                                    badge: s.isPrimary ? "주력" : s.status.title,
+                                                    photo: s.coverPhoto, art: "gear-skate", symbol: "shoeprints.fill")
                                 }
-                                .contentShape(Rectangle())
+                                .buttonStyle(.plain)
                             }
-                            .buttonStyle(.plain)
                         }
+                        .padding(.vertical, 6)
                     }
                 }
             }

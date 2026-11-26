@@ -141,6 +141,7 @@ final class ComponentDriveTests: XCTestCase {
         XCTAssertTrue(tapButton("저장"))
         sleep(1)
         XCTAssertNotNil(find("Bauer"), "스케이트 목록에 등록한 스케이트가 없다")
+        snap("gear-sticker-skates")
         back()
         let one = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "스케이트 1켤레")).firstMatch
         XCTAssertTrue(one.waitForExistence(timeout: 5), "락커 안 스케이트 칸이 1켤레로 안 바뀐다")
