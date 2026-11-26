@@ -35,7 +35,8 @@ struct AISummaryView: View {
                     Button {
                         run()
                     } label: {
-                        Label(working ? "요약하는 중…" : "돌아보기 만들기", icon: "sparkles")
+                        // 요약 중 표시는 아래 반짝이는 카드가 맡는다(여기까지 '요약하는 중'이면 두 번 보였다).
+                        Label("돌아보기 만들기", icon: "sparkles")
                             .frame(maxWidth: .infinity, minHeight: Theme.touch)
                     }
                     .disabled(working || facts.isEmpty)
