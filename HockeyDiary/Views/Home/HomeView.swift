@@ -52,11 +52,13 @@ struct HomeView: View {
                     .toolbar { BarAction(icon: "gearshape.fill", label: "설정") { showingSettings = true } }
                 if health.openFailed || health.lastSaveFailed { storeWarning }
                 // 매일 여는 화면이라 '다음 경기 → 오늘 할 일 → 바로 기록'을 먼저 둔다. 한 번만 묻는 실력 질문은 아래로.
-                // 워치·가민이 잰 하키가 아직 기록에 없으면 가장 먼저 묻는다(알림을 놓친 경우에도 보이게).
+                // 팀·뭐할까는 하단 탭에서 빠져 여기로 왔다. 다른 카드(다음 경기·운동·오늘 할 일)에 밀려 첫 화면 밖으로
+                // 내려가면 '없어졌다'고 느낀다(빌드 80 실기기). 그래서 인사말 바로 아래 맨 위에 둔다.
+                shortcutRow
+                // 워치·가민이 잰 하키가 아직 기록에 없으면 묻는다(알림을 놓친 경우에도 보이게).
                 unloggedWorkoutCard
                 nextGameHero
                 promptCard
-                shortcutRow
                 SectionHeader(title: "빠른 시작")
                 quickButtons
                 bodyCard
