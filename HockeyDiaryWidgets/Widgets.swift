@@ -202,9 +202,65 @@ struct RoutineLiveActivity: Widget {
 }
 
 @main
+/// 경기 점수판: 잠금 화면에 "펭귄스 3 : 2 베어스 · 2P"와 흐른 시간.
+struct ScoreLiveActivity: Widget {
+    var body: some WidgetConfiguration {
+        ActivityConfiguration(for: ScoreActivityAttributes.self) { context in
+            lockScreen(context.attributes, context.state)
+                .padding(14)
+                // 루틴 카드와 같은 이유로 살짝 비치게 둔다(iOS 26 유리 합성).
+                .activityBackgroundTint(WColor.deepNavy.opacity(0.85))
+                .activitySystemActionForegroundColor(.white)
+        } dynamicIsland: { context in
+            DynamicIsland {
+                DynamicIslandExpandedRegion(.leading) {
+                    Text(context.attributes.teamName).font(.caption.bold()).foregroundStyle(.white).lineLimit(1)
+                }
+                DynamicIslandExpandedRegion(.trailing) {
+                    Text(context.attributes.opponent).font(.caption.bold()).foregroundStyle(.white).lineLimit(1)
+                }
+                DynamicIslandExpandedRegion(.center) {
+                    Text("\(context.state.us) : \(context.state.them)").font(.system(size: 34, weight: .black, design: .rounded))
+                        .foregroundStyle(WColor.pink).monospacedDigit()
+                }
+                DynamicIslandExpandedRegion(.bottom) {
+                    Text(context.state.period).font(.caption.bold()).foregroundStyle(.white.opacity(0.8))
+                }
+            } compactLeading: {
+                Text("\(context.state.us)").font(.caption.bold().monospacedDigit()).foregroundStyle(WColor.pink)
+            } compactTrailing: {
+                Text("\(context.state.them)").font(.caption.bold().monospacedDigit()).foregroundStyle(.white)
+            } minimal: {
+                Text("\(context.state.us):\(context.state.them)").font(.caption2.bold().monospacedDigit()).foregroundStyle(WColor.pink)
+            }
+        }
+    }
+
+    private func lockScreen(_ a: ScoreActivityAttributes, _ s: ScoreActivityAttributes.ContentState) -> some View {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("\(a.teamName) vs \(a.opponent)").font(.caption).foregroundStyle(.white.opacity(0.8)).lineLimit(1)
+                HStack(spacing: 6) {
+                    Text(s.period).font(.caption.bold()).foregroundStyle(.white)
+                    Text(timerInterval: a.startedAt...a.startedAt.addingTimeInterval(6 * 3600), countsDown: false)
+                        .font(.caption.monospacedDigit()).foregroundStyle(.white.opacity(0.7))
+                }
+            }
+            Spacer(minLength: 8)
+            // 큰 숫자는 크기를 못 박아 둔다. 시스템이 카드 밖까지 레이어를 늘리지 않게.
+            Text("\(s.us) : \(s.them)").font(.system(size: 36, weight: .black, design: .rounded)).foregroundStyle(WColor.pink)
+                .monospacedDigit().lineLimit(1).minimumScaleFactor(0.6)
+                .frame(width: 120, height: 44, alignment: .trailing)
+                .fixedSize()
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
 struct MahadaWidgets: WidgetBundle {
     var body: some Widget {
         WeekWidget()
         RoutineLiveActivity()
+        ScoreLiveActivity()
     }
 }

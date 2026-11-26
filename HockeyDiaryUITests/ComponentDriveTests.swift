@@ -544,6 +544,41 @@ final class ComponentDriveTests: XCTestCase {
         snap("drill-search-initials")
     }
 
+    // MARK: 경기 점수판: 누르면 +1, 길게 누르면 −1, 닫았다 열어도 이어지고, 끝내면 경기 리뷰가 채워진다
+
+    func test_scoreboard_to_game_review() {
+        XCTAssertTrue(newRecord("경기 점수판"))
+        guard let opp = formField("상대 팀") else { XCTFail("상대 팀 칸이 없다"); return }
+        opp.tap(); opp.typeText("베어스")
+        XCTAssertTrue(tapButton("경기 시작"), "경기 시작 버튼이 없다")
+        let us = app.otherElements.matching(NSPredicate(format: "label BEGINSWITH '우리 '")).firstMatch
+        let them = app.otherElements.matching(NSPredicate(format: "label BEGINSWITH '상대 '")).firstMatch
+        XCTAssertTrue(us.waitForExistence(timeout: 5), "우리 점수 칸이 없다")
+        us.tap()
+        let mine = app.buttons["내가 넣었어요"]
+        XCTAssertTrue(mine.waitForExistence(timeout: 3), "누가 넣었는지 묻지 않는다"); mine.tap()
+        us.tap()
+        let other = app.buttons["다른 사람"]
+        if other.waitForExistence(timeout: 3) { other.tap() }
+        them.tap(); them.tap()
+        them.press(forDuration: 1.0)   // 잘못 누른 것 되돌리기
+        XCTAssertTrue(app.staticTexts["score-us"].label == "2" || us.label.contains("2점"), "우리 점수가 2가 아니다: \(us.label)")
+        XCTAssertTrue(them.label.contains("1점"), "길게 눌러도 상대 점수가 안 줄었다: \(them.label)")
+        XCTAssertNotNil(find("내 골 1", swipes: 0), "내 골이 안 세어졌다")
+        snap("score-1-board")
+
+        // 닫았다 다시 열어도 이어진다(벤치에서 폰을 잠갔다 켜는 경우).
+        tapButton("닫기"); sleep(1)
+        XCTAssertTrue(newRecord("경기 점수판 (진행 중)"), "진행 중인 점수판이 메뉴에 없다")
+        XCTAssertTrue(us.waitForExistence(timeout: 5) && us.label.contains("2점"), "다시 열었더니 점수가 사라졌다")
+
+        XCTAssertTrue(tapButton("끝내고 기록하기"))
+        let confirm = app.buttons["끝내고 기록하기"].firstMatch
+        if confirm.waitForExistence(timeout: 3) { confirm.tap() }
+        XCTAssertNotNil(find("점수판으로 채웠어요(2 : 1)", swipes: 0), "경기 리뷰에 점수판 값이 안 채워졌다")
+        snap("score-2-review")
+    }
+
     private func relaunch(with args: String...) {
         app.terminate()
         app.launchArguments += args

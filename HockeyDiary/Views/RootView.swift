@@ -12,6 +12,10 @@ enum NewEntry: Identifiable, Hashable {
     case workout(UnloggedWorkout)
     /// 팀 일정으로 기록 쓰기(상대·링크장·시간을 채우고 저장하면 일정과 잇는다).
     case event(UUID)
+    /// 경기 점수판(팀 일정에서 열면 그 일정).
+    case scoreboard(UUID?)
+    /// 점수판을 끝낸 결과로 경기 리뷰 쓰기.
+    case scoreResult(Scoreboard)
 
     var id: String {
         switch self {
@@ -20,6 +24,8 @@ enum NewEntry: Identifiable, Hashable {
         case .practice: return "practice"
         case .workout(let w): return "workout-\(w.id)"
         case .event(let id): return "event-\(id)"
+        case .scoreboard(let id): return "scoreboard-\(id?.uuidString ?? "")"
+        case .scoreResult(let b): return "score-result-\(b.startedAt.timeIntervalSince1970)"
         }
     }
 }
@@ -124,6 +130,8 @@ struct RootView: View {
             Button("자유 연습") { newEntry = .session(.freePractice) }
             Button("정규게임 리뷰") { newEntry = .session(.regularGame) }
             Button("미니게임 리뷰") { newEntry = .session(.miniGame) }
+            // 진행 중인 경기가 있으면 이어서 연다(점수는 기기에 저장돼 있다).
+            Button(ScoreboardStore.shared.current == nil ? "경기 점수판" : "경기 점수판 (진행 중)") { newEntry = .scoreboard(nil) }
             Button("드릴 시작") { newEntry = .practice }
             Button("하루 일기") { newEntry = .journal(Date()) }
         }
@@ -140,6 +148,10 @@ struct RootView: View {
                 NavigationStack { SessionEditorView(newType: lastType, startsAt: w.start, workout: w) }
             case .event(let id):
                 NavigationStack { SessionEditorView(newType: .regularGame, eventID: id) }
+            case .scoreboard(let id):
+                NavigationStack { ScoreboardView(eventID: id) }
+            case .scoreResult(let b):
+                NavigationStack { SessionEditorView(newType: b.kind, startsAt: b.startedAt, scoreboard: b) }
             case .practice:
                 NavigationStack {
                     PracticeView().toolbar { ToolbarItem(placement: .cancellationAction) { Button("닫기") { newEntry = nil } } }

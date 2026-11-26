@@ -41,6 +41,8 @@ struct SessionEditorView: View {
     private let workout: UnloggedWorkout?
     /// 팀 일정에서 연 기록. 그 일정 값으로 채우고 저장하면 일정과 잇는다.
     private let eventID: UUID?
+    /// 점수판을 끝내고 연 기록. 점수·내 골·어시·상대·시간을 채운다.
+    private let scoreboard: Scoreboard?
 
     @State private var type: ActivityType
     @State private var startsAt: Date
@@ -98,18 +100,20 @@ struct SessionEditorView: View {
     @State private var saved: Session?
     @State private var bests: [PersonalBest] = []
 
-    init(newType: ActivityType, startsAt: Date = Date(), fromNow: Bool = false, workout: UnloggedWorkout? = nil, eventID: UUID? = nil) {
+    init(newType: ActivityType, startsAt: Date = Date(), fromNow: Bool = false, workout: UnloggedWorkout? = nil, eventID: UUID? = nil,
+         scoreboard: Scoreboard? = nil) {
         session = nil
-        self.fromNow = fromNow && workout == nil && eventID == nil
+        self.fromNow = fromNow && workout == nil && eventID == nil && scoreboard == nil
         self.workout = workout
-        self.eventID = eventID
+        self.eventID = eventID ?? scoreboard?.eventID
+        self.scoreboard = scoreboard
         let preset = RecordPrefs.preset()
         self.preset = preset
         _expanded = State(initialValue: preset.expandedByDefault)
         _showingMore = State(initialValue: preset.gameDetailsOpen)
         _type = State(initialValue: newType)
         _startsAt = State(initialValue: workout?.start ?? startsAt)
-        _minutes = State(initialValue: workout?.minutes ?? preset.defaultMinutes(for: newType))
+        _minutes = State(initialValue: scoreboard?.minutes(until: Date()) ?? workout?.minutes ?? preset.defaultMinutes(for: newType))
         _surface = State(initialValue: .unknown)
         _rinkName = State(initialValue: "")
         _iceFeel = State(initialValue: nil)
@@ -121,18 +125,18 @@ struct SessionEditorView: View {
         _coachNotes = State(initialValue: "")
         _selfRating = State(initialValue: nil)
         _nextGoal = State(initialValue: "")
-        _opponent = State(initialValue: "")
-        _scoreFor = State(initialValue: nil)
-        _scoreAgainst = State(initialValue: nil)
+        _opponent = State(initialValue: scoreboard?.opponent ?? "")
+        _scoreFor = State(initialValue: scoreboard?.us)
+        _scoreAgainst = State(initialValue: scoreboard?.them)
         _position = State(initialValue: "")
-        _goals = State(initialValue: nil)
-        _assists = State(initialValue: nil)
+        _goals = State(initialValue: scoreboard.map(\.myGoals))
+        _assists = State(initialValue: scoreboard.map(\.myAssists))
         _review = State(initialValue: "")
         _learnings = State(initialValue: [])
         _attempts = State(initialValue: [])
         _skateID = State(initialValue: nil)
         _runnerID = State(initialValue: nil)
-        _iceMinutes = State(initialValue: workout?.minutes ?? preset.defaultMinutes(for: newType))
+        _iceMinutes = State(initialValue: scoreboard?.minutes(until: Date()) ?? workout?.minutes ?? preset.defaultMinutes(for: newType))
         _iceMinutesEdited = State(initialValue: false)
     }
 
@@ -141,6 +145,7 @@ struct SessionEditorView: View {
         self.fromNow = false
         self.workout = nil
         self.eventID = nil
+        self.scoreboard = nil
         self.preset = RecordPrefs.preset()
         _expanded = State(initialValue: true)
         _type = State(initialValue: session.type)
@@ -649,6 +654,9 @@ struct SessionEditorView: View {
             opponent = e.opponent
             userTouchedTime = true
             prefillNote = "팀 일정 '\(e.title)'으로 채웠어요. 저장하면 일정과 이어져요."
+            if let scoreboard { applyScoreboard(scoreboard) }
+        } else if let scoreboard {
+            applyScoreboard(scoreboard)
         } else if let workout {
             userTouchedTime = true
             prefillNote = "\(workout.source.isEmpty ? "건강 앱" : workout.source) '\(workout.activityName)' 운동 시간으로 채웠어요. 종류만 골라 주세요."
@@ -660,6 +668,19 @@ struct SessionEditorView: View {
             runnerID = primary.currentRunner?.id
         }
         if type.isGame { suggestSkills() }
+    }
+
+    /// 점수판 결과: 시작 시각·시간·점수·상대·내 골·어시. 일정 값보다 점수판이 우선(경기장에서 실제로 누른 값).
+    private func applyScoreboard(_ b: Scoreboard) {
+        type = b.kind
+        startsAt = b.startedAt
+        minutes = b.minutes(until: Date())
+        if !iceMinutesEdited { iceMinutes = minutes }
+        if !b.opponent.isEmpty { opponent = b.opponent }
+        scoreFor = b.us; scoreAgainst = b.them
+        goals = b.myGoals; assists = b.myAssists
+        userTouchedTime = true
+        prefillNote = "점수판으로 채웠어요(\(b.us) : \(b.them)). 맞는지만 봐 주세요."
     }
 
     /// 고른 날의 건강 앱 운동을 종류 상관없이 모두 불러온다(직접 고르기용). 권한 창은 띄우지 않는다.

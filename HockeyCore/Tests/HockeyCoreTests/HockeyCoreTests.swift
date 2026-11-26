@@ -1293,3 +1293,54 @@ final class SkillSearchTests: XCTestCase {
         XCTAssertFalse(SkillSearch.isSame("크로스", "크로스오버"))
     }
 }
+
+// 테스트 계층: Unit — 경기 점수판(벤치에서 누르는 점수 → 경기 리뷰 칸).
+final class ScoreboardTests: XCTestCase {
+    let t0 = Date(timeIntervalSince1970: 1_800_000_000)
+    func board() -> Scoreboard { Scoreboard(teamName: "펭귄스", opponent: "베어스", startedAt: t0) }
+
+    // 점수와 내 골·어시가 따로 세어진다. 상대 골에는 내 기록이 붙지 않는다.
+    func testScoreAndCredits() {
+        var b = board()
+        b.score(.us, at: t0); b.creditLastGoal(.myGoal)
+        b.score(.us, at: t0); b.creditLastGoal(.myAssist)
+        b.score(.us, at: t0)
+        b.score(.them, at: t0, credit: .myGoal)
+        XCTAssertEqual(b.us, 3); XCTAssertEqual(b.them, 1)
+        XCTAssertEqual(b.myGoals, 1); XCTAssertEqual(b.myAssists, 1)
+    }
+
+    // 되돌리기는 그 편의 가장 최근 골만 뺀다. 없으면 아무 일 없다.
+    func testUndo() {
+        var b = board()
+        b.score(.us, at: t0); b.creditLastGoal(.myGoal)
+        b.score(.them, at: t0)
+        b.score(.us, at: t0)
+        b.undo(.us)
+        XCTAssertEqual(b.us, 1); XCTAssertEqual(b.them, 1); XCTAssertEqual(b.myGoals, 1, "먼저 넣은 내 골은 남는다")
+        b.undo(.them); b.undo(.them)
+        XCTAssertEqual(b.them, 0)
+    }
+
+    // 피리어드는 1~연장 안에서만, 골에는 그때 피리어드가 남는다.
+    func testPeriods() {
+        var b = board()
+        b.setPeriod(2); b.score(.us, at: t0)
+        b.setPeriod(9)
+        XCTAssertEqual(b.periodTitle, "연장")
+        b.setPeriod(0)
+        XCTAssertEqual(b.periodTitle, "1P")
+        XCTAssertEqual(b.goals.first?.period, 2)
+    }
+
+    // 리뷰 시간과 잠금 화면 한 줄. 저장했다 불러도 같다.
+    func testMinutesLineAndCodable() throws {
+        var b = board()
+        b.score(.us, at: t0)
+        XCTAssertEqual(b.minutes(until: t0.addingTimeInterval(75 * 60)), 75)
+        XCTAssertEqual(b.minutes(until: t0), 1)
+        XCTAssertEqual(b.line, "펭귄스 1 : 0 베어스 · 1P")
+        let back = try JSONDecoder().decode(Scoreboard.self, from: JSONEncoder().encode(b))
+        XCTAssertEqual(back, b)
+    }
+}

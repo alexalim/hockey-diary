@@ -249,6 +249,13 @@ struct TeamEventView: View {
                 Label(event.sessionID == nil ? "이 일정으로 기록 만들기" : "기록 보기", icon: "square.and.pencil").frame(maxWidth: .infinity, minHeight: Theme.touch)
             }
             .buttonStyle(.bordered)
+            if event.sessionID == nil {
+                // 경기 중 벤치에서 점수를 누르고, 끝내면 이 일정으로 경기 리뷰가 채워진다.
+                Button { jumper?.go(.entry(.scoreboard(event.id))) } label: {
+                    Label("점수판 열기", icon: "sportscourt").frame(maxWidth: .infinity, minHeight: Theme.touch)
+                }
+                .buttonStyle(.bordered)
+            }
         }
     }
 }
