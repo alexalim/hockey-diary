@@ -580,6 +580,15 @@ final class ComponentDriveTests: XCTestCase {
         snap("score-2-review")
     }
 
+    // MARK: 잠금 화면·다이내믹 아일랜드를 누른 것과 같은 주소(mahada://scoreboard)로 점수판이 바로 열린다
+
+    func test_scoreboard_deep_link() {
+        tab("기록")   // 다른 화면에 있다가
+        app.open(URL(string: "mahada://scoreboard")!)
+        XCTAssertTrue(app.navigationBars["점수판"].waitForExistence(timeout: 8), "주소로 열었는데 점수판이 안 뜬다")
+        snap("score-deeplink")
+    }
+
     private func relaunch(with args: String...) {
         app.terminate()
         app.launchArguments += args
