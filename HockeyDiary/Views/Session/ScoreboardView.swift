@@ -46,7 +46,9 @@ struct ScoreboardView: View {
         .onAppear(perform: prefill)
         // 경기 중 화면이 꺼지지 않게. 나가면 원래대로.
         .onAppear { UIApplication.shared.isIdleTimerDisabled = true }
-        .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
+        .onDisappear { UIApplication.shared.isIdleTimerDisabled = false; OrientationDelegate.set(landscape: false) }
+        // 경기가 시작되면 가로로 돌린다(세로로 들어도 된다). 시작 전 입력은 키보드 때문에 세로.
+        .onChange(of: store.current == nil, initial: true) { _, idle in OrientationDelegate.set(landscape: !idle) }
         .confirmationDialog("누가 넣었어요?", isPresented: $askingCredit, titleVisibility: .visible) {
             Button("내가 넣었어요") { store.change { $0.creditLastGoal(.myGoal) } }
             Button("내가 어시했어요") { store.change { $0.creditLastGoal(.myAssist) } }
@@ -106,6 +108,39 @@ struct ScoreboardView: View {
     // MARK: - 경기 중
 
     private func boardView(_ b: Scoreboard) -> some View {
+        GeometryReader { g in
+            if g.size.width > g.size.height { landscape(b) } else { portrait(b) }
+        }
+        .screenBackground()
+    }
+
+    /// 가로: 왼쪽 우리, 오른쪽 상대를 크게. 가운데 좁은 기둥에 피리어드·시간·내 기록·끝내기.
+    private func landscape(_ b: Scoreboard) -> some View {
+        HStack(spacing: 12) {
+            side(.us, name: b.teamName.isEmpty ? "우리" : b.teamName, score: b.us, color: Theme.cobalt)
+            VStack(spacing: 10) {
+                Picker("피리어드", selection: Binding(get: { b.period }, set: { p in store.change { $0.setPeriod(p) } })) {
+                    ForEach(1...Scoreboard.lastPeriod, id: \.self) { Text(Scoreboard.periodTitle($0)).tag($0) }
+                }
+                .pickerStyle(.menu)
+                .font(.headline)
+                Text(timerInterval: b.startedAt...b.startedAt.addingTimeInterval(6 * 3600), countsDown: false)
+                    .font(.title3.monospacedDigit().bold()).foregroundStyle(Theme.title)
+                if b.myGoals + b.myAssists > 0 {
+                    Text("내 골 \(b.myGoals) · 어시 \(b.myAssists)").font(.caption.bold()).foregroundStyle(Theme.title)
+                }
+                Spacer(minLength: 0)
+                Text("누르면 +1\n길게 누르면 −1").font(.caption2).multilineTextAlignment(.center).foregroundStyle(Theme.inkSecondary)
+                Button { confirmingFinish = true } label: { Text("끝내고 기록하기").font(.subheadline.bold()) }
+                    .buttonStyle(PinkButtonStyle())
+            }
+            .frame(width: 150)
+            side(.them, name: b.opponent.isEmpty ? "상대" : b.opponent, score: b.them, color: Theme.inkSecondary)
+        }
+        .padding(.horizontal, 12).padding(.vertical, 8)
+    }
+
+    private func portrait(_ b: Scoreboard) -> some View {
         VStack(spacing: 14) {
             HStack {
                 Picker("피리어드", selection: Binding(get: { b.period }, set: { p in store.change { $0.setPeriod(p) } })) {
@@ -129,7 +164,6 @@ struct ScoreboardView: View {
                 .buttonStyle(PinkButtonStyle())
         }
         .padding(Theme.screenPadding)
-        .screenBackground()
     }
 
     private func side(_ side: Scoreboard.Side, name: String, score: Int, color: Color) -> some View {

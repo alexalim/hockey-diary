@@ -554,6 +554,7 @@ final class ComponentDriveTests: XCTestCase {
         let us = app.otherElements.matching(NSPredicate(format: "label BEGINSWITH '우리 '")).firstMatch
         let them = app.otherElements.matching(NSPredicate(format: "label BEGINSWITH '상대 '")).firstMatch
         XCTAssertTrue(us.waitForExistence(timeout: 5), "우리 점수 칸이 없다")
+        sleep(1); snap("score-0-landscape")   // 경기가 시작되면 가로로 돈다
         us.tap()
         let mine = app.buttons["내가 넣었어요"]
         XCTAssertTrue(mine.waitForExistence(timeout: 3), "누가 넣었는지 묻지 않는다"); mine.tap()

@@ -1,8 +1,27 @@
 import SwiftUI
 import SwiftData
 
+/// 화면 방향. 앱은 세로 고정이고, 경기 점수판이 열려 있을 때만 가로를 허용한다.
+final class OrientationDelegate: NSObject, UIApplicationDelegate {
+    static var allowLandscape = false
+
+    func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
+        Self.allowLandscape ? .allButUpsideDown : .portrait
+    }
+
+    /// 허용 방향을 바꾸고, 원하면 그쪽으로 돌린다.
+    @MainActor
+    static func set(landscape: Bool) {
+        allowLandscape = landscape
+        guard let scene = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first else { return }
+        scene.windows.first?.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
+        scene.requestGeometryUpdate(.iOS(interfaceOrientations: landscape ? .landscapeRight : .portrait)) { _ in }
+    }
+}
+
 @main
 struct HockeyDiaryApp: App {
+    @UIApplicationDelegateAdaptor(OrientationDelegate.self) private var orientation
     let container: ModelContainer
 
     init() {
