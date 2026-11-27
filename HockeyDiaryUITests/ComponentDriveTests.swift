@@ -791,6 +791,51 @@ final class ComponentDriveTests: XCTestCase {
         if app.keyboards.firstMatch.waitForExistence(timeout: 2) { f.typeText(text) }
     }
 
+    // MARK: 코치·감독: 명단 붙여 넣기 → 매주 반복 일정 → 지난 경기 라인업 가져오기
+
+    func test_coach_roster_repeat_lineup() {
+        openTeam()
+        guard let name = formField("팀 이름 (예: 목동 펭귄스)") else { XCTFail("팀 이름 칸이 없다"); return }
+        name.tap(); name.typeText("코치 팀")
+        XCTAssertTrue(tapButton("만들기"))
+
+        // 1) 명단 붙여 넣기(4명, 번호·포지션)
+        XCTAssertTrue(tapText("명단 붙여 넣기"), "명단 붙여 넣기 버튼이 없다")
+        let box = app.textViews["명단 칸"].exists ? app.textViews["명단 칸"] : app.textFields["명단 칸"]
+        XCTAssertTrue(box.waitForExistence(timeout: 3), "명단 칸이 없다")
+        box.tap(); box.typeText("9 민수\n17 지훈 D\n30 골리킴 G\n현우")
+        snap("coach-1-roster-paste")
+        let add = app.buttons["4명 추가"]
+        XCTAssertTrue(add.waitForExistence(timeout: 3), "4명을 읽지 못했다")
+        add.tap(); sleep(1)
+        XCTAssertNotNil(find("골리킴"), "붙여 넣은 명단이 팀에 없다")
+
+        // 2) 매주 4주 반복 일정
+        XCTAssertTrue(tapText("일정 추가"), "일정 추가 버튼이 없다")
+        let inc = app.steppers.matching(NSPredicate(format: "label CONTAINS '반복'")).firstMatch.buttons.element(boundBy: 1)
+        XCTAssertTrue(inc.waitForExistence(timeout: 3), "반복 칸이 없다")
+        for _ in 0..<3 { inc.tap() }
+        XCTAssertNotNil(find("매주 4주 반복", swipes: 0), "반복 주 수가 안 바뀐다")
+        snap("coach-2-repeat")
+        XCTAssertTrue(tapButton("저장")); sleep(1)
+        let rows = app.buttons.matching(NSPredicate(format: "label CONTAINS '정규게임'"))
+        XCTAssertGreaterThanOrEqual(rows.count, 4, "4주 반복했는데 일정이 \(rows.count)개다")
+        snap("coach-3-events")
+
+        // 3) 첫 일정 라인업에 한 명 넣고, 둘째 일정에서 '지난 경기 라인업 가져오기'
+        rows.element(boundBy: 0).tap(); sleep(1)
+        XCTAssertTrue(tapText("라인업 짜기"), "라인업 짜기 버튼이 없다")
+        XCTAssertTrue(tapText("비어 있음"), "라인업 칸이 없다")
+        XCTAssertTrue(tapText("민수"), "라인업에 고를 팀원이 없다")
+        XCTAssertTrue(tapButton("저장")); sleep(1)
+        back(); sleep(1)
+        rows.element(boundBy: 1).tap(); sleep(1)
+        XCTAssertTrue(tapText("라인업 짜기"))
+        XCTAssertTrue(tapText("지난 경기 라인업 가져오기"), "둘째 일정에 지난 라인업 가져오기가 없다")
+        XCTAssertNotNil(find("민수", swipes: 0), "가져온 라인업에 민수가 없다")
+        snap("coach-4-lineup-carried")
+    }
+
     private func relaunch(with args: String...) {
         app.terminate()
         app.launchArguments += args

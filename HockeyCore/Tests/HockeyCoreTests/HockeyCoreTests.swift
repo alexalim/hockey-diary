@@ -1376,3 +1376,42 @@ final class ScoreboardTests: XCTestCase {
         XCTAssertEqual(back, b)
     }
 }
+
+
+// 테스트 계층: Unit — 코치 도구: 명단 붙여 넣기, 매주 반복, 지난 라인업 이어 쓰기.
+final class CoachToolsTests: XCTestCase {
+    func testParseRosterShapes() {
+        let r = CoachTools.parseRoster("""
+        1. 9 민수 F
+        #17 지훈 D
+        골리킴 30 (G)
+        현우
+        민수, 서준 / 7 도윤
+        """)
+        XCTAssertEqual(r.map(\.name), ["민수", "지훈", "골리킴", "현우", "서준", "도윤"], "같은 이름(민수)은 한 번만")
+        XCTAssertEqual(r[0].number, "9"); XCTAssertEqual(r[0].position, .forward)
+        XCTAssertEqual(r[1].number, "17"); XCTAssertEqual(r[1].position, .defense)
+        XCTAssertEqual(r[2].number, "30"); XCTAssertEqual(r[2].position, .goalie)
+        XCTAssertEqual(r[3].number, ""); XCTAssertEqual(r[3].position, .any)
+        XCTAssertEqual(r[5].number, "7")
+    }
+
+    func testWeeklyDates() {
+        let t0 = Date(timeIntervalSince1970: 1_800_000_000)
+        let d = CoachTools.weeklyDates(from: t0, weeks: 4)
+        XCTAssertEqual(d.count, 4)
+        XCTAssertEqual(d[3].timeIntervalSince(t0), 21 * 86400, accuracy: 3600)
+        XCTAssertEqual(CoachTools.weeklyDates(from: t0, weeks: 0).count, 1)
+    }
+
+    func testCarryOverDropsAbsentAndRemoved() {
+        let a = UUID(), b = UUID(), c = UUID()
+        var l = Lineup()
+        l.assign(a, to: .lw1); l.assign(b, to: .c1); l.assign(c, to: .g1)
+        var att = AttendanceSheet(); att[b] = .notGoing
+        let out = CoachTools.carryOver(l, attendance: att, activeMembers: [a, b])
+        XCTAssertEqual(out[.lw1], a)
+        XCTAssertNil(out[.c1], "불참이면 비운다")
+        XCTAssertNil(out[.g1], "명단에서 빠졌으면 비운다")
+    }
+}

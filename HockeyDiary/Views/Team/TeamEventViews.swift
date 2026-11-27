@@ -368,6 +368,12 @@ struct LineupEditor: View {
     @State private var lineup = Lineup()
     @State private var picking: LineupSlot?
     @State private var loaded = false
+    @Query(sort: \TeamEvent.at, order: .reverse) private var allEvents: [TeamEvent]
+
+    /// 이 팀의 이 일정 전 일정 중 라인업이 있는 가장 최근 것.
+    private var previousLineup: TeamEvent? {
+        allEvents.first { $0.teamID == event.teamID && $0.id != event.id && $0.at < event.at && !$0.lineup.assignments.isEmpty }
+    }
 
     private var names: [UUID: String] { Dictionary(uniqueKeysWithValues: members.map { ($0.id, $0.name) }) }
 
@@ -377,9 +383,17 @@ struct LineupEditor: View {
             group("수비", LineupSlot.defensePairs)
             group("골리", [LineupSlot.goalies])
             Section {
+                // 매번 빈 칸에서 시작하지 않게: 이 팀 지난 경기 라인업을 가져온다(이번에 불참·명단에서 빠진 사람은 비운다).
+                if let prev = previousLineup {
+                    Button {
+                        lineup = CoachTools.carryOver(prev.lineup, attendance: event.attendance, activeMembers: Set(members.filter(\.isActive).map(\.id)))
+                    } label: {
+                        Label("지난 경기 라인업 가져오기 (\(prev.at.formatted(.dateTime.month().day())))", icon: "arrow.uturn.backward")
+                    }
+                }
                 Button("라인업 비우기", role: .destructive) { lineup = Lineup() }
             } footer: {
-                Text("참석으로 체크한 사람이 위에 먼저 나와요. 한 사람은 한 자리에만 들어가요.")
+                Text("참석으로 체크한 사람이 위에 먼저 나와요. 한 사람은 한 자리에만 들어가요. 지난 라인업을 가져오면 이번에 불참인 사람은 빠져요.")
             }
         }
         .navigationTitle("라인업")

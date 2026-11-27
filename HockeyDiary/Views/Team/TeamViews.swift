@@ -13,6 +13,7 @@ struct TeamView: View {
     @State private var newTeamName = ""
     @State private var editingMember: TeamMember?
     @State private var addingMember = false
+    @State private var pastingRoster = false
     @State private var addingEvent = false
     @State private var renaming = false
     @State private var addingTeam = false
@@ -131,7 +132,11 @@ struct TeamView: View {
                         }
                         .buttonStyle(.plain)
                     }
-                    Button { addingMember = true } label: { Label("팀원 추가", icon: "person.badge.plus") }
+                    HStack(spacing: 16) {
+                        Button { addingMember = true } label: { Label("팀원 추가", icon: "person.badge.plus") }
+                        // 20명을 하나씩 넣다 지친다. 단톡방 명단을 붙여 넣으면 한꺼번에.
+                        Button { pastingRoster = true } label: { Label("명단 붙여 넣기", icon: "doc.on.clipboard") }
+                    }
                 }
                 if !past.isEmpty {
                     Card {
@@ -190,6 +195,7 @@ struct TeamView: View {
             Button("취소", role: .cancel) {}
         }
         .sheet(isPresented: $addingMember) { NavigationStack { TeamMemberEditor(team: team, member: nil) } }
+        .sheet(isPresented: $pastingRoster) { NavigationStack { RosterPasteView(team: team) } }
         .sheet(item: $editingMember) { m in NavigationStack { TeamMemberEditor(team: team, member: m) } }
         .sheet(isPresented: $addingEvent) { NavigationStack { TeamEventEditor(team: team, event: nil) } }
     }
@@ -329,6 +335,8 @@ struct TeamEventEditor: View {
     @State private var memo = ""
     @State private var loaded = false
     @State private var confirmingDelete = false
+    /// 새 일정만: 같은 요일·시간으로 몇 주 만들지(1 = 한 번만).
+    @State private var weeks = 1
 
     var body: some View {
         Form {
@@ -338,6 +346,14 @@ struct TeamEventEditor: View {
                               selection: $kind, columns: 4, minHeight: 64)
                 DatePicker("언제", selection: $at)
                 Stepper("예정 시간 \(minutesText(minutes))", value: $minutes, in: 30...240, step: 15)
+                if event == nil {
+                    // 매주 같은 시간 훈련을 매번 새로 만들지 않게.
+                    Stepper(weeks == 1 ? "반복 안 함" : "매주 \(weeks)주 반복", value: $weeks, in: 1...12)
+                }
+            } footer: {
+                if event == nil && weeks > 1 {
+                    Text("같은 요일·시간으로 \(weeks)개를 만들어요. 마지막은 \(CoachTools.weeklyDates(from: at, weeks: weeks).last!.formatted(.dateTime.month().day().weekday(.abbreviated)))이에요.")
+                }
             }
             Section("어디서") { RinkNameField(text: $rinkName) }
             if kind.isGame { Section("상대") { TextField("상대 팀", text: $opponent) } }
@@ -368,8 +384,68 @@ struct TeamEventEditor: View {
         let target = event ?? { let e = TeamEvent(teamID: team.id, at: at); context.insert(e); return e }()
         target.at = at; target.minutes = minutes; target.kind = kind
         target.rinkName = rinkName.trimmingCharacters(in: .whitespaces); target.opponent = opponent.trimmingCharacters(in: .whitespaces); target.memo = memo
+        if event == nil && weeks > 1 {
+            for d in CoachTools.weeklyDates(from: at, weeks: weeks).dropFirst() {
+                let e = TeamEvent(teamID: team.id, at: d)
+                e.minutes = minutes; e.kind = kind; e.rinkName = target.rinkName; e.opponent = target.opponent; e.memo = memo
+                context.insert(e)
+            }
+        }
         if !target.rinkName.isEmpty { RinkStore.touch(name: target.rinkName, context: context) }
         context.saveOrReport()
         dismiss()
+    }
+}
+
+
+/// 명단 붙여 넣기: 한 줄에 한 명. 등번호·포지션(G·D·F)은 줄에서 읽는다. 이미 있는 이름은 건너뛴다.
+struct RosterPasteView: View {
+    @Environment(\.modelContext) private var context
+    @Environment(\.dismiss) private var dismiss
+    let team: Team
+    @State private var text = ""
+
+    private var existing: Set<String> { Set(TeamStore.members(of: team, context: context).map(\.name)) }
+    private var lines: [CoachTools.RosterLine] { CoachTools.parseRoster(text).filter { !existing.contains($0.name) } }
+
+    var body: some View {
+        Form {
+            Section {
+                TextField("9 민수\n17 지훈 D\n30 골리킴 G", text: $text, axis: .vertical)
+                    .lineLimit(6...14)
+                    .accessibilityIdentifier("명단 칸")
+            } footer: {
+                Text("단톡방 명단을 그대로 붙여 넣어도 돼요. 한 줄에 한 명, 등번호와 포지션(G 골리 · D 수비 · F 공격)은 있으면 읽어요.")
+            }
+            if !lines.isEmpty {
+                Section("추가할 사람 \(lines.count)명") {
+                    ForEach(lines, id: \.name) { l in
+                        HStack {
+                            Text(l.number.isEmpty ? "–" : l.number).font(.subheadline.monospacedDigit().bold()).frame(width: 32, alignment: .leading)
+                            Text(l.name)
+                            Spacer()
+                            if l.position != .any { Text(l.position.title).font(.caption).foregroundStyle(Theme.inkSecondary) }
+                        }
+                    }
+                }
+            }
+        }
+        .navigationTitle("명단 붙여 넣기")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) { Button("닫기") { dismiss() } }
+            ToolbarItem(placement: .confirmationAction) {
+                Button(lines.isEmpty ? "추가" : "\(lines.count)명 추가") {
+                    for l in lines {
+                        let m = TeamMember(teamID: team.id, name: l.name)
+                        m.number = l.number; m.position = l.position
+                        context.insert(m)
+                    }
+                    context.saveOrReport()
+                    dismiss()
+                }
+                .disabled(lines.isEmpty)
+            }
+        }
     }
 }
