@@ -44,7 +44,7 @@ public enum FirstIce {
             case .watch: return "flag.2.crossed"
             case .stickhandle: return "figure.hockey"
             case .rink: return "mappin.and.ellipse"
-            case .gear: return "shield.lefthalf.filled"
+            case .gear: return "tshirt.fill"
             case .firstSkate: return "pencil"
             }
         }

@@ -909,6 +909,7 @@ final class ComponentDriveTests: XCTestCase {
         snap("F01-home-intro")
         XCTAssertNil(find("이번 주 하키", swipes: 4), "입문 전인데 이번 주 하키 0회 카드가 보인다")
         XCTAssertNil(find("이달의 퀘스트", swipes: 0), "입문 전인데 퀘스트가 보인다")
+        XCTAssertNil(find("빠른 시작", swipes: 0), "입문 전인데 빠른 시작(경기 리뷰 등)이 보인다")
         app.swipeDown(); app.swipeDown(); app.swipeDown(); app.swipeDown()
         // 장비 알아보기 → 처음 장비
         guard let gearRow = find("장비 알아보기, 처음 장비 보기", swipes: 2) else { XCTFail("장비 단계가 없다"); return }
@@ -924,6 +925,7 @@ final class ComponentDriveTests: XCTestCase {
         if let what = find("뭐할까", swipes: 0) {
             what.tap(); sleep(1)
             XCTAssertNotNil(find("드릴 하나: 스틱핸들링 볼 (집)", swipes: 0), "입문 전 뭐할까 첫 카드가 집 드릴이 아니다")
+            XCTAssertNil(find("시간이 얼마나 있어요?", swipes: 0), "입문 전인데 시간 고르기 카드가 있다")
             XCTAssertNil(find("오늘 몸 상태 남기기", swipes: 3), "입문 전인데 몸 상태 카드가 있다")
             snap("F03-whatnow")
             back()
@@ -1059,9 +1061,13 @@ final class ComponentDriveTests: XCTestCase {
     private func branch(_ name: String) {
         let all = app.segmentedControls.buttons.matching(NSPredicate(format: "label == %@", name))
         _ = all.firstMatch.waitForExistence(timeout: 3)
-        for i in 0..<min(all.count, 10) {
-            let s = all.element(boundBy: i)
-            if s.exists && s.isHittable { s.tap(); sleep(1); return }
+        for attempt in 0..<3 {
+            for i in 0..<min(all.count, 10) {
+                let s = all.element(boundBy: i)
+                if s.exists && s.isHittable { s.tap(); sleep(1); return }
+            }
+            // 훈련 탭이 전에 내려 둔 자리에 있으면 갈래 버튼이 화면 위로 숨는다. 위로 올려서 다시 찾는다.
+            if attempt < 2 { app.swipeDown(); app.swipeDown() }
         }
         XCTFail("훈련 갈래 \(name)이 없다")
     }

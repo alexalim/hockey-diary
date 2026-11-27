@@ -35,7 +35,7 @@ struct LockerView: View {
                 if prestarter && gear.isEmpty && skates.isEmpty {
                     NavigationLink { StarterGearView() } label: {
                         HStack(spacing: 12) {
-                            AppIcon("shield.lefthalf.filled", size: 22).foregroundStyle(Theme.neonPink)
+                            AppIcon("tshirt.fill", size: 22).foregroundStyle(Theme.neonPink)
                                 .frame(width: 40, height: 40).background(Theme.neonPink.opacity(0.12), in: Circle())
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("처음 장비, 뭐부터?").font(.subheadline.bold()).foregroundStyle(Theme.title)

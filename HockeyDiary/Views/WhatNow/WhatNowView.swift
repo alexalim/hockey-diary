@@ -28,6 +28,7 @@ struct WhatNowView: View {
     /// 지금 쓸 수 있는 시간(분). 고르면 그 안에 끝나는 드릴·루틴을 권한다. 다시 누르면 해제.
     @State private var minutesFree: Int?
 
+    private var introMode: Bool { FirstIce.isActive(prestarter: prestarter, hasSessions: !sessions.isEmpty) }
     private var todayCheck: BodyCheck? { checks.first { Calendar.current.isDateInToday($0.day) } }
 
     private var facts: WhatNow.Facts {
@@ -89,11 +90,12 @@ struct WhatNowView: View {
                 ForEach(Array(list.enumerated()), id: \.element.id) { i, s in
                     if i == 0 { SectionHeader(title: "지금 하나") }
                     // 시간 고르기는 첫 카드 아래에 둔다(맨 위에 두면 '지금 하나'가 밀려 내려간다).
-                    if i == 1 && !RestPrefs.isResting(restJSON) { timeCard }
+                    if i == 1 && !RestPrefs.isResting(restJSON) && !introMode { timeCard }
                     if i == 1 { SectionHeader(title: "그 다음") }
                     card(s, first: i == 0)
                 }
-                Text("팀 일정, 몸 상태, 드릴, 수업 목표를 보고 골라요. 기록이 쌓일수록 더 잘 맞춰요.")
+                Text(introMode ? "아직 얼음에 서 보기 전이라 집에서 할 것과 알아 둘 것부터 골랐어요. 첫 기록을 남기면 그날그날 맞춰 드려요."
+                               : "팀 일정, 몸 상태, 드릴, 수업 목표를 보고 골라요. 기록이 쌓일수록 더 잘 맞춰요.")
                     .font(.caption).foregroundStyle(Theme.inkSecondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -190,7 +192,7 @@ struct WhatNowView: View {
         case .journal: return "book.fill"
         case .firstIce: return "sportscourt"
         case .learn: return "flag.2.crossed"
-        case .gear: return "shield.lefthalf.filled"
+        case .gear: return "tshirt.fill"
         }
     }
 }

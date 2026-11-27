@@ -68,8 +68,10 @@ struct HomeView: View {
                 unloggedWorkoutCard
                 nextGameHero
                 promptCard
-                SectionHeader(title: "빠른 시작")
-                quickButtons
+                if !intro {
+                    SectionHeader(title: "빠른 시작")
+                    quickButtons
+                }
                 if !intro {
                     bodyCard
                     weekCard
