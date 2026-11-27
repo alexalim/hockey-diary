@@ -454,7 +454,7 @@ struct DrillPickerView: View {
     }
 }
 
-/// 루틴 템플릿 고르기: 가져오면 내 루틴으로 복사되고, 그 뒤로는 마음대로 고칠 수 있다.
+/// 루틴 템플릿 고르기: 드릴 블록을 끼워 맞춘 모양으로 보여 준다. 가져오면 내 루틴으로 복사되고, 그 뒤로는 마음대로 고칠 수 있다.
 struct RoutineTemplatePicker: View {
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
@@ -462,35 +462,157 @@ struct RoutineTemplatePicker: View {
     let mine: Set<String>
 
     var body: some View {
-        List {
-            Section {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
+                BlockLegend()
                 ForEach(StarterRoutine.templates, id: \.name) { t in
-                    let have = mine.contains(t.name)
-                    HStack(spacing: 10) {
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text(t.name).font(.subheadline.bold()).foregroundStyle(Theme.title)
-                            Text("\(t.items.count)개 드릴 · 약 \(StarterRoutine.estimatedMinutes(t.items))분")
-                                .font(.caption).foregroundStyle(Theme.inkSecondary)
-                            Text(t.items.compactMap { DrillCatalog.drill($0.drillKey)?.title }.joined(separator: ", "))
-                                .font(.caption).foregroundStyle(Theme.inkSecondary)
-                        }
-                        Spacer()
-                        if have {
-                            StatusTag(text: "내 루틴에 있음")
-                        } else {
-                            Button("가져오기") { PracticeStore.importTemplate(t, context: context); dismiss() }
-                                .buttonStyle(.borderedProminent).tint(Theme.cobalt)
-                                .accessibilityLabel("\(t.name) 가져오기")
-                        }
+                    TemplateAssemblyCard(template: t, have: mine.contains(t.name)) {
+                        PracticeStore.importTemplate(t, context: context); dismiss()
                     }
                 }
-            } footer: {
-                Text("가져온 루틴은 드릴도 목표량도 마음대로 고쳐도 돼요.")
+                Text("가져온 루틴은 블록(드릴)을 빼고 더하고 순서를 바꿔도 돼요.")
+                    .font(.footnote).foregroundStyle(Theme.inkSecondary)
             }
+            .padding(16)
         }
+        .background(Theme.background)
         .navigationTitle("루틴 템플릿")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { ToolbarItem(placement: .cancellationAction) { Button("닫기") { dismiss() } } }
+    }
+}
+
+/// 드릴 블록의 색: 기술 갈래(스케이팅·퍽 컨트롤·슈팅·게임 운영)마다 하나.
+enum DrillBlockColor {
+    static let order = ["스케이팅", "퍽 컨트롤", "슈팅", "게임 운영"]
+    static func of(_ d: Drill) -> Color { of(category: SkillGuide.entries.first { $0.name == d.skillName }?.category) }
+    static func of(category: String?) -> Color {
+        switch category {
+        case "스케이팅": return Color(hex: 0x2F6FD6)
+        case "퍽 컨트롤": return Color(hex: 0x12A58A)
+        case "슈팅": return Color(hex: 0xFF2D8C)
+        case "게임 운영": return Color(hex: 0xF5A623)
+        default: return Color(hex: 0x7A869A)
+        }
+    }
+    static func minutes(_ d: Drill, _ target: Int) -> Int { StarterRoutine.estimatedMinutes([RoutineItem(drillKey: d.key, target: target)]) }
+}
+
+private struct BlockLegend: View {
+    var body: some View {
+        HStack(spacing: 12) {
+            ForEach(DrillBlockColor.order, id: \.self) { c in
+                HStack(spacing: 5) {
+                    RoundedRectangle(cornerRadius: 3).fill(DrillBlockColor.of(category: c)).frame(width: 14, height: 10)
+                    Text(c).font(.caption).foregroundStyle(Theme.inkSecondary)
+                }
+            }
+        }
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// 템플릿 한 장: 위에는 시간 비율로 이어 붙인 블록 막대, 아래에는 위에서부터 끼워 쌓은 드릴 블록.
+private struct TemplateAssemblyCard: View {
+    let template: StarterRoutine
+    let have: Bool
+    let onImport: () -> Void
+
+    private var drills: [(Drill, Int)] { template.items.compactMap { it in DrillCatalog.drill(it.drillKey).map { ($0, it.target) } } }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(template.name).font(.headline).foregroundStyle(Theme.title)
+                Spacer()
+                Text("블록 \(drills.count)개 · 약 \(StarterRoutine.estimatedMinutes(template.items))분")
+                    .font(.caption.bold()).foregroundStyle(Theme.inkSecondary)
+            }
+            // 시간 막대: 블록 폭 = 걸리는 시간
+            GeometryReader { geo in
+                let total = max(1, drills.reduce(0) { $0 + DrillBlockColor.minutes($1.0, $1.1) })
+                let gap: CGFloat = 3
+                let usable = geo.size.width - gap * CGFloat(max(0, drills.count - 1))
+                HStack(spacing: gap) {
+                    ForEach(Array(drills.enumerated()), id: \.offset) { _, p in
+                        RoundedRectangle(cornerRadius: 4, style: .continuous)
+                            .fill(DrillBlockColor.of(p.0))
+                            .frame(width: max(8, usable * CGFloat(DrillBlockColor.minutes(p.0, p.1)) / CGFloat(total)))
+                    }
+                }
+            }
+            .frame(height: 12)
+            .accessibilityHidden(true)
+            // 끼워 쌓은 블록
+            VStack(spacing: -4) {
+                ForEach(Array(drills.enumerated()), id: \.offset) { i, p in
+                    DrillBrick(index: i + 1, drill: p.0, target: p.1, last: i == drills.count - 1)
+                        .zIndex(Double(drills.count - i))
+                }
+            }
+            if have {
+                Label("내 루틴에 있어요", icon: "checkmark.circle.fill")
+                    .font(.subheadline.bold()).foregroundStyle(Theme.inkSecondary)
+                    .frame(maxWidth: .infinity, minHeight: Theme.touch)
+            } else {
+                Button(action: onImport) {
+                    Label("이 조립 그대로 가져오기", icon: "square.and.arrow.down")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(CobaltButtonStyle())
+                .accessibilityLabel("\(template.name) 가져오기")
+            }
+        }
+        .padding(14)
+        .background(Theme.card, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Theme.inkTertiary.opacity(0.2), lineWidth: 1))
+    }
+}
+
+/// 블록 하나: 왼쪽 색 몸통에 순서 번호, 위쪽 돌기(꽂는 자리), 오른쪽에 드릴 이름과 양.
+private struct DrillBrick: View {
+    let index: Int
+    let drill: Drill
+    let target: Int
+    let last: Bool
+
+    var body: some View {
+        let c = DrillBlockColor.of(drill)
+        HStack(spacing: 0) {
+            Text("\(index)")
+                .font(.subheadline.monospacedDigit().weight(.heavy)).foregroundStyle(.white)
+                .frame(width: 34)
+                .frame(maxHeight: .infinity)
+                .background(c)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(drill.title).font(.subheadline.bold()).foregroundStyle(Theme.title)
+                Text(drill.skillName + (drill.offIce ? " · 땅에서" : "")).font(.caption).foregroundStyle(Theme.inkSecondary)
+            }
+            .padding(.leading, 10)
+            Spacer(minLength: 8)
+            Text(drill.targetText(target))
+                .font(.caption.bold()).foregroundStyle(c)
+                .padding(.horizontal, 8).padding(.vertical, 4)
+                .background(c.opacity(0.12), in: Capsule())
+                .padding(.trailing, 10)
+        }
+        .frame(minHeight: 52)
+        .background(c.opacity(0.06))
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).stroke(c.opacity(0.55), lineWidth: 1.5))
+        // 블록 위 돌기 두 개: 위 블록에 꽂힌 모양
+        .overlay(alignment: .topLeading) {
+            HStack(spacing: 8) {
+                ForEach(0..<2, id: \.self) { _ in
+                    Capsule().fill(c).frame(width: 14, height: 6)
+                }
+            }
+            .offset(x: 44, y: -4)
+            .opacity(index == 1 ? 0 : 1)
+        }
+        .padding(.top, index == 1 ? 0 : 4)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(index)번 \(drill.title), \(drill.targetText(target))")
     }
 }
 
