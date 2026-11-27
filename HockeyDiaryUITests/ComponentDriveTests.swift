@@ -880,6 +880,20 @@ final class ComponentDriveTests: XCTestCase {
         XCTAssertLessThanOrEqual((ws.max() ?? 0) - (ws.min() ?? 0), 2, "탭마다 오른쪽 위 묶음 폭이 다르다: \(widths)")
     }
 
+    // MARK: 훈련 > 연습의 '다음 목표' 카드에서 '드릴로 가기' → 드릴 갈래가 열린다
+
+    // 테스트 계층: E2E — 같은 탭 안에서 갈래 바꾸기 요청이 사라지지 않는지(버그 재현)
+    func test_practice_go_to_drill_button() {
+        relaunch(with: "-ui-demo")
+        tab("훈련"); branch("연습")
+        guard let go = find("드릴로 가기") else { XCTFail("다음 목표 카드의 드릴로 가기가 없다"); return }
+        go.tap(); sleep(2)
+        let seg = app.segmentedControls.buttons["드릴"]
+        XCTAssertTrue(seg.isSelected, "드릴로 가기를 눌러도 드릴 갈래가 안 열린다")
+        XCTAssertNotNil(find("내 루틴", swipes: 2), "드릴 갈래 내용(내 루틴)이 안 보인다")
+        snap("practice-go-drill")
+    }
+
     private func relaunch(with args: String...) {
         app.terminate()
         app.launchArguments += args
