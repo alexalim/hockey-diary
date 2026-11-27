@@ -32,7 +32,29 @@ public struct CountMinutes: Equatable, Sendable {
     }
 }
 
+/// 링크장별로 모은 횟수·시간. 이름이 조금 달라도 같은 곳이면 하나로 센다(먼저 나온 이름으로 보인다).
+public struct RinkTally: Equatable, Sendable {
+    public var name: String
+    public var count: Int
+    public var minutes: Int
+}
+
 public enum Insights {
+    /// 여러 곳을 다니는 사람용: 링크장 이름별 횟수·시간, 많이 간 순. 이름이 빈 기록은 뺀다.
+    public static func byRink(_ visits: [(name: String, minutes: Int)]) -> [RinkTally] {
+        var out: [RinkTally] = []
+        for v in visits {
+            let n = v.name.trimmingCharacters(in: .whitespaces)
+            guard !n.isEmpty else { continue }
+            if let i = out.firstIndex(where: { RinkDirectory.sameRink($0.name, n) }) {
+                out[i].count += 1; out[i].minutes += v.minutes
+            } else {
+                out.append(RinkTally(name: n, count: 1, minutes: v.minutes))
+            }
+        }
+        return out.sorted { ($0.count, $0.minutes) > ($1.count, $1.minutes) }
+    }
+
     /// 기간 안의 활동만 남긴다. 같은 활동은 한 번만.
     public static func inPeriod(_ samples: [ActivitySample], from: Date?, to: Date) -> [ActivitySample] {
         var seen = Set<UUID>()

@@ -1199,6 +1199,16 @@ final class CountdownTests: XCTestCase {
     }
 }
 
+// 테스트 계층: Unit — 링크장별 횟수·시간(여러 곳에서 훈련하는 사람).
+final class RinkTallyTests: XCTestCase {
+    func testGroupsSameRinkAndSortsByVisits() {
+        let r = Insights.byRink([("목동아이스링크", 60), ("태릉국제스케이트장", 90), ("목동 아이스링크", 60), ("", 30), ("목동아이스링크", 50)])
+        XCTAssertEqual(r.map(\.name), ["목동아이스링크", "태릉국제스케이트장"])
+        XCTAssertEqual(r.first?.count, 3)
+        XCTAssertEqual(r.first?.minutes, 170)
+    }
+}
+
 // 테스트 계층: Unit — 초급 '처음 추천' 드릴이 전부 사전에 있고, 어려운 기술은 빠져 있다.
 final class StarterDrillTests: XCTestCase {
     func testStartersExistAndAreBasic() {

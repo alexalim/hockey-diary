@@ -718,7 +718,10 @@ final class ComponentDriveTests: XCTestCase {
             snap("V03-lesson-editor-veteran")
             _ = tapText("실내 링크"); sleep(1)
             if let rink = formField("링크장 이름") { rink.tap(); rink.typeText("목동"); sleep(2); snap("V04-rink-suggest-mokdong") }
-            if let first = find("목동 아이스링크", swipes: 0) { first.tap(); sleep(1) }
+            // 앱에 든 링크장 목록이 지도 검색(도로 이름)보다 먼저 나와야 한다.
+            let mokdong = app.buttons.matching(NSPredicate(format: "label CONTAINS '목동아이스링크'")).firstMatch
+            XCTAssertTrue(mokdong.waitForExistence(timeout: 3), "'목동'을 쳤는데 목동아이스링크가 제안되지 않는다")
+            if mokdong.exists { mokdong.tap(); sleep(1) }
             app.swipeUp()
             if let line = formField("오늘의 배움 한 줄") { line.tap(); line.typeText("크로스오버 바깥 발") }
             if let coach = formField("코치 메모") { coach.tap(); coach.typeText("상체 세우기") }
@@ -734,7 +737,8 @@ final class ComponentDriveTests: XCTestCase {
                 rink.tap(); sleep(1); snap("V06-rink-field-focused-recent")   // 비워 둔 채 눌렀을 때 최근 링크장이 나오나
                 rink.typeText("태릉"); sleep(2); snap("V07-rink-suggest-taereung")
             }
-            if let first = find("태릉", swipes: 0) { first.tap(); sleep(1) }
+            let taereung = app.buttons.matching(NSPredicate(format: "label CONTAINS '태릉국제스케이트장'")).firstMatch
+            if taereung.waitForExistence(timeout: 3) { taereung.tap(); sleep(1) }
             snap("V08-game-filled")
             _ = tapButton("저장"); sleep(2)
             if app.alerts.firstMatch.exists { snap("V08b-save-blocked"); app.alerts.buttons.firstMatch.tap() }
@@ -760,11 +764,11 @@ final class ComponentDriveTests: XCTestCase {
         tab("기록"); sleep(1)
         app.swipeDown()
         let field = app.searchFields.firstMatch
-        if field.waitForExistence(timeout: 3) { field.tap(); field.typeText("태릉"); sleep(1); snap("V13-diary-search-rink") }
+        if field.waitForExistence(timeout: 3) { field.tap(); sleep(1); if app.keyboards.firstMatch.exists { field.typeText("태릉") }; sleep(1); snap("V13-diary-search-rink") }
 
         // 6) 링크장 찾기: 내 링크장 목록
         tab("훈련"); sleep(1)
-        if tapText("링크장 찾기") { sleep(2); snap("V14-rink-finder"); if tapText("목동 아이스링크") { sleep(1); snap("V15-rink-detail") } }
+        if tapText("링크장 찾기") { sleep(2); snap("V14-rink-finder"); if tapText("목동아이스링크") { sleep(1); snap("V15-rink-detail") } }
     }
 
     private func relaunch(with args: String...) {

@@ -21,6 +21,16 @@ struct RinkNameField: View {
         return Array(list.filter { $0.name != q }.prefix(5))
     }
 
+    /// 앱에 든 국내 링크장 목록에서 찾은 것(내 링크장에 이미 있는 건 뺀다).
+    /// 예전엔 이 목록을 안 봐서 '목동'을 치면 지도 검색의 도로 이름(목동로·목동남로)만 나왔다(여러 곳 다니는 사람 따라가기).
+    private var directoryMatches: [RinkEntry] {
+        let q = text.trimmingCharacters(in: .whitespaces)
+        guard !q.isEmpty else { return [] }
+        return Array(RinkDirectory.search(q)
+            .filter { e in !rinks.contains { RinkDirectory.sameRink($0.name, e.name) } && e.name != q }
+            .prefix(4))
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             TextField(placeholder, text: $text)
@@ -35,10 +45,14 @@ struct RinkNameField: View {
                         focused = false
                     }
                 }
-                ForEach(search.results.filter { c in !localMatches.contains { $0.name == c.title } }, id: \.self) { c in
+                ForEach(directoryMatches, id: \.name) { e in
+                    suggestion(e.name, e.address, icon: "snowflake") { pick(e) }
+                }
+                // 지도 검색은 마지막. 링크장 목록에 없는 곳(새로 생긴 곳·대관 체육관)을 위해 남긴다.
+                ForEach(search.results.filter { c in !localMatches.contains { $0.name == c.title } && !directoryMatches.contains { RinkDirectory.sameRink($0.name, c.title) } }, id: \.self) { c in
                     suggestion(c.title, c.subtitle, icon: "mappin.circle") { pick(c) }
                 }
-                if !text.isEmpty && search.results.isEmpty && localMatches.isEmpty {
+                if !text.isEmpty && search.results.isEmpty && localMatches.isEmpty && directoryMatches.isEmpty {
                     Text(search.failed ? "지금은 지도 검색이 안 돼요. 이름만 적어도 저장돼요." : "찾는 중이거나 결과가 없어요. 그냥 적어도 저장돼요.")
                         .font(.caption).foregroundStyle(Theme.inkSecondary)
                 }
@@ -60,6 +74,15 @@ struct RinkNameField: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.borderless)
+    }
+
+    private func pick(_ e: RinkEntry) {
+        picking = true
+        text = e.name
+        focused = false
+        RinkStore.upsert(name: e.name, address: e.address, lat: e.latitude, lon: e.longitude, context: context)
+        context.saveOrReport()
+        picking = false
     }
 
     private func pick(_ c: MKLocalSearchCompletion) {
@@ -294,6 +317,10 @@ struct RinkDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Bindable var rink: Rink
     @State private var confirmRemove = false
+    @Query(sort: \Session.startsAt, order: .reverse) private var sessions: [Session]
+
+    /// 이 링크장에서 탄 기록(이름이 조금 달라도 같은 곳이면 센다).
+    private var here: [Session] { sessions.filter { RinkDirectory.sameRink($0.rinkName, rink.name) } }
 
     var body: some View {
         Form {
@@ -305,6 +332,24 @@ struct RinkDetailView: View {
                 if let url = URL(string: rink.officialURL), !rink.officialURL.isEmpty, url.scheme?.hasPrefix("http") == true {
                     Link(destination: url) { Label("공식 안내", icon: "safari") }
                 }
+            }
+            // 여러 곳을 다니면 '여기서 얼마나 탔나'가 궁금하다. 시설 정보 위에 둔다.
+            Section {
+                if here.isEmpty {
+                    Text("아직 이 링크장에서 남긴 기록이 없어요.").font(.subheadline).foregroundStyle(Theme.inkSecondary)
+                } else {
+                    HStack {
+                        Text("\(here.count)회 · \(minutesText(here.reduce(0) { $0 + $1.minutes }))").font(.headline).foregroundStyle(Theme.title)
+                        Spacer()
+                        if let last = here.first {
+                            Text("마지막 \(last.startsAt.formatted(.dateTime.month().day()))").font(.subheadline).foregroundStyle(Theme.inkSecondary)
+                        }
+                    }
+                    let kinds = Dictionary(grouping: here, by: \.type).map { ($0.key, $0.value.count) }.sorted { $0.1 > $1.1 }
+                    Text(kinds.map { "\($0.0.title) \($0.1)" }.joined(separator: " · ")).font(.caption).foregroundStyle(Theme.inkSecondary)
+                }
+            } header: {
+                Text("내 기록")
             }
             Section {
                 facility("주차", $rink.hasParking)

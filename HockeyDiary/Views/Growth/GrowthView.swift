@@ -217,6 +217,20 @@ struct GrowthView: View {
                         .frame(minHeight: 32)
                     }
                 }
+                // 링크장 이름별(여러 곳에서 훈련하는 사람에겐 실내/야외보다 이게 궁금하다).
+                let byRink = Insights.byRink(periodSessions.map { (name: $0.rinkName, minutes: $0.minutes) })
+                if !byRink.isEmpty {
+                    Divider().padding(.vertical, 4)
+                    Text("링크장별").font(.caption.bold()).foregroundStyle(Theme.inkSecondary)
+                    ForEach(byRink.prefix(6), id: \.name) { t in
+                        HStack {
+                            Label(t.name, icon: "mappin.and.ellipse").font(.subheadline).foregroundStyle(Theme.title).lineLimit(1)
+                            Spacer()
+                            Text("\(t.count)회 · \(minutesText(t.minutes))").font(.subheadline).foregroundStyle(Theme.inkSecondary)
+                        }
+                        .frame(minHeight: 30)
+                    }
+                }
                 Text("어디서 탔는지만 보여 줘요. 장소로 잘하고 못한 걸 따지지 않아요.")
                     .font(.caption).foregroundStyle(Theme.inkSecondary)
             }
