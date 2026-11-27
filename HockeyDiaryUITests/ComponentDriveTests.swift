@@ -649,7 +649,9 @@ final class ComponentDriveTests: XCTestCase {
         if newRecord("수업 기록") {
             snap("B04-lesson-editor")
             // 기술 고르기는 따로 시험한다(test_skill_picker_search). 여기선 메모만 적고 저장해 하루 흐름을 끝까지 본다.
-            if let line = formField("오늘의 배움 한 줄") { line.tap(); line.typeText("처음으로 스톱 연습. 넘어지지 않음!") }
+            // 간단 입력은 화면이 짧아 메모 칸이 맨 아래에 반쯤 걸친다. 올려서 누른다(사람도 그렇게 한다).
+            app.swipeUp(); sleep(1)
+            if let line = formField("오늘의 배움 한 줄") { line.tap(); sleep(1); line.typeText("처음으로 스톱 연습. 넘어지지 않음!") }
             snap("B07-lesson-filled")
             _ = tapButton("저장"); sleep(2)
             snap("B08-saved")
