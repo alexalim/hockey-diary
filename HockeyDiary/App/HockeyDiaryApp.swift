@@ -26,10 +26,24 @@ struct HockeyDiaryApp: App {
         WorkoutNudgeService.shared.start(container: container)
     }
 
+    @State private var showingSplash = true
+
     var body: some Scene {
         WindowGroup {
-            RootView()
-                .tint(Theme.accent)
+            ZStack {
+                RootView()
+                    .tint(Theme.accent)
+                if showingSplash {
+                    SplashView()
+                        .transition(.opacity)
+                        .zIndex(1)
+                }
+            }
+            .task {
+                // 시작 화면에서 이어 받아 잠깐 보여 준 뒤 사라진다. 그동안 뒤의 홈은 이미 그려져 있다.
+                try? await Task.sleep(for: .milliseconds(900))
+                withAnimation(.easeOut(duration: 0.35)) { showingSplash = false }
+            }
         }
         .modelContainer(container)
     }
@@ -41,4 +55,31 @@ final class StoreHealth {
     static let shared = StoreHealth()
     var openFailed = false
     var lastSaveFailed = false
+}
+
+
+/// 앱 시작 직후 잠깐 보이는 화면. iOS 시작 화면(LaunchBackground + LaunchLogo)과 같은 색·같은 자리·같은 크기라
+/// 넘어가는 순간이 끊기지 않는다. 그 아래로 이름이 떠오르고, 홈으로 부드럽게 사라진다. 누름은 받지 않는다.
+struct SplashView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var shown = false
+
+    var body: some View {
+        ZStack {
+            Color("LaunchBackground").ignoresSafeArea()
+            Image("LaunchLogo")
+                .shadow(color: .black.opacity(0.25), radius: 12, y: 6)
+                .scaleEffect(shown && !reduceMotion ? 1.04 : 1)
+            VStack(spacing: 6) {
+                Text("마하다").font(.system(size: 30, weight: .heavy, design: .rounded)).foregroundStyle(.white)
+                Text("오늘의 하키를 한 줄로").font(.subheadline.weight(.semibold)).foregroundStyle(.white.opacity(0.85))
+            }
+            .offset(y: 150)
+            .opacity(shown ? 1 : 0)
+            .offset(y: shown || reduceMotion ? 0 : 8)
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+        .onAppear { withAnimation(.easeOut(duration: 0.4)) { shown = true } }
+    }
 }
