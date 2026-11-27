@@ -836,6 +836,17 @@ final class ComponentDriveTests: XCTestCase {
         snap("coach-4-lineup-carried")
     }
 
+    // MARK: 시작 화면: 켜자마자 마스코트·이름이 보이고, 잠시 뒤 홈이 그대로 보인다(누름을 막지 않는다)
+
+    func test_splash_then_home() {
+        app.terminate()
+        app.launch()
+        usleep(400_000); snap("splash-1-start")
+        XCTAssertTrue(app.buttons["tab-홈"].waitForExistence(timeout: 10))
+        sleep(2); snap("splash-2-home")
+        XCTAssertTrue(tapButton("설정"), "시작 화면이 사라진 뒤 홈을 누를 수 없다")
+    }
+
     private func relaunch(with args: String...) {
         app.terminate()
         app.launchArguments += args
