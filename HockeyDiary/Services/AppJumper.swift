@@ -18,6 +18,8 @@ enum AppJump: Hashable {
 /// 하단 메뉴에서 빠지고 홈에서 들어가는 화면.
 enum HomeScreen: String, Hashable, Identifiable {
     case team, whatNow
+    /// 입문 전 '첫 빙판까지'에서 가는 화면들.
+    case explore, rinks, starterGear
     var id: String { rawValue }
 }
 

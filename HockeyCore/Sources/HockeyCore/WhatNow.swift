@@ -4,7 +4,7 @@ import Foundation
 /// 규칙은 전부 여기 있고 화면은 보여 주기만 한다. 같은 사실이면 언제나 같은 답이 나온다.
 public enum WhatNow {
     public enum Kind: String, Sendable {
-        case rest, logEvent, prepareEvent, bodyCheck, quest, drill, routine, goal, sharpen, journal, firstIce
+        case rest, logEvent, prepareEvent, bodyCheck, quest, drill, routine, goal, sharpen, journal, firstIce, learn, gear
     }
 
     public struct Suggestion: Equatable, Identifiable, Sendable {
@@ -54,6 +54,8 @@ public enum WhatNow {
         /// 지금 쓸 수 있는 시간(분). 고르지 않았으면 nil.
         public var minutesFree: Int? = nil
         public var routines: [RoutineFact] = []
+        /// 아직 얼음에 서 본 적 없는 사람(입문 전). 몸 상태·퀘스트 대신 흥미를 붙일 것부터 권한다.
+        public var prestarter: Bool = false
 
         public init(now: Date, resting: Bool = false, events: [HomePrompt.Event] = [], conditionOn: Bool = true,
                     bodyCheckedToday: Bool = false, journaledToday: Bool = false, quests: [QuestProgress] = [],
@@ -76,6 +78,17 @@ public enum WhatNow {
     public static func suggest(_ f: Facts, calendar: Calendar = .current) -> [Suggestion] {
         if f.resting {
             return [Suggestion(kind: .rest, title: "쉬는 중이에요", detail: "연속 기록과 목표는 멈춰 있어요. 돌아오면 이어서 세요.", action: "다시 탈래요")]
+        }
+        // 입문 전이고 기록이 없으면: 집 드릴 → 하키 구경 → 링크장 → 장비. 몸 상태·퀘스트는 아직 뜻이 없다.
+        if f.prestarter && f.lastSessionAt == nil {
+            let first = pickDrill([], now: f.now, calendar: calendar)
+            return [
+                Suggestion(kind: .drill, title: "드릴 하나: \(first.title)", detail: "얼음 없이 집에서 바로 할 수 있어요. \(first.targetText())부터요.",
+                           action: "지금 시작", key: first.key),
+                Suggestion(kind: .learn, title: "하키 구경하기", detail: FirstIce.Step.watch.detail, action: FirstIce.Step.watch.action),
+                Suggestion(kind: .firstIce, title: "링크장 한 번 가 보기", detail: FirstIce.Step.rink.detail, action: "링크장 찾기"),
+                Suggestion(kind: .gear, title: "장비 알아보기", detail: FirstIce.Step.gear.detail, action: FirstIce.Step.gear.action),
+            ]
         }
         var out: [Suggestion] = []
         let hour = calendar.component(.hour, from: f.now)

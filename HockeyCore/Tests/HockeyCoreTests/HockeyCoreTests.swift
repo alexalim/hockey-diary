@@ -1415,3 +1415,48 @@ final class CoachToolsTests: XCTestCase {
         XCTAssertNil(out[.g1], "명단에서 빠졌으면 비운다")
     }
 }
+
+
+// 테스트 계층: Unit — 입문 전 '첫 빙판까지' 단계·처음 장비·뭐할까 순서
+final class FirstIceTests: XCTestCase {
+    func testStepsMarkToggleAndNext() {
+        var raw = ""
+        XCTAssertEqual(FirstIce.next(FirstIce.done(raw)), .watch)
+        raw = FirstIce.marking(raw, .watch)
+        raw = FirstIce.marking(raw, .rink)
+        XCTAssertEqual(FirstIce.done(raw), [.watch, .rink])
+        XCTAssertEqual(FirstIce.next(FirstIce.done(raw)), .stickhandle)
+        raw = FirstIce.toggling(raw, .watch)
+        XCTAssertEqual(FirstIce.done(raw), [.rink])
+        raw = FirstIce.marking(raw, .rink)   // 두 번 표시해도 하나
+        XCTAssertEqual(raw, "rink")
+        XCTAssertNil(FirstIce.next(Set(FirstIce.Step.allCases)))
+    }
+
+    func testActiveOnlyBeforeFirstRecord() {
+        XCTAssertTrue(FirstIce.isActive(prestarter: true, hasSessions: false))
+        XCTAssertFalse(FirstIce.isActive(prestarter: true, hasSessions: true))
+        XCTAssertFalse(FirstIce.isActive(prestarter: false, hasSessions: false))
+    }
+
+    func testStarterGearHasEveryPlanAndUniqueKeys() {
+        for p in StarterGear.Plan.allCases { XCTAssertFalse(StarterGear.items(p).isEmpty, "\(p) 칸이 비었다") }
+        XCTAssertEqual(Set(StarterGear.all.map(\.key)).count, StarterGear.all.count)
+        var raw = StarterGear.toggling("", "skates")
+        raw = StarterGear.toggling(raw, "gloves")
+        XCTAssertEqual(StarterGear.ready(raw), ["skates", "gloves"])
+        XCTAssertEqual(raw, "gloves,skates")   // 목록 순서로
+        XCTAssertEqual(StarterGear.ready(StarterGear.toggling(raw, "gloves")), ["skates"])
+    }
+
+    func testWhatNowForPrestarterLeadsWithHomeDrillAndSkipsBodyAndQuest() {
+        var f = WhatNow.Facts(now: Date(), conditionOn: true, bodyCheckedToday: false)
+        f.prestarter = true
+        let list = WhatNow.suggest(f)
+        XCTAssertEqual(list.map(\.kind), [.drill, .learn, .firstIce, .gear])
+        XCTAssertEqual(DrillCatalog.drill(list[0].key)?.offIce, true, "첫 드릴은 집에서 하는 것이어야")
+        // 첫 기록을 남기면 평소 추천으로 돌아간다.
+        f.lastSessionAt = Date()
+        XCTAssertTrue(WhatNow.suggest(f).contains { $0.kind == .bodyCheck })
+    }
+}

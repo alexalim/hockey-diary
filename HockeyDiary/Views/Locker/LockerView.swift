@@ -21,6 +21,7 @@ struct LockerView: View {
 
     @Query private var skates: [Skate]
     @Query private var gear: [GearItem]
+    @AppStorage(FirstIce.prestarterKey) private var prestarter = false
     @Query private var profiles: [LockerProfile]
     @Query(sort: \StickerPlacement.zIndex) private var placements: [StickerPlacement]
 
@@ -30,6 +31,25 @@ struct LockerView: View {
                 ScreenHeader(eyebrow: "", title: "내 락커", subtitle: "장비도 추억도 여기 다 있어요.")
                     .toolbar { BarAction(icon: "pencil", label: "꾸미기") { editingProfile = LockerStore.profile(context) } }
                 if !newStickers.isEmpty { earnedBanner }
+                // 입문 전이고 장비가 아직 없으면: 무엇부터 준비할지(락커 칸마다 '등록'만 보이면 할 게 없다).
+                if prestarter && gear.isEmpty && skates.isEmpty {
+                    NavigationLink { StarterGearView() } label: {
+                        HStack(spacing: 12) {
+                            AppIcon("shield.lefthalf.filled", size: 22).foregroundStyle(Theme.neonPink)
+                                .frame(width: 40, height: 40).background(Theme.neonPink.opacity(0.12), in: Circle())
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("처음 장비, 뭐부터?").font(.subheadline.bold()).foregroundStyle(Theme.title)
+                                Text("빌려도 되는 것과 먼저 살 것을 나눠 봤어요.").font(.caption).foregroundStyle(Theme.inkSecondary)
+                            }
+                            Spacer(minLength: 0)
+                            AppIcon("chevron.right", size: 12).foregroundStyle(Theme.inkTertiary)
+                        }
+                        .padding(14)
+                        .background(Theme.card, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Theme.neonPink.opacity(0.35), lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
+                }
                 GeometryReader { geo in
                     let progress = DoorSwing.progress(angle)
                     ZStack {

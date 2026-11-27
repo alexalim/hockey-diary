@@ -22,6 +22,9 @@ struct WhatNowView: View {
     @Query(sort: \PracticeRoutine.createdAt) private var routines: [PracticeRoutine]
     @State private var running: RoutineRun?
     @State private var showingRinks = false
+    @State private var showingExplore = false
+    @State private var showingGear = false
+    @AppStorage(FirstIce.prestarterKey) private var prestarter = false
     /// 지금 쓸 수 있는 시간(분). 고르면 그 안에 끝나는 드릴·루틴을 권한다. 다시 누르면 해제.
     @State private var minutesFree: Int?
 
@@ -48,6 +51,7 @@ struct WhatNowView: View {
             hasTeam: !teams.isEmpty)
         f.bodyToday = todayCheck?.value
         f.minutesFree = minutesFree
+        f.prestarter = prestarter
         f.routines = routines.filter { !$0.items.isEmpty }
             .map { WhatNow.RoutineFact(name: $0.name, minutes: StarterRoutine.estimatedMinutes($0.items)) }
         return f
@@ -98,6 +102,8 @@ struct WhatNowView: View {
         .screenBackground()
         .navigationTitle("").navigationBarTitleDisplayMode(.inline)
         .navigationDestination(isPresented: $showingRinks) { RinkFinderView() }
+        .navigationDestination(isPresented: $showingExplore) { ExploreView() }
+        .navigationDestination(isPresented: $showingGear) { StarterGearView() }
         .fullScreenCover(item: $running) { run in
             NavigationStack { RoutineRunView(run: run) }
         }
@@ -163,6 +169,10 @@ struct WhatNowView: View {
             newEntry = .journal(Date())
         case .firstIce:
             if teams.isEmpty { showingRinks = true } else { jumper?.go(.homeScreen(.team)) }
+        case .learn:
+            showingExplore = true
+        case .gear:
+            showingGear = true
         }
     }
 
@@ -179,6 +189,8 @@ struct WhatNowView: View {
         case .sharpen: return "wrench.and.screwdriver.fill"
         case .journal: return "book.fill"
         case .firstIce: return "sportscourt"
+        case .learn: return "flag.2.crossed"
+        case .gear: return "shield.lefthalf.filled"
         }
     }
 }

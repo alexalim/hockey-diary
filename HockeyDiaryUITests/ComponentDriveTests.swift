@@ -899,7 +899,43 @@ final class ComponentDriveTests: XCTestCase {
     // MARK: 입문 전(하린이) 따라가기: 아직 얼음에 서 본 적 없는 사람이 처음 깔고 둘러본다
 
     // 테스트 계층: E2E — 화면 캡처로 첫인상·흐름을 보는 둘러보기(판정은 사람이 캡처로)
+    // 테스트 계층: E2E — '아직 안 타 봤어요' → 홈이 첫 빙판까지로 바뀌고, 단계·장비·뭐할까·락커가 이어진다
+    func test_prestarter_first_ice_mode() {
+        guard let pick = find("실력 아직 안 타 봤어요", swipes: 2) else { XCTFail("입문 전 선택지가 없다"); return }
+        pick.tap(); sleep(1)
+        app.swipeDown(); app.swipeDown()
+        XCTAssertNotNil(find("첫 빙판까지", swipes: 1), "홈에 첫 빙판까지 카드가 없다")
+        XCTAssertNotNil(find("하키, 같이 시작해요", swipes: 0), "입문 전 인사말이 아니다")
+        snap("F01-home-intro")
+        XCTAssertNil(find("이번 주 하키", swipes: 4), "입문 전인데 이번 주 하키 0회 카드가 보인다")
+        XCTAssertNil(find("이달의 퀘스트", swipes: 0), "입문 전인데 퀘스트가 보인다")
+        app.swipeDown(); app.swipeDown(); app.swipeDown(); app.swipeDown()
+        // 장비 알아보기 → 처음 장비
+        guard let gearRow = find("장비 알아보기, 처음 장비 보기", swipes: 2) else { XCTFail("장비 단계가 없다"); return }
+        gearRow.tap(); sleep(1)
+        XCTAssertNotNil(find("먼저 사면 좋아요", swipes: 0), "처음 장비 화면이 안 열렸다")
+        snap("F02-starter-gear")
+        XCTAssertNotNil(find("하키 장갑, 아직", swipes: 0)); find("하키 장갑, 아직", swipes: 0)?.tap()
+        XCTAssertNotNil(find("하키 장갑, 준비됨", swipes: 0), "장비 준비 체크가 안 된다")
+        back(); sleep(1)
+        XCTAssertNotNil(find("1/5", swipes: 2), "가 본 단계가 체크되지 않았다")
+        // 뭐할까: 집 드릴이 먼저, 몸 상태는 없다
+        app.swipeDown(); app.swipeDown()
+        if let what = find("뭐할까", swipes: 0) {
+            what.tap(); sleep(1)
+            XCTAssertNotNil(find("드릴 하나: 스틱핸들링 볼 (집)", swipes: 0), "입문 전 뭐할까 첫 카드가 집 드릴이 아니다")
+            XCTAssertNil(find("오늘 몸 상태 남기기", swipes: 3), "입문 전인데 몸 상태 카드가 있다")
+            snap("F03-whatnow")
+            back()
+        } else { XCTFail("뭐할까 바로 가기가 없다") }
+        // 락커: 처음 장비 카드
+        tab("락커")
+        XCTAssertNotNil(find("처음 장비, 뭐부터?", swipes: 0), "락커에 처음 장비 카드가 없다")
+        snap("F04-locker")
+    }
+
     func test_prestarter_walkthrough() {
+        if let pick = find("실력 아직 안 타 봤어요", swipes: 2) { pick.tap(); sleep(1); app.swipeDown(); app.swipeDown() }
         snap("P01-home")
         app.swipeUp(); snap("P02-home-2"); app.swipeUp(); snap("P03-home-3")
         app.swipeDown(); app.swipeDown(); app.swipeDown()

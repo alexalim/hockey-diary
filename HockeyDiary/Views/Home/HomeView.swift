@@ -16,6 +16,10 @@ struct HomeView: View {
     @Query(sort: \BodyCheck.day, order: .reverse) private var checks: [BodyCheck]
 
     @State private var showingSettings = false
+    /// 아직 얼음에 서 본 적 없다고 한 사람. 첫 기록을 남기기 전까지 홈이 '첫 빙판까지'로 바뀐다.
+    @AppStorage(FirstIce.prestarterKey) private var prestarter = false
+    @State private var running: RoutineRun?
+    private var intro: Bool { FirstIce.isActive(prestarter: prestarter, hasSessions: !sessions.isEmpty) }
     @State private var editingNickname = false
     @State private var nicknameDraft = ""
     /// 홈에서 밀어 여는 화면(팀·뭐할까).
@@ -58,16 +62,20 @@ struct HomeView: View {
                 shortcutRow
                 // 처음 온 사람(기록 없음)에겐 실력 질문을 먼저. 아래에 두면 퀘스트·몸 상태에 밀려 안 보였다.
                 if sessions.isEmpty { levelCard }
+                // 입문 전: 0회·60분 퀘스트·연마 같은 '이미 타는 사람' 카드 대신 첫 빙판까지 할 일.
+                if intro { FirstIceCard { openFirstIce($0) } }
                 // 워치·가민이 잰 하키가 아직 기록에 없으면 묻는다(알림을 놓친 경우에도 보이게).
                 unloggedWorkoutCard
                 nextGameHero
                 promptCard
                 SectionHeader(title: "빠른 시작")
                 quickButtons
-                bodyCard
-                weekCard
+                if !intro {
+                    bodyCard
+                    weekCard
+                }
                 if !sessions.isEmpty { levelCard }
-                ForEach(visibleBlocks) { b in block(b) }
+                ForEach(visibleBlocks.filter { !intro || ($0 != .quest && $0 != .sharpening) }) { b in block(b) }
                 Button { showingEdit = true } label: {
                     Label("홈 꾸미기", icon: "slider.horizontal.3").font(.footnote.weight(.semibold))
                         .frame(maxWidth: .infinity, minHeight: Theme.touch)
@@ -84,10 +92,26 @@ struct HomeView: View {
             switch d {
             case .team: TeamView()
             case .whatNow: WhatNowView(newEntry: $newEntry)
+            case .explore: ExploreView()
+            case .rinks: RinkFinderView()
+            case .starterGear: StarterGearView()
             }
         }
         .onChange(of: jumper?.pendingHome) { _, d in if let d { homeScreen = d; jumper?.pendingHome = nil } }
         .sheet(isPresented: $showingEdit) { NavigationStack { HomeEditView() } }
+        .fullScreenCover(item: $running) { run in NavigationStack { RoutineRunView(run: run) } }
+    }
+
+    /// '첫 빙판까지' 한 단계로 간다.
+    private func openFirstIce(_ s: FirstIce.Step) {
+        switch s {
+        case .watch: homeScreen = .explore
+        case .stickhandle:
+            if let d = DrillCatalog.drill("office-ball") { running = RoutineRun(single: d) } else { newEntry = .practice }
+        case .rink: homeScreen = .rinks
+        case .gear: homeScreen = .starterGear
+        case .firstSkate: newEntry = .session(.lesson)
+        }
     }
 
     /// 팀과 뭐할까는 하단 메뉴에서 빠졌다. 홈에서 들어간다.
@@ -123,8 +147,9 @@ struct HomeView: View {
                 if !nickname.isEmpty { Text("님,").foregroundStyle(Theme.title).padding(.leading, 16) }
             }
             .font(.system(size: 30, weight: .bold))
-            Text("오늘도 즐겁게 타요.").font(.system(size: 30, weight: .bold)).foregroundStyle(Theme.title)
-            Text("한 줄씩 적다 보면 실력이 늘어요.").font(.system(size: 14)).foregroundStyle(Theme.inkSecondary)
+            Text(intro ? "하키, 같이 시작해요." : "오늘도 즐겁게 타요.").font(.system(size: 30, weight: .bold)).foregroundStyle(Theme.title)
+            Text(intro ? "얼음 위에 서기 전에 해 볼 것부터 골라 뒀어요." : "한 줄씩 적다 보면 실력이 늘어요.")
+                .font(.system(size: 14)).foregroundStyle(Theme.inkSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.top, 4)
@@ -189,6 +214,19 @@ struct HomeView: View {
                         .accessibilityLabel("실력 \(l.title)")
                     }
                 }
+                // 아직 시작 전인 사람도 고를 자리가 있어야 한다(초급은 '1년 미만'이라 이미 타는 사람 말).
+                Button {
+                    levelRaw = PlayerLevel.starter.rawValue
+                    prestarter = true
+                } label: {
+                    VStack(spacing: 2) {
+                        Text("아직 안 타 봤어요").font(.subheadline.bold())
+                        Text("입문 준비 중").font(.caption)
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 52)
+                }
+                .buttonStyle(.bordered).tint(Theme.neonPink)
+                .accessibilityLabel("실력 아직 안 타 봤어요")
             }
         }
     }
