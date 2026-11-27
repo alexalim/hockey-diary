@@ -659,8 +659,10 @@ final class ComponentDriveTests: XCTestCase {
                 snap("B06-skill-picked")
                 // 검색 중엔 위 막대가 검색 창이라 '완료'가 가려진다. 검색을 닫고 완료를 누른다.
                 if app.buttons["Cancel"].exists { app.buttons["Cancel"].tap() } else if app.buttons["취소"].exists && !app.buttons.matching(NSPredicate(format: "label BEGINSWITH '완료'")).firstMatch.isHittable { app.buttons["취소"].firstMatch.tap() }
-                let done = app.buttons.matching(NSPredicate(format: "label BEGINSWITH '완료'")).firstMatch
-                if done.waitForExistence(timeout: 3) { done.tap() }
+                // '완료' 이름의 버튼이 여럿(숨은 키보드 완료 등)이라 화면에 보이는 것만 누른다.
+                let dones = app.buttons.matching(NSPredicate(format: "label BEGINSWITH '완료'"))
+                _ = dones.firstMatch.waitForExistence(timeout: 3)
+                for i in 0..<dones.count { let d = dones.element(boundBy: i); if d.isHittable { d.tap(); break } }
                 sleep(1)
                 // 그래도 남아 있으면 닫는다(뒤 단계를 막지 않게)
                 if app.navigationBars["기술 고르기"].exists { app.navigationBars["기술 고르기"].buttons.firstMatch.tap(); sleep(1) }
