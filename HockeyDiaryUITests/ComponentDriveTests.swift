@@ -832,6 +832,8 @@ final class ComponentDriveTests: XCTestCase {
         rows.element(boundBy: 1).tap(); sleep(1)
         XCTAssertTrue(tapText("라인업 짜기"))
         XCTAssertTrue(tapText("지난 경기 라인업 가져오기"), "둘째 일정에 지난 라인업 가져오기가 없다")
+        // 민수는 포워드 1라인(화면 맨 위)에 들어간다. 버튼은 맨 아래라 위로 올려서 본다.
+        for _ in 0..<3 { app.swipeDown() }
         XCTAssertNotNil(find("민수", swipes: 0), "가져온 라인업에 민수가 없다")
         snap("coach-4-lineup-carried")
     }
