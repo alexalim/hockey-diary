@@ -56,6 +56,8 @@ struct HomeView: View {
                 // 팀·뭐할까는 하단 탭에서 빠져 여기로 왔다. 다른 카드(다음 경기·운동·오늘 할 일)에 밀려 첫 화면 밖으로
                 // 내려가면 '없어졌다'고 느낀다(빌드 80 실기기). 그래서 인사말 바로 아래 맨 위에 둔다.
                 shortcutRow
+                // 처음 온 사람(기록 없음)에겐 실력 질문을 먼저. 아래에 두면 퀘스트·몸 상태에 밀려 안 보였다.
+                if sessions.isEmpty { levelCard }
                 // 워치·가민이 잰 하키가 아직 기록에 없으면 묻는다(알림을 놓친 경우에도 보이게).
                 unloggedWorkoutCard
                 nextGameHero
@@ -64,7 +66,7 @@ struct HomeView: View {
                 quickButtons
                 bodyCard
                 weekCard
-                levelCard
+                if !sessions.isEmpty { levelCard }
                 ForEach(visibleBlocks) { b in block(b) }
                 Button { showingEdit = true } label: {
                     Label("홈 꾸미기", icon: "slider.horizontal.3").font(.footnote.weight(.semibold))

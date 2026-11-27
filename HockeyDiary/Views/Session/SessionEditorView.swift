@@ -874,9 +874,20 @@ struct SkillPickerView: View {
     @State private var newName = ""
 
     private var grouped: [(String, [Skill])] {
-        // 이름·분류, 띄어쓰기 무시, 초성("ㅋㄹㅅ")까지 찾는다.
-        let filtered = skills.filter { SkillSearch.matches(search, name: $0.name, category: $0.category) }
-        let dict = Dictionary(grouping: filtered, by: \.category)
+        // 검색 중에는 분류로 나누지 않고 잘 맞는 순서로 한 목록. '하키 스톱'을 찾는데 분류 순서 때문에
+        // 슈팅 기술이 먼저 보이고 정작 스톱은 키보드 아래로 밀렸다(처음 시작한 사람 따라가기에서 발견).
+        if !search.trimmingCharacters(in: .whitespaces).isEmpty {
+            let ranked = skills.compactMap { s -> (Int, Skill)? in
+                if let r = SkillSearch.rank(search, name: s.name) { return (r, s) }
+                // 분류 이름은 글자 그대로 쳤을 때만(초성 X): '스케이팅' → 스케이팅 기술 전부
+                if SkillSearch.matches(search, names: [], texts: [s.category]) { return (4, s) }
+                return nil
+            }
+            .sorted { ($0.0, $0.1.name) < ($1.0, $1.1.name) }
+            .map(\.1)
+            return ranked.isEmpty ? [] : [("찾은 기술", ranked)]
+        }
+        let dict = Dictionary(grouping: skills, by: \.category)
         return dict.keys.sorted().map { ($0, dict[$0] ?? []) }
     }
 

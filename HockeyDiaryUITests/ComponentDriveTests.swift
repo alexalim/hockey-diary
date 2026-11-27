@@ -638,6 +638,7 @@ final class ComponentDriveTests: XCTestCase {
 
     func test_beginner_first_day_walkthrough() {
         snap("B01-first-launch-home")
+        XCTAssertNotNil(find("내 하키 실력은 어느 정도예요?", swipes: 0), "처음 온 사람에게 실력 질문이 첫 화면에 없다")
         app.swipeUp(); snap("B02-home-scrolled"); app.swipeDown(); app.swipeDown()
 
         // 실력 질문: 초급
@@ -652,12 +653,17 @@ final class ComponentDriveTests: XCTestCase {
                 let field = app.searchFields.firstMatch
                 if field.waitForExistence(timeout: 3) { field.tap(); field.typeText("ㅅㅌ"); sleep(1) }
                 snap("B05-skill-search-initials")
-                if let stop = find("스톱", swipes: 0) { stop.tap() }
-                field.buttons.firstMatch.tap()
+                let stop = app.buttons.matching(NSPredicate(format: "label CONTAINS '스톱'")).firstMatch
+                XCTAssertTrue(stop.waitForExistence(timeout: 3) && stop.isHittable, "초성 ㅅㅌ로 스톱이 키보드 위에 안 보인다")
+                if stop.exists && stop.isHittable { stop.tap() }
                 snap("B06-skill-picked")
+                // 검색 중엔 위 막대가 검색 창이라 '완료'가 가려진다. 검색을 닫고 완료를 누른다.
+                if app.buttons["Cancel"].exists { app.buttons["Cancel"].tap() } else if app.buttons["취소"].exists && !app.buttons.matching(NSPredicate(format: "label BEGINSWITH '완료'")).firstMatch.isHittable { app.buttons["취소"].firstMatch.tap() }
                 let done = app.buttons.matching(NSPredicate(format: "label BEGINSWITH '완료'")).firstMatch
-                if done.exists { done.tap() }
+                if done.waitForExistence(timeout: 3) { done.tap() }
                 sleep(1)
+                // 그래도 남아 있으면 닫는다(뒤 단계를 막지 않게)
+                if app.navigationBars["기술 고르기"].exists { app.navigationBars["기술 고르기"].buttons.firstMatch.tap(); sleep(1) }
             }
             if let line = formField("오늘의 배움 한 줄") { line.tap(); line.typeText("처음으로 스톱 연습. 넘어지지 않음!") }
             snap("B07-lesson-filled")

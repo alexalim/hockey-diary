@@ -22,6 +22,23 @@ public enum SkillSearch {
         matches(query, names: [name, category])
     }
 
+    /// 이름이 검색어에 얼마나 잘 맞는가. 작을수록 위. 이름에 안 맞으면 nil.
+    /// 0 같음 · 1 이름이 검색어로 시작 · 2 단어 하나가 검색어로 시작("하키 스톱"의 '스톱') · 3 이름 중간에 들어 있음.
+    /// 초성 검색도 같은 단계로 센다(초성은 이름에만, 분류에는 쓰지 않는다: 'ㅅㅌ'가 분류 '슈팅'에 걸려 슈팅 기술이 다 나왔다).
+    public static func rank(_ query: String, name: String) -> Int? {
+        let q = normalized(query)
+        guard !q.isEmpty else { return 0 }
+        let full = normalized(name)
+        let words = name.split(whereSeparator: { $0.isWhitespace }).map { normalized(String($0)) }
+        let ini = q.allSatisfy { initials.contains($0) }
+        func key(_ t: String) -> String { ini ? initialsOf(t) : t }
+        if key(full) == q { return 0 }
+        if key(full).hasPrefix(q) { return 1 }
+        if words.contains(where: { key($0).hasPrefix(q) }) { return 2 }
+        if key(full).contains(q) { return 3 }
+        return nil
+    }
+
     /// 초성만 친 검색어인가("ㅋㄹㅅ"). 이건 찾는 중이지 새 기술 이름이 아니다.
     public static func isInitialsOnly(_ query: String) -> Bool {
         let q = normalized(query)

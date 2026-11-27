@@ -1280,6 +1280,19 @@ final class SkillSearchTests: XCTestCase {
         XCTAssertTrue(SkillSearch.matches("역삼", names: ["역삼 아이스링크"], texts: []))
     }
 
+    // 초보자 '스톱' 찾기(ㅅㅌ): 하키 스톱이 리스트 샷보다 위, 분류 '슈팅'의 초성으로는 안 걸린다.
+    func testRankPutsWordStartFirst() {
+        let r1 = SkillSearch.rank("ㅅㅌ", name: "하키 스톱")
+        let r2 = SkillSearch.rank("ㅅㅌ", name: "리스트 샷")
+        XCTAssertNotNil(r1); XCTAssertNotNil(r2)
+        XCTAssertLessThan(r1!, r2!)
+        XCTAssertNil(SkillSearch.rank("ㅅㅌ", name: "스냅 샷"), "분류 '슈팅' 초성으로 걸리면 안 된다")
+        XCTAssertEqual(SkillSearch.rank("크로스오버", name: "크로스오버"), 0)
+        XCTAssertEqual(SkillSearch.rank("크로", name: "크로스오버"), 1)
+        XCTAssertEqual(SkillSearch.rank("스톱", name: "하키 스톱"), 2)
+        XCTAssertEqual(SkillSearch.rank("키스", name: "하키 스톱"), 3)
+    }
+
     func testInitialsOnlyIsNotANewName() {
         XCTAssertTrue(SkillSearch.isInitialsOnly("ㅋㄹㅅ"))
         XCTAssertTrue(SkillSearch.isInitialsOnly(" ㅋ ㄹ "))
