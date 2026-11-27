@@ -109,9 +109,10 @@ struct HomeView: View {
                             SquiggleLine().stroke(Theme.neonPink, style: StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
                                 .frame(height: 6)
                         }
-                        .overlay(alignment: .topTrailing) {
-                            AppIcon("pencil").font(.system(size: 13, weight: .bold)).foregroundStyle(Theme.neonPink)
-                                .offset(x: 14, y: -6)
+                        // 연필은 꼬불 밑줄 끝에서 줄을 긋고 있는 모양(연필 끝이 줄 끝에 닿게).
+                        .overlay(alignment: .bottomTrailing) {
+                            AppIcon("pencil").font(.system(size: 15, weight: .bold)).foregroundStyle(Theme.neonPink)
+                                .offset(x: 13, y: -2)
                         }
                 }
                 .buttonStyle(.plain)
