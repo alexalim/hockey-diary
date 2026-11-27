@@ -438,27 +438,38 @@ struct LockerInside: View {
         }
     }
 
-    /// 칸 안에 놓는 그림: 사진은 흰 테두리 스티커처럼, 그림은 그대로. 칸보다 조금 작게 둔다.
+    /// 칸 안에 놓는 그림: 락커 그림체에 맞게 장비 그림을 크게 두고, 내 사진이 있으면 모서리에 작은 폴라로이드로 붙인다.
+    /// 그림이 없는 종류(헬멧)는 사진을 크게 둔다.
     @ViewBuilder
     private func picture(photo: Data?, art: String?) -> some View {
         GeometryReader { g in
-            Group {
-                if let photo, let ui = UIImage(data: photo) {
-                    Image(uiImage: ui).resizable().scaledToFill()
-                        .frame(width: g.size.width * 0.8, height: g.size.height * 0.8)
-                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                        .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(.white, lineWidth: 3))
-                        .shadow(color: .black.opacity(0.2), radius: 3, y: 2)
-                } else if let art {
+            ZStack(alignment: .bottomTrailing) {
+                if let art {
                     Image(art).resizable().scaledToFit()
                         .frame(width: g.size.width * 0.88, height: g.size.height * 0.88)
                         .shadow(color: .black.opacity(0.15), radius: 2, y: 1)
+                        .frame(width: g.size.width, height: g.size.height)
+                    if let photo, let ui = UIImage(data: photo) {
+                        let side = min(g.size.width, g.size.height) * 0.42
+                        polaroid(ui, side: side).rotationEffect(.degrees(6)).offset(x: -2, y: -2)
+                    }
+                } else if let photo, let ui = UIImage(data: photo) {
+                    polaroid(ui, side: min(g.size.width, g.size.height) * 0.8)
+                        .frame(width: g.size.width, height: g.size.height)
                 }
             }
-            .frame(width: g.size.width, height: g.size.height)
         }
         .allowsHitTesting(false)
         .accessibilityHidden(true)
+    }
+
+    private func polaroid(_ ui: UIImage, side: CGFloat) -> some View {
+        Image(uiImage: ui).resizable().scaledToFill()
+            .frame(width: side, height: side)
+            .clipped()
+            .padding(3).padding(.bottom, 4)
+            .background(.white, in: RoundedRectangle(cornerRadius: 3, style: .continuous))
+            .shadow(color: .black.opacity(0.25), radius: 3, y: 2)
     }
 
     private func zone(_ zone: GearKind.Zone, _ spot: CGRect, in size: CGSize, showBadge: Bool = true) -> some View {
