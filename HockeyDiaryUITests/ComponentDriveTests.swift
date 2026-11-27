@@ -717,6 +717,10 @@ final class ComponentDriveTests: XCTestCase {
         // 1) A 링크장 수업(고급이라 상세로 열린다)
         if newRecord("수업 기록") {
             snap("V03-lesson-editor-veteran")
+            // 상세 기록에선 메모가 '어디서 탔어요?'보다 위에 있다. 메모부터 쓰고 내려간다.
+            typeInto("오늘의 배움 한 줄", "크로스오버 바깥 발")
+            typeInto("코치 메모", "상체 세우기")
+            dismissKeyboard()
             _ = tapText("실내 링크"); sleep(1)
             if let rink = formField("링크장 이름") { rink.tap(); rink.typeText("목동"); sleep(2); snap("V04-rink-suggest-mokdong") }
             // 앱에 든 링크장 목록이 지도 검색(도로 이름)보다 먼저 나와야 한다.
@@ -724,9 +728,6 @@ final class ComponentDriveTests: XCTestCase {
             XCTAssertTrue(mokdong.waitForExistence(timeout: 3), "'목동'을 쳤는데 목동아이스링크가 제안되지 않는다")
             if mokdong.exists { mokdong.tap(); sleep(1) }
             dismissKeyboard()
-            app.swipeUp(); sleep(1)
-            typeInto("오늘의 배움 한 줄", "크로스오버 바깥 발")
-            typeInto("코치 메모", "상체 세우기")
             snap("V05-lesson-filled")
             _ = tapButton("저장"); sleep(2); _ = tapButton("닫기"); sleep(1)
         }
