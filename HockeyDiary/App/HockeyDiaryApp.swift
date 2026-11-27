@@ -68,20 +68,20 @@ final class StoreHealth {
 }
 
 
-/// 앱 시작 직후 보이는 화면. 사용자가 준 로딩 그림(12장 움직이는 그림)을 0.12초마다 넘겨 재생한다.
-/// 그림은 정사각형이라 화면 폭에 맞춰 가운데 두고, 위아래는 그림 가장자리 색으로 이어 칠한다.
+/// 앱 시작 직후 보이는 화면. 사용자가 준 로딩 그림(4장 움직이는 그림)을 0.18초마다 넘겨 재생한다.
+/// 원본은 가로 그림이라 가운데(로고·헬멧·스틱·퍽·막대)만 세로로 잘라 화면 폭에 맞추고, 위아래는 그림 가장자리 색으로 잇는다.
 /// 아무 데나 누르면 홈으로. iOS 시작 화면은 같은 남색(LaunchBackground)만 쓴다.
 struct SplashView: View {
     var onTap: () -> Void
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    private static let frames = (0..<12).map { String(format: "splash-%02d", $0) }
-    private static let top = Color(hex: 0x183879), bottom = Color(hex: 0x052161)
+    private static let frames = (0..<4).map { String(format: "splash-%02d", $0) }
+    private static let top = Color(hex: 0x0A2A6D), bottom = Color(hex: 0x072461)
 
     var body: some View {
         ZStack {
             LinearGradient(colors: [Self.top, Self.bottom], startPoint: .top, endPoint: .bottom).ignoresSafeArea()
-            TimelineView(.animation(minimumInterval: 0.12, paused: reduceMotion)) { ctx in
-                let n = reduceMotion ? 0 : Int(ctx.date.timeIntervalSinceReferenceDate / 0.12) % Self.frames.count
+            TimelineView(.animation(minimumInterval: 0.18, paused: reduceMotion)) { ctx in
+                let n = reduceMotion ? 0 : Int(ctx.date.timeIntervalSinceReferenceDate / 0.18) % Self.frames.count
                 Image(Self.frames[n])
                     .resizable()
                     .scaledToFit()
