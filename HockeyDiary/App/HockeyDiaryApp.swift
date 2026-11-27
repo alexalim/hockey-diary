@@ -43,6 +43,9 @@ struct HockeyDiaryApp: App {
             }
             .task {
                 // 시작 화면에서 이어 받아 잠깐 보여 준 뒤 사라진다. 그동안 뒤의 홈은 이미 그려져 있다.
+                // UI 시험은 `-holdSplash`로 저절로 넘어가지 않게 해 '누르면 넘어감'만 본다
+                // (앱이 한가해질 때까지 기다리는 시험 시작이 2초를 넘겨 그림을 못 보고 지나갔다).
+                guard !ProcessInfo.processInfo.arguments.contains("-holdSplash") else { return }
                 try? await Task.sleep(for: .milliseconds(2200))
                 dismissSplash()
             }

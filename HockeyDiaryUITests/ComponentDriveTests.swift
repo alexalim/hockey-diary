@@ -843,6 +843,7 @@ final class ComponentDriveTests: XCTestCase {
     func test_splash_then_home() {
         app.terminate()
         app.launchArguments.removeAll { $0 == "-skipSplash" }
+        app.launchArguments.append("-holdSplash")
         app.launch()
         let splash = app.descendants(matching: .any)["splash"]
         XCTAssertTrue(splash.waitForExistence(timeout: 5), "시작 화면이 안 보인다")
