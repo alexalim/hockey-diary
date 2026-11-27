@@ -662,8 +662,15 @@ final class ComponentDriveTests: XCTestCase {
                 // '완료' 이름의 버튼이 여럿(숨은 키보드 완료 등)이라 화면에 보이는 것만 누른다.
                 let dones = app.buttons.matching(NSPredicate(format: "label BEGINSWITH '완료'"))
                 _ = dones.firstMatch.waitForExistence(timeout: 3)
-                for i in 0..<dones.count { let d = dones.element(boundBy: i); if d.isHittable { d.tap(); break } }
+                // iOS 26 유리 막대 버튼은 '누를 수 없음'으로 잡히기도 해서, 버튼 자리를 좌표로 누른다.
+                for i in 0..<dones.count {
+                    let d = dones.element(boundBy: i)
+                    if d.exists && d.frame.minY < 200 { d.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap(); break }
+                }
                 sleep(1)
+                // 그래도 남아 있으면 취소로 닫는다(뒤 단계를 막지 않게).
+                let cancel = app.buttons["취소"].firstMatch
+                if cancel.exists && cancel.frame.minY < 200 { cancel.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap(); sleep(1) }
                 // 그래도 남아 있으면 닫는다(뒤 단계를 막지 않게)
                 if app.navigationBars["기술 고르기"].exists { app.navigationBars["기술 고르기"].buttons.firstMatch.tap(); sleep(1) }
             }
