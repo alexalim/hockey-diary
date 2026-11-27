@@ -896,6 +896,28 @@ final class ComponentDriveTests: XCTestCase {
         snap("practice-go-drill")
     }
 
+    // MARK: 입문 전(하린이) 따라가기: 아직 얼음에 서 본 적 없는 사람이 처음 깔고 둘러본다
+
+    // 테스트 계층: E2E — 화면 캡처로 첫인상·흐름을 보는 둘러보기(판정은 사람이 캡처로)
+    func test_prestarter_walkthrough() {
+        snap("P01-home")
+        app.swipeUp(); snap("P02-home-2"); app.swipeUp(); snap("P03-home-3")
+        app.swipeDown(); app.swipeDown(); app.swipeDown()
+        if let what = find("뭐할까", swipes: 0) { what.tap(); sleep(1); snap("P04-whatnow"); app.swipeUp(); snap("P05-whatnow-2"); back() }
+        tab("훈련"); snap("P06-training-practice")
+        branch("경기"); snap("P07-training-game")
+        branch("드릴"); snap("P08-training-drill"); app.swipeUp(); snap("P09-training-drill-2")
+        if tapText("기술 도감") { sleep(1); snap("P10-skill-guide"); app.swipeUp(); snap("P11-skill-guide-2"); back() }
+        if let rules = find("규칙·전술") { rules.tap(); sleep(1); snap("P12-rules"); app.swipeUp(); snap("P13-rules-2"); back() }
+        if let rinks = find("링크장 찾기") { rinks.tap(); sleep(2); snap("P14-rink-finder"); back() }
+        tab("성장"); snap("P15-growth")
+        tab("락커"); snap("P16-locker")
+        if tapButton("문 열기") { sleep(2); snap("P17-locker-open") }
+        tab("기록"); snap("P18-diary")
+        tab("홈")
+        if app.buttons["새 기록"].exists { app.buttons["새 기록"].tap(); sleep(1); snap("P19-plus-menu") }
+    }
+
     private func relaunch(with args: String...) {
         app.terminate()
         app.launchArguments += args
