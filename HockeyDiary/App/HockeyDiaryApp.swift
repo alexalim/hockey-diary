@@ -82,20 +82,20 @@ struct SplashView: View {
                 let w = geo.size.width, h = geo.size.height
                 ZStack {
                     SplashRink()
-                        .frame(width: w * 1.25, height: h * 0.5)
-                        .position(x: w / 2, y: h * 0.82)
+                        .frame(width: w * 1.25, height: h * 0.4)
+                        .position(x: w / 2, y: h * 0.96)
                     SplashPuckAndStick(shown: shown || reduceMotion)
                         .frame(width: 220, height: 160)
-                        .position(x: w / 2, y: h * 0.40)
+                        .position(x: w / 2, y: h * 0.34)
                     VStack(spacing: 8) {
                         Text("마하다").font(.system(size: 44, weight: .heavy, design: .rounded)).foregroundStyle(.white)
                         Text("오늘의 하키를 한 줄로").font(.headline).foregroundStyle(.white.opacity(0.85))
                     }
-                    .position(x: w / 2, y: h * 0.58)
+                    .position(x: w / 2, y: h * 0.52)
                     .opacity(shown ? 1 : 0)
                     Text("누르면 시작")
                         .font(.footnote.weight(.semibold)).foregroundStyle(.white.opacity(0.7))
-                        .position(x: w / 2, y: h - 60)
+                        .position(x: w / 2, y: h * 0.67)
                         .opacity(shown ? 1 : 0)
                 }
             }
