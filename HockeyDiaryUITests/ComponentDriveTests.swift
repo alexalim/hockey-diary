@@ -298,7 +298,7 @@ final class ComponentDriveTests: XCTestCase {
         tab("훈련"); branch("드릴")
         XCTAssertTrue(tapText("템플릿에서 가져오기"), "템플릿에서 가져오기 버튼이 없다")
         snap("template-1-routine-picker")
-        XCTAssertNotNil(find("블록 3개 · 약", swipes: 0) ?? find("스케이팅", swipes: 0), "템플릿이 블록 모양으로 안 보인다")
+        XCTAssertNotNil(find("드릴 3개 · 약", swipes: 0) ?? find("스케이팅", swipes: 0), "템플릿이 블록 모양으로 안 보인다")
         // 템플릿 카드가 길어져 '슈팅 집중'은 아래에 있다. 내려 가며 찾는다.
         guard let imp = find("슈팅 집중 가져오기") else { XCTFail("슈팅 집중 템플릿이 없다"); return }
         snap("template-1b-shooting-card")

@@ -470,7 +470,7 @@ struct RoutineTemplatePicker: View {
                         PracticeStore.importTemplate(t, context: context); dismiss()
                     }
                 }
-                Text("가져온 루틴은 블록(드릴)을 빼고 더하고 순서를 바꿔도 돼요.")
+                Text("가져온 다음에 드릴을 빼거나 더하고, 순서도 바꿀 수 있어요.")
                     .font(.footnote).foregroundStyle(Theme.inkSecondary)
             }
             .padding(16)
@@ -525,7 +525,7 @@ private struct TemplateAssemblyCard: View {
             HStack(alignment: .firstTextBaseline) {
                 Text(template.name).font(.headline).foregroundStyle(Theme.title)
                 Spacer()
-                Text("블록 \(drills.count)개 · 약 \(StarterRoutine.estimatedMinutes(template.items))분")
+                Text("드릴 \(drills.count)개 · 약 \(StarterRoutine.estimatedMinutes(template.items))분")
                     .font(.caption.bold()).foregroundStyle(Theme.inkSecondary)
             }
             // 시간 막대: 블록 폭 = 걸리는 시간
@@ -556,7 +556,7 @@ private struct TemplateAssemblyCard: View {
                     .frame(maxWidth: .infinity, minHeight: Theme.touch)
             } else {
                 Button(action: onImport) {
-                    Label("이 조립 그대로 가져오기", icon: "square.and.arrow.down")
+                    Label("내 루틴으로 가져오기", icon: "square.and.arrow.down")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(CobaltButtonStyle())
