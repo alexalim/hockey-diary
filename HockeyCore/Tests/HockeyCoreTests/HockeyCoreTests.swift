@@ -1199,6 +1199,15 @@ final class CountdownTests: XCTestCase {
     }
 }
 
+// 테스트 계층: Unit — 초급 '처음 추천' 드릴이 전부 사전에 있고, 어려운 기술은 빠져 있다.
+final class StarterDrillTests: XCTestCase {
+    func testStartersExistAndAreBasic() {
+        XCTAssertEqual(DrillCatalog.starters.count, DrillCatalog.starterKeys.count, "없는 드릴 키가 있다")
+        let hard = ["크로스오버", "피벗", "엣지 턴", "슬랩 샷", "백워드 스케이팅"]
+        XCTAssertFalse(DrillCatalog.starters.contains { d in d.offIce == false && hard.contains(d.skillName) }, "얼음 위 어려운 기술이 처음 추천에 있다")
+    }
+}
+
 // 테스트 계층: Unit — 기록 안 된 건강 앱 하키 운동 찾기(알림·홈 카드가 같은 판정을 쓴다).
 final class WorkoutNudgeTests: XCTestCase {
     let now = Date(timeIntervalSince1970: 1_800_000_000)

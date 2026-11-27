@@ -104,7 +104,8 @@ struct HomeView: View {
                     nicknameDraft = nickname
                     editingNickname = true
                 } label: {
-                    Text(nickname.isEmpty ? "닉네임" : nickname)
+                    // 비어 있을 땐 '닉네임 님,'이 어색해서 무엇을 하라는지 보이는 말로.
+                    Text(nickname.isEmpty ? "이름 정하기" : nickname)
                         .foregroundStyle(nickname.isEmpty ? Theme.inkTertiary : Theme.title)
                         .padding(.bottom, 4)
                         .background(alignment: .bottom) {
@@ -119,7 +120,7 @@ struct HomeView: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(nickname.isEmpty ? "닉네임 정하기" : "닉네임 \(nickname), 고치기")
-                Text("님,").foregroundStyle(Theme.title).padding(.leading, nickname.isEmpty ? 16 : 16)
+                if !nickname.isEmpty { Text("님,").foregroundStyle(Theme.title).padding(.leading, 16) }
             }
             .font(.system(size: 30, weight: .bold))
             Text("오늘도 즐겁게 타요.").font(.system(size: 30, weight: .bold)).foregroundStyle(Theme.title)

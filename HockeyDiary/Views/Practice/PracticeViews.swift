@@ -68,7 +68,8 @@ struct DrillSection: View {
                 Button { pickingDrill = true } label: {
                     Label("드릴 고르기", icon: "magnifyingglass").frame(maxWidth: .infinity, minHeight: Theme.touch)
                 }
-                .buttonStyle(.bordered)
+                // 연한 테두리 버튼은 눌리지 않는 것처럼 보였다(처음 시작한 사람 따라가기).
+                .buttonStyle(CobaltButtonStyle())
             }
             recentCard
         }
@@ -415,6 +416,10 @@ struct DrillPickerView: View {
         var out = order.compactMap { k in on[k].map { (k, $0) } }
         let off = DrillCatalog.offIce.filter(matches)
         if !off.isEmpty { out.append(("집에서 (오프아이스)", off)) }
+        // 초급이면 쉬운 것부터: 목록 맨 위가 크로스오버·엣지 슬라럼이라 막 시작한 사람에겐 어려웠다.
+        if search.isEmpty, RecordPrefs.level() == .starter {
+            out.insert(("처음 추천", DrillCatalog.starters), at: 0)
+        }
         return out
     }
 

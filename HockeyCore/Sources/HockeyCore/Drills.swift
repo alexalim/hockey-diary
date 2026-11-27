@@ -69,6 +69,11 @@ public enum DrillCatalog {
 
     public static func drill(_ key: String) -> Drill? { all.first { $0.key == key } }
 
+    /// 막 시작한 사람(초급)에게 먼저 보여 줄 드릴. 서기·멈추기·균형·기본 퍽 다루기부터.
+    /// 드릴에 난이도 칸이 없어 따로 고른다. 크로스오버·피벗·엣지처럼 어려운 건 넣지 않는다.
+    public static let starterKeys = ["stop-lines", "office-balance", "office-ball", "stickhandle-8", "wall-pass-fh"]
+    public static var starters: [Drill] { starterKeys.compactMap(drill) }
+
     public static var onIce: [Drill] { all.filter { !$0.offIce } }
     public static var offIce: [Drill] { all.filter(\.offIce) }
 }

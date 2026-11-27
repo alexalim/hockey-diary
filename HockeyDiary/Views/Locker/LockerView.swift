@@ -238,6 +238,14 @@ struct LockerDoorBase: View {
     /// 테마별 문 그림 이름. 그림이 들어오면 자동으로 그림을 쓰고, 없으면 코드로 그린 문을 쓴다.
     static func artName(_ theme: LockerTheme) -> String { "locker-door-\(theme.rawValue)" }
 
+    @AppStorage(MyPrefs.nicknameKey) private var nicknameForPlate = ""
+
+    static func plateText(_ plate: String?, nickname: String) -> String {
+        let p = (plate ?? "").trimmingCharacters(in: .whitespaces)
+        if !p.isEmpty && p != "MY LOCKER" { return p }
+        return nickname.isEmpty ? "내 락커" : nickname
+    }
+
     var body: some View {
         let theme = profile?.theme ?? .cobalt
         if UIImage(named: Self.artName(theme)) != nil {
@@ -290,7 +298,8 @@ struct LockerDoorBase: View {
     private var plates: some View {
                 VStack(spacing: 18) {
                     // 이름표: 테이프로 붙인 종이 쪽지
-                    Text((profile?.nameplate.isEmpty == false ? profile!.nameplate : "MY LOCKER"))
+                    // 기본 이름표가 영어 'MY LOCKER'였다. 손대지 않았으면 닉네임, 없으면 '내 락커'.
+                    Text(LockerDoorBase.plateText(profile?.nameplate, nickname: nicknameForPlate))
                         .font(.system(.headline, design: .rounded).weight(.heavy))
                         .foregroundStyle(Theme.paperInk)
                         .lineLimit(1)
@@ -516,7 +525,7 @@ struct LockerCustomizeView: View {
                 HStack {
                     Text("이름표")
                     Spacer()
-                    TextField("MY LOCKER", text: Binding(
+                    TextField("내 락커", text: Binding(
                         get: { profile.nameplate },
                         set: { profile.nameplate = String($0.prefix(14)); context.saveOrReport() }))
                         .multilineTextAlignment(.trailing)

@@ -666,6 +666,7 @@ final class ComponentDriveTests: XCTestCase {
         branch("드릴"); sleep(1); snap("B11-drills")
         if tapText("드릴 고르기") {
             sleep(1); snap("B12-drill-picker")
+            XCTAssertNotNil(find("처음 추천", swipes: 0), "초급인데 드릴 고르기 맨 위에 '처음 추천'이 없다")
             if let first = app.cells.firstMatch as XCUIElement?, first.exists { first.tap(); sleep(1); snap("B13-drill-run") }
             _ = tapButton("그만"); sleep(1)
             if app.buttons["닫기"].exists { app.buttons["닫기"].tap() }

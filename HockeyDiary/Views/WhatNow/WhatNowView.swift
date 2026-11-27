@@ -124,8 +124,9 @@ struct WhatNowView: View {
                 .buttonStyle(PinkButtonStyle())
                 .accessibilityIdentifier("whatnow-\(s.kind.rawValue)")
         } else {
+            // 연한 테두리 버튼은 눌리지 않는 것처럼 보였다. 진한 파랑으로(첫 카드는 분홍).
             Button { act(s) } label: { label }
-                .buttonStyle(.bordered).tint(Theme.accent)
+                .buttonStyle(CobaltButtonStyle())
                 .accessibilityIdentifier("whatnow-\(s.kind.rawValue)")
         }
     }
