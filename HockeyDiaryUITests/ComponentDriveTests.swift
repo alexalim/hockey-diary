@@ -657,8 +657,6 @@ final class ComponentDriveTests: XCTestCase {
                 XCTAssertTrue(stop.waitForExistence(timeout: 3) && stop.isHittable, "초성 ㅅㅌ로 스톱이 키보드 위에 안 보인다")
                 if stop.exists && stop.isHittable { stop.tap() }
                 snap("B06-skill-picked")
-                // 검색 중엔 위 막대가 검색 창이라 '완료'가 가려진다. 검색을 닫고 완료를 누른다.
-                if app.buttons["Cancel"].exists { app.buttons["Cancel"].tap() } else if app.buttons["취소"].exists && !app.buttons.matching(NSPredicate(format: "label BEGINSWITH '완료'")).firstMatch.isHittable { app.buttons["취소"].firstMatch.tap() }
                 // '완료' 이름의 버튼이 여럿(숨은 키보드 완료 등)이라 화면에 보이는 것만 누른다.
                 let dones = app.buttons.matching(NSPredicate(format: "label BEGINSWITH '완료'"))
                 _ = dones.firstMatch.waitForExistence(timeout: 3)
@@ -668,9 +666,10 @@ final class ComponentDriveTests: XCTestCase {
                     if d.exists && d.frame.minY < 200 { d.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap(); break }
                 }
                 sleep(1)
-                // 그래도 남아 있으면 취소로 닫는다(뒤 단계를 막지 않게).
+                // 검색이 켜진 채로 완료를 한 번만 눌러도 닫혀야 한다(예전엔 검색만 닫혀 두 번 눌러야 했다).
+                XCTAssertFalse(app.staticTexts["기술 고르기"].exists, "완료를 한 번 눌렀는데 기술 고르기가 안 닫힌다")
                 let cancel = app.buttons["취소"].firstMatch
-                if cancel.exists && cancel.frame.minY < 200 { cancel.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap(); sleep(1) }
+                if app.staticTexts["기술 고르기"].exists && cancel.exists { cancel.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap(); sleep(1) }
                 // 그래도 남아 있으면 닫는다(뒤 단계를 막지 않게)
                 if app.navigationBars["기술 고르기"].exists { app.navigationBars["기술 고르기"].buttons.firstMatch.tap(); sleep(1) }
             }

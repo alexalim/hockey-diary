@@ -891,6 +891,15 @@ struct SkillPickerView: View {
         return dict.keys.sorted().map { ($0, dict[$0] ?? []) }
     }
 
+    private func close() {
+        if searching {
+            searching = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { dismiss() }
+        } else {
+            dismiss()
+        }
+    }
+
     /// 검색어 그대로의 기술이 없으면 바로 새 기술로 추가하게 한다.
     private var canAddSearch: Bool {
         let q = search.trimmingCharacters(in: .whitespaces)
@@ -960,11 +969,13 @@ struct SkillPickerView: View {
         .navigationTitle("기술 고르기")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .cancellationAction) { Button("취소") { dismiss() } }
+            // 검색 창이 켜져 있으면 dismiss()가 시트 대신 검색만 닫아, 완료를 두 번 눌러야 했다(처음 시작한 사람 따라가기).
+            // 검색을 먼저 끄고 다음 틈에 시트를 닫는다.
+            ToolbarItem(placement: .cancellationAction) { Button("취소") { close() } }
             ToolbarItem(placement: .confirmationAction) {
                 Button("완료 \(selected.count)") {
                     onDone(skills.filter { selected.contains($0.id) })
-                    dismiss()
+                    close()
                 }
             }
         }
