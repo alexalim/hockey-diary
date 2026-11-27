@@ -375,9 +375,25 @@ struct BarAction: ToolbarContent {
 
     var body: some ToolbarContent {
         ToolbarItem(placement: .topBarTrailing) {
-            Button(action: action) { AppIcon(icon).font(.title3).foregroundStyle(Theme.title) }
+            Button(action: action) { BarIcon(name: icon) }
                 .accessibilityLabel(label)
         }
+    }
+}
+
+/// 오른쪽 위 막대의 아이콘 한 칸. 아이콘마다(직접 그린 것·시스템 기호) 폭이 달라 탭마다 버튼 묶음 크기가
+/// 들쭉날쭉했다. 모든 탭에서 같은 칸(28×28)에 같은 크기로 넣는다.
+struct BarIcon: View {
+    var name: String
+    var size: CGFloat = 21
+    var tint: Color = Theme.title
+    static let side: CGFloat = 28
+
+    var body: some View {
+        AppIcon(name, size: size)
+            .font(.system(size: size * 0.87, weight: .medium))
+            .foregroundStyle(tint)
+            .frame(width: Self.side, height: Self.side)
     }
 }
 
@@ -389,7 +405,7 @@ struct BarLink<Destination: View>: ToolbarContent {
 
     var body: some ToolbarContent {
         ToolbarItem(placement: .topBarTrailing) {
-            NavigationLink { destination() } label: { AppIcon(icon).font(.title3).foregroundStyle(Theme.title) }
+            NavigationLink { destination() } label: { BarIcon(name: icon) }
                 .accessibilityLabel(label)
         }
     }

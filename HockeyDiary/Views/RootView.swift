@@ -202,9 +202,7 @@ struct RootView: View {
             Button {
                 showingQuickMenu = true
             } label: {
-                AppIcon("plus.circle.fill")
-                    .font(.title2)
-                    .foregroundStyle(Theme.neonPink)
+                BarIcon(name: "plus.circle.fill", size: 26, tint: Theme.neonPink)
             }
             .accessibilityLabel("새 기록")
         }
