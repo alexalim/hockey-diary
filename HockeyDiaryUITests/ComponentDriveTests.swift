@@ -633,6 +633,81 @@ final class ComponentDriveTests: XCTestCase {
         sleep(1); snap("ai-thinking")
     }
 
+    // MARK: 처음 시작한 사람의 하루(탐색용). 빈 앱으로 첫 화면부터 처음 쓰는 사람처럼 눌러 보고 단계마다 찍는다.
+    // 단언은 최소한으로: 막히는 곳을 찾는 게 목적이라, 실패해도 다음 단계로 넘어가 끝까지 찍는다.
+
+    func test_beginner_first_day_walkthrough() {
+        snap("B01-first-launch-home")
+        app.swipeUp(); snap("B02-home-scrolled"); app.swipeDown(); app.swipeDown()
+
+        // 실력 질문: 초급
+        if let lv = find("실력 초급") { lv.tap(); sleep(1) }
+        snap("B03-level-picked")
+
+        // 첫 수업 기록
+        if newRecord("수업 기록") {
+            snap("B04-lesson-editor")
+            if let pick = find("오늘 배운 기술 고르기", swipes: 4) {
+                pick.tap(); sleep(1)
+                let field = app.searchFields.firstMatch
+                if field.waitForExistence(timeout: 3) { field.tap(); field.typeText("ㅅㅌ"); sleep(1) }
+                snap("B05-skill-search-initials")
+                if let stop = find("스톱", swipes: 0) { stop.tap() }
+                field.buttons.firstMatch.tap()
+                snap("B06-skill-picked")
+                let done = app.buttons.matching(NSPredicate(format: "label BEGINSWITH '완료'")).firstMatch
+                if done.exists { done.tap() }
+                sleep(1)
+            }
+            if let line = formField("오늘의 배움 한 줄") { line.tap(); line.typeText("처음으로 스톱 연습. 넘어지지 않음!") }
+            snap("B07-lesson-filled")
+            _ = tapButton("저장"); sleep(2)
+            snap("B08-saved")
+            _ = tapButton("닫기"); sleep(1)
+        }
+
+        // 기록 탭
+        tab("기록"); sleep(1); snap("B09-diary")
+
+        // 훈련 → 드릴
+        tab("훈련"); sleep(1); snap("B10-training")
+        branch("드릴"); sleep(1); snap("B11-drills")
+        if tapText("드릴 고르기") {
+            sleep(1); snap("B12-drill-picker")
+            if let first = app.cells.firstMatch as XCUIElement?, first.exists { first.tap(); sleep(1); snap("B13-drill-run") }
+            _ = tapButton("그만"); sleep(1)
+            if app.buttons["닫기"].exists { app.buttons["닫기"].tap() }
+        }
+
+        // 홈 → 뭐할까
+        tab("홈"); sleep(1)
+        if let what = find("뭐할까", swipes: 0) { what.tap(); sleep(1); snap("B14-whatnow"); app.swipeUp(); snap("B15-whatnow-bottom"); back() }
+
+        // 성장
+        tab("성장"); sleep(1); snap("B16-growth"); app.swipeUp(); snap("B17-growth-bottom")
+
+        // 락커: 문 열고 첫 스케이트
+        tab("락커"); sleep(1); snap("B18-locker")
+        if tapButton("문 열기") {
+            sleep(2); snap("B19-locker-open")
+            let zone = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "스케이트")).firstMatch
+            if zone.waitForExistence(timeout: 3) {
+                zone.tap(); sleep(1); snap("B20-skates-empty")
+                if tapButton("스케이트 추가") {
+                    sleep(1); snap("B21-skate-editor")
+                    if let brand = formField("브랜드 (예: Bauer)") { brand.tap(); brand.typeText("CCM") }
+                    _ = tapButton("저장"); sleep(1); snap("B22-skate-saved")
+                }
+                back()
+            }
+        }
+
+        // 하키 아카데미: 규칙 처음 읽기
+        tab("훈련"); branch("드릴"); sleep(1)
+        app.swipeUp(); snap("B23-academy")
+        if tapText("규칙·전술") { sleep(1); snap("B24-rules"); if tapText("자주 나오는 반칙") { sleep(1); snap("B25-fouls") } }
+    }
+
     private func relaunch(with args: String...) {
         app.terminate()
         app.launchArguments += args
