@@ -723,9 +723,10 @@ final class ComponentDriveTests: XCTestCase {
             let mokdong = app.buttons.matching(NSPredicate(format: "label CONTAINS '목동아이스링크'")).firstMatch
             XCTAssertTrue(mokdong.waitForExistence(timeout: 3), "'목동'을 쳤는데 목동아이스링크가 제안되지 않는다")
             if mokdong.exists { mokdong.tap(); sleep(1) }
-            app.swipeUp()
-            if let line = formField("오늘의 배움 한 줄") { line.tap(); line.typeText("크로스오버 바깥 발") }
-            if let coach = formField("코치 메모") { coach.tap(); coach.typeText("상체 세우기") }
+            dismissKeyboard()
+            app.swipeUp(); sleep(1)
+            typeInto("오늘의 배움 한 줄", "크로스오버 바깥 발")
+            typeInto("코치 메모", "상체 세우기")
             snap("V05-lesson-filled")
             _ = tapButton("저장"); sleep(2); _ = tapButton("닫기"); sleep(1)
         }
@@ -740,6 +741,7 @@ final class ComponentDriveTests: XCTestCase {
             }
             let taereung = app.buttons.matching(NSPredicate(format: "label CONTAINS '태릉국제스케이트장'")).firstMatch
             if taereung.waitForExistence(timeout: 3) { taereung.tap(); sleep(1) }
+            dismissKeyboard()
             snap("V08-game-filled")
             _ = tapButton("저장"); sleep(2)
             if app.alerts.firstMatch.exists { snap("V08b-save-blocked"); app.alerts.buttons.firstMatch.tap() }
@@ -770,6 +772,22 @@ final class ComponentDriveTests: XCTestCase {
         // 6) 링크장 찾기: 내 링크장 목록
         tab("훈련"); sleep(1)
         if tapText("링크장 찾기") { sleep(2); snap("V14-rink-finder"); if tapText("목동아이스링크") { sleep(1); snap("V15-rink-detail") } }
+    }
+
+    /// 키보드가 떠 있으면 닫는다(다른 칸을 눌러도 먼저 칸이 키보드를 붙들고 있으면 글자가 안 들어간다).
+    private func dismissKeyboard() {
+        let kb = app.keyboards.firstMatch
+        guard kb.exists else { return }
+        let keys = kb.buttons
+        if keys.count > 0 { keys.element(boundBy: keys.count - 1).tap() }   // 마지막 키 = 완료(✓)
+        sleep(1)
+    }
+
+    /// 칸을 찾아 누르고, 키보드가 붙은 걸 확인한 뒤 쓴다.
+    private func typeInto(_ placeholder: String, _ text: String) {
+        guard let f = formField(placeholder) else { return }
+        f.tap()
+        if app.keyboards.firstMatch.waitForExistence(timeout: 2) { f.typeText(text) }
     }
 
     private func relaunch(with args: String...) {
