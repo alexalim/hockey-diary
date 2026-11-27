@@ -859,6 +859,27 @@ final class ComponentDriveTests: XCTestCase {
         XCTAssertTrue(tapButton("설정"), "시작 화면이 사라진 뒤 홈을 누를 수 없다")
     }
 
+    // MARK: 오른쪽 위 버튼 묶음: 다섯 탭에서 크기가 같아야 한다(아이콘마다 폭이 달라 들쭉날쭉했다)
+
+    func test_top_right_bar_same_size_on_every_tab() {
+        var widths: [String: CGFloat] = [:]
+        for t in ["기록", "훈련", "홈", "성장", "락커"] {
+            tab(t); sleep(1)
+            let plus = app.buttons["새 기록"].firstMatch
+            XCTAssertTrue(plus.waitForExistence(timeout: 3), "\(t) 탭에 (+)가 없다")
+            // (+) 왼쪽 버튼(탭마다 다른 것)과 (+) 사이 폭 = 묶음 폭
+            let left = app.navigationBars.buttons.allElementsBoundByIndex
+                .filter { $0.frame.maxX <= plus.frame.minX + 1 && $0.frame.minX > app.frame.width / 2 }
+                .max { $0.frame.minX < $1.frame.minX }
+            let w = plus.frame.maxX - (left?.frame.minX ?? plus.frame.minX)
+            widths[t] = w
+            snap("bar-\(t)")
+        }
+        print("bar widths", widths)
+        let ws = widths.values
+        XCTAssertLessThanOrEqual((ws.max() ?? 0) - (ws.min() ?? 0), 2, "탭마다 오른쪽 위 묶음 폭이 다르다: \(widths)")
+    }
+
     private func relaunch(with args: String...) {
         app.terminate()
         app.launchArguments += args
