@@ -145,6 +145,7 @@ final class ComponentDriveTests: XCTestCase {
         back()
         let one = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "스케이트 1켤레")).firstMatch
         XCTAssertTrue(one.waitForExistence(timeout: 5), "락커 안 스케이트 칸이 1켤레로 안 바뀐다")
+        sleep(1); snap("locker-open-skate-filled")   // 빈 윤곽 대신 스케이트 그림이 올라와야 한다
     }
 
     // MARK: 팀: 만들기 → 팀원 추가 → 명단에 보임

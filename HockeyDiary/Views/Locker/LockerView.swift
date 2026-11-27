@@ -33,7 +33,8 @@ struct LockerView: View {
                 GeometryReader { geo in
                     let progress = DoorSwing.progress(angle)
                     ZStack {
-                        LockerInside(skateCount: skates.count, gear: gear)
+                        LockerInside(skateCount: skates.count, gear: gear,
+                                     skatePhoto: (skates.first { $0.isPrimary } ?? skates.first)?.coverPhoto)
                             .scaleEffect(0.94 + 0.06 * progress)
                             .brightness(-0.25 * (1 - progress))
                             .allowsHitTesting(angle >= DoorSwing.openAngle - 1)
@@ -391,6 +392,8 @@ struct StickerView: View {
 struct LockerInside: View {
     var skateCount: Int
     var gear: [GearItem]
+    /// 주력 스케이트 사진(없으면 스케이트 그림).
+    var skatePhoto: Data? = nil
 
     /// 그림 안에서 칸이 차지하는 자리(가로·세로 0~1). 그림을 바꾸면 여기도 맞춘다.
     private enum Spot {
@@ -408,6 +411,12 @@ struct LockerInside: View {
             .overlay {
                 GeometryReader { g in
                     ZStack(alignment: .topLeading) {
+                        // 등록한 장비가 있는 칸은 흐린 윤곽 위에 장비 그림(사진이 있으면 사진)을 얹는다(빌드 94 피드백).
+                        filled([.helmet], art: nil, Spot.helmet, in: g.size)
+                        filled([.jersey, .pants, .shoulder, .elbow, .shin, .pads], art: "gear-jersey", Spot.uniform, in: g.size)
+                        filled([.neck, .gloves, .tape], art: "gear-gloves", Spot.gloves, in: g.size)
+                        filled([.stick], art: "gear-stick", Spot.stick, in: g.size)
+                        if skateCount > 0 { picture(photo: skatePhoto, art: "gear-skate").placed(Spot.skates, in: g.size) }
                         zone(.top, Spot.helmet, in: g.size)
                         zone(.middle, Spot.uniform, in: g.size)
                         zone(.top, Spot.gloves, in: g.size, showBadge: false)
@@ -417,6 +426,39 @@ struct LockerInside: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    /// 이 종류의 장비가 하나라도 있으면 그 칸에 그림을 얹는다. 그림 파일이 없는 종류(헬멧)는 사진이 있을 때만.
+    @ViewBuilder
+    private func filled(_ kinds: [GearKind], art: String?, _ spot: CGRect, in size: CGSize) -> some View {
+        let items = gear.filter { kinds.contains($0.kind) }
+        let photo = items.first { $0.photo != nil }?.photo
+        if !items.isEmpty, photo != nil || art != nil {
+            picture(photo: photo, art: art).placed(spot, in: size)
+        }
+    }
+
+    /// 칸 안에 놓는 그림: 사진은 흰 테두리 스티커처럼, 그림은 그대로. 칸보다 조금 작게 둔다.
+    @ViewBuilder
+    private func picture(photo: Data?, art: String?) -> some View {
+        GeometryReader { g in
+            Group {
+                if let photo, let ui = UIImage(data: photo) {
+                    Image(uiImage: ui).resizable().scaledToFill()
+                        .frame(width: g.size.width * 0.8, height: g.size.height * 0.8)
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(.white, lineWidth: 3))
+                        .shadow(color: .black.opacity(0.2), radius: 3, y: 2)
+                } else if let art {
+                    Image(art).resizable().scaledToFit()
+                        .frame(width: g.size.width * 0.88, height: g.size.height * 0.88)
+                        .shadow(color: .black.opacity(0.15), radius: 2, y: 1)
+                }
+            }
+            .frame(width: g.size.width, height: g.size.height)
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 
     private func zone(_ zone: GearKind.Zone, _ spot: CGRect, in size: CGSize, showBadge: Bool = true) -> some View {
