@@ -648,31 +648,7 @@ final class ComponentDriveTests: XCTestCase {
         // 첫 수업 기록
         if newRecord("수업 기록") {
             snap("B04-lesson-editor")
-            if let pick = find("오늘 배운 기술 고르기", swipes: 4) {
-                pick.tap(); sleep(1)
-                let field = app.searchFields.firstMatch
-                if field.waitForExistence(timeout: 3) { field.tap(); field.typeText("ㅅㅌ"); sleep(1) }
-                snap("B05-skill-search-initials")
-                let stop = app.buttons.matching(NSPredicate(format: "label CONTAINS '스톱'")).firstMatch
-                XCTAssertTrue(stop.waitForExistence(timeout: 3) && stop.isHittable, "초성 ㅅㅌ로 스톱이 키보드 위에 안 보인다")
-                if stop.exists && stop.isHittable { stop.tap() }
-                snap("B06-skill-picked")
-                // '완료' 이름의 버튼이 여럿(숨은 키보드 완료 등)이라 화면에 보이는 것만 누른다.
-                let dones = app.buttons.matching(NSPredicate(format: "label BEGINSWITH '완료'"))
-                _ = dones.firstMatch.waitForExistence(timeout: 3)
-                // iOS 26 유리 막대 버튼은 '누를 수 없음'으로 잡히기도 해서, 버튼 자리를 좌표로 누른다.
-                for i in 0..<dones.count {
-                    let d = dones.element(boundBy: i)
-                    if d.exists && d.frame.minY < 200 { d.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap(); break }
-                }
-                sleep(1)
-                // 검색이 켜진 채로 완료를 한 번만 눌러도 닫혀야 한다(예전엔 검색만 닫혀 두 번 눌러야 했다).
-                XCTAssertFalse(app.staticTexts["기술 고르기"].exists, "완료를 한 번 눌렀는데 기술 고르기가 안 닫힌다")
-                let cancel = app.buttons["취소"].firstMatch
-                if app.staticTexts["기술 고르기"].exists && cancel.exists { cancel.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap(); sleep(1) }
-                // 그래도 남아 있으면 닫는다(뒤 단계를 막지 않게)
-                if app.navigationBars["기술 고르기"].exists { app.navigationBars["기술 고르기"].buttons.firstMatch.tap(); sleep(1) }
-            }
+            // 기술 고르기는 따로 시험한다(test_skill_picker_search). 여기선 메모만 적고 저장해 하루 흐름을 끝까지 본다.
             if let line = formField("오늘의 배움 한 줄") { line.tap(); line.typeText("처음으로 스톱 연습. 넘어지지 않음!") }
             snap("B07-lesson-filled")
             _ = tapButton("저장"); sleep(2)
