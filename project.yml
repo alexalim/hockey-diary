@@ -46,7 +46,7 @@ targets:
         CFBundleDisplayName: 마하다
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
-        # 시작 화면: 프린세스 블루 바탕만. 그림(링크장·퍽·스틱)은 앱 안 SplashView가 그린다.
+        # 시작 화면: 로딩 그림과 같은 남색 바탕만. 그림(움직이는 12장)은 앱 안 SplashView가 재생한다.
         UILaunchScreen:
           UIColorName: LaunchBackground
         # 세로 고정. 점수판 가로 전환은 빌드 83~85에서 화면이 반만 그려져 뺐다(실기기에서 원인 확인 후 다시).
