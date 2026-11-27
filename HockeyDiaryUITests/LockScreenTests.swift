@@ -10,7 +10,7 @@ final class LockScreenTests: XCTestCase {
     override func setUp() {
         continueAfterFailure = true
         app = XCUIApplication()
-        app.launchArguments = ["-inMemoryStore", "-AppleLanguages", "(ko)", "-AppleLocale", "ko_KR"]
+        app.launchArguments = ["-inMemoryStore", "-AppleLanguages", "(ko)", "-AppleLocale", "ko_KR", "-skipSplash"]
         addUIInterruptionMonitor(withDescription: "권한") { alert in
             for label in ["Don’t Allow", "Don't Allow", "허용 안 함", "OK", "확인"] where alert.buttons[label].exists {
                 alert.buttons[label].tap(); return true

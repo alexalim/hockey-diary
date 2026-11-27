@@ -10,7 +10,7 @@ final class ScreenTourTests: XCTestCase {
         app = XCUIApplication()
         // 빈 상태 투어는 예시 데이터 없이 메모리 저장소만 쓴다(처음 설치한 사람이 보는 화면).
         let seed = name.contains("test_emptyTour") ? ["-inMemoryStore"] : ["-ui-demo"]
-        app.launchArguments = seed + ["-AppleLanguages", "(ko)", "-AppleLocale", "ko_KR"]
+        app.launchArguments = seed + ["-AppleLanguages", "(ko)", "-AppleLocale", "ko_KR", "-skipSplash"]
         addUIInterruptionMonitor(withDescription: "권한") { alert in
             for label in ["Don’t Allow", "Don't Allow", "허용 안 함", "OK", "확인"] where alert.buttons[label].exists {
                 alert.buttons[label].tap()

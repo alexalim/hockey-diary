@@ -9,7 +9,7 @@ final class ComponentDriveTests: XCTestCase {
     override func setUp() {
         continueAfterFailure = true
         app = XCUIApplication()
-        app.launchArguments = ["-inMemoryStore", "-AppleLanguages", "(ko)", "-AppleLocale", "ko_KR"]
+        app.launchArguments = ["-inMemoryStore", "-AppleLanguages", "(ko)", "-AppleLocale", "ko_KR", "-skipSplash"]
         addUIInterruptionMonitor(withDescription: "권한") { alert in
             for label in ["Don’t Allow", "Don't Allow", "허용 안 함", "OK", "확인"] where alert.buttons[label].exists {
                 alert.buttons[label].tap(); return true
@@ -838,14 +838,19 @@ final class ComponentDriveTests: XCTestCase {
         snap("coach-4-lineup-carried")
     }
 
-    // MARK: 시작 화면: 켜자마자 마스코트·이름이 보이고, 잠시 뒤 홈이 그대로 보인다(누름을 막지 않는다)
+    // MARK: 시작 화면: 켜자마자 링크장 그림·이름이 보이고, 누르면 바로 홈으로
 
     func test_splash_then_home() {
         app.terminate()
+        app.launchArguments.removeAll { $0 == "-skipSplash" }
         app.launch()
-        usleep(400_000); snap("splash-1-start")
-        XCTAssertTrue(app.buttons["tab-홈"].waitForExistence(timeout: 10))
-        sleep(2); snap("splash-2-home")
+        let splash = app.descendants(matching: .any)["splash"]
+        XCTAssertTrue(splash.waitForExistence(timeout: 5), "시작 화면이 안 보인다")
+        sleep(1); snap("splash-1-start")
+        // 누르면 바로 홈으로(저절로 넘어가기 전에)
+        splash.tap()
+        XCTAssertTrue(splash.waitForNonExistence(timeout: 1.5), "시작 화면을 눌러도 안 넘어간다")
+        snap("splash-2-home")
         XCTAssertTrue(tapButton("설정"), "시작 화면이 사라진 뒤 홈을 누를 수 없다")
     }
 
