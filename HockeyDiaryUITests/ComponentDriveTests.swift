@@ -867,11 +867,13 @@ final class ComponentDriveTests: XCTestCase {
             tab(t); sleep(1)
             let plus = app.buttons["새 기록"].firstMatch
             XCTAssertTrue(plus.waitForExistence(timeout: 3), "\(t) 탭에 (+)가 없다")
-            // (+) 왼쪽 버튼(탭마다 다른 것)과 (+) 사이 폭 = 묶음 폭
-            let left = app.navigationBars.buttons.allElementsBoundByIndex
-                .filter { $0.frame.maxX <= plus.frame.minX + 1 && $0.frame.minX > app.frame.width / 2 }
-                .max { $0.frame.minX < $1.frame.minX }
-            let w = plus.frame.maxX - (left?.frame.minX ?? plus.frame.minX)
+            // 묶음 = (+)와 그 오른쪽 버튼(탭마다 다른 것). (+) 왼쪽 끝부터 가장 오른쪽 버튼 끝까지가 묶음 폭.
+            // (처음엔 (+) 왼쪽을 찾아 늘 (+) 폭만 재서, 고치기 전에도 통과했다.)
+            let right = app.navigationBars.buttons.allElementsBoundByIndex
+                .filter { $0.frame.minX >= plus.frame.maxX - 1 }
+                .max { $0.frame.maxX < $1.frame.maxX }
+            XCTAssertNotNil(right, "\(t) 탭에 (+) 오른쪽 버튼이 없다")
+            let w = (right?.frame.maxX ?? plus.frame.maxX) - plus.frame.minX
             widths[t] = w
             snap("bar-\(t)")
         }
