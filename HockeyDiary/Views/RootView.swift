@@ -87,7 +87,9 @@ struct RootView: View {
         case .training(let b):
             resets[.practice, default: 0] += 1
             tab = .practice
-            jumper.pendingBranch = b
+            // 스택을 새로 만든 다음에 갈래를 건넨다. 같이 넣으면 사라지는 옛 훈련 화면이 먼저 받아 지워 버려,
+            // 훈련 탭 안의 '드릴로 가기'가 아무 반응 없었다(새 화면은 '연습' 그대로).
+            DispatchQueue.main.async { jumper.pendingBranch = b }
         case .entry(let e):
             DispatchQueue.main.asyncAfter(deadline: .now() + wait) { newEntry = e }
         case .homeScreen(let d):
