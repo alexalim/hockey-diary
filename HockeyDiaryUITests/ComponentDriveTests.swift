@@ -701,6 +701,72 @@ final class ComponentDriveTests: XCTestCase {
         if tapText("규칙·전술") { sleep(1); snap("B24-rules"); if tapText("자주 나오는 반칙") { sleep(1); snap("B25-fouls") } }
     }
 
+    // MARK: 오래 한 사람·여러 곳에서 훈련(탐색용). 고급으로 시작해 링크장을 바꿔 가며 기록하고, 링크장별로 보이는지 본다.
+
+    func test_veteran_multi_rink_walkthrough() {
+        snap("V01-first-launch")
+        if let lv = find("실력 고급") { lv.tap(); sleep(1) }
+        if let name = find("이름 정하기", swipes: 0) {
+            name.tap()
+            let input = app.alerts.textFields.firstMatch
+            if input.waitForExistence(timeout: 3) { input.typeText("베테랑"); app.alerts.buttons["저장"].tap() }
+        }
+        snap("V02-home-after-setup")
+
+        // 1) A 링크장 수업(고급이라 상세로 열린다)
+        if newRecord("수업 기록") {
+            snap("V03-lesson-editor-veteran")
+            _ = tapText("실내 링크"); sleep(1)
+            if let rink = formField("링크장 이름") { rink.tap(); rink.typeText("목동"); sleep(2); snap("V04-rink-suggest-mokdong") }
+            if let first = find("목동 아이스링크", swipes: 0) { first.tap(); sleep(1) }
+            app.swipeUp()
+            if let line = formField("오늘의 배움 한 줄") { line.tap(); line.typeText("크로스오버 바깥 발") }
+            if let coach = formField("코치 메모") { coach.tap(); coach.typeText("상체 세우기") }
+            snap("V05-lesson-filled")
+            _ = tapButton("저장"); sleep(2); _ = tapButton("닫기"); sleep(1)
+        }
+
+        // 2) B 링크장 경기
+        tab("홈")
+        if newRecord("정규게임 리뷰") {
+            _ = tapText("실내 링크"); sleep(1)
+            if let rink = formField("링크장 이름") {
+                rink.tap(); sleep(1); snap("V06-rink-field-focused-recent")   // 비워 둔 채 눌렀을 때 최근 링크장이 나오나
+                rink.typeText("태릉"); sleep(2); snap("V07-rink-suggest-taereung")
+            }
+            if let first = find("태릉", swipes: 0) { first.tap(); sleep(1) }
+            snap("V08-game-filled")
+            _ = tapButton("저장"); sleep(2)
+            if app.alerts.firstMatch.exists { snap("V08b-save-blocked"); app.alerts.buttons.firstMatch.tap() }
+            _ = tapButton("닫기"); sleep(1)
+        }
+
+        // 3) 세 번째: 자유 연습. 지난 링크장이 미리 채워지나, 바꾸기 쉬운가
+        tab("홈")
+        if newRecord("자유 연습") {
+            snap("V09-free-prefilled-rink")
+            app.swipeUp(); snap("V10-free-place-section")
+            _ = tapButton("닫기"); sleep(1)
+        }
+
+        // 4) 성장: 어디서 탔어요?
+        tab("성장"); sleep(1)
+        for _ in 0..<3 { app.swipeUp() }
+        snap("V11-growth-where")
+        for _ in 0..<2 { app.swipeUp() }
+        snap("V12-growth-where-more")
+
+        // 5) 기록 검색: 링크장 이름
+        tab("기록"); sleep(1)
+        app.swipeDown()
+        let field = app.searchFields.firstMatch
+        if field.waitForExistence(timeout: 3) { field.tap(); field.typeText("태릉"); sleep(1); snap("V13-diary-search-rink") }
+
+        // 6) 링크장 찾기: 내 링크장 목록
+        tab("훈련"); sleep(1)
+        if tapText("링크장 찾기") { sleep(2); snap("V14-rink-finder"); if tapText("목동 아이스링크") { sleep(1); snap("V15-rink-detail") } }
+    }
+
     private func relaunch(with args: String...) {
         app.terminate()
         app.launchArguments += args
